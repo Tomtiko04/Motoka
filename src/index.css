@@ -1,1 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
 @import "tailwindcss";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  /* padding: 0;
+  margin: 0; */
+}
+
+html {
+  /* font-size: 62.5%; */
+}
+
+body {
+  font-family: "Lexend", sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+  font-size: 1.6rem;
+  background-color: #F4F5FC;
+  background-image: url('./assets/images/Subtract.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+header{
+    /* padding-inline: 3em; */
+}
+
+img{
+  display: block;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+*:disabled {
+  cursor: not-allowed;
+}
+
+/* select:disabled,
+input:disabled {
+  background-color: var(--color-grey-200);
+  color: var(--color-grey-500);
+} */
+
+/* input:focus,
+button:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: -1px;
+} */
+
+/* Parent selector, finally 😃 */
+/* button:has(svg) {
+  line-height: 0;
+} */
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+img {
+  max-width: 100%;
+}
+
+.ai-button{
+    background-image: linear-gradient(#EBB850, #BA8823);
+}

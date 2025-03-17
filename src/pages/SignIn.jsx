@@ -1,7 +1,13 @@
-import React from 'react'
+import React from "react";
+import Header from "../components/Header"
+import Signin from "../features/auth/Signin";
 
 export default function SignIn() {
   return (
-    <div>SignIn here/....</div>
-  )
+    <>
+      <Header />
+      <br />
+      <Signin />
+    </>
+  );
 }
