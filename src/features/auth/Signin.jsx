@@ -73,7 +73,7 @@ export default function Signin() {
                 Don't have an account?
               </span>
               <Link
-                to="/signup"
+                to="/auth/signup"
                 className="ml-1 text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
               >
                 Signup

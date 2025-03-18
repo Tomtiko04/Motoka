@@ -7,7 +7,9 @@ export default function SignIn() {
     <>
       <Header />
       <br />
+      <br />
       <Signin />
+      <br />
     </>
   );
 }

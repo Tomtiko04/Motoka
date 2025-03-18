@@ -10,6 +10,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
+import Verification from "./pages/Verification.jsx";
+import VerificationSuccess from "./features/auth/VerificationSuccess";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -31,6 +33,8 @@ export default function App() {
         <Routes>
           <Route path="auth/signin" element={<SignIn />}></Route>
           <Route path="auth/signup" element={<SignUp />}></Route>
+          <Route path="auth/verify-account" element={<Verification />}></Route>
+          <Route path="auth/verification-success" element={<VerificationSuccess />}></Route>
         </Routes>
       </BrowserRouter>
       <Toaster
