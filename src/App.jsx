@@ -12,6 +12,7 @@ import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Verification from "./pages/Verification.jsx";
 import VerificationSuccess from "./features/auth/VerificationSuccess";
+import AddCar from "./features/car/AddCar.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="auth/signup" element={<SignUp />}></Route>
           <Route path="auth/verify-account" element={<Verification />}></Route>
           <Route path="auth/verification-success" element={<VerificationSuccess />}></Route>
+          <Route path="add-car" element={<AddCar />}></Route>
         </Routes>
       </BrowserRouter>
       <Toaster
