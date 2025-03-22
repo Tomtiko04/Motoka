@@ -13,6 +13,7 @@ import SignUp from "./pages/SignUp.jsx";
 import Verification from "./pages/Verification.jsx";
 import VerificationSuccess from "./features/auth/VerificationSuccess";
 import AddCar from "./features/car/AddCar.jsx";
+import Dashboard from "./features/dashboard/Dashboard.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -32,6 +33,8 @@ export default function App() {
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <Routes>
+          <Route index element={<Dashboard />}/>
+          <Route path="dashboard/home" element={<Dashboard />}/>
           <Route path="auth/signin" element={<SignIn />}></Route>
           <Route path="auth/signup" element={<SignUp />}></Route>
           <Route path="auth/verify-account" element={<Verification />}></Route>

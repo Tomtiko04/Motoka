@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
+import axios from "axios";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -11,13 +12,13 @@ export default function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
-    terms: false
+    terms: false,
   });
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    terms: ""
+    terms: "",
   });
 
   const handleChange = (e) => {
@@ -72,14 +73,26 @@ export default function Signup() {
       newErrors.terms = "You must accept the Terms & Conditions";
       isValid = false;
     }
-    
+
     setErrors(newErrors);
 
     if (isValid) {
       // Proceed with form submission
       console.log("Form submitted:", formData);
-      navigate('/auth/verify-account')
+      navigate("/auth/verify-account");
     }
+    axios
+      .post("https://backend.motoka.com.ng/api/register", {
+        name: "Ogunneye",
+        email: formData.email,
+        password: formData.password,
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
   return (
@@ -226,7 +239,7 @@ export default function Signup() {
             <div>
               <button
                 type="submit"
-                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 active:scale-95 sm:mt-14 sm:w-36"
+                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:mt-14 sm:w-36"
               >
                 Sign Up
               </button>

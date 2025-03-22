@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
+import axios from "axios";
 
 export default function Signin() {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +53,18 @@ export default function Signin() {
       // Proceed with form submission
       console.log("Form submitted:", formData);
     }
+
+    axios
+      .post("https://backend.motoka.com.ng/api/login2", {
+        email: formData.email,
+        password: formData.password,
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
   return (
