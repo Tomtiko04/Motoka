@@ -3,51 +3,53 @@ import { Link } from "react-router-dom";
 import { BsCarFront, BsQuestionCircle } from "react-icons/bs";
 import { FaRegHandshake } from "react-icons/fa";
 import { TbLicense, TbSteeringWheel } from "react-icons/tb";
+import { FaRegEye, FaRegEyeSlash, FaCarAlt, FaPlus } from "react-icons/fa";
 import { MdOutlineAirplaneTicket } from "react-icons/md";
-import { IoWarningOutline } from "react-icons/io5";
-import { PiNumberSquareThreeBold } from "react-icons/pi";
+import { IoIosArrowForward } from "react-icons/io";
+import { PiNumberSquareThreeBold, PiHandWavingFill } from "react-icons/pi";
 import AppLayout from "../../components/AppLayout";
+import MercedesLogo from "../../assets/images/mercedes-logo.png";
 
 export default function Dashboard() {
   const quickActions = [
     {
-      icon: <BsCarFront className="h-6 w-6 text-[#2389E3]" />,
-      title: "View Car Documents",
+      icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
+      title: "View Car\nDocuments",
       link: "/documents",
     },
     {
-      icon: <FaRegHandshake className="h-6 w-6 text-[#2389E3]" />,
-      title: "Change of Ownership",
+      icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
+      title: "Change of\nOwnership",
       link: "/ownership",
     },
     {
-      icon: <TbLicense className="h-6 w-6 text-[#2389E3]" />,
-      title: "Traffic Rules",
+      icon: <TbLicense className="text-3xl text-[#2389E3]" />,
+      title: "Traffic\nRules",
       link: "/rules",
     },
     {
-      icon: <BsQuestionCircle className="h-6 w-6 text-[#2389E3]" />,
-      title: "How can we Help?",
+      icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
+      title: "How can\nwe Help?",
       link: "/help",
     },
     {
-      icon: <TbSteeringWheel className="h-6 w-6 text-[#2389E3]" />,
-      title: "Register/Renew Vehicle License",
+      icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
+      title: "Register/Renew\nVehicle License",
       link: "/vehicle-license",
     },
     {
-      icon: <MdOutlineAirplaneTicket className="h-6 w-6 text-[#2389E3]" />,
-      title: "New/Renew Driver's License",
+      icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
+      title: "New/Renew\nDriver's License",
       link: "/drivers-license",
     },
     {
-      icon: <PiNumberSquareThreeBold className="h-6 w-6 text-[#2389E3]" />,
-      title: "Request Plate Number",
+      icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
+      title: "Request\nPlate Number",
       link: "/plate-number",
     },
     {
-      icon: <MdOutlineAirplaneTicket className="h-6 w-6 text-[#2389E3]" />,
-      title: "International Driver's License",
+      icon: <MdOutlineAirplaneTicket className="text-3xl text-[#2389E3]" />,
+      title: "International\nDriver's License",
       link: "/international-license",
     },
   ];
@@ -55,87 +57,158 @@ export default function Dashboard() {
   return (
     <AppLayout>
       {/* Welcome Section */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-medium text-[#05243F]">Welcome</h1>
-            <h1 className="text-2xl font-medium text-[#05243F]">Anjola</h1>
-            <span role="img" aria-label="wave">👋</span>
+          <div className="mt-4 flex flex-col gap-1">
+            <h1 className="text-base font-medium text-[#05243F]/40 sm:text-lg">
+              Welcome
+            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-medium text-[#05243F] sm:text-3xl">
+                Anjola
+              </h1>
+              <span role="img" aria-label="wave">
+                <PiHandWavingFill color="#EBB850" size={30} />
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-[#05243F]/60">Transaction History</span>
-          <span className="font-medium text-[#2389E3]">₦234,098</span>
+
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="text-sm font-normal text-[#05243F]/44 sm:text-base">
+            Transaction History
+          </span>
+          <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
+            <span>
+              <FaRegEye color="#697C8C" size={24} />
+            </span>
+            <span className="text-lg font-semibold text-[#2389E3] sm:text-xl">
+              ₦234,098
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="mb-8 flex gap-4">
-        <button className="rounded-full bg-[#F4F5FC] px-4 py-2 text-[#05243F]/60">
+      <div className="mb-5 flex flex-wrap gap-3 sm:gap-4">
+        <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md sm:text-base">
           Licence Status
         </button>
-        <button className="rounded-full bg-[#2389E3] px-4 py-2 text-white">
-          My Cars
+        <button className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base">
+          Garage
         </button>
-        <button className="relative rounded-full bg-[#F4F5FC] px-4 py-2 text-[#05243F]/60">
+        <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base">
           Ladipo
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#FDB022] text-xs text-white">
+          <span className="absolute -top-2 -right-8 flex h-[17px] items-center justify-center rounded-full bg-[#FFEFCE] px-2.5 text-[8px] whitespace-nowrap text-[#BA8823]">
             Coming Soon
           </span>
         </button>
       </div>
 
       {/* Car Details Card */}
-      <div className="mb-8 rounded-2xl bg-white p-6">
-        <div className="mb-4 flex items-center gap-3">
-          <img src="/mercedes-logo.svg" alt="Mercedes" className="h-8 w-8" />
-          <div>
-            <div className="text-sm text-[#05243F]/60">Car Model</div>
-            <div className="text-lg font-medium text-[#05243F]">Mercedes Benz</div>
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl bg-white px-4 py-5">
+          <div className="mb-6">
+            <div className="text-sm font-light text-[#05243F]/60">
+              Car Model
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <div className="">
+                  <img src={MercedesLogo} alt="Mercedes" className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#05243F]">
+                  Mercedes Benz
+                </h3>
+              </div>
+              <div>
+                <FaCarAlt className="text-3xl text-[#2389E3]" />
+              </div>
+            </div>
           </div>
-          <img src="/car-icon.svg" alt="Car" className="ml-auto h-12 w-12" />
+
+          <div className="mb-6 flex items-center">
+            <div>
+              <div className="text-sm text-[#05243F]/60">Plate No:</div>
+              <div className="text-base font-semibold text-[#05243F]">
+                LSD1234
+              </div>
+            </div>
+            <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
+            <div>
+              <div className="text-sm text-[#05243F]/60">Exp. Date</div>
+              <div className="text-base font-semibold text-[#05243F]">
+                04-05-25
+              </div>
+            </div>
+            <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
+            <div>
+              <div className="text-sm text-[#05243F]/60">Car Type</div>
+              <div className="text-base font-semibold text-[#05243F]">
+                Saloon
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 rounded-full bg-[#FFEFCE] px-4 py-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#FDB022]"></span>
+              <span className="text-sm font-medium text-[#05243F]">
+                Expires in 3 days
+              </span>
+            </div>
+            <button className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90">
+              Renew Now
+            </button>
+          </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-3 gap-4">
-          <div>
-            <div className="text-sm text-[#05243F]/60">Plate No:</div>
-            <div className="font-medium text-[#05243F]">LSD1234</div>
-          </div>
-          <div>
-            <div className="text-sm text-[#05243F]/60">Exp. Date</div>
-            <div className="font-medium text-[#05243F]">04-05-25</div>
-          </div>
-          <div>
-            <div className="text-sm text-[#05243F]/60">Car Type</div>
-            <div className="font-medium text-[#05243F]">Saloon</div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <IoWarningOutline className="text-[#FDB022]" />
-            <span className="text-sm text-[#05243F]/60">Expires in 3 days</span>
-          </div>
-          <button className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-medium text-white">
-            Renew Now
+        <div className="flex items-center justify-center rounded-2xl bg-white p-6">
+          <button className="flex flex-col items-center gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3] text-xl">
+              <FaPlus className="text-xl text-white" />
+            </span>
+            <span className="text-base font-medium text-[#05243F]">
+              Add a New Car
+            </span>
           </button>
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="mb-4">
-        <h2 className="mb-4 text-lg font-medium text-[#05243F]">Quick Action.</h2>
+        <h2 className="mb-6 text-sm font-semibold text-[#939FAA]">
+          Quick Action
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {quickActions.map((action, index) => (
             <Link
               key={index}
               to={action.link}
-              className="flex items-center gap-4 rounded-2xl bg-white p-4 transition-all hover:shadow-md"
+              className="group relative flex h-[161px] flex-col justify-between rounded-3xl bg-white px-4 py-6 will-change-transform hover:border-2 hover:border-[#45A1F2] hover:shadow-lg"
+              style={{ transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
             >
-              {action.icon}
-              <span className="text-sm font-medium text-[#05243F]">
-                {action.title}
-              </span>
+              <div className="flex flex-col items-start gap-y-10">
+                <div className="will-change-transform" style={{ transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  <div className="group-hover:scale-110" style={{ transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                    {action.icon}
+                  </div>
+                </div>
+                <div className="flex w-full items-center justify-between">
+                  <h3 
+                    className="text-base font-normal leading-tight whitespace-pre-line text-[#05243F] group-hover:text-[#45A1F2]"
+                    style={{ transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  >
+                    {action.title}
+                  </h3>
+                  <div 
+                    className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#45A1F2]"
+                    style={{ transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  >
+                    <IoIosArrowForward className="text-xl opacity-29" />
+                  </div>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
