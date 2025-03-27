@@ -104,6 +104,18 @@ export default function AppLayout({ children }) {
           }`}
         >
           <div className="h-full flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-[#F4F5FC]">
+              <div className="flex items-center gap-2">
+                <img src={Logo} alt="Motoka" className="h-8 w-8" />
+                <span className="text-lg font-semibold text-[#05243F]">Motoka</span>
+              </div>
+              <button
+                onClick={toggleMenu}
+                className="rounded-lg p-2 text-[#05243F] hover:bg-[#F4F5FC]"
+              >
+                <FaTimes className="h-6 w-6" />
+              </button>
+            </div>
             <div className="flex-1 overflow-y-auto py-6 px-4">
               <nav className="flex flex-col space-y-2">
                 {navLinks.map((link) => (
