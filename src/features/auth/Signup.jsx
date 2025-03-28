@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function Signup() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
     let isValid = true;
@@ -76,24 +77,117 @@ export default function Signup() {
 
     setErrors(newErrors);
 
-    if (isValid) {
-      // Proceed with form submission
-      console.log("Form submitted:", formData);
-      navigate("/auth/verify-account");
-    }
-    axios
-      .post("https://backend.motoka.com.ng/api/register", {
-        name: "Ogunneye",
-        email: formData.email,
-        password: formData.password,
-      })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // if (isValid) {
+    //   let loadingToast;
+    //   try {
+    //     // Show loading toast
+    //     loadingToast = toast.loading('Creating your account...');
+        
+    //     // Extract first part of email as name if @ exists
+    //     const name = formData.email.includes('@') 
+    //       ? formData.email.split('@')[0] 
+    //       : formData.email;
+
+    //     const response = await axios.post("https://backend.motoka.com.ng/api/register", {
+    //       name: name,
+    //       email: formData.email,
+    //       password: formData.password,
+    //     });
+
+    //     if (response.data && response.data.success) {
+    //       // Store email for verification
+    //       localStorage.setItem('email', formData.email);
+          
+    //       // Dismiss loading and show success
+    //       toast.dismiss(loadingToast);
+    //       toast.success("Account created successfully!");
+          
+    //       // Redirect to verify account
+    //       navigate("/auth/verify-account");
+    //     } else {
+    //       // Dismiss loading and show error
+    //       toast.dismiss(loadingToast);
+    //       toast.error(response.data?.message || "Something went wrong. Please try again.");
+    //     }
+    //   } catch (error) {
+    //     // Always dismiss loading first
+    //     toast.dismiss(loadingToast);
+
+    //     // Handle different types of errors
+    //     if (error.response) {
+    //       // Server responded with error
+    //       const errorMessage = error.response.data?.message || "Registration failed. Please try again.";
+    //       toast.error(errorMessage);
+
+    //       // Handle specific error cases
+    //       if (error.response.status === 422) {
+    //         // Validation errors
+    //         const serverErrors = error.response.data?.errors;
+    //         if (serverErrors) {
+    //           setErrors(prev => ({
+    //             ...prev,
+    //             email: serverErrors.email?.[0] || "",
+    //             password: serverErrors.password?.[0] || "",
+    //           }));
+    //         }
+    //       }
+    //     } else if (error.request) {
+    //       // Request made but no response
+    //       toast.error("Unable to reach the server. Please check your internet connection.");
+    //     } else {
+    //       // Something else went wrong
+    //       toast.error("An unexpected error occurred. Please try again.");
+    //     }
+    //     console.error("Signup Error:", error);
+    //   }
+    // }
+
+     if (isValid) {
+       let loadingToast;
+       try {
+         // Show loading toast
+         loadingToast = toast.loading("Creating your account...");
+
+         // Extract first part of email as name if @ exists
+         const name = formData.email.includes("@")
+           ? formData.email.split("@")[0]
+           : formData.email;
+
+         const response = await axios.post(
+           "https://backend.motoka.com.ng/api/register",
+           {
+             name: name,
+             email: formData.email,
+             password: formData.password,
+           },
+         );
+
+         if (response.data) {
+           // Store email for verification
+           localStorage.setItem("email", formData.email);
+
+           // Dismiss loading and show success
+           toast.dismiss(loadingToast);
+           toast.success("Account created successfully!");
+
+           // Redirect to verify account
+           navigate("/auth/verify-account");
+         } else {
+           // Dismiss loading and show error
+           toast.dismiss(loadingToast);
+           toast.error(
+             response.data?.message ||
+               "Something went wrong. Please try again.",
+           );
+         }
+       } catch (error) {
+         // Always dismiss loading first
+         toast.dismiss(loadingToast);
+         toast.error(error);
+       }
+     }
   };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">

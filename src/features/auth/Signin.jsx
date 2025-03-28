@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function Signin() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +15,7 @@ export default function Signin() {
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +32,7 @@ export default function Signin() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
     let isValid = true;
@@ -49,22 +51,169 @@ export default function Signin() {
 
     setErrors(newErrors);
 
-    if (!isValid) {
-      // Proceed with form submission
-      console.log("Form submitted:", formData);
-    }
+    // if (isValid) {
+    //   let loadingToast;
+    //   try {
+    //     // Show loading toast
+    //     loadingToast = toast.loading('Signing in...');
 
-    axios
-      .post("https://backend.motoka.com.ng/api/login2", {
-        email: formData.email,
-        password: formData.password,
-      })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    //     const response = await axios.post("https://backend.motoka.com.ng/api/login2", {
+    //       email: formData.email,
+    //       password: formData.password,
+    //     });
+
+    //     if (response.data && response.data.token) {
+    //       // Store auth token securely
+    //       localStorage.setItem("token", response.data.token);
+          
+    //       // Store user data if available
+    //       if (response.data.user) {
+    //         localStorage.setItem("user", JSON.stringify(response.data.user));
+    //       }
+
+    //       // Set up axios defaults for future requests
+    //       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+          
+    //       // Dismiss loading and show success
+    //       toast.dismiss(loadingToast);
+    //       toast.success("Login successful!");
+          
+    //       // Redirect to dashboard
+    //       navigate("/");
+    //     } else {
+    //       // Dismiss loading and show error
+    //       toast.dismiss(loadingToast);
+    //       toast.error("Something went wrong. Please try again.");
+    //     }
+    //   } catch (error) {
+    //     // Always dismiss loading first
+    //     toast.dismiss(loadingToast);
+
+    //     // Handle different types of errors
+    //     if (error.response) {
+    //       // Server responded with error
+    //       const errorMessage = error.response.data?.message || "Invalid credentials";
+    //       toast.error(errorMessage);
+
+    //       // Handle specific error cases
+    //       if (error.response.status === 422) {
+    //         // Validation errors
+    //         const serverErrors = error.response.data?.errors;
+    //         if (serverErrors) {
+    //           setErrors(prev => ({
+    //             ...prev,
+    //             email: serverErrors.email?.[0] || "",
+    //             password: serverErrors.password?.[0] || "",
+    //           }));
+    //         }
+    //       } else if (error.response.status === 401) {
+    //         // Unauthorized - clear any existing tokens
+    //         localStorage.removeItem("token");
+    //         localStorage.removeItem("user");
+    //         setErrors(prev => ({
+    //           ...prev,
+    //           password: "Invalid email or password",
+    //         }));
+    //       } else if (error.response.status === 403) {
+    //         // Account not verified
+    //         toast.error("Please verify your email address first");
+    //         localStorage.setItem("email", formData.email);
+    //         navigate("/auth/verify-account");
+    //         return;
+    //       }
+    //     } else if (error.request) {
+    //       // Request made but no response
+    //       toast.error("Unable to reach the server. Please check your internet connection.");
+    //     } else {
+    //       // Something else went wrong
+    //       toast.error("An unexpected error occurred. Please try again.");
+    //     }
+    //     console.error("Signin Error:", error);
+    //   }
+    // }
+
+     if (isValid) {
+       let loadingToast;
+       try {
+         // Show loading toast
+         loadingToast = toast.loading("Signing in...");
+
+         const response = await axios.post(
+           "https://backend.motoka.com.ng/api/login2",
+           {
+             email: formData.email,
+             password: formData.password,
+           },
+         );
+
+        //  if (response.data && response.data.token) {
+        //    // Store auth token securely
+        //    localStorage.setItem("token", response.data.token);
+
+        //    // Store user data if available
+        //    if (response.data.user) {
+        //      localStorage.setItem("user", JSON.stringify(response.data.user));
+        //    }
+
+        //    // Set up axios defaults for future requests
+        //    axios.defaults.headers.common["Authorization"] =
+        //      `Bearer ${response.data.token}`;
+
+           // Dismiss loading and show success
+           toast.dismiss(loadingToast);
+           toast.success("Login successful!");
+
+           // Redirect to dashboard
+           navigate("/");
+       } catch (error) {
+         // Always dismiss loading first
+         toast.dismiss(loadingToast);
+
+         // Handle different types of errors
+         if (error.response) {
+           // Server responded with error
+           const errorMessage =
+             error.response.data?.message || "Invalid credentials";
+           toast.error(errorMessage);
+
+           // Handle specific error cases
+           if (error.response.status === 422) {
+             // Validation errors
+             const serverErrors = error.response.data?.errors;
+             if (serverErrors) {
+               setErrors((prev) => ({
+                 ...prev,
+                 email: serverErrors.email?.[0] || "",
+                 password: serverErrors.password?.[0] || "",
+               }));
+             }
+           } else if (error.response.status === 401) {
+             // Unauthorized - clear any existing tokens
+             localStorage.removeItem("token");
+             localStorage.removeItem("user");
+             setErrors((prev) => ({
+               ...prev,
+               password: "Invalid email or password",
+             }));
+           } else if (error.response.status === 403) {
+             // Account not verified
+             toast.error("Please verify your email address first");
+             localStorage.setItem("email", formData.email);
+             navigate("/auth/verify-account");
+             return;
+           }
+         } else if (error.request) {
+           // Request made but no response
+           toast.error(
+             "Unable to reach the server. Please check your internet connection.",
+           );
+         } else {
+           // Something else went wrong
+           toast.error("An unexpected error occurred. Please try again.");
+         }
+         console.error("Signin Error:", error);
+       }
+     }
   };
 
   return (
