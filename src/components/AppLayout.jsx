@@ -23,7 +23,7 @@ export default function AppLayout({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F4F5FC]">
+    <div className="flex items-center justify-center bg-[#F4F5FC]">
       <div className="mt-4 w-full max-w-4xl">
         {/* Header Navigation */}
         <header className="sticky top-0 z-50 rounded-full bg-white shadow-sm">

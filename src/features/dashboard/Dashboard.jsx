@@ -59,6 +59,14 @@ export default function Dashboard() {
     navigate("licenses/renew");
   }
 
+  function handleGarage(){
+    navigate("garage")
+  }
+
+  function handleAddCar() {
+    navigate("/add-car");
+  }
+
   return (
     <AppLayout>
       {/* Welcome Section */}
@@ -99,7 +107,10 @@ export default function Dashboard() {
         <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md sm:text-base">
           Licence Status
         </button>
-        <button className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base">
+        <button
+          onClick={handleGarage}
+          className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base"
+        >
           Garage
         </button>
         <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base">
@@ -162,14 +173,20 @@ export default function Dashboard() {
                 Expires in 3 days
               </span>
             </div>
-            <button onClick={handleRenewLicense} className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90">
+            <button
+              onClick={handleRenewLicense}
+              className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90"
+            >
               Renew Now
             </button>
           </div>
         </div>
 
         <div className="flex items-center justify-center rounded-2xl bg-white p-6">
-          <button className="flex flex-col items-center gap-2">
+          <button
+            onClick={handleAddCar}
+            className="flex flex-col items-center gap-2"
+          >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3] text-xl">
               <FaPlus className="text-xl text-white" />
             </span>
@@ -191,24 +208,38 @@ export default function Dashboard() {
               key={index}
               to={action.link}
               className="group relative flex h-[161px] flex-col justify-between rounded-3xl bg-white px-4 py-6 will-change-transform hover:border-2 hover:border-[#45A1F2] hover:shadow-lg"
-              style={{ transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+              style={{ transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
             >
               <div className="flex flex-col items-start gap-y-10">
-                <div className="will-change-transform" style={{ transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                  <div className="group-hover:scale-110" style={{ transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                <div
+                  className="will-change-transform"
+                  style={{
+                    transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                  }}
+                >
+                  <div
+                    className="group-hover:scale-110"
+                    style={{
+                      transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
                     {action.icon}
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-between">
-                  <h3 
-                    className="text-base font-normal leading-tight whitespace-pre-line text-[#05243F] group-hover:text-[#45A1F2]"
-                    style={{ transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  <h3
+                    className="text-base leading-tight font-normal whitespace-pre-line text-[#05243F] group-hover:text-[#45A1F2]"
+                    style={{
+                      transition: "color 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
                   >
                     {action.title}
                   </h3>
-                  <div 
+                  <div
                     className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#45A1F2]"
-                    style={{ transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                    style={{
+                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
                   >
                     <IoIosArrowForward className="text-xl opacity-29" />
                   </div>

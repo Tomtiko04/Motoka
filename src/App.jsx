@@ -15,6 +15,7 @@ import VerificationSuccess from "./features/auth/VerificationSuccess";
 import AddCar from "./features/car/AddCar.jsx";
 import Dashboard from "./features/dashboard/Dashboard.jsx";
 import RenewLicense from "./features/licenses/RenewLicense";
+import Garage from "./features/garage/Garage.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="licenses">
             <Route path="renew" element={<RenewLicense />} />
           </Route>
+          <Route path="garage" element={<Garage />} />
         </Routes>
       </BrowserRouter>
       <Toaster
