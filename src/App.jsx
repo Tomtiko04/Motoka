@@ -34,14 +34,19 @@ export default function App() {
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <Routes>
-          <Route index element={<Dashboard />}/>
-          <Route path="dashboard/home" element={<Dashboard />}/>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard/home" element={<Dashboard />} />
           <Route path="auth/signin" element={<SignIn />}></Route>
           <Route path="auth/signup" element={<SignUp />}></Route>
           <Route path="auth/verify-account" element={<Verification />}></Route>
-          <Route path="auth/verification-success" element={<VerificationSuccess />}></Route>
+          <Route
+            path="auth/verification-success"
+            element={<VerificationSuccess />}
+          ></Route>
           <Route path="add-car" element={<AddCar />}></Route>
-          <Route path="licenses/renew" element={<RenewLicense />} />
+          <Route path="licenses">
+            <Route path="renew" element={<RenewLicense />} />
+          </Route>
         </Routes>
       </BrowserRouter>
       <Toaster

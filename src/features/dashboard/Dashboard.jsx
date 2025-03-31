@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BsCarFront, BsQuestionCircle } from "react-icons/bs";
 import { FaRegHandshake } from "react-icons/fa";
 import { TbLicense, TbSteeringWheel } from "react-icons/tb";
@@ -11,6 +11,7 @@ import AppLayout from "../../components/AppLayout";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const quickActions = [
     {
       icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
@@ -53,6 +54,10 @@ export default function Dashboard() {
       link: "/international-license",
     },
   ];
+
+  function handleRenewLicense() {
+    navigate("licenses/renew");
+  }
 
   return (
     <AppLayout>
@@ -157,7 +162,7 @@ export default function Dashboard() {
                 Expires in 3 days
               </span>
             </div>
-            <button className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90">
+            <button onClick={handleRenewLicense} className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90">
               Renew Now
             </button>
           </div>
