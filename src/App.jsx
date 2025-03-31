@@ -14,6 +14,7 @@ import Verification from "./pages/Verification.jsx";
 import VerificationSuccess from "./features/auth/VerificationSuccess";
 import AddCar from "./features/car/AddCar.jsx";
 import Dashboard from "./features/dashboard/Dashboard.jsx";
+import RenewLicense from "./features/licenses/RenewLicense";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="auth/verify-account" element={<Verification />}></Route>
           <Route path="auth/verification-success" element={<VerificationSuccess />}></Route>
           <Route path="add-car" element={<AddCar />}></Route>
+          <Route path="licenses/renew" element={<RenewLicense />} />
         </Routes>
       </BrowserRouter>
       <Toaster
