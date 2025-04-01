@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BsStars } from "react-icons/bs";
 import Header from "../../components/Header";
+import { useNavigate } from "react-router-dom";
 
 export default function AddCar() {
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ export default function AddCar() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -120,6 +122,7 @@ export default function AddCar() {
     try {
       // TODO: Submit form data to backend
       console.log("Form submitted:", formData);
+      navigate("/")
       // Reset form after successful submission
       // setFormData({ ...initialFormState });
     } catch (error) {

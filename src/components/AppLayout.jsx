@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaBell, FaBars, FaTimes } from "react-icons/fa";
 import Logo from "../assets/images/Logo.png";
 import Avarta from "../assets/images/avarta.png";
@@ -7,6 +7,7 @@ import Avarta from "../assets/images/avarta.png";
 export default function AppLayout({ children }) {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -22,6 +23,10 @@ export default function AppLayout({ children }) {
     document.body.style.overflow = !isMenuOpen ? 'hidden' : '';
   };
 
+  function handleHome(){
+    navigate("/")
+  }
+
   return (
     <div className="flex items-center justify-center bg-[#F4F5FC]">
       <div className="mt-4 w-full max-w-4xl">
@@ -29,7 +34,7 @@ export default function AppLayout({ children }) {
         <header className="sticky top-0 z-50 rounded-full bg-white shadow-sm">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div onClick={handleHome} className="flex items-center gap-2 cursor-pointer">
                 <img src={Logo} alt="Motoka" className="h-8 w-8" />
                 <span className="text-lg font-semibold text-[#05243F]">Motoka</span>
               </div>
@@ -79,6 +84,7 @@ export default function AppLayout({ children }) {
                     3
                   </span>
                 </div>
+                {/* When you click it will show a drop down */}
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img 
                     src={Avarta} 
