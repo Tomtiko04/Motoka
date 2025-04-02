@@ -1,21 +1,23 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
-import axios from "axios";
 import toast from "react-hot-toast";
+import { useSignup } from "./useAuth";
 
 export default function Signup() {
-  const navigate = useNavigate();
+  const { signupUser, isSigningUp } = useSignup();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
     terms: false,
   });
   const [errors, setErrors] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -41,6 +43,12 @@ export default function Signup() {
     e.preventDefault();
     let newErrors = {};
     let isValid = true;
+
+    // Validate name
+    if (!formData.name) {
+      newErrors.name = "Username is required";
+      isValid = false;
+    }
 
     // Validate email
     if (!formData.email.trim()) {
@@ -76,118 +84,23 @@ export default function Signup() {
     }
 
     setErrors(newErrors);
-
-    // if (isValid) {
-    //   let loadingToast;
-    //   try {
-    //     // Show loading toast
-    //     loadingToast = toast.loading('Creating your account...');
-        
-    //     // Extract first part of email as name if @ exists
-    //     const name = formData.email.includes('@') 
-    //       ? formData.email.split('@')[0] 
-    //       : formData.email;
-
-    //     const response = await axios.post("https://backend.motoka.com.ng/api/register", {
-    //       name: name,
-    //       email: formData.email,
-    //       password: formData.password,
-    //     });
-
-    //     if (response.data && response.data.success) {
-    //       // Store email for verification
-    //       localStorage.setItem('email', formData.email);
-          
-    //       // Dismiss loading and show success
-    //       toast.dismiss(loadingToast);
-    //       toast.success("Account created successfully!");
-          
-    //       // Redirect to verify account
-    //       navigate("/auth/verify-account");
-    //     } else {
-    //       // Dismiss loading and show error
-    //       toast.dismiss(loadingToast);
-    //       toast.error(response.data?.message || "Something went wrong. Please try again.");
-    //     }
-    //   } catch (error) {
-    //     // Always dismiss loading first
-    //     toast.dismiss(loadingToast);
-
-    //     // Handle different types of errors
-    //     if (error.response) {
-    //       // Server responded with error
-    //       const errorMessage = error.response.data?.message || "Registration failed. Please try again.";
-    //       toast.error(errorMessage);
-
-    //       // Handle specific error cases
-    //       if (error.response.status === 422) {
-    //         // Validation errors
-    //         const serverErrors = error.response.data?.errors;
-    //         if (serverErrors) {
-    //           setErrors(prev => ({
-    //             ...prev,
-    //             email: serverErrors.email?.[0] || "",
-    //             password: serverErrors.password?.[0] || "",
-    //           }));
-    //         }
-    //       }
-    //     } else if (error.request) {
-    //       // Request made but no response
-    //       toast.error("Unable to reach the server. Please check your internet connection.");
-    //     } else {
-    //       // Something else went wrong
-    //       toast.error("An unexpected error occurred. Please try again.");
-    //     }
-    //     console.error("Signup Error:", error);
-    //   }
-    // }
-
-     if (isValid) {
-       let loadingToast;
-       try {
-         // Show loading toast
-         loadingToast = toast.loading("Creating your account...");
-
-         // Extract first part of email as name if @ exists
-         const name = formData.email.includes("@")
-           ? formData.email.split("@")[0]
-           : formData.email;
-
-         const response = await axios.post(
-           "https://backend.motoka.com.ng/api/register",
-           {
-             name: name,
-             email: formData.email,
-             password: formData.password,
-           },
-         );
-
-         if (response.data) {
-           // Store email for verification
-           localStorage.setItem("email", formData.email);
-
-           // Dismiss loading and show success
-           toast.dismiss(loadingToast);
-           toast.success("Account created successfully!");
-
-           // Redirect to verify account
-           navigate("/auth/verify-account");
-         } else {
-           // Dismiss loading and show error
-           toast.dismiss(loadingToast);
-           toast.error(
-             response.data?.message ||
-               "Something went wrong. Please try again.",
-           );
-         }
-       } catch (error) {
-         // Always dismiss loading first
-         toast.dismiss(loadingToast);
-         toast.error(error);
-       }
-     }
+    if (isValid) {
+      let loadingToast;
+      try {
+        loadingToast = toast.loading("Creating your account...");
+        await signupUser({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
+      } catch (error) {
+        toast.dismiss(loadingToast);
+        toast.error(error.message);
+      } finally {
+        toast.dismiss(loadingToast);
+      }
+    }
   };
-
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -206,7 +119,7 @@ export default function Signup() {
             <div className="flex items-center">
               <span className="text-sm text-[#a8b2bd]">Have an account?</span>
               <Link
-                to="/auth/signin"
+                to="/auth/login"
                 className="ml-1 text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
               >
                 Login
@@ -215,6 +128,29 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+            <div>
+              <label
+                htmlFor="name"
+                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+              >
+                Username
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Tomtiko"
+                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+              />
+              {errors.name && (
+                <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                  {errors.name}
+                </p>
+              )}
+            </div>
+
             <div>
               <label
                 htmlFor="email"
@@ -333,7 +269,7 @@ export default function Signup() {
             <div>
               <button
                 type="submit"
-                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:mt-14 sm:w-36"
+                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-14 sm:w-36"
               >
                 Sign Up
               </button>

@@ -25,6 +25,34 @@ export async function login({ email, password }) {
   }
 }
 
+export async function signupRequest({ name, email, password }) {
+  try {
+    const { data } = await api.post("/register", { name, email, password });
+
+    const token = data?.authorization?.token;
+    if (!token) throw new Error("Signup successful, but no token received.");
+
+    // Store token securely
+
+    Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
+
+    return  data.user
+  } catch (error) {
+    console.log(error.response.data);
+    if (error.response) {
+      const errorMessage =
+        error.response.data?.email?.[0] ||
+        error.response.data?.password?.[0] ||
+        error.response.data?.name?.[0] ||
+        error.response.data?.message ||
+        "Signup failed";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error(error.message || "Signup failed");
+    }
+  }
+}
+
 // export async function logout() {
 //   try {
 //     await api.post("/logout");
