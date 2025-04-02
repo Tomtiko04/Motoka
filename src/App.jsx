@@ -37,7 +37,7 @@ export default function App() {
         <Routes>
           <Route index element={<Dashboard />} />
           <Route path="dashboard/home" element={<Dashboard />} />
-          <Route path="auth/signin" element={<SignIn />}></Route>
+          <Route path="auth/login" element={<SignIn />}></Route>
           <Route path="auth/signup" element={<SignUp />}></Route>
           <Route path="auth/verify-account" element={<Verification />}></Route>
           <Route

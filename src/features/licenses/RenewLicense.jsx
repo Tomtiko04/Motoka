@@ -8,9 +8,9 @@ import AppLayout from "../../components/AppLayout";
 export default function RenewLicense() {
   const navigate = useNavigate();
   const [deliveryDetails, setDeliveryDetails] = useState({
-    address: "456, Prince modupeloa street, Iyana iworo",
-    fee: "₦5,000",
-    contact: "08097655432",
+    address: "",
+    fee: "",
+    contact: "",
   });
 
   const handleDeliveryChange = (field, value) => {

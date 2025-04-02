@@ -89,7 +89,7 @@ export default function Dashboard() {
 
         <div className="flex items-center gap-2 sm:gap-4">
           <span className="text-sm font-normal text-[#05243F]/44 sm:text-base">
-            Transaction History
+            Wallet Balance
           </span>
           <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
             <span>

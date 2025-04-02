@@ -164,12 +164,12 @@ export default function AppLayout({ children }) {
         </main>
 
         {/* Ask Mo Button */}
-        <div className="fixed right-8 bottom-8 z-50">
+        {/* <div className="fixed right-8 bottom-8 z-50">
           <button className="flex items-center gap-2 rounded-full bg-[#EBB950] px-6 py-3 text-white shadow-lg transition-transform hover:scale-105">
             <span className="font-semibold">Ask Mo</span>
             <span role="img" aria-label="sparkles">✨</span>
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

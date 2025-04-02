@@ -4,9 +4,11 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useLogin } from "./useAuth";
 
 export default function Signin() {
   const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoggingIn } = useLogin();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,7 +17,6 @@ export default function Signin() {
     email: "",
     password: "",
   });
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +24,7 @@ export default function Signin() {
       ...prev,
       [name]: value,
     }));
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
@@ -51,169 +53,20 @@ export default function Signin() {
 
     setErrors(newErrors);
 
-    // if (isValid) {
-    //   let loadingToast;
-    //   try {
-    //     // Show loading toast
-    //     loadingToast = toast.loading('Signing in...');
-
-    //     const response = await axios.post("https://backend.motoka.com.ng/api/login2", {
-    //       email: formData.email,
-    //       password: formData.password,
-    //     });
-
-    //     if (response.data && response.data.token) {
-    //       // Store auth token securely
-    //       localStorage.setItem("token", response.data.token);
-          
-    //       // Store user data if available
-    //       if (response.data.user) {
-    //         localStorage.setItem("user", JSON.stringify(response.data.user));
-    //       }
-
-    //       // Set up axios defaults for future requests
-    //       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-          
-    //       // Dismiss loading and show success
-    //       toast.dismiss(loadingToast);
-    //       toast.success("Login successful!");
-          
-    //       // Redirect to dashboard
-    //       navigate("/");
-    //     } else {
-    //       // Dismiss loading and show error
-    //       toast.dismiss(loadingToast);
-    //       toast.error("Something went wrong. Please try again.");
-    //     }
-    //   } catch (error) {
-    //     // Always dismiss loading first
-    //     toast.dismiss(loadingToast);
-
-    //     // Handle different types of errors
-    //     if (error.response) {
-    //       // Server responded with error
-    //       const errorMessage = error.response.data?.message || "Invalid credentials";
-    //       toast.error(errorMessage);
-
-    //       // Handle specific error cases
-    //       if (error.response.status === 422) {
-    //         // Validation errors
-    //         const serverErrors = error.response.data?.errors;
-    //         if (serverErrors) {
-    //           setErrors(prev => ({
-    //             ...prev,
-    //             email: serverErrors.email?.[0] || "",
-    //             password: serverErrors.password?.[0] || "",
-    //           }));
-    //         }
-    //       } else if (error.response.status === 401) {
-    //         // Unauthorized - clear any existing tokens
-    //         localStorage.removeItem("token");
-    //         localStorage.removeItem("user");
-    //         setErrors(prev => ({
-    //           ...prev,
-    //           password: "Invalid email or password",
-    //         }));
-    //       } else if (error.response.status === 403) {
-    //         // Account not verified
-    //         toast.error("Please verify your email address first");
-    //         localStorage.setItem("email", formData.email);
-    //         navigate("/auth/verify-account");
-    //         return;
-    //       }
-    //     } else if (error.request) {
-    //       // Request made but no response
-    //       toast.error("Unable to reach the server. Please check your internet connection.");
-    //     } else {
-    //       // Something else went wrong
-    //       toast.error("An unexpected error occurred. Please try again.");
-    //     }
-    //     console.error("Signin Error:", error);
-    //   }
-    // }
-
-     if (isValid) {
-       let loadingToast;
-       try {
-         // Show loading toast
-         loadingToast = toast.loading("Signing in...");
-
-         const response = await axios.post(
-           "https://backend.motoka.com.ng/api/login2",
-           {
-             email: formData.email,
-             password: formData.password,
-           },
-         );
-
-        //  if (response.data && response.data.token) {
-        //    // Store auth token securely
-        //    localStorage.setItem("token", response.data.token);
-
-        //    // Store user data if available
-        //    if (response.data.user) {
-        //      localStorage.setItem("user", JSON.stringify(response.data.user));
-        //    }
-
-        //    // Set up axios defaults for future requests
-        //    axios.defaults.headers.common["Authorization"] =
-        //      `Bearer ${response.data.token}`;
-
-           // Dismiss loading and show success
-           toast.dismiss(loadingToast);
-           toast.success("Login successful!");
-
-           // Redirect to dashboard
-           navigate("/");
-       } catch (error) {
-         // Always dismiss loading first
-         toast.dismiss(loadingToast);
-
-         // Handle different types of errors
-         if (error.response) {
-           // Server responded with error
-           const errorMessage =
-             error.response.data?.message || "Invalid credentials";
-           toast.error(errorMessage);
-
-           // Handle specific error cases
-           if (error.response.status === 422) {
-             // Validation errors
-             const serverErrors = error.response.data?.errors;
-             if (serverErrors) {
-               setErrors((prev) => ({
-                 ...prev,
-                 email: serverErrors.email?.[0] || "",
-                 password: serverErrors.password?.[0] || "",
-               }));
-             }
-           } else if (error.response.status === 401) {
-             // Unauthorized - clear any existing tokens
-             localStorage.removeItem("token");
-             localStorage.removeItem("user");
-             setErrors((prev) => ({
-               ...prev,
-               password: "Invalid email or password",
-             }));
-           } else if (error.response.status === 403) {
-             // Account not verified
-             toast.error("Please verify your email address first");
-             localStorage.setItem("email", formData.email);
-             navigate("/auth/verify-account");
-             return;
-           }
-         } else if (error.request) {
-           // Request made but no response
-           toast.error(
-             "Unable to reach the server. Please check your internet connection.",
-           );
-         } else {
-           // Something else went wrong
-           toast.error("An unexpected error occurred. Please try again.");
-         }
-         console.error("Signin Error:", error);
-       }
-     }
+    if (isValid) {
+      let loadingToast;
+      try {
+        // Await the login mutation
+        loadingToast = toast.loading("Signing in...");
+        await login(formData);
+        toast.dismiss(loadingToast);
+      } catch (error) {
+        toast.dismiss(loadingToast);
+        // console.error("Login failed:", error.message);
+        toast.error(error.message || "Login failed");
+        throw newErrors(error.message)
+      }
+    }
   };
 
   return (
@@ -330,7 +183,7 @@ export default function Signin() {
             <div>
               <button
                 type="submit"
-                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:mt-14 sm:w-36"
+                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-14 sm:w-36"
               >
                 Login
               </button>
