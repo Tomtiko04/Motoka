@@ -6,10 +6,7 @@ export default function Verification() {
   return (
     <>
       <Header />
-      <br />
-      {/* <br /> */}
       <VerifyAccount />
-      <br />
     </>
   );
 }

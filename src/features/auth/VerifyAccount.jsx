@@ -112,7 +112,7 @@ export default function VerifyAccount() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
         <div className="text-center">
           <h2 className="mb-2 text-lg font-medium text-[#05243F] sm:text-xl">
@@ -171,3 +171,5 @@ export default function VerifyAccount() {
     </div>
   );
 }
+
+// flex min-h-screen items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8

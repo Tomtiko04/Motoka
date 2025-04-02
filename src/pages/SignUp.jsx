@@ -6,7 +6,6 @@ export default function SignUp() {
     <>
       <Header />
       <br />
-      <br />
       <Signup />
       <br />
     </>
