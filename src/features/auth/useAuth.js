@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { login as loginApi } from "../../services/apiAuth";
 import { signupRequest as signupApi } from "../../services/apiAuth";
+import { verifyAccount as verifyApi } from "../../services/apiAuth";
 import { useNavigate } from "react-router-dom";
 
 export function useLogin() {
@@ -34,7 +35,9 @@ export function useSignup() {
 
   const { mutate: signupUser, isLoading: isSigningUp } = useMutation({
     mutationFn: signupApi,
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      const userEmail = variables.email;
+      localStorage.setItem("pendingVerificationEmail", userEmail);
       toast.success(
         data.message ||
           "User created successfully. Please check your email for verification code. ",
@@ -48,4 +51,25 @@ export function useSignup() {
   });
 
   return { signupUser, isSigningUp };
+}
+
+export function useVerifyAccount() {
+  const navigate = useNavigate();
+
+  const { mutate: verifyAccount, isLoading: isVerifying } = useMutation({
+    mutationFn: verifyApi,
+    onSuccess: (data) => {
+      toast.success(
+        data.message || "Account verified successfully! You can now log in.",
+      );
+      navigate("/auth/verification-success");
+      localStorage.removeItem("pendingVerificationEmail");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Verification failed. Please try again.");
+    },
+    retry: false,
+  });
+
+  return { verifyAccount, isVerifying };
 }

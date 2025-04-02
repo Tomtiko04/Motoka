@@ -38,7 +38,6 @@ export async function signupRequest({ name, email, password }) {
 
     return  data.user
   } catch (error) {
-    console.log(error.response.data);
     if (error.response) {
       const errorMessage =
         error.response.data?.email?.[0] ||
@@ -49,6 +48,23 @@ export async function signupRequest({ name, email, password }) {
       throw new Error(errorMessage);
     } else {
       throw new Error(error.message || "Signup failed");
+    }
+  }
+}
+
+export async function verifyAccount({code, email}) {
+  try {
+    const { data } = await api.post("/user/verify", { code, email });
+    return data;
+  } catch (error) { 
+    if (error.response) {
+      const errorMessage =
+        error.response.data?.email?.[0] ||
+        error.response.data?.message ||
+        "Account Verification Failed";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error(error.message || "Account Verification Failed");
     }
   }
 }

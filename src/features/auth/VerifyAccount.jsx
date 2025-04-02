@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useVerifyAccount } from "./useAuth";
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
+  const { verifyAccount, isVerifying } = useVerifyAccount();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [timeLeft, setTimeLeft] = useState(60); // 1 minute countdown
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown
   const inputRefs = useRef([]);
+  const storedEmail = localStorage.getItem("pendingVerificationEmail");
 
   useEffect(() => {
     // Focus the first input on mount
@@ -27,6 +30,28 @@ export default function VerifyAccount() {
     return () => clearInterval(timer);
   }, []);
 
+  // const handleChange = (index, value) => {
+  //   // Only allow numbers
+  //   if (!/^\d*$/.test(value)) return;
+
+  //   const newCode = [...code];
+  //   newCode[index] = value;
+  //   setCode(newCode);
+
+  //   // Auto-focus next input
+  //   if (value && index < 5 && inputRefs.current[index + 1]) {
+  //     inputRefs.current[index + 1].focus();
+  //   }
+
+  //   // If all fields are filled, automatically verify
+  //   if (index === 5 && value) {
+  //     const fullCode = [...newCode.slice(0, 5), value].join("");
+  //     if (fullCode.length === 6) {
+  //       handleVerify();
+  //     }
+  //   }
+  // };
+
   const handleChange = (index, value) => {
     // Only allow numbers
     if (!/^\d*$/.test(value)) return;
@@ -35,17 +60,15 @@ export default function VerifyAccount() {
     newCode[index] = value;
     setCode(newCode);
 
-    // Auto-focus next input
+    // Auto-focus next input if not the last
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
     }
 
-    // If all fields are filled, automatically verify
-    if (index === 5 && value) {
-      const fullCode = [...newCode.slice(0, 5), value].join("");
-      if (fullCode.length === 6) {
-        handleVerify();
-      }
+    // Check if the full code is entered
+    const fullCode = newCode.join("");
+    if (fullCode.length === 6) {
+      handleVerify(fullCode); // Pass the completed code
     }
   };
 
@@ -62,11 +85,23 @@ export default function VerifyAccount() {
     // TODO: Implement resend logic
   };
 
-  const handleVerify = () => {
-    // TODO: Add actual verification logic here
-    // For now, just navigate to success page
-    navigate("/auth/verification-success");
+  const handleVerify = (fullCode) => {
+    let loadingToast;
+    if (fullCode.length !== 6) {
+      toast.error("The code must be 6 characters long.");
+      return;
+    }
+    try {
+      loadingToast = toast.loading("Verifying account...");
+      verifyAccount({ code: fullCode, email: storedEmail });
+    } catch (error) {
+      throw new Error(error.message);
+    } finally {
+      toast.dismiss(loadingToast);
+    }
   };
+
+  //TODO: if input field is empty it should not verify
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -124,8 +159,9 @@ export default function VerifyAccount() {
 
         <button
           onClick={handleVerify}
+          disabled={code.join("").length !== 6}
           type="submit"
-          className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:mt-8 sm:w-36 sm:text-base md:mt-10"
+          className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-36 sm:text-base md:mt-10"
         >
           Verify
         </button>
