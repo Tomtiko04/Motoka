@@ -84,21 +84,31 @@ export default function Signup() {
     }
 
     setErrors(newErrors);
-    if (isValid) {
-      const loadingToast = toast.loading("Creating your account...");
-      try {
-        await signupUser({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        });
-      } catch (error) {
-        toast.dismiss(loadingToast);
-        toast.error(error.message);
-      } finally {
-        toast.dismiss(loadingToast);
-      }
-    }
+   if (isValid) {
+     const loadingToast = toast.loading("Creating your account...");
+
+     try {
+       await signupUser(
+         {
+           name: formData.name,
+           email: formData.email,
+           password: formData.password,
+         },
+         {
+           onSuccess: () => {
+             toast.dismiss(loadingToast);
+           },
+           onError: () => {
+             toast.dismiss(loadingToast); 
+           },
+         },
+       );
+     } catch (error) {
+       toast.dismiss(loadingToast);
+       toast.error(error.message || "Signup failed");
+     }
+   }
+
   };
 
   return (

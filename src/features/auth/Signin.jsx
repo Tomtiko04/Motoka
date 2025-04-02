@@ -52,16 +52,22 @@ export default function Signin() {
     }
 
     setErrors(newErrors);
-
     if (isValid) {
-      const loadingToast = toast.loading("Signing in...");
+      const loadingToast = toast.loading("Logging in...");
+
       try {
-        await login(formData);
+        await login(formData, {
+          onSuccess: () => {
+            toast.dismiss(loadingToast);
+          },
+          onError: () => {
+            toast.dismiss(loadingToast);
+          },
+        });
       } catch (error) {
+        toast.dismiss(loadingToast);
         toast.error(error.message || "Login failed");
-        throw newErrors(error.message)
-      } finally{
-        toast.dismiss(loadingToast)
+        throw newErrors(error.message);
       }
     }
   };

@@ -1,18 +1,31 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useVerifyAccount } from "./useAuth";
-import { Navigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
   const { verifyAccount, isVerifying } = useVerifyAccount();
   const [email, setEmail] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown
   const inputRefs = useRef([]);
 
   useEffect(() => {
+    const storedEmail = localStorage.getItem("pendingVerificationEmail");
+    if (storedEmail) {
+      setEmail(storedEmail);
+    } else {
+      navigate("/auth/signup", { replace: true }); // Navigate before setting state
+      return; // Exit early to prevent setting state after redirect
+    }
+    setLoading(false);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (loading) return; // Prevents running before email is checked
+
     // Focus the first input on mount
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
@@ -30,40 +43,7 @@ export default function VerifyAccount() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const storedEmail = localStorage.getItem("pendingVerificationEmail");
-    if (storedEmail) {
-      setEmail(storedEmail);
-    }
-  }, []);
-
-  if (!email) {
-    return <Navigate to="/auth/signup" replace />;
-  }
-
-  // const handleChange = (index, value) => {
-  //   // Only allow numbers
-  //   if (!/^\d*$/.test(value)) return;
-
-  //   const newCode = [...code];
-  //   newCode[index] = value;
-  //   setCode(newCode);
-
-  //   // Auto-focus next input
-  //   if (value && index < 5 && inputRefs.current[index + 1]) {
-  //     inputRefs.current[index + 1].focus();
-  //   }
-
-  //   // If all fields are filled, automatically verify
-  //   if (index === 5 && value) {
-  //     const fullCode = [...newCode.slice(0, 5), value].join("");
-  //     if (fullCode.length === 6) {
-  //       handleVerify();
-  //     }
-  //   }
-  // };
+  }, [loading]);
 
   const handleChange = (index, value) => {
     // Only allow numbers
@@ -81,7 +61,7 @@ export default function VerifyAccount() {
     // Check if the full code is entered
     const fullCode = newCode.join("");
     if (fullCode.length === 6) {
-      handleVerify(fullCode); 
+      handleVerify(fullCode);
     }
   };
 
@@ -107,15 +87,23 @@ export default function VerifyAccount() {
     const loadingToast = toast.loading("Verifying account...");
 
     try {
-      await verifyAccount({ code: fullCode, email: email });
-      toast.success("Account verified successfully!");
+      await verifyAccount(
+        { code: fullCode, email: email },
+        {
+          onSuccess: () => {
+            toast.dismiss(loadingToast);
+          },
+          onError: () => {
+            toast.dismiss(loadingToast);
+          },
+        },
+      );
     } catch (error) {
+      toast.dismiss(loadingToast);
       toast.error(error.message || "Verification failed. Please try again.");
-    } finally {
-      toast.dismiss(loadingToast); 
     }
-  };
 
+  };
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -124,7 +112,7 @@ export default function VerifyAccount() {
   };
 
   return (
-    <div className="flex items-center justify-center px-4 py-6 sm:px-6 sm:py-8 md:py-10 lg:px-8">
+    <div className="flex h-screen items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
         <div className="text-center">
           <h2 className="mb-2 text-lg font-medium text-[#05243F] sm:text-xl">

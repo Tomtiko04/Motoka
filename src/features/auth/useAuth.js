@@ -12,11 +12,13 @@ export function useLogin() {
   const { mutate: login, isLoading: isLoggingIn } = useMutation({
     mutationFn: loginApi,
     onSuccess: (data) => {
+      toast.dismiss(); // Dismiss any existing loading toast
       queryClient.setQueryData(["user"], data);
-      toast.success("User logged in successfully!");
+      toast.success(data.message || "User logged in successfully!");
       navigate("/");
     },
     onError: (err) => {
+      toast.dismiss(); // Dismiss loading toast on error
       if (err.message === "Please verify your email before logging in.") {
         toast.error(err.message);
         navigate("/auth/verify-account");
@@ -36,15 +38,17 @@ export function useSignup() {
   const { mutate: signupUser, isLoading: isSigningUp } = useMutation({
     mutationFn: signupApi,
     onSuccess: (data, variables) => {
+      toast.dismiss(); // Dismiss loading toast on success
       const userEmail = variables.email;
       localStorage.setItem("pendingVerificationEmail", userEmail);
       toast.success(
         data.message ||
-          "User created successfully. Please check your email for verification code. ",
+          "User created successfully. Please check your email for the verification code.",
       );
       navigate("/auth/verify-account");
     },
     onError: (err) => {
+      toast.dismiss(); // Dismiss loading toast on error
       toast.error(err.message || "An error occurred during signup.");
     },
     retry: false,
@@ -59,6 +63,7 @@ export function useVerifyAccount() {
   const { mutate: verifyAccount, isLoading: isVerifying } = useMutation({
     mutationFn: verifyApi,
     onSuccess: (data) => {
+      toast.dismiss();
       toast.success(
         data.message || "Account verified successfully! You can now log in.",
       );
@@ -66,6 +71,7 @@ export function useVerifyAccount() {
       localStorage.removeItem("pendingVerificationEmail");
     },
     onError: (err) => {
+      toast.dismiss();
       toast.error(err.message || "Verification failed. Please try again.");
     },
     retry: false,
