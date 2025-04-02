@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useVerifyAccount } from "./useAuth";
+import { Navigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
   const { verifyAccount, isVerifying } = useVerifyAccount();
+  const [email, setEmail] = useState(null);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown
   const inputRefs = useRef([]);
-  const storedEmail = localStorage.getItem("pendingVerificationEmail");
 
   useEffect(() => {
     // Focus the first input on mount
@@ -29,6 +31,17 @@ export default function VerifyAccount() {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("pendingVerificationEmail");
+    if (storedEmail) {
+      setEmail(storedEmail);
+    }
+  }, []);
+
+  if (!email) {
+    return <Navigate to="/auth/signup" replace />;
+  }
 
   // const handleChange = (index, value) => {
   //   // Only allow numbers
@@ -93,15 +106,13 @@ export default function VerifyAccount() {
     }
     try {
       loadingToast = toast.loading("Verifying account...");
-      verifyAccount({ code: fullCode, email: storedEmail });
+      verifyAccount({ code: fullCode, email: email });
     } catch (error) {
       throw new Error(error.message);
     } finally {
       toast.dismiss(loadingToast);
     }
   };
-
-  //TODO: if input field is empty it should not verify
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -158,7 +169,7 @@ export default function VerifyAccount() {
         </div>
 
         <button
-          onClick={handleVerify}
+          onClick={() => handleVerify(code.join(""))}
           disabled={code.join("").length !== 6}
           type="submit"
           className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-36 sm:text-base md:mt-10"
