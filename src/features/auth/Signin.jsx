@@ -54,17 +54,14 @@ export default function Signin() {
     setErrors(newErrors);
 
     if (isValid) {
-      let loadingToast;
+      const loadingToast = toast.loading("Signing in...");
       try {
-        // Await the login mutation
-        loadingToast = toast.loading("Signing in...");
         await login(formData);
-        toast.dismiss(loadingToast);
       } catch (error) {
-        toast.dismiss(loadingToast);
-        // console.error("Login failed:", error.message);
         toast.error(error.message || "Login failed");
         throw newErrors(error.message)
+      } finally{
+        toast.dismiss(loadingToast)
       }
     }
   };

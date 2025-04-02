@@ -81,7 +81,7 @@ export default function VerifyAccount() {
     // Check if the full code is entered
     const fullCode = newCode.join("");
     if (fullCode.length === 6) {
-      handleVerify(fullCode); // Pass the completed code
+      handleVerify(fullCode); 
     }
   };
 
@@ -98,21 +98,24 @@ export default function VerifyAccount() {
     // TODO: Implement resend logic
   };
 
-  const handleVerify = (fullCode) => {
-    let loadingToast;
+  const handleVerify = async (fullCode) => {
     if (fullCode.length !== 6) {
       toast.error("The code must be 6 characters long.");
       return;
     }
+
+    const loadingToast = toast.loading("Verifying account...");
+
     try {
-      loadingToast = toast.loading("Verifying account...");
-      verifyAccount({ code: fullCode, email: email });
+      await verifyAccount({ code: fullCode, email: email });
+      toast.success("Account verified successfully!");
     } catch (error) {
-      throw new Error(error.message);
+      toast.error(error.message || "Verification failed. Please try again.");
     } finally {
-      toast.dismiss(loadingToast);
+      toast.dismiss(loadingToast); 
     }
   };
+
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);

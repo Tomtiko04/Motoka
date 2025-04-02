@@ -85,9 +85,8 @@ export default function Signup() {
 
     setErrors(newErrors);
     if (isValid) {
-      let loadingToast;
+      const loadingToast = toast.loading("Creating your account...");
       try {
-        loadingToast = toast.loading("Creating your account...");
         await signupUser({
           name: formData.name,
           email: formData.email,
