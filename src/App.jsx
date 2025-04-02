@@ -16,6 +16,7 @@ import AddCar from "./features/car/AddCar.jsx";
 import Dashboard from "./features/dashboard/Dashboard.jsx";
 import RenewLicense from "./features/licenses/RenewLicense";
 import Garage from "./features/garage/Garage.jsx";
+import Licenses from "./features/licenses/Licenses.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -46,6 +47,7 @@ export default function App() {
           ></Route>
           <Route path="add-car" element={<AddCar />}></Route>
           <Route path="licenses">
+            <Route index element={<Licenses />} />
             <Route path="renew" element={<RenewLicense />} />
           </Route>
           <Route path="garage" element={<Garage />} />

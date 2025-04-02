@@ -27,16 +27,18 @@ export default function RenewLicense() {
   return (
     <AppLayout>
       {/* Header */}
-      <div className="relative mt-3 mb-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
-        >
-          <IoIosArrowBack className="h-5 w-5" />
-        </button>
-        <h1 className="text-center text-2xl font-medium text-[#05243F]">
-          Renew License
-        </h1>
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="relative mt-3 mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+          >
+            <IoIosArrowBack className="h-5 w-5" />
+          </button>
+          <h1 className="text-center text-2xl font-medium text-[#05243F]">
+            Renew License
+          </h1>
+        </div>
       </div>
 
       {/* Main Content */}
