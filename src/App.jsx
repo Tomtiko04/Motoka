@@ -17,6 +17,7 @@ import Dashboard from "./features/dashboard/Dashboard.jsx";
 import RenewLicense from "./features/licenses/RenewLicense";
 import Garage from "./features/garage/Garage.jsx";
 import Licenses from "./features/licenses/Licenses.jsx";
+import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="renew" element={<RenewLicense />} />
           </Route>
           <Route path="garage" element={<Garage />} />
+          <Route path="payment" element={<PaymentOptions availableBalance={3000} renewalCost={1000}/>}/>
         </Routes>
       </BrowserRouter>
       <Toaster
