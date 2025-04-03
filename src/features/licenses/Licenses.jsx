@@ -7,6 +7,10 @@ import { FaRegEye, FaRegEyeSlash, FaCarAlt, FaPlus } from "react-icons/fa";
 import { MdOutlineAirplaneTicket } from "react-icons/md";
 import { IoIosArrowForward } from "react-icons/io";
 import { PiNumberSquareThreeBold, PiHandWavingFill } from "react-icons/pi";
+import { FaCar, FaIdCard } from "react-icons/fa";
+import { BsCardText } from "react-icons/bs";
+import { MdOutlineDirectionsCar } from "react-icons/md";
+import { IoCarSportOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import AppLayout from "../../components/AppLayout";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +19,11 @@ export default function Licenses() {
   const navigate = useNavigate();
   const licensesTypes = [
     {
-      icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
+      icons: [
+        <IoCarSportOutline key="car" className="text-2xl text-[#2389E3]" />,
+        <BsCardText key="paper" className="text-2xl text-[#2389E3]" />,
+        <FaIdCard key="license" className="text-2xl text-[#2389E3]" />,
+      ],
       title: "Vehicles Papers",
       link: "/documents",
     },
@@ -76,7 +84,7 @@ export default function Licenses() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-4xl rounded-[20px] bg-[#F9FAFC] p-8 shadow-sm">
-        <h2 className="text-center text-[15px] font-normal text-[#05243F]/71">
+        <h2 className="mb-5 text-center text-[15px] font-normal text-[#05243F]/71">
           Select the type of License(s) we can help you with?
         </h2>
         {/* Licenses Types */}
@@ -85,39 +93,42 @@ export default function Licenses() {
             <Link
               key={index}
               to={action.link}
-              className="group relative flex h-[161px] flex-col justify-between rounded-3xl bg-white px-4 py-6 will-change-transform hover:border-2 hover:border-[#45A1F2] hover:shadow-lg"
-              style={{ transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
+              className="group relative flex h-[161px] flex-col justify-between rounded-3xl border border-[#05243F]/10 py-5 px-4 hover:border-0 hover:bg-[#FDF6E8]"
+              // style={{ transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
             >
               <div className="flex flex-col items-start gap-y-10">
-                <div
-                  className="will-change-transform"
-                  style={{
-                    transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                  }}
-                >
-                  <div
-                    className="group-hover:scale-110"
-                    style={{
-                      transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    }}
-                  >
-                    {action.icon}
-                  </div>
+                <div>
+                  {Array.isArray(action.icons) ? (
+                    <div className="flex -space-x-0">
+                      {action.icons.map((icon, index) => (
+                        <div
+                          key={index}
+                          className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2389E3]/10 text-lg"
+                        >
+                          {icon}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2389E3]/10 text-lg">
+                      {action.icon}
+                    </div>
+                  )}
                 </div>
                 <div className="flex w-full items-center justify-between">
                   <h3
-                    className="text-base leading-tight font-normal whitespace-pre-line text-[#05243F] group-hover:text-[#45A1F2]"
-                    style={{
-                      transition: "color 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    }}
+                    className="text-base leading-tight font-normal whitespace-pre-line text-[#05243F] group-hover:text-[#05243F]"
+                    // style={{
+                    //   transition: "color 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    // }}
                   >
                     {action.title}
                   </h3>
                   <div
-                    className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#45A1F2]"
-                    style={{
-                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    }}
+                    className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#05243F]"
+                    // style={{
+                    //   transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    // }}
                   >
                     <IoIosArrowForward className="text-xl opacity-29" />
                   </div>
