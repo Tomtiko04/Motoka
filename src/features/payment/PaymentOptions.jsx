@@ -275,14 +275,16 @@ export default function PaymentOptions() {
                       value={cardNumber}
                       onChange={handleCardNumberChange}
                       placeholder="0000-0000-0000-0000"
-                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] py-3 pr-4 text-right text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
+                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] text-right py-3 pl-12 pr-4 text-base text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
                     />
                     {cardLogo && (
-                      <img
-                        src={cardLogo}
-                        alt={cardType || "card"}
-                        className="absolute top-1/2 left-4 h-5 w-auto -translate-y-1/2"
-                      />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                        <img
+                          src={cardLogo}
+                          alt={cardType || "card"}
+                          className="h-6 w-auto object-contain"
+                        />
+                      </div>
                     )}
                   </div>
 
