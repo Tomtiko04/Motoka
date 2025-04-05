@@ -78,32 +78,33 @@ export default function PaymentOptions() {
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Wallet Method
               </h2>
-              <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
+              <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#05243F]/60">
+                  <span className="text-sm font-normal text-[#05243F]/40">
                     Available Balance:
                   </span>
-                  <span className="font-medium text-[#05243F]">
+                  <span className="text-base font-semibold text-[#05243F]">
                     {walletDetails.availableBalance}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#05243F]/60">
-                    Renewal Cost:
+                  <span className="text-sm font-normal text-[#05243F]/40">
+                    Renewal Cost
                   </span>
-                  <span className="font-medium text-[#05243F]">
+                  <span className="text-base font-semibold text-[#05243F]">
                     {walletDetails.renewalCost}
                   </span>
                 </div>
+                <div className="border border-[#F4F5FC]"></div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#05243F]/60">
-                    New Balance:
+                  <span className="text-sm font-normal text-[#05243F]/40">
+                    New Balance
                   </span>
-                  <span className="font-medium text-[#05243F]">
+                  <span className="text-base font-semibold text-[#05243F]">
                     {walletDetails.newBalance}
                   </span>
                 </div>
-                <button className="mt-4 w-full rounded-lg bg-[#2389E3] px-6 py-3 text-center text-sm font-medium text-white transition-all hover:bg-[#2389E3]/90">
+                <button className="mt-5 w-full rounded-full bg-[#2284DB] px-6 py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
                   N35,000 Pay Now
                 </button>
               </div>
@@ -112,78 +113,98 @@ export default function PaymentOptions() {
 
           {selectedPayment === "transfer" && (
             <div>
-              <h2 className="mb-4 text-sm font-medium text-[#05243F]/70">
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Transfer Method
               </h2>
-              <div className="space-y-6 rounded-lg bg-[#05243F] p-6 text-white shadow-sm">
+              <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-4">
                 <div className="text-center">
-                  <h3 className="text-sm font-medium text-[#2389E3]">
+                  <h3 className="text-sm font-normal text-[#05243F]/40">
                     Transfer
                   </h3>
-                  <p className="mt-2 text-4xl font-semibold">N35,000</p>
-                  <p className="mt-1 text-sm text-[#8B9EB7]">
-                    Account No. Expires in{" "}
-                    <span className="text-[#FDB022]">30</span> mins
+                  <p className="mt-2 text-4xl font-semibold text-[#2284DB]">
+                    N35,000
+                  </p>
+                  <p className="mt-3 text-[15px] text-[#05243F]/40">
+                    Account No. Expires in
+                    <span className="ml-1 font-semibold text-[#EBB850]">
+                      30
+                    </span>
+                    mins
                   </p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-sm text-[#8B9EB7]">
+                <div className="mt-5 space-y-4">
+                  <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                    <span className="text-[15px] font-light text-[#05243F]/60">
                       Account Number:
                     </span>
-                    <span className="text-sm font-medium">0987654322</span>
+                    <span className="text-base font-semibold text-[#05243F]">
+                      0987654322
+                    </span>
                   </div>
-                  <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-sm text-[#8B9EB7]">Bank Name:</span>
-                    <span className="text-sm font-medium">Paystack</span>
+                  <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                    <span className="text-[15px] font-light text-[#05243F]/60">
+                      Bank Name:
+                    </span>
+                    <span className="text-base font-semibold text-[#05243F]">
+                      Paystack
+                    </span>
                   </div>
-                  <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-sm text-[#8B9EB7]">
+                  <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                    <span className="text-[15px] font-light text-[#05243F]/60">
                       Account Name:
                     </span>
-                    <span className="text-sm font-medium">Money Credit</span>
+                    <span className="text-base font-semibold text-[#05243F]">
+                      Money Credit
+                    </span>
                   </div>
-                  <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="text-sm text-[#8B9EB7]">Amount:</span>
-                    <span className="text-sm font-medium">N35,000</span>
+                  <div className="flex justify-between pb-3">
+                    <span className="text-[15px] font-light text-[#05243F]/60">
+                      Amount:
+                    </span>
+                    <span className="text-base font-semibold text-[#05243F]">
+                      N35,000
+                    </span>
                   </div>
                 </div>
 
-                <div className="rounded-lg bg-white/10 p-4">
+                <div className="rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
                   <div className="flex gap-3">
-                    <span className="font-medium text-[#FDB022]">Note:</span>
-                    <p className="text-sm">
+                    <span className="text-base font-medium text-[#05243F]">
+                      Note:
+                    </span>
+                    <p className="text-sm font-normal text-[#05243F]/60">
                       Kindly transfer the exact amount to the account details
                       above
                     </p>
                   </div>
                 </div>
-
-                <button className="w-full rounded-lg bg-[#2389E3] px-6 py-3 text-center text-sm font-medium text-white transition-all hover:bg-[#2389E3]/90">
-                  I've Made Payment
-                </button>
               </div>
+              <button className="mt-5 w-full rounded-full bg-[#2284DB] px-6 py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+                I've Made Payment
+              </button>
             </div>
           )}
 
           {selectedPayment === "card" && (
             <div>
-              <h2 className="mb-4 text-sm font-medium text-[#05243F]/70">
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Card Method
               </h2>
-              <div className="space-y-6 rounded-lg bg-white p-6 shadow-sm">
+              <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-2">
                 <div className="text-center">
-                  <span className="text-sm text-[#05243F]/60">Amount</span>
-                  <p className="mt-1 text-4xl font-semibold text-[#2389E3]">
+                  <span className="text-sm font-normal text-[#05243F]/40">
+                    Amount
+                  </span>
+                  <p className="mt-1 text-4xl font-semibold text-[#2284DB]">
                     N35,000
                   </p>
-                  <p className="mt-1 text-sm text-[#05243F]/60">
+                  <p className="mt-2 text-[15px] text-[#05243F]/40">
                     Kindly Input your Card Details
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="mt-5 space-y-3">
                   <h3 className="text-sm font-medium text-[#05243F]">
                     Input Card Details
                   </h3>
@@ -193,7 +214,7 @@ export default function PaymentOptions() {
                     <input
                       type="text"
                       placeholder="0000-0000-0000-0000"
-                      className="w-full rounded-lg border border-[#E1E6F4] bg-white px-12 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
+                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] py-3 pr-4 text-right text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
                     />
                     <img
                       src="/visa.svg"
@@ -203,56 +224,73 @@ export default function PaymentOptions() {
                   </div>
 
                   {/* Month/Year and CVV */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        placeholder="Month"
-                        className="rounded-lg border border-[#E1E6F4] bg-white px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Year"
-                        className="rounded-lg border border-[#E1E6F4] bg-white px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
-                      />
-                    </div>
+                  {/* TODO: Let add min and max value and error input invalidation */}
+                  <div className="grid grid-cols-2 gap-2">
                     <input
-                      type="text"
+                      type="number"
+                      placeholder="Month"
+                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Year"
+                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
+                    />
+                    <input
+                      type="number"
                       placeholder="CVV"
-                      className="rounded-lg border border-[#E1E6F4] bg-white px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
+                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
                     />
-                  </div>
 
-                  {/* Auto Renew Checkbox */}
-                  <div className="flex items-center justify-end gap-2">
-                    <input
-                      type="checkbox"
-                      id="autoRenew"
-                      className="h-4 w-4 rounded border-[#E1E6F4] text-[#2389E3] focus:ring-[#2389E3]"
-                    />
-                    <label
-                      htmlFor="autoRenew"
-                      className="text-sm text-[#05243F]"
-                    >
-                      Auto Renew
-                    </label>
+                    {/* Auto Renew Checkbox */}
+                    <div className="flex items-center justify-center gap-x-3 rounded-[10px] bg-[#EEF2FF]">
+                      <input
+                        type="checkbox"
+                        id="autoRenew"
+                        className="h-4 w-4 rounded-full border-[#E1E6F4] text-[#2389E3] focus:ring-[#2389E3]"
+                      />
+                      <label
+                        htmlFor="autoRenew"
+                        className="text-sm text-[#05243F]/40"
+                      >
+                        Auto Renew
+                      </label>
+                    </div>
+                    {/* <div className="flex items-center justify-center gap-x-3 bg-[#EEF2FF]">
+                      <input
+                        type="checkbox"
+                        id="autoRenew"
+                        className="h-5 w-5 appearance-none rounded-full border border-[#E1E6F4] text-[#2389E3] checked:border-[#2389E3] checked:bg-[#2389E3] focus:ring-2 focus:ring-[#2389E3]"
+                      />
+                      <label
+                        htmlFor="autoRenew"
+                        className="text-sm text-[#05243F]/40"
+                      >
+                        Auto Renew
+                      </label>
+                    </div> */}
                   </div>
 
                   {/* Note */}
-                  <div className="flex items-start gap-2 rounded-lg bg-[#F3F6FF] p-4">
-                    <span className="font-medium text-[#05243F]">Note:</span>
-                    <p className="text-sm text-[#05243F]/60">
-                      Activate Auto renewal to enjoy{" "}
-                      <span className="text-[#FF3B30]">10%</span> Discount on
-                      your next renewal
-                    </p>
+                  <div className="mt-5 rounded-[10px] bg-[#F8F8F8] p-4 drop-shadow-xs">
+                    <div className="flex gap-5">
+                      <span className="text-base font-medium text-[#05243F]">
+                        Note:
+                      </span>
+                      <p className="text-sm text-[#05243F]/60">
+                        Activate Auto renewal to enjoy{" "}
+                        <span className="font-semibold text-[#F26060]">
+                          10%
+                        </span>{" "}
+                        Discount on your next renewal
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                <button className="w-full rounded-lg bg-[#2389E3] px-6 py-3 text-center text-sm font-medium text-white transition-all hover:bg-[#2389E3]/90">
-                  I've Made Payment
-                </button>
               </div>
+              <button className="mt-5 w-full rounded-full bg-[#2284DB] px-6 py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+                Make Payment
+              </button>
             </div>
           )}
         </div>
