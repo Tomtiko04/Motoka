@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
+import cardValidator from "card-validator";
 import AppLayout from "../../components/AppLayout";
 import { useNavigate } from "react-router-dom";
 
@@ -18,6 +19,64 @@ export default function PaymentOptions() {
     renewalCost: "N30,876",
     newBalance: "N270,000",
   };
+
+  const [cardType, setCardType] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+
+  // Optional: CDN that has common logos, based on type name
+  const getCardLogoURL = (type) => {
+    if (!type) return null;
+
+    const supported = [
+      "visa",
+      "mastercard",
+      "amex",
+      "discover",
+      "jcb",
+      "diners",
+      "unionpay",
+    ];
+
+    if (supported.includes(type)) {
+      return `https://img.icons8.com/color/48/${type}.png`;
+    }
+
+    // fallback icon
+    return "https://img.icons8.com/ios-filled/50/bank-card-back-side.png";
+  };
+
+  const formatCardNumber = (value) => {
+    const digits = value.replace(/\D/g, ""); // remove non-digits
+    const groups = digits.match(/.{1,4}/g); // split into groups of 4
+    return groups ? groups.join("-") : "";
+  };
+
+  const handleCardNumberChange = (e) => {
+    const rawValue = e.target.value;
+    const formatted = formatCardNumber(rawValue);
+
+    setCardNumber(formatted);
+
+    const validation = cardValidator.number(rawValue);
+    setCardType(validation.card?.type || "");
+  };
+
+  const cardLogo = getCardLogoURL(cardType);
+
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [touched, setTouched] = useState({
+    month: false,
+    year: false,
+    cvv: false,
+  });
+
+  const currentYear = new Date().getFullYear();
+
+  const isMonthValid = month >= 1 && month <= 12;
+  const isYearValid = year >= currentYear && year <= currentYear + 15;
+  const isCvvValid = /^[0-9]{3,4}$/.test(cvv);
 
   return (
     <AppLayout>
@@ -213,19 +272,23 @@ export default function PaymentOptions() {
                   <div className="relative">
                     <input
                       type="text"
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
                       placeholder="0000-0000-0000-0000"
                       className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] py-3 pr-4 text-right text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
                     />
-                    <img
-                      src="/visa.svg"
-                      alt="Visa"
-                      className="absolute top-1/2 left-4 h-4 w-auto -translate-y-1/2"
-                    />
+                    {cardLogo && (
+                      <img
+                        src={cardLogo}
+                        alt={cardType || "card"}
+                        className="absolute top-1/2 left-4 h-5 w-auto -translate-y-1/2"
+                      />
+                    )}
                   </div>
 
                   {/* Month/Year and CVV */}
                   {/* TODO: Let add min and max value and error input invalidation */}
-                  <div className="grid grid-cols-2 gap-2">
+                  {/* <div className="grid grid-cols-2 gap-2">
                     <input
                       type="number"
                       placeholder="Month"
@@ -242,7 +305,6 @@ export default function PaymentOptions() {
                       className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
                     />
 
-                    {/* Auto Renew Checkbox */}
                     <div className="flex items-center justify-center gap-x-3 rounded-[10px] bg-[#EEF2FF]">
                       <input
                         type="checkbox"
@@ -256,11 +318,78 @@ export default function PaymentOptions() {
                         Auto Renew
                       </label>
                     </div>
-                    {/* <div className="flex items-center justify-center gap-x-3 bg-[#EEF2FF]">
+                  </div> */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      placeholder="Month"
+                      value={month}
+                      min={1}
+                      max={12}
+                      onBlur={() =>
+                        setTouched((prev) => ({ ...prev, month: true }))
+                      }
+                      onInput={(e) => {
+                        if (e.target.value.length > 2) {
+                          e.target.value = e.target.value.slice(0, 2);
+                        }
+                      }}
+                      onChange={(e) => setMonth(e.target.value)}
+                      className={`w-full rounded-[10px] border ${
+                        touched.month && !isMonthValid
+                          ? "border-red-500"
+                          : "border-[#E1E6F4]"
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="Year"
+                      value={year}
+                      min={currentYear}
+                      max={currentYear + 15}
+                      onBlur={() =>
+                        setTouched((prev) => ({ ...prev, year: true }))
+                      }
+                      onInput={(e) => {
+                        if (e.target.value.length > 4) {
+                          e.target.value = e.target.value.slice(0, 4);
+                        }
+                      }}
+                      onChange={(e) => setYear(e.target.value)}
+                      className={`w-full rounded-[10px] border ${
+                        touched.year && !isYearValid
+                          ? "border-red-500"
+                          : "border-[#E1E6F4]"
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="CVV"
+                      value={cvv}
+                      onBlur={() =>
+                        setTouched((prev) => ({ ...prev, cvv: true }))
+                      }
+                      onInput={(e) => {
+                        if (e.target.value.length > 4) {
+                          e.target.value = e.target.value.slice(0, 4);
+                        }
+                      }}
+                      onChange={(e) => setCvv(e.target.value)}
+                      className={`w-full rounded-[10px] border ${
+                        touched.cvv && !isCvvValid
+                          ? "border-red-500"
+                          : "border-[#E1E6F4]"
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                    />
+
+                    {/* Auto Renew */}
+                    <div className="flex items-center justify-center gap-x-3 rounded-[10px] bg-[#EEF2FF]">
                       <input
                         type="checkbox"
                         id="autoRenew"
-                        className="h-5 w-5 appearance-none rounded-full border border-[#E1E6F4] text-[#2389E3] checked:border-[#2389E3] checked:bg-[#2389E3] focus:ring-2 focus:ring-[#2389E3]"
+                        className="h-4 w-4 rounded-full border-[#E1E6F4] text-[#2389E3] focus:ring-[#2389E3]"
                       />
                       <label
                         htmlFor="autoRenew"
@@ -268,7 +397,7 @@ export default function PaymentOptions() {
                       >
                         Auto Renew
                       </label>
-                    </div> */}
+                    </div>
                   </div>
 
                   {/* Note */}
