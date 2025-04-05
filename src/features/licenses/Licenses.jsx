@@ -23,7 +23,7 @@ export default function Licenses() {
         <FaIdCard key="license" className="text-2xl text-[#2389E3]" />,
       ],
       title: "Vehicles Papers",
-      link: "/documents",
+      link: "documents",
     },
     {
       icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
@@ -91,8 +91,7 @@ export default function Licenses() {
             <Link
               key={index}
               to={action.link}
-              className="group relative flex h-[161px] flex-col justify-between rounded-3xl border border-[#05243F]/10 py-5 px-4 hover:border-0 hover:bg-[#FDF6E8]"
-              // style={{ transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
+              className="group relative flex h-[161px] flex-col justify-between rounded-[20px] border border-[#05243F]/10 py-5 px-4 hover:border-0 hover:bg-[#FDF6E8]"
             >
               <div className="flex flex-col items-start gap-y-10">
                 <div>
@@ -113,7 +112,7 @@ export default function Licenses() {
                     </div>
                   )}
                 </div>
-                <div className="flex w-full items-center justify-between">
+                <div className="flex w-full items-center justify-between mt-auto">
                   <h3
                     className="text-base leading-tight font-normal whitespace-pre-line text-[#05243F] group-hover:text-[#05243F]"
                     // style={{
@@ -123,7 +122,7 @@ export default function Licenses() {
                     {action.title}
                   </h3>
                   <div
-                    className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#05243F]"
+                    className="text-[#697B8C] group-hover:text-[#05243F]"
                     // style={{
                     //   transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                     // }}
