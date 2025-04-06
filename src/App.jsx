@@ -19,6 +19,7 @@ import Garage from "./features/garage/Garage.jsx";
 import Licenses from "./features/licenses/Licenses.jsx";
 import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
+import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -48,10 +49,11 @@ export default function App() {
             element={<VerificationSuccess />}
           ></Route>
           <Route path="add-car" element={<AddCar />}></Route>
-          <Route path="licenses">
+          <Route path="licenses"> 
             <Route index element={<Licenses />} />
             <Route path="renew" element={<RenewLicense />} />
             <Route path="documents" element={<VehiclePaper />} />
+            <Route path="confirm-request" element={<ConfirmRequest />} />
           </Route>
           <Route path="garage" element={<Garage />} />
           <Route
@@ -64,21 +66,52 @@ export default function App() {
       </BrowserRouter>
       <Toaster
         position="top-right"
-        gutter={12}
-        containerStyle={{ margin: "8px" }}
+        gutter={8}
+        containerStyle={{ margin: "16px" }}
         toastOptions={{
           success: {
             duration: 3000,
+            style: {
+              background: "#F9FAFC",
+              border: "1px solid #E1E6F4",
+              color: "#05243F",
+            },
+            iconTheme: {
+              primary: "#2389E3",
+              secondary: "#FFFFFF",
+            },
           },
           error: {
             duration: 5000,
+            style: {
+              background: "#FDF6E8",
+              border: "1px solid #FDB022",
+              color: "#05243F",
+            },
+            iconTheme: {
+              primary: "#FDB022",
+              secondary: "#FFFFFF",
+            },
+          },
+          loading: {
+            duration: Infinity,
+            style: {
+              background: "#F9FAFC",
+              border: "1px solid #2389E3",
+              color: "#05243F",
+            },
+            iconTheme: {
+              primary: "#2389E3",
+              secondary: "#F9FAFC",
+            },
           },
           style: {
-            fontSize: "16px",
-            maxWidth: "500px",
-            padding: "16px 24px",
-            // backgroundColor: "bg-orange-500",
-            // color: "text-white",
+            fontSize: "14px",
+            maxWidth: "400px",
+            padding: "12px 16px",
+            borderRadius: "12px",
+            boxShadow:
+              "0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06)",
           },
         }}
       />
