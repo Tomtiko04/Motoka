@@ -5,7 +5,7 @@ import OrderList from "./OrderList";
 
 export default function ConfirmRequest() {
   const location = useLocation();
-  const { items, type, backTo } = location.state || {};
+  const { items, type } = location.state || {};
 
   // Define configurations for different request types
   const requestConfigs = {
@@ -58,7 +58,6 @@ export default function ConfirmRequest() {
       title={config.title}
       subTitle={config.subTitle}
       mainContentTitle={config.mainContentTitle}
-      backTo={backTo}
     >
       <OrderList
         items={items}
