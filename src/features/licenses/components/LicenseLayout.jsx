@@ -18,7 +18,7 @@ export default function LicenseLayout({ children, title, subTitle, mainContentTi
               <IoIosArrowBack className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-center text-2xl font-medium text-[#05243F]">
+              <h1 className="text-center text-xl md:text-2xl font-medium text-[#05243F]">
                 {title}
               </h1>
               <p className="mt-2 text-center text-sm font-normal text-[#05243F]/40">

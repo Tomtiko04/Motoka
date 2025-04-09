@@ -163,7 +163,7 @@ export default function PaymentOptions() {
                     {walletDetails.newBalance}
                   </span>
                 </div>
-                <button className="mt-5 w-full rounded-full bg-[#2284DB] px-6 py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
+                <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
                   N35,000 Pay Now
                 </button>
               </div>
@@ -239,7 +239,7 @@ export default function PaymentOptions() {
                   </div>
                 </div>
               </div>
-              <button className="mt-5 w-full rounded-full bg-[#2284DB] px-6 py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+              <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
                 I've Made Payment
               </button>
             </div>
@@ -419,7 +419,7 @@ export default function PaymentOptions() {
                   </div>
                 </div>
               </div>
-              <button className="mt-5 w-full rounded-full bg-[#2284DB] px-6 py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+              <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
                 Make Payment
               </button>
             </div>

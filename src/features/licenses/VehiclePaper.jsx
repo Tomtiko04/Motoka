@@ -3,7 +3,6 @@ import { IoIosArrowBack } from "react-icons/io";
 import { BsShieldCheck, BsPersonFill } from "react-icons/bs";
 import { FaUmbrella, FaCar } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import AppLayout from "../../components/AppLayout";
 import toast from "react-hot-toast";
 import LicenseLayout from "./components/LicenseLayout";
 
