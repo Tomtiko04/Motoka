@@ -21,6 +21,7 @@ import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/DriversLicense.jsx";
+import Settings from "./features/settings/Settings.jsx"
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -64,6 +65,12 @@ export default function App() {
               <PaymentOptions availableBalance={3000} renewalCost={1000} />
             }
           />
+          <Route path="settings"> 
+            <Route index element={<Settings />} />
+            {/* <Route path="renew" element={<RenewLicense />} />
+            <Route path="documents" element={<VehiclePaper />} />
+            <Route path="confirm-request" element={<ConfirmRequest />} /> */}
+          </Route>
         </Routes>
       </BrowserRouter>
       <Toaster
