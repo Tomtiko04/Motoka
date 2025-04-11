@@ -1,5 +1,4 @@
 import React from "react";
-import { IoIosArrowBack } from "react-icons/io";
 import { BsQuestionCircle } from "react-icons/bs";
 import { FaRegHandshake } from "react-icons/fa";
 import { TbLicense, TbSteeringWheel } from "react-icons/tb";
@@ -10,12 +9,9 @@ import { FaIdCard } from "react-icons/fa";
 import { BsCardText } from "react-icons/bs";
 import { IoCarSportOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
-import AppLayout from "../../components/AppLayout";
-import { useNavigate } from "react-router-dom";
 import LicenseLayout from "./components/LicenseLayout";
 
 export default function Licenses() {
-  const navigate = useNavigate();
   const licensesTypes = [
     {
       icons: [
@@ -29,7 +25,7 @@ export default function Licenses() {
     {
       icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
       title: "Driver’s license",
-      link: "/ownership",
+      link: "drivers-license",
     },
     {
       icon: <TbLicense className="text-3xl text-[#2389E3]" />,
