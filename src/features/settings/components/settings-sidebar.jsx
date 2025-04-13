@@ -10,12 +10,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
       <div className="space-y-1">
         {/* Account Settings */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "account" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("account")}
         >
-          <span className="font-medium">Account Settings</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Account Settings</span>
           {expandedSection === "account" ? (
             <ChevronDown className="h-5 w-5 text-gray-500" />
           ) : (
@@ -31,7 +31,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("profile")}
             >
-              <span>Profile Information</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Profile Information</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -40,7 +40,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("password")}
             >
-              <span>Change Password</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Change Password</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -49,7 +49,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("2fa")}
             >
-              <span>2FA</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">2FA</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -57,12 +57,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* Payment & Billing */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "payment" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("payment")}
         >
-          <span className="font-medium">Payment & Billing</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Payment & Billing</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -76,7 +76,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("payment")}
             >
-              <span>Saved Payment Method</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Saved Payment Method</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -85,7 +85,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("transaction")}
             >
-              <span>Transaction History</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Transaction History</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -94,7 +94,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("auto-renewal")}
             >
-              <span>Auto Renewal Settings</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Auto Renewal Settings</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -103,7 +103,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("billing")}
             >
-              <span>Billing Address</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Billing Address</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -111,12 +111,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* Notifications & Alerts */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "notifications" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("notifications")}
         >
-          <span className="font-medium">Notifications & Alerts</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Notifications & Alerts</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -128,7 +128,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("push-notification")}
             >
-              <span>Push Notification</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Push Notification</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -137,7 +137,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("custom-notification")}
             >
-              <span>Customized Notification</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Customized Notification</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -145,12 +145,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* App Preference */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "preference" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("preference")}
         >
-          <span className="font-medium">App Preference</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">App Preference</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -162,7 +162,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("language-region")}
             >
-              <span>Language & Region</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Language & Region</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -171,7 +171,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("dark-mode")}
             >
-              <span>Dark Mode/ Light Mode</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Dark Mode/ Light Mode</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -180,7 +180,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("location-service")}
             >
-              <span>Location Services</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Location Services</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -188,12 +188,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* Support & Help */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "support" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("support")}
         >
-          <span className="font-medium">Support & Help</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Support & Help</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -205,7 +205,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("contact-support")}
             >
-              <span>Contact Support</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Contact Support</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -214,7 +214,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("report-issue")}
             >
-              <span>Report an Issue</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Report an Issue</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -223,7 +223,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("live-chat")}
             >
-              <span>Live Chat / Help Desk</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Live Chat / Help Desk</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -231,12 +231,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* Legal */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "legal" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("legal")}
         >
-          <span className="font-medium">Legal</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Legal</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -248,7 +248,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("terms-condition")}
             >
-              <span>Terms & Condition</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Terms & Condition</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -257,7 +257,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("data-permission")}
             >
-              <span>Data & Permission</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Data & Permission</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -266,7 +266,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("delete-account")}
             >
-              <span>Delete Account</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Delete Account</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -274,12 +274,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* Privacy Policy */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "privacy" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("privacy")}
         >
-          <span className="font-medium">Privacy Policy</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Privacy Policy</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -291,7 +291,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("info-collect", "collect")}
             >
-              <span>Information We Collect</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Information We Collect</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -300,7 +300,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("info-sharing", "sharing")}
             >
-              <span>Information Sharing</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Information Sharing</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -309,7 +309,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("data-security", "security")}
             >
-              <span>Data Security</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Data Security</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
@@ -317,12 +317,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
         {/* FAQs */}
         <div
-          className={`flex justify-between items-center px-4 py-3 cursor-pointer ${
+          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "faqs" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
           onClick={() => onSectionToggle("faqs")}
         >
-          <span className="font-medium">FAQs</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">FAQs</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
@@ -334,7 +334,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("account-app-usage")}
             >
-              <span>Account & App Usage</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Account & App Usage</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -343,7 +343,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("licensing-registration")}
             >
-              <span>Licensing & Registration</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Licensing & Registration</span>
               <ChevronRight className="h-5 w-5" />
             </div>
             <div
@@ -352,15 +352,15 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               }`}
               onClick={() => onNavigate("autocare-maintenance")}
             >
-              <span>Auto Care & Maintenance</span>
+              <span className="text-sm font-semibold text-[#05243FA1]/95">Auto Care & Maintenance</span>
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
         )}
 
         {/* Logout */}
-        <div className="px-4 py-3 cursor-pointer hover:bg-gray-50">
-          <span className="font-medium">Log out</span>
+        <div className="flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer">
+          <span className="text-sm font-semibold text-[#05243F]/95">Log out</span>
         </div>
       </div>
     </div>

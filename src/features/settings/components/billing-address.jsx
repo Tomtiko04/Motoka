@@ -14,26 +14,26 @@ export default function BillingAddress({ onNavigate }) {
 
       <div className="space-y-4 md:space-y-6">
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Address 1</label>
+          <label className="mb-2 block text-sm font-medium text-[#05243F]">Address 1</label>
           <input
             type="text"
             defaultValue="No 4 Aliko estate"
-            className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Address 2 (optional)</label>
+          <label className="mb-2 block text-sm font-medium text-[#05243F]">Address 2 (optional)</label>
           <input
             type="text"
             placeholder=""
-            className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">State</label>
+            <label className="mb-2 block text-sm font-medium text-[#05243F]">State</label>
             <select className="w-full p-2 md:p-3 border border-gray-200 rounded-md bg-white text-sm md:text-base">
               <option value="ogun">Ogun</option>
               <option value="lagos">Lagos</option>
@@ -41,17 +41,17 @@ export default function BillingAddress({ onNavigate }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">City</label>
+            <label className="mb-2 block text-sm font-medium text-[#05243F]">City</label>
             <input
               type="text"
               defaultValue="Ijebu Ode"
-              className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+              className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Country</label>
+          <label className="mb-2 block text-sm font-medium text-[#05243F]">Country</label>
           <select className="w-full p-2 md:p-3 border border-gray-200 rounded-md bg-white text-sm md:text-base">
             <option value="nigeria">Nigeria</option>
             <option value="ghana">Ghana</option>

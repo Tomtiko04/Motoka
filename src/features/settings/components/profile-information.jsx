@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronLeft, Pencil } from "lucide-react"
+import Profile from "../../../assets/images/setting/profile3.png"
 // import Image from "next/image"
 
 export default function ProfileInformation({ onNavigate }) {
@@ -18,62 +19,80 @@ export default function ProfileInformation({ onNavigate }) {
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 items-center justify-between mb-8">
         <div className="relative">
           <div className="rounded-full overflow-hidden h-20 w-20">
-          <img src="/images/profile.png" alt="Profile" className="object-cover h-full w-full" />
+          <img src={Profile} alt="Profile" className="object-cover h-full w-full" />
           </div>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-800 text-center md:text-left">Salisu Anjola</h2>
-          <p className="text-gray-500">salisuanjola@gmail.com</p>
+        <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">Salisu Anjola</h2>
+        <p className="text-base font-normal text-[#05243F]/40 sm:text-lg">salisuanjola@gmail.com</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <label  className="mb-2 block text-sm font-medium text-[#05243F]">Name</label>
           <input
             type="text"
             value="Salisu Anjola"
             readOnly
-            className="w-full p-3 border border-gray-200 rounded-md bg-gray-50"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            
+          
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+          <label  className="mb-2 block text-sm font-medium text-[#05243F]">Address</label>
           <input
             type="text"
             value="No 4 Aliko estate"
             readOnly
-            className="w-full p-3 border border-gray-200 rounded-md bg-gray-50"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            
+          
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+          <label  className="mb-2 block text-sm font-medium text-[#05243F]">Gender</label>
           <input
             type="text"
             value="Female"
             readOnly
-            className="w-full p-3 border border-gray-200 rounded-md bg-gray-50"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            
+          
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label  className="mb-2 block text-sm font-medium text-[#05243F]">Email</label>
           <input
             type="email"
             value="salisuanjola@gmail.com"
             readOnly
-            className="w-full p-3 border border-gray-200 rounded-md bg-gray-50"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            
+          
           />
         </div>
 
-        <button className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-md transition-colors">
-          Edit Profile
-        </button>
+        
+        {/* Fixed Footer Section */}
+        <div className="mt-5 pt-5">
+
+          <button
+            type="submit"
+            
+            className="w-full rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95"
+          >
+            Edit Profile
+          </button>
+        </div>
+       
       </div>
     </div>
   )

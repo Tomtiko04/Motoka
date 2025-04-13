@@ -41,46 +41,46 @@ export default function AddBankCard({ onNavigate }) {
       {activeTab === "card" ? (
         <div className="space-y-4 md:space-y-6">
           <div>
-            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Card Number</label>
+            <label className="mb-2 block text-sm font-medium text-[#05243F]">Card Number</label>
             <input
               type="text"
               placeholder="Enter 16-19 digital card number"
-              className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+              className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Expiry date</label>
+              <label className="mb-2 block text-sm font-medium text-[#05243F]">Expiry date</label>
               <input
                 type="text"
                 placeholder="MM / YY"
-                className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+                className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
               />
             </div>
             <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">CVV</label>
+              <label className="mb-2 block text-sm font-medium text-[#05243F]">CVV</label>
               <input
                 type="text"
                 placeholder="Enter Card cvv"
-                className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+                className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Pin</label>
+            <label className="mb-2 block text-sm font-medium text-[#05243F]">Pin</label>
             <input
               type="password"
               placeholder="Enter Card Pin"
-              className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+              className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
             />
           </div>
         </div>
       ) : (
         <div className="space-y-4 md:space-y-6">
           <div>
-            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Bank</label>
+            <label className="mb-2 block text-sm font-medium text-[#05243F]">Bank</label>
             <select className="w-full p-2 md:p-3 border border-gray-200 rounded-md bg-white text-sm md:text-base">
               <option value="">select bank</option>
               <option value="uba">UBA Bank</option>
@@ -90,28 +90,31 @@ export default function AddBankCard({ onNavigate }) {
           </div>
 
           <div>
-            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">Bank Account</label>
+            <label className="mb-2 block text-sm font-medium text-[#05243F]">Bank Account</label>
             <input
               type="text"
               placeholder="Enter 10-digit account number"
-              className="w-full p-2 md:p-3 border border-gray-200 rounded-md text-sm md:text-base"
+              className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
             />
           </div>
         </div>
       )}
 
-      <div className="mt-6 md:mt-8">
-        <button
-          onClick={() => {
-            // In a real app, we would save the card/account data here
-            // For demo purposes, just navigate back to payment page
-            onNavigate("payment-with-cards")
-          }}
-          className="w-full bg-sky-500 hover:bg-sky-600 text-white py-2 md:py-3 px-4 rounded-md transition-colors text-sm md:text-base"
-        >
-          confirm
-        </button>
-      </div>
+      
+      <div className="mt-6 md:mt-8 sticky bottom-0  flex justify-center rounded-b-[20px]  p-6 pt-4 sm:p-8 sm:pt-4">
+
+          <button
+            type="submit"
+            onClick={() => {
+              // In a real app, we would save the card/account data here
+              // For demo purposes, just navigate back to payment page
+              onNavigate("payment-with-cards")
+            }}
+            className="w-full rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95"
+          >
+            confirm
+          </button>
+        </div>
     </div>
   )
 }

@@ -82,9 +82,12 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
                 <ChevronLeft className="h-5 w-5 text-gray-600" />
               </button>
             )}
-            <div className="flex items-center text-xl font-medium text-gray-500">
+            <div className="flex items-center text-xl font-medium">
               <Cog className="h-5 w-5 text-sky-500 mr-2" />
-              {getTitle()}
+              <h1 className="text-center text-xl md:text-2xl font-medium text-[#05243F]">
+                {getTitle()}
+                
+              </h1>
             </div>
           </header>
 
@@ -114,11 +117,11 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
               )}
 
               {/* Desktop sidebar */}
-              <div className="hidden md:block lg:col-span-2 border-r border-gray-100">
+              <div className="hidden md:block lg:col-span-2 border-r border-gray-100  ">
                 <div className="p-4">
                   <SearchBar />
                 </div>
-                <div className="overflow-y-auto max-h-[calc(100vh-120px)]">
+                <div className=" scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-4">
                   <SettingsSidebar
                     activePage={activePage}
                     expandedSection={expandedSection}
@@ -129,7 +132,7 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
               </div>
 
               {/* Main content */}
-              <div className="lg:col-span-3 p-4 md:p-6">{children}</div>
+              <div className="lg:col-span-3 p-4 md:p-6 bg-[#F8F8FA]">{children}</div>
             </div>
           </div>
 
