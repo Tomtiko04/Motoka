@@ -53,7 +53,7 @@ export default function VehiclePaper() {
         <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
       ],
       title: "Private",
-      link: "private",
+      link: "/licenses/drivers-license",
       description:
         "Vehicle License, Road Worthiness, Insurance, Proof of ownership",
     },

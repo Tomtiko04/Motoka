@@ -97,7 +97,7 @@ export default function PaymentOptions() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-4xl rounded-[20px] bg-[#F9FAFC] p-8 shadow-sm">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[1fr_auto_1fr]">
           {/* Left Panel - Payment Methods */}
           <div>
             <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
@@ -108,7 +108,7 @@ export default function PaymentOptions() {
                 <button
                   key={method.id}
                   onClick={() => setSelectedPayment(method.id)}
-                  className={`w-full rounded-lg bg-[#F4F5FC] p-4 text-left transition-all ${
+                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${
                     selectedPayment === method.id
                       ? "shadow-sm ring-1 ring-[#2389E3]"
                       : "hover:bg-[#FDF6E8] hover:shadow-sm"
@@ -130,6 +130,8 @@ export default function PaymentOptions() {
               ))}
             </div>
           </div>
+
+          <div className="hidden h-full w-px bg-[#F4F5FC] md:block"></div>
 
           {/* Right Panel - Payment Details */}
           {selectedPayment === "wallet" && (
@@ -275,10 +277,10 @@ export default function PaymentOptions() {
                       value={cardNumber}
                       onChange={handleCardNumberChange}
                       placeholder="0000-0000-0000-0000"
-                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] text-right py-3 pl-12 pr-4 text-base text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
+                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] py-3 pr-4 pl-12 text-right text-base text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
                     />
                     {cardLogo && (
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                      <div className="absolute top-1/2 left-4 flex -translate-y-1/2 items-center justify-center">
                         <img
                           src={cardLogo}
                           alt={cardType || "card"}

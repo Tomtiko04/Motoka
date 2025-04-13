@@ -20,6 +20,7 @@ import Licenses from "./features/licenses/Licenses.jsx";
 import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
+import DriversLicense from "./features/licenses/DriversLicense.jsx";
 import Settings from "./features/settings/Settings.jsx"
 
 export default function App() {
@@ -50,10 +51,11 @@ export default function App() {
             element={<VerificationSuccess />}
           ></Route>
           <Route path="add-car" element={<AddCar />}></Route>
-          <Route path="licenses"> 
+          <Route path="licenses">
             <Route index element={<Licenses />} />
             <Route path="renew" element={<RenewLicense />} />
             <Route path="documents" element={<VehiclePaper />} />
+            <Route path="drivers-license" element={<DriversLicense />} />
             <Route path="confirm-request" element={<ConfirmRequest />} />
           </Route>
           <Route path="garage" element={<Garage />} />
