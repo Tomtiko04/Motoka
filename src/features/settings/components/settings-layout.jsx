@@ -64,7 +64,7 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
   return (
     <>
       <AppLayout>
-        <div className="container mx-auto py-4 md:py-8 px-4">
+        <div className="container mx-auto py-5 md:py-8 px-4">
           <header className="flex items-center justify-center mb-6 relative">
             {isMobile && (
               <button
@@ -136,12 +136,12 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
             </div>
           </div>
 
-          <div className="fixed bottom-6 right-6">
+          {/* <div className="fixed bottom-6 right-6">
             <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors">
               <span>Ask Mo</span>
               <Sparkles className="h-5 w-5" />
             </button>
-          </div>
+          </div> */}
         </div>
       </AppLayout>
     </>

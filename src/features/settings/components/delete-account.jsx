@@ -13,11 +13,14 @@ export default function DeleteAccount({ onNavigate }) {
       </div>
 
       <div className="text-center space-y-6">
-        <h3 className="text-lg font-medium text-gray-700">Are You Sure You Want To Delete Your Account?</h3>
+        <div className="flex justify-center items-center w-full h-full text-center ">
+
+         <p className="text-gray-500 mb-4 text-center text-sm md:text-base w-80 ">Are You Sure You Want To Delete Your Account?</p>
+        </div>
 
         <div className="flex justify-center gap-4">
-          <button className="bg-sky-500 hover:bg-sky-600 text-white py-2 px-8 rounded-md transition-colors">Yes</button>
-          <button className="bg-white border border-gray-300 text-gray-700 py-2 px-8 rounded-md transition-colors">
+          <button className="rounded-3xl bg-[#2389E3] hover:bg-sky-600 text-base font-semibold text-white py-2 px-10  transition-colors">Yes</button>
+          <button className="rounded-3xl bg-white border border-gray-300 text-base font-semibold text-gray-700 py-2 px-10  transition-colors">
             No
           </button>
         </div>
