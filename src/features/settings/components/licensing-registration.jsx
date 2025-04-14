@@ -60,10 +60,10 @@ export default function FAQs({ onNavigate }) {
         {licensingFaqs.map((faq) => (
           <div key={faq.id} className="border border-gray-100 rounded-lg overflow-hidden">
             <div
-              className="flex items-center justify-between p-4 cursor-pointer"
+              className="flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2"
               onClick={() => toggleQuestion(faq.id)}
             >
-              <h3 className="font-medium">{faq.question}</h3>
+              <span className="text-sm font-semibold text-[#05243F]/95">{faq.question}</span>
               <ChevronDown
                 className={`h-5 w-5 text-gray-400 transition-transform ${
                   expandedQuestions[faq.id] ? "transform rotate-180" : ""
@@ -72,7 +72,7 @@ export default function FAQs({ onNavigate }) {
             </div>
             {expandedQuestions[faq.id] && (
               <div className="px-4 pb-4 text-gray-600">
-                <p>{faq.answer}</p>
+                <p className="text-sm font-semibold-600 text-[#05243FA1]/95">{faq.answer}</p>
               </div>
             )}
           </div>

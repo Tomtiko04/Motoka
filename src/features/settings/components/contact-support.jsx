@@ -14,25 +14,25 @@ export default function ContactSupport({ onNavigate }) {
 
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-          <input type="text" defaultValue="Salisu Anjola" className="w-full p-3 border border-gray-200 rounded-md" />
+          <label className="mb-2 block text-sm font-medium text-[#05243F]">Full Name</label>
+          <input type="text" defaultValue="Salisu Anjola" className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200" />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="mb-2 block text-sm font-medium text-[#05243F]">Email</label>
           <input
             type="email"
             defaultValue="salisuanjola@gmail.com"
-            className="w-full p-3 border border-gray-200 rounded-md"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tell us about the problem</label>
+          <label className="mb-2 block text-sm font-medium text-[#05243F]">Tell us about the problem</label>
           <textarea
             placeholder="Describe the issue..."
             rows={4}
-            className="w-full p-3 border border-gray-200 rounded-md resize-none"
+            className="text-md text-[#05243F] block bg-white rounded-lg w-full px-4 py-3 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200 resize-none"
           ></textarea>
         </div>
 

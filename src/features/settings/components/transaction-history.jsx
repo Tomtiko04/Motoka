@@ -35,9 +35,11 @@ export default function TransactionHistory({ onNavigate }) {
                 <p className="text-xs text-gray-500">{transaction.description}</p>
               </div>
             </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500">{transaction.date}</p>
+            </div>
             <div className="text-right">
               <p className="font-medium text-sky-500 text-xs md:text-sm">{transaction.amount}</p>
-              <p className="text-xs text-gray-500">{transaction.date}</p>
             </div>
           </div>
         ))}
