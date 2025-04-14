@@ -22,6 +22,7 @@ import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/DriversLicense.jsx";
 import Settings from "./features/settings/Settings.jsx"
+import PlateNumber from "./features/licenses/PlateNumber.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="renew" element={<RenewLicense />} />
             <Route path="documents" element={<VehiclePaper />} />
             <Route path="drivers-license" element={<DriversLicense />} />
+            <Route path="plate-number" element={<PlateNumber />}/>
             <Route path="confirm-request" element={<ConfirmRequest />} />
           </Route>
           <Route path="garage" element={<Garage />} />

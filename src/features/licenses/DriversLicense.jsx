@@ -118,10 +118,11 @@ export default function DriversLicense() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     // Validate form
     validateForm();
+    console.log("Confirm and submit clicked");
     // Navigate to confirm request with form data
     navigate("/licenses/confirm-request", {
       state: {
@@ -184,7 +185,7 @@ export default function DriversLicense() {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute left-0 mt-1 w-full rounded-[26px] border-2 border-[#2389E3] py-1 shadow-sm">
+                  <div className="absolute left-0 mt-1 w-fit rounded-[26px] border-2 border-[#2389E3] py-1 shadow-sm bg-white sm:w-full">
                     <button
                       type="button"
                       onClick={() => {

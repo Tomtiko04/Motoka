@@ -30,7 +30,7 @@ export default function Licenses() {
     {
       icon: <TbLicense className="text-3xl text-[#2389E3]" />,
       title: "Plate Number",
-      link: "/rules",
+      link: "plate-number",
     },
     {
       icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
