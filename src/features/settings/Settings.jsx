@@ -72,7 +72,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-sky-100">
+    <div className="max-h-screen bg-gradient-to-b from-sky-50 to-sky-100">
       <SettingsLayout
         activePage={activePage}
         expandedSection={expandedSection}
