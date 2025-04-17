@@ -34,11 +34,19 @@ export default function BillingAddress({ onNavigate }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="mb-2 block text-sm font-medium text-[#05243F]">State</label>
-            <select className="w-full p-2 md:p-3 border border-gray-200 rounded-md bg-white text-sm md:text-base">
-              <option value="ogun">Ogun</option>
-              <option value="lagos">Lagos</option>
-              <option value="abuja">Abuja</option>
-            </select>
+            <div className="relative">
+
+              <select className="w-full p-2 md:p-3 pr-10 border-none rounded-md bg-white text-sm md:text-base appearance-none">
+                <option value="ogun">Ogun</option>
+                <option value="lagos">Lagos</option>
+                <option value="abuja">Abuja</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium text-[#05243F]">City</label>
@@ -52,11 +60,18 @@ export default function BillingAddress({ onNavigate }) {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-[#05243F]">Country</label>
-          <select className="w-full p-2 md:p-3 border border-gray-200 rounded-md bg-white text-sm md:text-base">
-            <option value="nigeria">Nigeria</option>
-            <option value="ghana">Ghana</option>
-            <option value="kenya">Kenya</option>
-          </select>
+          <div className="relative">
+            <select className="w-full p-2 md:p-3 pr-10 border-none rounded-md bg-white text-sm md:text-base appearance-none">
+              <option value="nigeria">Nigeria</option>
+              <option value="ghana">Ghana</option>
+              <option value="kenya">Kenya</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
     </div>
