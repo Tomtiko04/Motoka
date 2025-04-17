@@ -6,7 +6,7 @@ import Profile from "../../../assets/images/setting/profile3.png"
 export default function MainSettings({ onNavigate }) {
   return (
     
-    <div className="flex flex-col items-center justify-start h-screen mt-10">
+    <div className="flex flex-col items-center justify-start mt-10">
       <div className="relative mb-4">
         <div className="rounded-full border-4 border-sky-200 overflow-hidden h-24 w-24">
           <img src={Profile} alt="Profile" className="object-cover h-full w-full" />
