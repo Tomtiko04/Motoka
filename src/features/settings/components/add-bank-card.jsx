@@ -81,12 +81,21 @@ export default function AddBankCard({ onNavigate }) {
         <div className="space-y-4 md:space-y-6">
           <div>
             <label className="mb-2 block text-sm font-medium text-[#05243F]">Bank</label>
-            <select className="w-full p-2 md:p-3 border border-gray-200 rounded-md bg-white text-sm md:text-base">
-              <option value="">select bank</option>
-              <option value="uba">UBA Bank</option>
-              <option value="zenith">Zenith Bank</option>
-              <option value="gtb">GTBank</option>
-            </select>
+            <div className="relative">
+            
+
+              <select className="w-full p-2 md:p-3 pr-10 border-none rounded-md bg-white text-sm md:text-base appearance-none">
+                <option value="">select bank</option>
+                <option value="uba">UBA Bank</option>
+                <option value="zenith">Zenith Bank</option>
+                <option value="gtb">GTBank</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           <div>
