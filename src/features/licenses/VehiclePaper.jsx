@@ -6,6 +6,34 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import LicenseLayout from "./components/LicenseLayout";
 
+ const documentTypes = [
+   {
+     icons: [
+       <FaUmbrella key="umbrella" className="text-2xl text-[#2389E3]" />,
+       <BsShieldCheck key="check" className="text-2xl text-[#2389E3]" />,
+       <FaCar key="car" className="text-2xl text-[#2389E3]" />,
+       <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
+     ],
+     title: "Private",
+     link: "/licenses/drivers-license",
+     description:
+       "Vehicle License, Road Worthiness, Insurance, Proof of ownership",
+   },
+   {
+     icons: [
+       <FaUmbrella key="umbrella" className="text-2xl text-[#2389E3]" />,
+       <BsShieldCheck key="check" className="text-2xl text-[#2389E3]" />,
+       <FaCar key="car" className="text-2xl text-[#2389E3]" />,
+       <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
+       <FaCar key="car" className="text-2xl text-[#2389E3]" />,
+     ],
+     title: "Commercial",
+     link: "commercial",
+     description:
+       "Vehicle License, Road Worthiness, Insurance, Proof of ownership, Commercial permit",
+   },
+ ];
+
 export default function VehiclePaper() {
   const navigate = useNavigate();
   const [hoveredType, setHoveredType] = React.useState(null);
@@ -43,34 +71,6 @@ export default function VehiclePaper() {
       },
     });
   };
-
-  const documentTypes = [
-    {
-      icons: [
-        <FaUmbrella key="umbrella" className="text-2xl text-[#2389E3]" />,
-        <BsShieldCheck key="check" className="text-2xl text-[#2389E3]" />,
-        <FaCar key="car" className="text-2xl text-[#2389E3]" />,
-        <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
-      ],
-      title: "Private",
-      link: "/licenses/drivers-license",
-      description:
-        "Vehicle License, Road Worthiness, Insurance, Proof of ownership",
-    },
-    {
-      icons: [
-        <FaUmbrella key="umbrella" className="text-2xl text-[#2389E3]" />,
-        <BsShieldCheck key="check" className="text-2xl text-[#2389E3]" />,
-        <FaCar key="car" className="text-2xl text-[#2389E3]" />,
-        <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
-        <FaCar key="car" className="text-2xl text-[#2389E3]" />,
-      ],
-      title: "Commercial",
-      link: "commercial",
-      description:
-        "Vehicle License, Road Worthiness, Insurance, Proof of ownership, Commercial permit",
-    },
-  ];
 
   return (
     <LicenseLayout

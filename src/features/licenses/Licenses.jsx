@@ -11,49 +11,49 @@ import { IoCarSportOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import LicenseLayout from "./components/LicenseLayout";
 
-export default function Licenses() {
-  const licensesTypes = [
-    {
-      icons: [
-        <IoCarSportOutline key="car" className="text-2xl text-[#2389E3]" />,
-        <BsCardText key="paper" className="text-2xl text-[#2389E3]" />,
-        <FaIdCard key="license" className="text-2xl text-[#2389E3]" />,
-      ],
-      title: "Vehicles Papers",
-      link: "documents",
-    },
-    {
-      icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
-      title: "Driver’s license",
-      link: "drivers-license",
-    },
-    {
-      icon: <TbLicense className="text-3xl text-[#2389E3]" />,
-      title: "Plate Number",
-      link: "plate-number",
-    },
-    {
-      icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
-      title: "Int’l Driver’s\nLicense",
-      link: "/help",
-    },
-    {
-      icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
-      title: "Road Tax",
-      link: "/vehicle-license",
-    },
-    {
-      icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
-      title: "Tint Permit",
-      link: "/drivers-license",
-    },
-    {
-      icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
-      title: "Local Gov.\nPapers",
-      link: "/plate-number",
-    },
-  ];
+const licensesTypes = [
+  {
+    icons: [
+      <IoCarSportOutline key="car" className="text-2xl text-[#2389E3]" />,
+      <BsCardText key="paper" className="text-2xl text-[#2389E3]" />,
+      <FaIdCard key="license" className="text-2xl text-[#2389E3]" />,
+    ],
+    title: "Vehicles Papers",
+    link: "documents",
+  },
+  {
+    icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
+    title: "Driver’s license",
+    link: "drivers-license",
+  },
+  {
+    icon: <TbLicense className="text-3xl text-[#2389E3]" />,
+    title: "Plate Number",
+    link: "plate-number",
+  },
+  {
+    icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
+    title: "Int’l Driver’s\nLicense",
+    link: "/help",
+  },
+  {
+    icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
+    title: "Road Tax",
+    link: "/vehicle-license",
+  },
+  {
+    icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
+    title: "Tint Permit",
+    link: "tint-permit",
+  },
+  {
+    icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
+    title: "Local Gov.\nPapers",
+    link: "local-government-papers",
+  },
+];
 
+export default function Licenses() {
   return (
     <LicenseLayout
       title="Licenses"
