@@ -12,6 +12,7 @@ import AppLayout from "../../../components/AppLayout";
 export default function SettingsLayout({ children, activePage, expandedSection, onNavigate, onSectionToggle }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -69,18 +70,18 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
           <header className="flex items-center justify-center mb-6 mt-3 relative">
             {isMobile && (
               <button
-                onClick={() => navigate(-1)}
-                className="absolute top-1/4 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+                onClick={toggleMobileMenu}
+                className="absolute left-0 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors md:hidden"
               >
-                <IoIosArrowBack className="h-5 w-5" />
+                <Menu className="h-5 w-5 text-gray-600" />
               </button>
             )}
             {!isMobile && (
              <button
-                onClick={() => navigate(-1)}
+                onClick={() => onNavigate("main")}
                 className="absolute top-1/4 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
               >
-                <IoIosArrowBack className="h-5 w-5" />
+                <IoIosArrowBack className="h-5 w-5 text-gray-600" />
               </button>
             )}
 
