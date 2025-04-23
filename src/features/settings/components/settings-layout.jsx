@@ -6,11 +6,13 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Cog, Sparkles, Menu } from "lucide-react"
 import SearchBar from "./search-bar"
 import SettingsSidebar from "./settings-sidebar"
+import { IoIosArrowBack } from "react-icons/io";
 import AppLayout from "../../../components/AppLayout";
 
 export default function SettingsLayout({ children, activePage, expandedSection, onNavigate, onSectionToggle }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -64,8 +66,8 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
   return (
     <>
       <AppLayout>
-        <div className="container mx-auto py-5 md:py-8 px-4">
-          <header className="flex items-center justify-center mb-6 relative">
+        <div className=" px-4 sm:px-6 lg:px-8">
+          <header className="flex items-center justify-center mb-6 mt-3 relative">
             {isMobile && (
               <button
                 onClick={toggleMobileMenu}
@@ -75,20 +77,26 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
               </button>
             )}
             {!isMobile && (
-              <button
+             <button
                 onClick={() => onNavigate("main")}
-                className="absolute left-0 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="absolute top-1/4 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
               >
-                <ChevronLeft className="h-5 w-5 text-gray-600" />
+                <IoIosArrowBack className="h-5 w-5 text-gray-600" />
               </button>
             )}
-            <div className="flex items-center text-xl font-medium">
-              <Cog className="h-5 w-5 text-sky-500 mr-2" />
-              <h1 className="text-center text-xl md:text-2xl font-medium text-[#05243F]">
-                {getTitle()}
-                
-              </h1>
-            </div>
+
+              
+              <div>
+
+                <h1 className="text-center flex items-center justify-center text-xl md:text-2xl font-medium text-[#05243F]">
+                  <Cog className="h-5 w-5 text-sky-500 mr-2" />{getTitle()}
+                  
+                </h1>
+                <p className="mt-2 text-center text-sm font-normal text-[#05243F]/40">
+                  This is Sub Title
+                </p>
+              </div>
+            
           </header>
 
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
