@@ -26,6 +26,7 @@ import PlateNumber from "./features/licenses/PlateNumber.jsx";
 import PlateDetails from "./features/licenses/platenumber/PlateDetails.jsx";
 import LocalGovPaper from "./features/licenses/LocalGovPaper.jsx";
 import TintPermit from "./features/licenses/TintPermit.jsx";
+import InternationalDriversLicense from "./features/licenses/InternationalDriversLicense.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -68,6 +69,7 @@ export default function App() {
             <Route path="plate-number/:type" element={<PlateDetails />} />
             <Route path="local-government-papers" element={<LocalGovPaper />} />
             <Route path="tint-permit" element={<TintPermit />}/>
+            <Route path="international-driver's-license" element={<InternationalDriversLicense />}/>
 
             <Route path="confirm-request" element={<ConfirmRequest />} />
           </Route>

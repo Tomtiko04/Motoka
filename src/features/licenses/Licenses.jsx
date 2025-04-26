@@ -34,7 +34,7 @@ const licensesTypes = [
   {
     icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
     title: "Int’l Driver’s\nLicense",
-    link: "/help",
+    link: "international-driver's-license",
   },
   {
     icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
