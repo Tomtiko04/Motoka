@@ -121,7 +121,7 @@ export default function DriversLicense() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Validate form
-    validateForm();
+    if (!validateForm()) return;
     console.log("Confirm and submit clicked");
     // Navigate to confirm request with form data
     navigate("/licenses/confirm-request", {
