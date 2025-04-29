@@ -13,8 +13,9 @@ export default function AppLayout({ children }) {
     { name: "Home", path: "/" },
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
+    { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Ladipo", path: "/ladipo" },
-    { name: "Settings", path: "/settings" },
+    // { name: "Settings", path: "/settings" },
   ];
 
   const toggleMenu = () => {
