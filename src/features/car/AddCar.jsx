@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BsStars } from "react-icons/bs";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
+import { useAddCar } from "./useAddCar";
 
 export default function AddCar() {
   const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ export default function AddCar() {
   });
 
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addCar, isAdding } = useAddCar();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -57,7 +58,7 @@ export default function AddCar() {
       requiredFields.push(
         { name: "registrationNo", label: "Registration Number" },
         { name: "dateIssued", label: "Date Issued" },
-        { name: "expiryDate", label: "Expiry Date" }
+        { name: "expiryDate", label: "Expiry Date" },
       );
     } else {
       requiredFields.push({ name: "phoneNo", label: "Phone Number" });
@@ -78,12 +79,16 @@ export default function AddCar() {
       const currentYear = new Date().getFullYear();
       if (year > currentYear) {
         newErrors.vehicleYear = "Year cannot be in the future";
-      } else if (year < 1886) { // First automobile was invented in 1886
+      } else if (year < 1886) {
+        // First automobile was invented in 1886
         newErrors.vehicleYear = "Please enter a valid year";
       }
     }
 
-    if (formData.phoneNo && !/^\d{10,12}$/.test(formData.phoneNo.replace(/\D/g, ""))) {
+    if (
+      formData.phoneNo &&
+      !/^\d{10,12}$/.test(formData.phoneNo.replace(/\D/g, ""))
+    ) {
       newErrors.phoneNo = "Please enter a valid phone number (10-12 digits)";
     }
 
@@ -100,7 +105,10 @@ export default function AddCar() {
         newErrors.expiryDate = "Expiry date must be after issue date";
       }
 
-      if (formData.registrationNo && !/^[A-Z0-9]{3,8}$/.test(formData.registrationNo)) {
+      if (
+        formData.registrationNo &&
+        !/^[A-Z0-9]{3,8}$/.test(formData.registrationNo)
+      ) {
         newErrors.registrationNo = "Please enter a valid registration number";
       }
     }
@@ -110,28 +118,29 @@ export default function AddCar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      setIsSubmitting(false);
       return;
     }
 
     try {
-      // TODO: Submit form data to backend
-      console.log("Form submitted:", formData);
-      navigate("/")
-      // Reset form after successful submission
-      // setFormData({ ...initialFormState });
+      const loadingToast = toast.loading("Registering car...");
+      addCar(formData, {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          navigate("/");
+        },
+        onError: () => {
+          toast.dismiss(loadingToast);
+        },
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrors({
         submit: "Failed to submit form. Please try again.",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -140,7 +149,6 @@ export default function AddCar() {
       ...prev,
       isRegistered,
     }));
-    // Clear errors when switching registration type
     setErrors({});
   };
 
@@ -151,7 +159,7 @@ export default function AddCar() {
         className="mb-2 block text-sm font-medium text-[#05243F]"
       >
         {label}
-        <span className="text-[#A73957B0] ml-0.5">*</span>
+        <span className="ml-0.5 text-[#A73957B0]">*</span>
       </label>
       <div className="relative">
         <input
@@ -161,31 +169,47 @@ export default function AddCar() {
           value={formData[name]}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200 ${
-            errors[name] 
-              ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]" 
-              : formData[name]?.trim() 
-                ? "border-2 border-green-500" 
+          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
+            errors[name]
+              ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+              : formData[name]?.trim()
+                ? "border-2 border-green-500"
                 : ""
           }`}
         />
         {errors[name] && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg className="h-5 w-5 text-[#A73957B0]" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="h-5 w-5 text-[#A73957B0]"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
         )}
         {!errors[name] && formData[name]?.trim() && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            <svg
+              className="h-5 w-5 text-green-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
         )}
       </div>
       {errors[name] && (
-        <p className="mt-1 text-sm text-[#A73957B0] flex items-center gap-1">
+        <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
           {errors[name]}
         </p>
       )}
@@ -287,17 +311,19 @@ export default function AddCar() {
           {/* Fixed Footer Section */}
           <div className="sticky bottom-0 mt-4 flex justify-center rounded-b-[20px] bg-white p-6 pt-4 sm:p-8 sm:pt-4">
             {errors.submit && (
-              <p className="mb-4 text-center text-sm text-[#A73957B0]">{errors.submit}</p>
+              <p className="mb-4 text-center text-sm text-[#A73957B0]">
+                {errors.submit}
+              </p>
             )}
             <button
               type="submit"
               onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 ${
-                isSubmitting ? "cursor-not-allowed opacity-70" : ""
+              disabled={isAdding}
+              className={`rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] active:scale-95 ${
+                isAdding ? "cursor-not-allowed opacity-70" : ""
               }`}
             >
-              {isSubmitting ? "Processing..." : "Confirm and Proceed"}
+              {isAdding ? "Processing..." : "Confirm and Proceed"}
             </button>
           </div>
         </div>

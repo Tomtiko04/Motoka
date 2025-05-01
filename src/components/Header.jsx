@@ -1,4 +1,4 @@
-import Logo from "../assets/images/Logo.png";
+import Logo from "../assets/images/motoka logo.svg";
 import { BsStars } from "react-icons/bs";
 
 export default function Header() {

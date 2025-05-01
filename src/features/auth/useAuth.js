@@ -12,9 +12,21 @@ export function useLogin() {
   const { mutate: login, isLoading: isLoggingIn } = useMutation({
     mutationFn: loginApi,
     onSuccess: (data) => {
-      toast.dismiss(); // Dismiss any existing loading toast
-      queryClient.setQueryData(["user"], data);
+      toast.dismiss();
+      queryClient.setQueryData(["user"], data.user);
       toast.success(data.message || "User logged in successfully!");
+      localStorage.removeItem("userInfo");
+      if (data) {
+        const userDetails = {
+          user_type_id: data.user_type_id,
+          name: data.name,
+          email: data.email,
+          phone_number: data.phone_number,
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userDetails));
+        localStorage.setItem("rememberedEmail", JSON.stringify(data.email));
+      }
+
       navigate("/");
     },
     onError: (err) => {

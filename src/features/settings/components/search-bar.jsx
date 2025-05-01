@@ -26,16 +26,16 @@ export default function SearchBar() {
       // </div>
       <div>
 
-        <form class="max-w-md mx-auto bg-white rounded-lg">   
+        <form class="max-w-md mx-auto bg-white rounded-full border border-gray-300 overflow-hidden">   
             <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
             <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                     </svg>
                 </div>
-                <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-3xl bg-white focus:ring-blue-500 focus:border-[#2389E3]-500 dark:bg-white dark:border-gray-300 dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-[#2389E3]-500 dark:focus:border-[#2389E3]-500" placeholder="Search " required />
-                <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-[#2389E3] hover:bg-[#2389E3]-800 focus:ring-4 focus:outline-none focus:ring-[#2389E3]-300 font-medium rounded-3xl text-sm px-5 py-2 dark:bg-[#2389E3]-600 dark:hover:bg-[#2389E3]-700 dark:focus:ring-[#2389E3]-800">Search</button>
+                <input type="search" id="default-search" class="block w-full pl-10 pr-4 py-2 text-sm text-gray-900 border-none rounded-full bg-white focus:ring-[#2389E3]-500 focus:border-[#2389E3]-500 dark:bg-white dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-[#2389E3]-500 dark:focus:border-[#2389E3]-500" placeholder="Search " required />
+                <button type="submit" class="text-white absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-[#2389E3] hover:bg-[#2389E3]-800 focus:ring-4 focus:outline-none focus:ring-[#2389E3]-300 font-medium rounded-full text-sm px-4 py-1 dark:bg-[#2389E3]-600 dark:hover:bg-[#2389E3]-700 dark:focus:ring-[#2389E3]-800">Search</button>
             </div>
         </form>
 
