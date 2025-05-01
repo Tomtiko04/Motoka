@@ -34,7 +34,7 @@ export default function Success() {
         {/* Button */}
         <button
           onClick={() => navigate("/add-car")}
-          className="mt-5 rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95"
+          className="mt-5 rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95"
         >
           Add your Car
         </button>
