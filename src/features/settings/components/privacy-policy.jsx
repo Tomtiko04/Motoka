@@ -20,8 +20,8 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
       {activeTab === "collect" && (
         <div className="space-y-6 bg-white p-6 rounded-lg">
           <div>
-            <h3 className="font-medium mb-2">Personal Information</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Personal Information</h3>
+            <ul className="space-y-2 text-sm text-gray-600 pl-4">
               <li>Name, address, email address, phone number.</li>
               <li>Driver's license information, vehicle registration details.</li>
               <li>Vehicle identification number (VIN).</li>
@@ -30,8 +30,8 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">Usage Information</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Usage Information</h3>
+            <ul className="space-y-2 text-sm text-gray-600 pl-4">
               <li>Information about how you use the App, including features used, time spent, and interactions.</li>
               <li>Device information, such as device type, operating system, and unique device identifiers.</li>
               <li>Location data (if you enable location services).</li>
@@ -39,8 +39,8 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">Auto-Care Information</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Auto-Care Information</h3>
+            <ul className="space-y-2 text-sm text-gray-600 pl-4">
               <li>Vehicle service history.</li>
               <li>Information about vehicle issues you report.</li>
               <li>Maintenance records</li>
@@ -52,27 +52,27 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
       {activeTab === "sharing" && (
         <div className="space-y-6 bg-white p-6 rounded-lg">
           <div>
-            <h3 className="font-medium mb-2">Service Providers</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Service Providers</h3>
+            <p className="text-sm text-gray-600 pl-4">
               Third-party vendors who assist us with payment processing, data storage, and other services.
             </p>
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">Auto-Care Partners</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Auto-Care Partners</h3>
+            <p className="text-sm text-gray-600 pl-4">
               Authorized auto-care providers to facilitate appointments and services.
             </p>
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">Government Agencies</h3>
-            <p className="text-sm text-gray-600">As required by law or to comply with legal obligations.</p>
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Government Agencies</h3>
+            <p className="text-sm text-gray-600 pl-4">As required by law or to comply with legal obligations.</p>
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">With Your Consent</h3>
-            <p className="text-sm text-gray-600">When you give us permission to share your information.</p>
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">With Your Consent</h3>
+            <p className="text-sm text-gray-600 pl-4">When you give us permission to share your information.</p>
           </div>
         </div>
       )}
@@ -80,15 +80,15 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
       {activeTab === "security" && (
         <div className="space-y-6 bg-white p-6 rounded-lg border-2 border-sky-200">
           <div>
-            <h3 className="font-medium mb-2">Data Storage and Retention</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Data Storage and Retention</h3>
+            <p className="text-sm text-gray-600 pl-4">
               We retain data only as long as necessary to provide our services and comply with legal requirements.
             </p>
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">Third-Party Services & Data Sharing</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Third-Party Services & Data Sharing</h3>
+            <ul className="space-y-2 text-sm text-gray-600 pl-4">
               <li>We never sell your data.</li>
               <li>Third-party service providers (e.g., payment processors) adhere to strict security standards.</li>
               <li>Data shared with law enforcement follows legal procedures only.</li>
@@ -96,8 +96,8 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
           </div>
 
           <div>
-            <h3 className="font-medium mb-2">Your Security Responsibilities</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Your Security Responsibilities</h3>
+            <ul className="space-y-2 text-sm text-gray-600 pl-4">
               <li>Using strong passwords and enabling 2FA.</li>
               <li>Keeping your app updated to the latest version.</li>
             </ul>

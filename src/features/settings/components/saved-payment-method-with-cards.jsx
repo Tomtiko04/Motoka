@@ -19,7 +19,7 @@ export default function SavedPaymentMethodWithCards({ onNavigate }) {
 
       <div className="space-y-4 mb-8">
         {savedCards.map((card) => (
-          <div key={card.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg">
+          <div key={card.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg bg-white shadow-md cursor-pointer">
             <div className="flex items-center gap-3">
               {card.bank === "UBA Bank" ? (
                 <div className="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-md font-bold">
@@ -36,17 +36,25 @@ export default function SavedPaymentMethodWithCards({ onNavigate }) {
               </div>
             </div>
             <div
-              className={
-                card.isDefault ? "h-3 w-3 bg-sky-500 rounded-full" : "h-3 w-3 border border-gray-300 rounded-full"
-              }
-            ></div>
+             
+            >
+              <input type="radio" id="card" name="2fa-method" className="h-4 w-4 text-sky-500 focus:ring-sky-400 cursor-pointer" />
+            </div>
           </div>
         ))}
       </div>
 
-      <button className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-md transition-colors">
-        confirm
-      </button>
+     
+      <div className="mt-5 pt-5">
+
+        <button
+          type="submit"
+          
+          className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95"
+        >
+          confirm
+        </button>
+      </div>
     </div>
   )
 }

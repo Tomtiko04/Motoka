@@ -12,14 +12,14 @@ export default function LiveChat({ onNavigate }) {
         <h2 className="text-lg font-medium">Live Chat / Help Desk</h2>
       </div>
 
-      <div className="space-y-6">
-        <p className="text-gray-600">Chat with a support agent in real-time.</p>
+      <div className="space-y-6 my-5">
+        <p className="mb-2 block text-sm font-medium text-grey-500">Chat with a support agent in real-time.</p>
 
         <div className="flex">
           <input
             type="email"
             placeholder="Info@Example.com"
-            className="flex-1 p-3 border border-gray-200 rounded-l-md"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-4 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
           <button className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-3 rounded-r-md transition-colors">
             <svg

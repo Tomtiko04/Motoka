@@ -23,28 +23,36 @@ export default function SavedPaymentMethod({ onNavigate }) {
       </div>
 
       {savedCards.length === 0 ? (
-        <div>
-          <p className="text-gray-500 mb-4 text-center text-sm md:text-base">
-            Add and manage your payment methods, conveniently save your cards or banking info for easy payments
-          </p>
+        <div className="flex flex-col ijustify-between h-full">
+          <div>
 
-          <div className="border border-sky-200 rounded-lg p-4 md:p-6 mb-6 md:mb-8 flex items-center justify-center">
-            <p className="text-gray-400 text-sm md:text-base">You have not saved any account</p>
+            <p className="text-gray-500 mb-4 text-center text-sm md:text-base">
+              Add and manage your payment methods, conveniently save your cards or banking info for easy payments
+            </p>
+
+            <div className="border border-sky-200 rounded-lg p-4 md:p-6 mb-6 md:mb-8 flex items-center justify-center bg-white">
+              <p className="text-gray-400 text-sm md:text-base">You have not saved any account</p>
+            </div>
+
+            <div className="flex items-center justify-center bg-white border border-sky-200 rounded-lg p-4 mb-6 md:mb-8">
+              <button onClick={() => onNavigate("add-card")} className="flex items-center gap-2 text-sky-500">
+                <Plus className="h-4 w-4 bg-sky-500 text-white font-bold" />
+                <span className="text-sm font-semibold text-[#05243F]/95">Add a Bank Card/Account</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center justify-center mb-6 md:mb-8">
-            <button onClick={() => onNavigate("add-card")} className="flex items-center gap-2 text-sky-500">
-              <Plus className="h-4 w-4" />
-              <span>Add a Bank Card/Account</span>
+          
+          <div className="pt-5 md:mt-8">
+
+            <button
+              type="submit"
+              onClick={() => onNavigate("add-card")}
+              className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95"
+            >
+              Add a Bank Card/Account
             </button>
           </div>
-
-          <button
-            onClick={() => onNavigate("add-card")}
-            className="w-full bg-sky-500 hover:bg-sky-600 text-white py-2 md:py-3 px-4 rounded-md transition-colors text-sm md:text-base"
-          >
-            Add a Bank Card/Account
-          </button>
         </div>
       ) : (
         <div>
