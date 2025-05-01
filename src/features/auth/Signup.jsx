@@ -278,6 +278,7 @@ export default function Signup() {
             <div>
               <button
                 type="submit"
+                disabled={isSigningUp}
                 className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-14 sm:w-36"
               >
                 Sign Up

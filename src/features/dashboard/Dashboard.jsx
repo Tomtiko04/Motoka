@@ -1,59 +1,64 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsCarFront, BsQuestionCircle } from "react-icons/bs";
 import { FaRegHandshake } from "react-icons/fa";
 import { TbLicense, TbSteeringWheel } from "react-icons/tb";
-import { FaRegEye, FaRegEyeSlash, FaCarAlt, FaPlus } from "react-icons/fa";
+import { FaCarAlt, FaPlus } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import { MdOutlineAirplaneTicket } from "react-icons/md";
 import { IoIosArrowForward } from "react-icons/io";
 import { PiNumberSquareThreeBold, PiHandWavingFill } from "react-icons/pi";
 import AppLayout from "../../components/AppLayout";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
+import { formatCurrency } from "../../utils/formatCurrency";
+
+const quickActions = [
+  {
+    icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
+    title: "View Car\nDocuments",
+    link: "/documents",
+  },
+  {
+    icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
+    title: "Change of\nOwnership",
+    link: "/ownership",
+  },
+  {
+    icon: <TbLicense className="text-3xl text-[#2389E3]" />,
+    title: "Traffic\nRules",
+    link: "/rules",
+  },
+  {
+    icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
+    title: "How can\nwe Help?",
+    link: "/help",
+  },
+  {
+    icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
+    title: "Register/Renew\nVehicle License",
+    link: "/vehicle-license",
+  },
+  {
+    icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
+    title: "New/Renew\nDriver's License",
+    link: "/drivers-license",
+  },
+  {
+    icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
+    title: "Request\nPlate Number",
+    link: "/plate-number",
+  },
+  {
+    icon: <MdOutlineAirplaneTicket className="text-3xl text-[#2389E3]" />,
+    title: "International\nDriver's License",
+    link: "/international-license",
+  },
+];
 
 export default function Dashboard() {
+  const [showBalance, setShowBalance] = useState(true);
+  const balance = 234098;
   const navigate = useNavigate();
-  const quickActions = [
-    {
-      icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
-      title: "View Car\nDocuments",
-      link: "/documents",
-    },
-    {
-      icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
-      title: "Change of\nOwnership",
-      link: "/ownership",
-    },
-    {
-      icon: <TbLicense className="text-3xl text-[#2389E3]" />,
-      title: "Traffic\nRules",
-      link: "/rules",
-    },
-    {
-      icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
-      title: "How can\nwe Help?",
-      link: "/help",
-    },
-    {
-      icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
-      title: "Register/Renew\nVehicle License",
-      link: "/vehicle-license",
-    },
-    {
-      icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
-      title: "New/Renew\nDriver's License",
-      link: "/drivers-license",
-    },
-    {
-      icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
-      title: "Request\nPlate Number",
-      link: "/plate-number",
-    },
-    {
-      icon: <MdOutlineAirplaneTicket className="text-3xl text-[#2389E3]" />,
-      title: "International\nDriver's License",
-      link: "/international-license",
-    },
-  ];
 
   function handleRenewLicense() {
     navigate("licenses/renew");
@@ -67,22 +72,27 @@ export default function Dashboard() {
     navigate("/add-car");
   }
 
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
   return (
     <AppLayout>
       <div className="px-4 sm:px-6 lg:px-8">
         {/* Welcome Section */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="md:mt-4 flex flex-col gap-1 mt-0.5 sm:mt-0">
+            <div className="mt-0.5 flex flex-col gap-1 sm:mt-0 md:mt-4">
               <h1 className="text-base font-medium text-[#05243F]/40 sm:text-lg">
                 Welcome
               </h1>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-medium text-[#05243F] sm:text-3xl">
-                  Anjola
+                  {userName}
                 </h1>
                 <span role="img" aria-label="wave">
-                  <PiHandWavingFill color="#EBB850" size={30} />
+                  {/* <PiHandWavingFill color="#EBB850" size={30} /> */}
+                  <Icon icon="mdi:hand-wave" fontSize={30} color="#B18378" />
                 </span>
               </div>
             </div>
@@ -92,12 +102,34 @@ export default function Dashboard() {
             <span className="text-sm font-normal text-[#05243F]/44 sm:text-base">
               Wallet Balance
             </span>
-            <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
+            <div className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
               <span>
-                <FaRegEye color="#697C8C" size={24} />
+                {showBalance ? (
+                  <Icon
+                    icon="mingcute:eye-fill"
+                    fontSize={24}
+                    color="#697C8C"
+                    onClick={() => setShowBalance(!showBalance)}
+                  />
+                ) : (
+                  <Icon
+                    icon="majesticons:eye-off"
+                    fontSize={24}
+                    color="#697C8C"
+                    onClick={() => setShowBalance(!showBalance)}
+                  />
+                )}
               </span>
               <span className="text-lg font-semibold text-[#2389E3] sm:text-xl">
-                ₦234,098
+                {showBalance ? (
+                  formatCurrency(balance)
+                ) : (
+                  <Icon
+                    icon="mdi:shield-lock-outline"
+                    fontSize={24}
+                    color="#2389E3"
+                  />
+                )}
               </span>
             </div>
           </div>
