@@ -10,6 +10,7 @@ import SettingsSidebar from "./settings-sidebar"
 export default function SettingsLayout({ children, activePage, expandedSection, onNavigate, onSectionToggle }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfMobile = () => {
