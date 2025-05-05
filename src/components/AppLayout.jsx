@@ -5,6 +5,7 @@ import Logo from "../assets/images/Logo.png";
 import Avarta from "../assets/images/avarta.png";
 import { toast } from "react-hot-toast";
 import { Cookie } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 export default function AppLayout({ children }) {
   const location = useLocation();
@@ -61,7 +62,11 @@ export default function AppLayout({ children }) {
               {/* Mobile menu button and notifications */}
               <div className="flex items-center gap-4 md:hidden">
                 <div className="relative">
-                  <FaBell className="h-5 w-5 cursor-pointer text-[#05243F]/60 hover:text-[#05243F]" />
+                  <Icon
+                    icon="ri:notification-4-fill"
+                    fontSize={20}
+                    className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
+                  />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
                     3
                   </span>
@@ -98,7 +103,11 @@ export default function AppLayout({ children }) {
               {/* User Actions */}
               <div className="hidden items-center gap-4 md:flex">
                 <div className="relative">
-                  <FaBell className="h-5 w-5 cursor-pointer text-[#05243F]/60 hover:text-[#05243F]" />
+                  <Icon
+                    icon="ri:notification-4-fill"
+                    fontSize={20}
+                    className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
+                  />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
                     3
                   </span>

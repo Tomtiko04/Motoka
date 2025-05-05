@@ -3,7 +3,7 @@ import { api } from "./apiClient";
 
 export async function addCar(formData) {
   try {
-    const { data } = await api.post("/reg", { ...formData });
+    const { data } = await api.post("/car/reg", { ...formData });
     console.log("dataaa", data);
     return data;
   } catch (error) {

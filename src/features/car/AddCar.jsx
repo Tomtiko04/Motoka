@@ -1,8 +1,151 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { BsStars } from "react-icons/bs";
 import Header from "../../components/Header";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAddCar } from "./useAddCar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { api } from "../../services/apiClient";
+import PropTypes from "prop-types";
+
+const SearchableSelect = ({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+  name,
+  filterKey,
+  allowCustom = true,
+  disabled = false,
+  isLoading = false
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredOptions, setFilteredOptions] = useState(options);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = options.filter((option) =>
+        option[filterKey].toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+      setFilteredOptions(filtered);
+    } else {
+      setFilteredOptions(options);
+    }
+  }, [searchTerm, options, filterKey]);
+
+  const handleSelect = (option) => {
+    onChange({ target: { name, value: option[filterKey] } });
+    setSearchTerm("");
+    setIsOpen(false);
+  };
+
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+    setIsOpen(true);
+
+    if (allowCustom) {
+      onChange({ target: { name, value: newValue } });
+    }
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 200);
+  };
+
+  return (
+    <div className="relative">
+      <label
+        htmlFor={name}
+        className="mb-2 block text-sm font-medium text-[#05243F]"
+      >
+        {label}
+        <span className="ml-0.5 text-[#A73957B0]">*</span>
+      </label>
+      <div className="relative">
+        <input
+          type="text"
+          id={name}
+          name={name}
+          value={searchTerm || value}
+          onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
+          onBlur={handleBlur}
+          placeholder={placeholder}
+          disabled={disabled || isLoading}
+          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+            error
+              ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+              : value
+                ? "border-2 border-green-500"
+                : ""
+          }`}
+        />
+        {isLoading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
+          </div>
+        )}
+        {!isLoading && !error && value && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <svg
+              className="h-5 w-5 text-green-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
+        {isOpen && filteredOptions.length > 0 && (
+          <div className="ring-opacity-5 absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 shadow-lg ring-1 ring-black">
+            {filteredOptions.map((option) => (
+              <div
+                key={option.id}
+                className="cursor-pointer px-4 py-2 text-sm text-[#05243F] hover:bg-[#F4F5FC]"
+                onClick={() => handleSelect(option)}
+              >
+                {option[filterKey]}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {error && (
+        <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+SearchableSelect.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    [PropTypes.string]: PropTypes.string
+  })).isRequired,
+  placeholder: PropTypes.string,
+  error: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  filterKey: PropTypes.string.isRequired,
+  allowCustom: PropTypes.bool,
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool
+};
 
 export default function AddCar() {
   const [formData, setFormData] = useState({
@@ -21,17 +164,77 @@ export default function AddCar() {
     phoneNo: "",
   });
 
+  const [carTypes, setCarTypes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const { addCar, isAdding } = useAddCar();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCarTypes = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await api.get("/car-types");
+        if (data.success) {
+          setCarTypes(data.data);
+        } else {
+          toast.error("Failed to load car data. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error fetching car types:", error);
+        toast.error("Failed to load car data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCarTypes();
+  }, []);
+
+  const uniqueMakes = useMemo(() => 
+    [...new Set(carTypes.map((car) => car.make))].map(
+      (make) => ({ id: make, make }),
+    ),
+    [carTypes]
+  );
+
+  const uniqueModels = useMemo(() => 
+    carTypes
+      .filter((car) => car.make === formData.vehicleMake)
+      .map((car) => ({ id: car.id, model: car.model })),
+    [carTypes, formData.vehicleMake]
+  );
+
+  const uniqueYears = useMemo(() => 
+    [...new Set(carTypes.map((car) => car.year))].map(
+      (year) => ({ id: year, year }),
+    ),
+    [carTypes]
+  );
+
+  const uniqueColors = useMemo(() => [
+    { id: 1, color: "Black" },
+    { id: 2, color: "White" },
+    { id: 3, color: "Silver" },
+    { id: 4, color: "Gray" },
+    { id: 5, color: "Red" },
+    { id: 6, color: "Blue" },
+    { id: 7, color: "Green" },
+    { id: 8, color: "Brown" },
+    { id: 9, color: "Beige" },
+    { id: 10, color: "Gold" },
+  ], []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "vehicleMake" && {
+        vehicleModel: "",
+        vehicleYear: "",
+      }),
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -151,6 +354,68 @@ export default function AddCar() {
     }));
     setErrors({});
   };
+
+  const renderDateField = (name, label) => (
+    <div>
+      <label
+        htmlFor={name}
+        className="mb-2 block text-sm font-medium text-[#05243F]"
+      >
+        {label}
+        <span className="ml-0.5 text-[#A73957B0]">*</span>
+      </label>
+      <div className="relative">
+        <div className="w-full">
+          <DatePicker
+            id={name}
+            name={name}
+            selected={formData[name] ? new Date(formData[name]) : null}
+            onChange={(date) =>
+              handleChange({ target: { name, value: date.toISOString() } })
+            }
+            dateFormat="dd/MM/yyyy"
+            className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
+              errors[name]
+                ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+                : formData[name]
+                  ? "border-2 border-green-500"
+                  : ""
+            }`}
+            placeholderText={`Select ${label.toLowerCase()}`}
+            maxDate={name === "dateIssued" ? new Date() : undefined}
+            minDate={
+              name === "expiryDate"
+                ? formData.dateIssued
+                  ? new Date(formData.dateIssued)
+                  : new Date()
+                : undefined
+            }
+            wrapperClassName="w-full"
+          />
+        </div>
+        {!errors[name] && formData[name] && (
+          <div className="absolute top-1/2 right-3 -translate-y-1/2">
+            <svg
+              className="h-5 w-5 text-green-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+      {errors[name] && (
+        <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
+          {errors[name]}
+        </p>
+      )}
+    </div>
+  );
 
   const renderField = (name, label, placeholder, type = "text") => (
     <div>
@@ -276,12 +541,52 @@ export default function AddCar() {
                   "Address",
                   "Jd Street, Off motoka road.",
                 )}
-                {renderField("vehicleMake", "Vehicle Make", "Mercedes Benz")}
-                {renderField("vehicleModel", "Vehicle Model", "c300")}
+                <SearchableSelect
+                  label="Vehicle Make"
+                  name="vehicleMake"
+                  value={formData.vehicleMake}
+                  onChange={handleChange}
+                  options={uniqueMakes}
+                  placeholder="Select vehicle make"
+                  error={errors.vehicleMake}
+                  filterKey="make"
+                  isLoading={isLoading}
+                />
+                <SearchableSelect
+                  label="Vehicle Model"
+                  name="vehicleModel"
+                  value={formData.vehicleModel}
+                  onChange={handleChange}
+                  options={uniqueModels}
+                  placeholder="Select vehicle model"
+                  error={errors.vehicleModel}
+                  filterKey="model"
+                  disabled={!formData.vehicleMake}
+                  isLoading={isLoading}
+                />
+                <SearchableSelect
+                  label="Vehicle Year"
+                  name="vehicleYear"
+                  value={formData.vehicleYear}
+                  onChange={handleChange}
+                  options={uniqueYears}
+                  placeholder="Select vehicle year"
+                  error={errors.vehicleYear}
+                  filterKey="year"
+                  isLoading={isLoading}
+                />
+                <SearchableSelect
+                  label="Vehicle Color"
+                  name="vehicleColor"
+                  value={formData.vehicleColor}
+                  onChange={handleChange}
+                  options={uniqueColors}
+                  placeholder="Select vehicle color"
+                  error={errors.vehicleColor}
+                  filterKey="color"
+                />
                 {renderField("chassisNo", "Chassis Number", "123489645432")}
                 {renderField("engineNo", "Engine Number", "4567890")}
-                {renderField("vehicleYear", "Vehicle Year", "2013")}
-                {renderField("vehicleColor", "Vehicle Color", "Black")}
 
                 {formData.isRegistered && (
                   <>
@@ -290,18 +595,8 @@ export default function AddCar() {
                       "Registration Number",
                       "LSD2345",
                     )}
-                    {renderField(
-                      "dateIssued",
-                      "Date Issued",
-                      "00/00/00",
-                      "date",
-                    )}
-                    {renderField(
-                      "expiryDate",
-                      "Expiry Date",
-                      "00/00/00",
-                      "date",
-                    )}
+                    {renderDateField("dateIssued", "Date Issued")}
+                    {renderDateField("expiryDate", "Expiry Date")}
                   </>
                 )}
               </form>
