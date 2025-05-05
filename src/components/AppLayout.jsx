@@ -13,7 +13,7 @@ export default function AppLayout({ children }) {
   const navigate = useNavigate();
 
   const navLinks = [
-    { name: "Dashboard", path: "/" },
+    { name: "Dashboard", path: "/dashboard" },
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
     { name: "Ladipo", path: "/ladipo" },

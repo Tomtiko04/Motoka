@@ -1,4 +1,9 @@
 import React from "react";
+
+import { Link } from "react-router-dom";
+import { Icon } from "@iconify/react";
+
+
 import { BsQuestionCircle } from "react-icons/bs";
 import { FaRegHandshake } from "react-icons/fa";
 import { TbLicense, TbSteeringWheel } from "react-icons/tb";
@@ -8,13 +13,20 @@ import { PiNumberSquareThreeBold } from "react-icons/pi";
 import { FaIdCard } from "react-icons/fa";
 import { BsCardText } from "react-icons/bs";
 import { IoCarSportOutline } from "react-icons/io5";
-import { Link } from "react-router-dom";
+
+
 import LicenseLayout from "./components/LicenseLayout";
+
 
 const licensesTypes = [
   {
     icons: [
-      <IoCarSportOutline key="car" className="text-2xl text-[#2389E3]" />,
+      <Icon
+        icon="mdi:car-pickup"
+        key="car"
+        fontSize={30}
+        color="#2389E3"
+      />,
       <BsCardText key="paper" className="text-2xl text-[#2389E3]" />,
       <FaIdCard key="license" className="text-2xl text-[#2389E3]" />,
     ],

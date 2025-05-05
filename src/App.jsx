@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import {
   QueryCache,
   QueryClient,
@@ -42,6 +42,7 @@ export default function App() {
     defaultOptions: {
       queries: {
         staleTime: 0,
+        retry: 1,
       },
     },
   });
@@ -50,32 +51,33 @@ export default function App() {
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="auth" element={<AuthLayout />}>
-            <Route path="login" element={
-              <GuestRoute>
-                <SignIn />
-              </GuestRoute>
-            } />
-            <Route path="signup" element={
-              <GuestRoute>
-                <SignUp />
-              </GuestRoute>
-            } />
-            <Route path="verify-account" element={
-              <GuestRoute>
-                <Verification />
-              </GuestRoute>
-            } />
+            <Route
+              path="login"
+              element={
+                <GuestRoute>
+                  <SignIn />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="signup"
+              element={
+                <GuestRoute>
+                  <SignUp />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="verify-account"
+              element={
+                <GuestRoute>
+                  <Verification />
+                </GuestRoute>
+              }
+            />
             <Route
               path="verification-success"
               element={
@@ -85,16 +87,22 @@ export default function App() {
               }
             />
           </Route>
-          <Route path="add-car" element={
-            <ProtectedRoute>
-              <AddCar />
-            </ProtectedRoute>
-          } />
-          <Route path="licenses" element={
-            <ProtectedRoute>
-              <Licenses />
-            </ProtectedRoute>
-          }>
+          <Route
+            path="add-car"
+            element={
+              <ProtectedRoute>
+                <AddCar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="licenses"
+            element={
+              <ProtectedRoute>
+                <Licenses />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Licenses />} />
             <Route path="renew" element={<RenewLicense />} />
             <Route path="documents" element={<VehiclePaper />} />
@@ -109,16 +117,22 @@ export default function App() {
             />
             <Route path="confirm-request" element={<ConfirmRequest />} />
           </Route>
-          <Route path="garage" element={
-            <ProtectedRoute>
-              <Garage />
-            </ProtectedRoute>
-          } />
-          <Route path="traffic-rules" element={
-            <ProtectedRoute>
-              <TrafficRules />
-            </ProtectedRoute>
-          } />
+          <Route
+            path="garage"
+            element={
+              <ProtectedRoute>
+                <Garage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="traffic-rules"
+            element={
+              <ProtectedRoute>
+                <TrafficRules />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="payment"
             element={
@@ -127,11 +141,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="settings" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }>
+          <Route
+            path="settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Settings />} />
           </Route>
         </Routes>
