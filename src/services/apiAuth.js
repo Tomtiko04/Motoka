@@ -1,5 +1,5 @@
-import Cookies from "js-cookie";
 import { api } from "./apiClient";
+import { authStorage } from "../utils/authStorage";
 
 export async function login({ email, password }) {
   try {
@@ -8,7 +8,8 @@ export async function login({ email, password }) {
     const token = data?.authorization?.token;
     if (!token) throw new Error("Invalid token response");
 
-    Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
+    // Store token securely
+    authStorage.setToken(token);
 
     return data.user;
   } catch (error) {
@@ -25,6 +26,34 @@ export async function login({ email, password }) {
   }
 }
 
+export async function refreshToken() {
+  try {
+    const currentToken = authStorage.getToken();
+    if (!currentToken) throw new Error("No token available");
+
+    const { data } = await api.post("/auth/refresh-token", { token: currentToken });
+    const newToken = data?.authorization?.token;
+    
+    if (!newToken) throw new Error("Invalid refresh token response");
+    
+    authStorage.setToken(newToken);
+    return newToken;
+  } catch (error) {
+    authStorage.removeToken();
+    throw new Error("Failed to refresh token");
+  }
+}
+
+export async function logout() {
+  try {
+    await api.post("/logout");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    authStorage.removeToken();
+  }
+}
+
 export async function signupRequest({ name, email, password }) {
   try {
     const { data } = await api.post("/register", { name, email, password });
@@ -33,10 +62,9 @@ export async function signupRequest({ name, email, password }) {
     if (!token) throw new Error("Signup successful, but no token received.");
 
     // Store token securely
+    authStorage.setToken(token);
 
-    Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
-
-    return  data.user
+    return data.user;
   } catch (error) {
     if (error.response) {
       const errorMessage =
@@ -52,11 +80,11 @@ export async function signupRequest({ name, email, password }) {
   }
 }
 
-export async function verifyAccount({code, email}) {
+export async function verifyAccount({ code, email }) {
   try {
     const { data } = await api.post("/verify/user/verify", { code, email });
     return data;
-  } catch (error) { 
+  } catch (error) {
     if (error.response) {
       const errorMessage =
         error.response.data?.email?.[0] ||

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { authStorage } from '../utils/authStorage';
 
 export default function GuestRoute({ children }) {
-  const token = Cookies.get('authToken');
+  const isAuthenticated = authStorage.isAuthenticated();
 
-  if (token) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
