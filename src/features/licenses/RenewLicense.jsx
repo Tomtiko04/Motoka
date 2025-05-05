@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaCarAlt, FaPlus } from "react-icons/fa";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
-import AppLayout from "../../components/AppLayout";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ export default function RenewLicense() {
   };
 
   return (
-    <AppLayout>
+    <>
       {/* Header */}
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="relative mt-3 mb-8">
@@ -202,6 +201,6 @@ export default function RenewLicense() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

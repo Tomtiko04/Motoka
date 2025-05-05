@@ -1,13 +1,16 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FaBell, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
-import Logo from "../assets/images/Logo.png";
-import Avarta from "../assets/images/avarta.png";
 import { toast } from "react-hot-toast";
 import { Cookie } from "lucide-react";
 import { Icon } from "@iconify/react";
 
-export default function AppLayout({ children }) {
+import { authStorage } from "../utils/authStorage";
+
+import Avarta from "../assets/images/avarta.png";
+import Logo from "../assets/images/Logo.png";
+
+export default function AppLayout() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -21,20 +24,25 @@ export default function AppLayout({ children }) {
     { name: "Settings", path: "/settings" },
   ];
 
+  useEffect(() => {
+    if (!authStorage.isAuthenticated()) {
+      navigate("/auth/login", { state: { from: location }, replace: true });
+    }
+  }, [navigate, location]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    // Prevent scrolling when menu is open
     document.body.style.overflow = !isMenuOpen ? "hidden" : "";
   };
 
   const handleLogout = () => {
     Cookie.remove("authToken");
     localStorage.removeItem("userInfo");
-    
+
     toast.success("Logged out successfully");
-    
+
     setIsMenuOpen(false);
-    
+
     navigate("/auth/login");
   };
 
@@ -185,6 +193,7 @@ export default function AppLayout({ children }) {
                   <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                     <img
                       src={Avarta}
+                      lazyloading="lazy"
                       alt="User"
                       className="h-full w-full object-cover"
                     />
@@ -199,7 +208,9 @@ export default function AppLayout({ children }) {
         </div>
 
         {/* Main Content */}
-        <main className="mx-auto max-w-7xl py-6">{children}</main>
+        <main className="mx-auto max-w-7xl py-6">
+          <Outlet />
+        </main>
 
         {/* Ask Mo Button */}
         {/* <div className="fixed right-8 bottom-8 z-50">
