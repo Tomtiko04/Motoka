@@ -54,7 +54,7 @@ export async function signupRequest({ name, email, password }) {
 
 export async function verifyAccount({code, email}) {
   try {
-    const { data } = await api.post("/user/verify", { code, email });
+    const { data } = await api.post("/verify/user/verify", { code, email });
     return data;
   } catch (error) { 
     if (error.response) {

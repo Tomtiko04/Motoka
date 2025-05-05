@@ -14,44 +14,64 @@ import { formatCurrency } from "../../utils/formatCurrency";
 
 const quickActions = [
   {
-    icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="mingcute:car-fill" fontSize={30} color="#2389E3" />,
     title: "View Car\nDocuments",
     link: "/documents",
   },
   {
-    icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="solar:document-bold" fontSize={30} color="#2389E3" />,
     title: "Change of\nOwnership",
     link: "/ownership",
   },
   {
-    icon: <TbLicense className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon
+        icon="material-symbols:traffic-rounded"
+        fontSize={30}
+        color="#2389E3"
+      />
+    ),
     title: "Traffic\nRules",
-    link: "/rules",
+    link: "/traffic-rules",
   },
   {
-    icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon
+        icon="material-symbols:contact-support-rounded"
+        fontSize={30}
+        color="#2389E3"
+      />
+    ),
     title: "How can\nwe Help?",
     link: "/help",
   },
   {
-    icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="mdi:car-pickup" fontSize={30} color="#2389E3" />,
     title: "Register/Renew\nVehicle License",
-    link: "/vehicle-license",
+    link: "/licenses/documents",
   },
   {
-    icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon icon="mingcute:steering-wheel-fill" fontSize={30} color="#2389E3" />
+    ),
     title: "New/Renew\nDriver's License",
-    link: "/drivers-license",
+    link: "/licenses/drivers-license",
   },
   {
-    icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon
+        icon="fluent:text-number-format-24-filled"
+        fontSize={30}
+        color="#2389E3"
+      />
+    ),
     title: "Request\nPlate Number",
-    link: "/plate-number",
+    link: "/licenses/plate-number",
   },
   {
-    icon: <MdOutlineAirplaneTicket className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="jam:plane-f" fontSize={30} color="#2389E3" />,
     title: "International\nDriver's License",
-    link: "/international-license",
+    link: "/international-driver's-license",
   },
 ];
 
@@ -83,7 +103,7 @@ export default function Dashboard() {
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mt-0.5 flex flex-col gap-1 sm:mt-0 md:mt-4">
-              <h1 className="text-base font-medium text-[#05243F]/40 sm:text-lg">
+              <h1 className="text-base font-medium text-[#05243F]/40 sm:text-sm">
                 Welcome
               </h1>
               <div className="flex items-center gap-2">
@@ -99,7 +119,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <span className="text-sm font-normal text-[#05243F]/44 sm:text-base">
+            <span className="text-base font-normal text-[#05243F]/44 sm:text-sm">
               Wallet Balance
             </span>
             <div className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
@@ -120,7 +140,7 @@ export default function Dashboard() {
                   />
                 )}
               </span>
-              <span className="text-lg font-semibold text-[#2389E3] sm:text-xl">
+              <span className="text-lg font-semibold text-[#2389E3] sm:text-base">
                 {showBalance ? (
                   formatCurrency(balance)
                 ) : (
@@ -137,16 +157,16 @@ export default function Dashboard() {
 
         {/* Navigation Tabs */}
         <div className="mb-5 flex flex-wrap gap-3 sm:gap-4">
-          <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md sm:text-base">
+          <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md">
             Licence Status
           </button>
           <button
             onClick={handleGarage}
-            className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base"
+            className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md"
           >
             Garage
           </button>
-          <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base">
+          <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md">
             Ladipo
             <span className="absolute -top-2 -right-8 flex h-[17px] items-center justify-center rounded-full bg-[#FFEFCE] px-2.5 text-[8px] whitespace-nowrap text-[#BA8823]">
               Coming Soon
@@ -175,7 +195,11 @@ export default function Dashboard() {
                   </h3>
                 </div>
                 <div>
-                  <FaCarAlt className="text-3xl text-[#2389E3]" />
+                  <Icon
+                    icon="ion:car-sport-sharp"
+                    fontSize={30}
+                    color="#2389E3"
+                  />
                 </div>
               </div>
             </div>
@@ -212,7 +236,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={handleRenewLicense}
-                className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90"
+                className="rounded-full bg-[#2389E3] text-sm px-6 py-2 font-semibold text-white hover:bg-[#2389E3]/90"
               >
                 Renew Now
               </button>
@@ -222,12 +246,18 @@ export default function Dashboard() {
           <div className="flex items-center justify-center rounded-2xl bg-white p-6">
             <button
               onClick={handleAddCar}
+              type="button"
+              aria-label="Add a New Car"
               className="flex flex-col items-center gap-2"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3] text-xl">
-                <FaPlus className="text-xl text-white" />
+              <span className="flex items-center justify-center rounded-full bg-[#2389E3] p-0.5 transition hover:bg-[#1b6dbb]">
+                <Icon
+                  icon="lets-icons:add-round"
+                  fontSize={24}
+                  color="#ffffff"
+                />
               </span>
-              <span className="text-base font-medium text-[#05243F]">
+              <span className="text-sm font-medium text-[#05243F]">
                 Add a New Car
               </span>
             </button>
