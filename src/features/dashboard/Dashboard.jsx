@@ -1,59 +1,84 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsCarFront, BsQuestionCircle } from "react-icons/bs";
 import { FaRegHandshake } from "react-icons/fa";
 import { TbLicense, TbSteeringWheel } from "react-icons/tb";
-import { FaRegEye, FaRegEyeSlash, FaCarAlt, FaPlus } from "react-icons/fa";
+import { FaCarAlt, FaPlus } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import { MdOutlineAirplaneTicket } from "react-icons/md";
 import { IoIosArrowForward } from "react-icons/io";
 import { PiNumberSquareThreeBold, PiHandWavingFill } from "react-icons/pi";
 import AppLayout from "../../components/AppLayout";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
+import { formatCurrency } from "../../utils/formatCurrency";
+
+const quickActions = [
+  {
+    icon: <Icon icon="mingcute:car-fill" fontSize={30} color="#2389E3" />,
+    title: "View Car\nDocuments",
+    link: "/documents",
+  },
+  {
+    icon: <Icon icon="solar:document-bold" fontSize={30} color="#2389E3" />,
+    title: "Change of\nOwnership",
+    link: "/ownership",
+  },
+  {
+    icon: (
+      <Icon
+        icon="material-symbols:traffic-rounded"
+        fontSize={30}
+        color="#2389E3"
+      />
+    ),
+    title: "Traffic\nRules",
+    link: "/traffic-rules",
+  },
+  {
+    icon: (
+      <Icon
+        icon="material-symbols:contact-support-rounded"
+        fontSize={30}
+        color="#2389E3"
+      />
+    ),
+    title: "How can\nwe Help?",
+    link: "/help",
+  },
+  {
+    icon: <Icon icon="mdi:car-pickup" fontSize={30} color="#2389E3" />,
+    title: "Register/Renew\nVehicle License",
+    link: "/licenses/documents",
+  },
+  {
+    icon: (
+      <Icon icon="mingcute:steering-wheel-fill" fontSize={30} color="#2389E3" />
+    ),
+    title: "New/Renew\nDriver's License",
+    link: "/licenses/drivers-license",
+  },
+  {
+    icon: (
+      <Icon
+        icon="fluent:text-number-format-24-filled"
+        fontSize={30}
+        color="#2389E3"
+      />
+    ),
+    title: "Request\nPlate Number",
+    link: "/licenses/plate-number",
+  },
+  {
+    icon: <Icon icon="jam:plane-f" fontSize={30} color="#2389E3" />,
+    title: "International\nDriver's License",
+    link: "/international-driver's-license",
+  },
+];
 
 export default function Dashboard() {
+  const [showBalance, setShowBalance] = useState(true);
+  const balance = 234098;
   const navigate = useNavigate();
-  const quickActions = [
-    {
-      icon: <BsCarFront className="text-3xl text-[#2389E3]" />,
-      title: "View Car\nDocuments",
-      link: "/documents",
-    },
-    {
-      icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
-      title: "Change of\nOwnership",
-      link: "/ownership",
-    },
-    {
-      icon: <TbLicense className="text-3xl text-[#2389E3]" />,
-      title: "Traffic\nRules",
-      link: "/rules",
-    },
-    {
-      icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
-      title: "How can\nwe Help?",
-      link: "/help",
-    },
-    {
-      icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
-      title: "Register/Renew\nVehicle License",
-      link: "/vehicle-license",
-    },
-    {
-      icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
-      title: "New/Renew\nDriver's License",
-      link: "/drivers-license",
-    },
-    {
-      icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
-      title: "Request\nPlate Number",
-      link: "/plate-number",
-    },
-    {
-      icon: <MdOutlineAirplaneTicket className="text-3xl text-[#2389E3]" />,
-      title: "International\nDriver's License",
-      link: "/international-license",
-    },
-  ];
 
   function handleRenewLicense() {
     navigate("licenses/renew");
@@ -67,37 +92,64 @@ export default function Dashboard() {
     navigate("/add-car");
   }
 
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
   return (
     <AppLayout>
       <div className="px-4 sm:px-6 lg:px-8">
         {/* Welcome Section */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="md:mt-4 flex flex-col gap-1 mt-0.5 sm:mt-0">
-              <h1 className="text-base font-medium text-[#05243F]/40 sm:text-lg">
+            <div className="mt-0.5 flex flex-col gap-1 sm:mt-0 md:mt-4">
+              <h1 className="text-base font-medium text-[#05243F]/40 sm:text-sm">
                 Welcome
               </h1>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-medium text-[#05243F] sm:text-3xl">
-                  Anjola
+                  {userName}
                 </h1>
                 <span role="img" aria-label="wave">
-                  <PiHandWavingFill color="#EBB850" size={30} />
+                  {/* <PiHandWavingFill color="#EBB850" size={30} /> */}
+                  <Icon icon="mdi:hand-wave" fontSize={30} color="#B18378" />
                 </span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <span className="text-sm font-normal text-[#05243F]/44 sm:text-base">
+            <span className="text-base font-normal text-[#05243F]/44 sm:text-sm">
               Wallet Balance
             </span>
-            <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
+            <div className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
               <span>
-                <FaRegEye color="#697C8C" size={24} />
+                {showBalance ? (
+                  <Icon
+                    icon="mingcute:eye-fill"
+                    fontSize={24}
+                    color="#697C8C"
+                    onClick={() => setShowBalance(!showBalance)}
+                  />
+                ) : (
+                  <Icon
+                    icon="majesticons:eye-off"
+                    fontSize={24}
+                    color="#697C8C"
+                    onClick={() => setShowBalance(!showBalance)}
+                  />
+                )}
               </span>
-              <span className="text-lg font-semibold text-[#2389E3] sm:text-xl">
-                ₦234,098
+              <span className="text-lg font-semibold text-[#2389E3] sm:text-base">
+                {showBalance ? (
+                  formatCurrency(balance)
+                ) : (
+                  <Icon
+                    icon="mdi:shield-lock-outline"
+                    fontSize={24}
+                    color="#2389E3"
+                  />
+                )}
               </span>
             </div>
           </div>
@@ -105,16 +157,16 @@ export default function Dashboard() {
 
         {/* Navigation Tabs */}
         <div className="mb-5 flex flex-wrap gap-3 sm:gap-4">
-          <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md sm:text-base">
+          <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md">
             Licence Status
           </button>
           <button
             onClick={handleGarage}
-            className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base"
+            className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md"
           >
             Garage
           </button>
-          <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md sm:text-base">
+          <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md">
             Ladipo
             <span className="absolute -top-2 -right-8 flex h-[17px] items-center justify-center rounded-full bg-[#FFEFCE] px-2.5 text-[8px] whitespace-nowrap text-[#BA8823]">
               Coming Soon
@@ -143,7 +195,11 @@ export default function Dashboard() {
                   </h3>
                 </div>
                 <div>
-                  <FaCarAlt className="text-3xl text-[#2389E3]" />
+                  <Icon
+                    icon="ion:car-sport-sharp"
+                    fontSize={30}
+                    color="#2389E3"
+                  />
                 </div>
               </div>
             </div>
@@ -180,7 +236,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={handleRenewLicense}
-                className="rounded-full bg-[#2389E3] px-6 py-2 text-base font-semibold text-white hover:bg-[#2389E3]/90"
+                className="rounded-full bg-[#2389E3] text-sm px-6 py-2 font-semibold text-white hover:bg-[#2389E3]/90"
               >
                 Renew Now
               </button>
@@ -190,12 +246,18 @@ export default function Dashboard() {
           <div className="flex items-center justify-center rounded-2xl bg-white p-6">
             <button
               onClick={handleAddCar}
+              type="button"
+              aria-label="Add a New Car"
               className="flex flex-col items-center gap-2"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3] text-xl">
-                <FaPlus className="text-xl text-white" />
+              <span className="flex items-center justify-center rounded-full bg-[#2389E3] p-0.5 transition hover:bg-[#1b6dbb]">
+                <Icon
+                  icon="lets-icons:add-round"
+                  fontSize={24}
+                  color="#ffffff"
+                />
               </span>
-              <span className="text-base font-medium text-[#05243F]">
+              <span className="text-sm font-medium text-[#05243F]">
                 Add a New Car
               </span>
             </button>

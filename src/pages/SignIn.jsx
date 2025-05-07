@@ -1,14 +1,9 @@
 import React from "react";
-import Header from "../components/Header"
 import Signin from "../features/auth/Signin";
+import AppLayout from "../components/AppLayout";
 
 export default function SignIn() {
   return (
-    <>
-      <Header />
-      <br />
       <Signin />
-      <br />
-    </>
   );
 }

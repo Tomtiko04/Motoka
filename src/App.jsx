@@ -22,6 +22,15 @@ import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/DriversLicense.jsx";
 import Settings from "./features/settings/Settings.jsx"
+import PlateNumber from "./features/licenses/PlateNumber.jsx";
+import PlateDetails from "./features/licenses/platenumber/PlateDetails.jsx";
+import LocalGovPaper from "./features/licenses/LocalGovPaper.jsx";
+import TintPermit from "./features/licenses/TintPermit.jsx";
+import IntlDriverLicense from "./features/licenses/IntlDriverLicense.jsx";
+import TrafficRules from "./features/trafficrules/TrafficRules.jsx";
+import AuthLayout from "./features/auth/AuthLayout.jsx";
+import ProtectedRoute from "./components/ProtectedRoute";
+import GuestRoute from "./components/GuestRoute";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -41,35 +50,89 @@ export default function App() {
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <Routes>
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard/home" element={<Dashboard />} />
-          <Route path="auth/login" element={<SignIn />}></Route>
-          <Route path="auth/signup" element={<SignUp />}></Route>
-          <Route path="auth/verify-account" element={<Verification />}></Route>
-          <Route
-            path="auth/verification-success"
-            element={<VerificationSuccess />}
-          ></Route>
-          <Route path="add-car" element={<AddCar />}></Route>
-          <Route path="licenses">
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="auth" element={<AuthLayout />}>
+            <Route path="login" element={
+              <GuestRoute>
+                <SignIn />
+              </GuestRoute>
+            } />
+            <Route path="signup" element={
+              <GuestRoute>
+                <SignUp />
+              </GuestRoute>
+            } />
+            <Route path="verify-account" element={
+              <GuestRoute>
+                <Verification />
+              </GuestRoute>
+            } />
+            <Route
+              path="verification-success"
+              element={
+                <GuestRoute>
+                  <VerificationSuccess />
+                </GuestRoute>
+              }
+            />
+          </Route>
+          <Route path="add-car" element={
+            <ProtectedRoute>
+              <AddCar />
+            </ProtectedRoute>
+          } />
+          <Route path="licenses" element={
+            <ProtectedRoute>
+              <Licenses />
+            </ProtectedRoute>
+          }>
             <Route index element={<Licenses />} />
             <Route path="renew" element={<RenewLicense />} />
             <Route path="documents" element={<VehiclePaper />} />
             <Route path="drivers-license" element={<DriversLicense />} />
+            <Route path="plate-number" element={<PlateNumber />} />
+            <Route path="plate-number/:type" element={<PlateDetails />} />
+            <Route path="local-government-papers" element={<LocalGovPaper />} />
+            <Route path="tint-permit" element={<TintPermit />} />
+            <Route
+              path="international-driver's-license"
+              element={<IntlDriverLicense />}
+            />
             <Route path="confirm-request" element={<ConfirmRequest />} />
           </Route>
-          <Route path="garage" element={<Garage />} />
+          <Route path="garage" element={
+            <ProtectedRoute>
+              <Garage />
+            </ProtectedRoute>
+          } />
+          <Route path="traffic-rules" element={
+            <ProtectedRoute>
+              <TrafficRules />
+            </ProtectedRoute>
+          } />
           <Route
             path="payment"
             element={
-              <PaymentOptions availableBalance={3000} renewalCost={1000} />
+              <ProtectedRoute>
+                <PaymentOptions availableBalance={3000} renewalCost={1000} />
+              </ProtectedRoute>
             }
           />
-          <Route path="settings"> 
+          <Route path="settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }>
             <Route index element={<Settings />} />
-            {/* <Route path="renew" element={<RenewLicense />} />
-            <Route path="documents" element={<VehiclePaper />} />
-            <Route path="confirm-request" element={<ConfirmRequest />} /> */}
           </Route>
         </Routes>
       </BrowserRouter>
