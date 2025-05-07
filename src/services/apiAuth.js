@@ -8,7 +8,11 @@ export async function login({ email, password }) {
     const token = data?.authorization?.token;
     if (!token) throw new Error("Invalid token response");
 
+    // Store token securely
     Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
+    
+    // Store user data
+    localStorage.setItem("userData", JSON.stringify(data.user));
 
     return data.user;
   } catch (error) {
@@ -33,10 +37,12 @@ export async function signupRequest({ name, email, password }) {
     if (!token) throw new Error("Signup successful, but no token received.");
 
     // Store token securely
-
     Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
+    
+    // Store user data
+    localStorage.setItem("userData", JSON.stringify(data.user));
 
-    return  data.user
+    return data.user;
   } catch (error) {
     if (error.response) {
       const errorMessage =
@@ -69,20 +75,24 @@ export async function verifyAccount({code, email}) {
   }
 }
 
-// export async function logout() {
-//   try {
-//     await api.post("/logout");
-//     Cookies.remove("authToken"); // Remove token from cookies
-//   } catch (error) {
-//     console.error("Logout failed:", error);
-//   }
-// }
+export async function logout() {
+  try {
+    await api.post("/logout");
+    Cookies.remove("authToken"); // Remove token from cookies
+    localStorage.removeItem("userData"); // Remove user data
+    return { success: true };
+  } catch (error) {
+    console.error("Logout failed:", error);
+    throw new Error(error.message || "Logout failed");
+  }
+}
 
-// export async function getCurrentUser() {
-//   try {
-//     const { data } = await api.get("/user");
-//     return data.user;
-//   } catch {
-//     return null;
-//   }
-// }
+export function getCurrentUser() {
+  try {
+    const userData = localStorage.getItem("userData");
+    return userData ? JSON.parse(userData) : null;
+  } catch (error) {
+    console.error("Failed to get current user:", error);
+    return null;
+  }
+}
