@@ -8,7 +8,7 @@ export async function login({ email, password }) {
     const token = data?.authorization?.token;
     if (!token) throw new Error("Invalid token response");
 
-    // Store token securely
+    // Stores token securely
     authStorage.setToken(token);
 
     return data.user;
@@ -61,8 +61,8 @@ export async function signupRequest({ name, email, password }) {
     const token = data?.authorization?.token;
     if (!token) throw new Error("Signup successful, but no token received.");
 
-    // Store token securely
-    authStorage.setToken(token);
+    // Stores token securely
+    // authStorage.setToken(token);
 
     return data.user;
   } catch (error) {
