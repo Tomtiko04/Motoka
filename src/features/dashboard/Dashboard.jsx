@@ -65,7 +65,7 @@ const quickActions = [
   {
     icon: <Icon icon="jam:plane-f" fontSize={30} color="#2389E3" />,
     title: "International\nDriver's License",
-    link: "/international-driver's-license",
+    link: "/licenses/international-driver's-license",
   },
 ];
 

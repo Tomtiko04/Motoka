@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
-import { TrafficConeIcon } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 export default function LicenseLayout({
   children,
@@ -24,7 +24,7 @@ export default function LicenseLayout({
           </button>
           <div className="flex flex-col items-center justify-center">
             <div className="flex items-center justify-center gap-x-2">
-              <TrafficConeIcon color="#2389E3" size={30} />
+              <Icon icon="entypo:traffic-cone" color="#2389E3" fontSize={30} />
               {heading === "" ? (
                 <h1 className="text-center text-xl font-medium text-[#05243F] md:text-2xl">
                   {title}

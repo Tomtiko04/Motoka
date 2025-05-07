@@ -31,6 +31,7 @@ import TrafficRules from "./features/trafficrules/TrafficRules.jsx";
 import AuthLayout from "./features/auth/AuthLayout.jsx";
 import AppLayout from "./components/AppLayout";
 import GuestRoute from "./components/GuestRoute";
+import ScrollToTop from "./components/scrollToTop.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -49,31 +50,44 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           {/* Auth Routes */}
           <Route path="auth" element={<AuthLayout />}>
-            <Route path="login" element={
-              <GuestRoute>
-                <SignIn />
-              </GuestRoute>
-            } />
-            <Route path="signup" element={
-              <GuestRoute>
-                <SignUp />
-              </GuestRoute>
-            } />
-            <Route path="verify-account" element={
-              <GuestRoute>
-                <Verification />
-              </GuestRoute>
-            } />
-            <Route path="verification-success" element={
-              <GuestRoute>
-                <VerificationSuccess />
-              </GuestRoute>
-            } />
+            <Route
+              path="login"
+              element={
+                <GuestRoute>
+                  <SignIn />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="signup"
+              element={
+                <GuestRoute>
+                  <SignUp />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="verify-account"
+              element={
+                <GuestRoute>
+                  <Verification />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="verification-success"
+              element={
+                <GuestRoute>
+                  <VerificationSuccess />
+                </GuestRoute>
+              }
+            />
           </Route>
 
           {/* Protected Routes */}
@@ -87,16 +101,25 @@ export default function App() {
               <Route path="drivers-license" element={<DriversLicense />} />
               <Route path="plate-number" element={<PlateNumber />} />
               <Route path="plate-number/:type" element={<PlateDetails />} />
-              <Route path="local-government-papers" element={<LocalGovPaper />} />
+              <Route
+                path="local-government-papers"
+                element={<LocalGovPaper />}
+              />
               <Route path="tint-permit" element={<TintPermit />} />
-              <Route path="international-driver's-license" element={<IntlDriverLicense />} />
+              <Route
+                path="international-driver's-license"
+                element={<IntlDriverLicense />}
+              />
               <Route path="confirm-request" element={<ConfirmRequest />} />
             </Route>
             <Route path="garage" element={<Garage />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
-            <Route path="payment" element={
-              <PaymentOptions availableBalance={3000} renewalCost={1000} />
-            } />
+            <Route
+              path="payment"
+              element={
+                <PaymentOptions availableBalance={3000} renewalCost={1000} />
+              }
+            />
             <Route path="settings">
               <Route index element={<Settings />} />
             </Route>
