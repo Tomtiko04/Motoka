@@ -32,33 +32,33 @@ export async function updateProfile(profileData) {
 }
 
 // Change password
-// export async function changePassword(passwordData) {
-//   try {
-//     const { data } = await api.post("/settings/change-password", passwordData)
-//     return data
-//   } catch (error) {
-//     if (error.response) {
-//       const errorMessage = error.response.data?.message || "Failed to change password"
-//       throw new Error(errorMessage)
-//     } else {
-//       throw new Error(error.message || "Failed to change password")
-//     }
-//   }
-// }
+export async function changePassword(passwordData) {
+  try {
+    const { data } = await api.post("/settings/change-password", passwordData)
+    return data
+  } catch (error) {
+    if (error.response) {
+      const errorMessage = error.response.data?.message || "Failed to change password"
+      throw new Error(errorMessage)
+    } else {
+      throw new Error(error.message || "Failed to change password")
+    }
+  }
+}
 
 // Delete account
-// export async function deleteAccount(password) {
-//   try {
-//     const { data } = await api.delete("/settings/delete-account", {
-//       data: { password },
-//     })
-//     return data
-//   } catch (error) {
-//     if (error.response) {
-//       const errorMessage = error.response.data?.message || "Failed to delete account"
-//       throw new Error(errorMessage)
-//     } else {
-//       throw new Error(error.message || "Failed to delete account")
-//     }
-//   }
-// }
+export async function deleteAccount(password) {
+  try {
+    const { data } = await api.delete("/settings/delete-account", {
+      data: { password },
+    })
+    return data
+  } catch (error) {
+    if (error.response) {
+      const errorMessage = error.response.data?.message || "Failed to delete account"
+      throw new Error(errorMessage)
+    } else {
+      throw new Error(error.message || "Failed to delete account")
+    }
+  }
+}
