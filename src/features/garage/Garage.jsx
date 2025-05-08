@@ -3,6 +3,8 @@ import { FaRegEye, FaCarAlt, FaPlus } from "react-icons/fa";
 import { PiHandWavingFill } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
+import WelcomeSection from "../../components/WelcomeSection";
+import NavigationTabs from "../../components/NavigationTabs";
 
 export default function Garage() {
   const navigate = useNavigate();
@@ -18,60 +20,18 @@ export default function Garage() {
     navigate("/add-car");
   }
 
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       {/* Welcome Section */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="mt-4 flex flex-col gap-1">
-            <h1 className="text-base font-medium text-[#05243F]/40 sm:text-lg">
-              Welcome
-            </h1>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-medium text-[#05243F] sm:text-3xl">
-                Anjola
-              </h1>
-              <span role="img" aria-label="wave">
-                <PiHandWavingFill color="#EBB850" size={30} />
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-4">
-          <span className="text-sm font-normal text-[#05243F]/44 sm:text-base">
-            Transaction History
-          </span>
-          <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 sm:gap-3 sm:px-4 sm:py-2">
-            <span>
-              <FaRegEye color="#697C8C" size={24} />
-            </span>
-            <span className="text-lg font-semibold text-[#2389E3] sm:text-xl">
-              ₦234,098
-            </span>
-          </div>
-        </div>
-      </div>
+      <WelcomeSection userName={userName} />
 
       {/* Navigation Tabs */}
-      <div className="mb-5 flex flex-wrap gap-3 sm:gap-4">
-        <button
-          onClick={handleLicence}
-          className="rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md"
-        >
-          Licence Status
-        </button>
-        <button className="rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md">
-          Garage
-        </button>
-
-        <button className="relative rounded-full bg-[#E1E5EE] px-4 py-2 text-sm font-semibold text-[#697C8C] transition-all hover:bg-[#d1d6e0] hover:shadow-md">
-          Ladipo
-          <span className="absolute -top-2 -right-8 flex h-[17px] items-center justify-center rounded-full bg-[#FFEFCE] px-2.5 text-[8px] whitespace-nowrap text-[#BA8823]">
-            Coming Soon
-          </span>
-        </button>
-      </div>
+      <NavigationTabs onLicenseClick={handleLicence} activeTab="garage" />
 
       {/* Car Details Card */}
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">

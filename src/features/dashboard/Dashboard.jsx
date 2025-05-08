@@ -29,7 +29,7 @@ export default function Dashboard() {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <WelcomeSection userName={userName} />
-      <NavigationTabs onGarageClick={handleGarage} />
+      <NavigationTabs onGarageClick={handleGarage} activeTab="license" />
 
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <CarDetailsCard onRenewClick={handleRenewLicense} />
