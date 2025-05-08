@@ -62,10 +62,9 @@ export async function signupRequest({ name, email, password }) {
     if (!token) throw new Error("Signup successful, but no token received.");
 
     // Store token securely
+    authStorage.setToken(token);
 
-    Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
-
-    return  data.user
+    return data.user;
   } catch (error) {
     if (error.response) {
       const errorMessage =
@@ -98,24 +97,20 @@ export async function verifyAccount({ code, email }) {
   }
 }
 
-export async function logout() {
-  try {
-    await api.post("/logout");
-    Cookies.remove("authToken"); // Remove token from cookies
-    localStorage.removeItem("userData"); // Remove user data
-    return { success: true };
-  } catch (error) {
-    console.error("Logout failed:", error);
-    throw new Error(error.message || "Logout failed");
-  }
-}
+// export async function logout() {
+//   try {
+//     await api.post("/logout");
+//     Cookies.remove("authToken"); // Remove token from cookies
+//   } catch (error) {
+//     console.error("Logout failed:", error);
+//   }
+// }
 
-export function getCurrentUser() {
-  try {
-    const userData = localStorage.getItem("userData");
-    return userData ? JSON.parse(userData) : null;
-  } catch (error) {
-    console.error("Failed to get current user:", error);
-    return null;
-  }
-}
+// export async function getCurrentUser() {
+//   try {
+//     const { data } = await api.get("/user");
+//     return data.user;
+//   } catch {
+//     return null;
+//   }
+// }

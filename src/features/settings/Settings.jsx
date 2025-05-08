@@ -4,6 +4,7 @@ import { useState } from "react"
 import SettingsLayout from "./components/settings-layout"
 import MainSettings from "./components/main-settings"
 import ProfileInformation from "./components/profile-information"
+import EditProfile from "./components/edit-profile"
 import ChangePassword from "./components/change-password"
 import TwoFactorAuth from "./components/two-factor-auth"
 import SavedPaymentMethod from "./components/saved-payment-method"
@@ -37,7 +38,7 @@ export default function SettingsPage() {
   const handleNavigate = (page, tab) => {
     setActivePage(page)
 
-    // Set the appropriate expanded section based on the page
+   
     if (
       page === "payment" ||
       page === "payment-with-cards" ||
@@ -82,8 +83,9 @@ export default function SettingsPage() {
         {activePage === "main" && <MainSettings onNavigate={handleNavigate} />}
 
         {/* Account Settings */}
-        {activePage === "profile" && <ProfileInformation onNavigate={handleNavigate} />}
-        {activePage === "password" && <ChangePassword onNavigate={handleNavigate} />}
+        {activePage === "profile" && <ProfileInformation onNavigate={handleNavigate} key="profile-view" />}
+        {activePage === "edit-profile" && <EditProfile onNavigate={handleNavigate} key="edit-profile-view" />}
+        {activePage === "password" && <ChangePassword onNavigate={handleNavigate} key="change-password-view" />}
         {activePage === "2fa" && <TwoFactorAuth onNavigate={handleNavigate} />}
 
         {/* Payment & Billing */}

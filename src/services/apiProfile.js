@@ -1,30 +1,64 @@
-import { api } from "./apiClient";
-import { getCurrentUser } from "./apiAuth";
+import { api } from "./apiClient.js"
 
-/**
- * Get user profile data from local storage
- */
-export function getProfile() {
-  return getCurrentUser();
-}
-
-/**
- * Update user profile
- * Note: This is a placeholder until the actual endpoint is implemented
- */
-export async function updateProfile(profileData) {
+// Get user profile
+export async function getProfile() {
   try {
-    // Store updated data in localStorage
-    const currentUser = getCurrentUser();
-    const updatedUser = { ...currentUser, ...profileData };
-    localStorage.setItem("userData", JSON.stringify(updatedUser));
-    
-    // In a real implementation, this would call an API endpoint
-    // const { data } = await api.post("/user/profile", profileData);
-    
-    return { success: true, message: "Profile updated successfully", data: updatedUser };
+    const { data } = await api.get("/settings/profile")
+    return data
   } catch (error) {
-    throw new Error(error.message || "Failed to update profile");
+    if (error.response) {
+      const errorMessage = error.response.data?.message || "Failed to fetch profile"
+      throw new Error(errorMessage)
+    } else {
+      throw new Error(error.message || "Failed to fetch profile")
+    }
   }
 }
 
+// Update user profile
+export async function updateProfile(profileData) {
+  try {
+    const { data } = await api.put("/settings/profile", profileData)
+    // Clear any cached profile data since we've updated it
+    return data
+  } catch (error) {
+    if (error.response) {
+      const errorMessage = error.response.data?.message || "Failed to update profile"
+      throw new Error(errorMessage)
+    } else {
+      throw new Error(error.message || "Failed to update profile")
+    }
+  }
+}
+
+// Change password
+// export async function changePassword(passwordData) {
+//   try {
+//     const { data } = await api.post("/settings/change-password", passwordData)
+//     return data
+//   } catch (error) {
+//     if (error.response) {
+//       const errorMessage = error.response.data?.message || "Failed to change password"
+//       throw new Error(errorMessage)
+//     } else {
+//       throw new Error(error.message || "Failed to change password")
+//     }
+//   }
+// }
+
+// Delete account
+// export async function deleteAccount(password) {
+//   try {
+//     const { data } = await api.delete("/settings/delete-account", {
+//       data: { password },
+//     })
+//     return data
+//   } catch (error) {
+//     if (error.response) {
+//       const errorMessage = error.response.data?.message || "Failed to delete account"
+//       throw new Error(errorMessage)
+//     } else {
+//       throw new Error(error.message || "Failed to delete account")
+//     }
+//   }
+// }
