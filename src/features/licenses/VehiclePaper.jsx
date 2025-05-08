@@ -1,18 +1,34 @@
 import React from "react";
+
 import { IoIosArrowBack } from "react-icons/io";
-import { BsShieldCheck, BsPersonFill } from "react-icons/bs";
-import { FaUmbrella, FaCar } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
+import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
+
 import LicenseLayout from "./components/LicenseLayout";
 
  const documentTypes = [
    {
      icons: [
-       <FaUmbrella key="umbrella" className="text-2xl text-[#2389E3]" />,
-       <BsShieldCheck key="check" className="text-2xl text-[#2389E3]" />,
-       <FaCar key="car" className="text-2xl text-[#2389E3]" />,
-       <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
+       <Icon
+         key="umbrella"
+         icon="mdi:umbrella"
+         fontSize={24}
+         color="#2389E3"
+       />,
+       <Icon
+         key="check"
+         icon="ic:round-gpp-good"
+         fontSize={24}
+         color="#2389E3"
+       />,
+       <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
+       <Icon
+         icon="iconamoon:profile-fill"
+         fontSize={24}
+         color="#2389E3"
+         key="person"
+       />,
      ],
      title: "Private",
      link: "/licenses/drivers-license",
@@ -21,11 +37,31 @@ import LicenseLayout from "./components/LicenseLayout";
    },
    {
      icons: [
-       <FaUmbrella key="umbrella" className="text-2xl text-[#2389E3]" />,
-       <BsShieldCheck key="check" className="text-2xl text-[#2389E3]" />,
-       <FaCar key="car" className="text-2xl text-[#2389E3]" />,
-       <BsPersonFill key="person" className="text-2xl text-[#2389E3]" />,
-       <FaCar key="car" className="text-2xl text-[#2389E3]" />,
+       <Icon
+         key="umbrella"
+         icon="mdi:umbrella"
+         fontSize={24}
+         color="#2389E3"
+       />,
+       <Icon
+         key="check"
+         icon="ic:round-gpp-good"
+         fontSize={24}
+         color="#2389E3"
+       />,
+       <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
+       <Icon
+         icon="iconamoon:profile-fill"
+         fontSize={24}
+         color="#2389E3"
+         key="person"
+       />,
+       <Icon
+         icon="solar:bus-bold"
+         fontSize={24}
+         color="#2389E3"
+         key="car"
+       />,
      ],
      title: "Commercial",
      link: "commercial",

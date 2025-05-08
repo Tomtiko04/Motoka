@@ -1,53 +1,59 @@
 import React from "react";
-import { BsQuestionCircle } from "react-icons/bs";
-import { FaRegHandshake } from "react-icons/fa";
-import { TbLicense, TbSteeringWheel } from "react-icons/tb";
-import { FaCarAlt, FaPlus } from "react-icons/fa";
-import { IoIosArrowForward } from "react-icons/io";
-import { PiNumberSquareThreeBold } from "react-icons/pi";
-import { FaIdCard } from "react-icons/fa";
-import { BsCardText } from "react-icons/bs";
-import { IoCarSportOutline } from "react-icons/io5";
+
 import { Link } from "react-router-dom";
+import { Icon } from "@iconify/react";
+
+import { IoIosArrowForward } from "react-icons/io";
 import LicenseLayout from "./components/LicenseLayout";
 
 const licensesTypes = [
   {
     icons: [
-      <IoCarSportOutline key="car" className="text-2xl text-[#2389E3]" />,
-      <BsCardText key="paper" className="text-2xl text-[#2389E3]" />,
-      <FaIdCard key="license" className="text-2xl text-[#2389E3]" />,
+      <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
+      <Icon icon="mdi:umbrella" key="paper" fontSize={24} color="#2389E3" />,
+      <Icon
+        icon="ic:round-gpp-good"
+        key="license"
+        fontSize={24}
+        color="#2389E3"
+      />,
     ],
     title: "Vehicles Papers",
     link: "documents",
   },
   {
-    icon: <FaRegHandshake className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon icon="mingcute:steering-wheel-fill" fontSize={24} color="#2389E3" />
+    ),
     title: "Driver’s license",
     link: "drivers-license",
   },
   {
-    icon: <TbLicense className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon icon="stash:data-numbers-duotone" fontSize={24} color="#2389E3" />
+    ),
     title: "Plate Number",
     link: "plate-number",
   },
   {
-    icon: <BsQuestionCircle className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="mingcute:car-fill" fontSize={24} color="#2389E3" />,
     title: "Int’l Driver’s\nLicense",
     link: "international-driver's-license",
   },
   {
-    icon: <FaCarAlt className="text-3xl text-[#2389E3]" />,
+    icon: (
+      <Icon icon="mage:bookmark-check-fill" fontSize={24} color="#2389E3" />
+    ),
     title: "Road Tax",
     link: "/vehicle-license",
   },
   {
-    icon: <TbSteeringWheel className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="mdi:car-door" fontSize={24} color="#2389E3" />,
     title: "Tint Permit",
     link: "tint-permit",
   },
   {
-    icon: <PiNumberSquareThreeBold className="text-3xl text-[#2389E3]" />,
+    icon: <Icon icon="solar:bus-bold" fontSize={24} color="#2389E3" />,
     title: "Local Gov.\nPapers",
     link: "local-government-papers",
   },
