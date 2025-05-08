@@ -1,9 +1,8 @@
 import React from "react";
-import AppLayout from "../../../components/AppLayout";
 
 export default function SettingsLayout({ children, title, subTitle, mainContentTitle }) {
   return (
-    <AppLayout>
+    <>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="relative mt-3 mb-6">
           <h1 className="text-center text-2xl font-medium text-[#05243F]">
@@ -20,6 +19,6 @@ export default function SettingsLayout({ children, title, subTitle, mainContentT
         </h2>
         {children}
       </div>
-    </AppLayout>
+    </>
   );
 }

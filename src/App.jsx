@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import {
   QueryCache,
   QueryClient,
@@ -29,8 +29,9 @@ import TintPermit from "./features/licenses/TintPermit.jsx";
 import IntlDriverLicense from "./features/licenses/IntlDriverLicense.jsx";
 import TrafficRules from "./features/trafficrules/TrafficRules.jsx";
 import AuthLayout from "./features/auth/AuthLayout.jsx";
-import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
 import GuestRoute from "./components/GuestRoute";
+import ScrollToTop from "./components/scrollToTop.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -49,33 +50,36 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+          {/* Auth Routes */}
           <Route path="auth" element={<AuthLayout />}>
-            <Route path="login" element={
-              <GuestRoute>
-                <SignIn />
-              </GuestRoute>
-            } />
-            <Route path="signup" element={
-              <GuestRoute>
-                <SignUp />
-              </GuestRoute>
-            } />
-            <Route path="verify-account" element={
-              <GuestRoute>
-                <Verification />
-              </GuestRoute>
-            } />
+            <Route
+              path="login"
+              element={
+                <GuestRoute>
+                  <SignIn />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="signup"
+              element={
+                <GuestRoute>
+                  <SignUp />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="verify-account"
+              element={
+                <GuestRoute>
+                  <Verification />
+                </GuestRoute>
+              }
+            />
             <Route
               path="verification-success"
               element={
@@ -85,54 +89,40 @@ export default function App() {
               }
             />
           </Route>
-          <Route path="add-car" element={
-            <ProtectedRoute>
-              <AddCar />
-            </ProtectedRoute>
-          } />
-          <Route path="licenses" element={
-            <ProtectedRoute>
-              <Licenses />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Licenses />} />
-            <Route path="renew" element={<RenewLicense />} />
-            <Route path="documents" element={<VehiclePaper />} />
-            <Route path="drivers-license" element={<DriversLicense />} />
-            <Route path="plate-number" element={<PlateNumber />} />
-            <Route path="plate-number/:type" element={<PlateDetails />} />
-            <Route path="local-government-papers" element={<LocalGovPaper />} />
-            <Route path="tint-permit" element={<TintPermit />} />
+
+          {/* Protected Routes */}
+          <Route element={<AppLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="add-car" element={<AddCar />} />
+            <Route path="licenses">
+              <Route index element={<Licenses />} />
+              <Route path="renew" element={<RenewLicense />} />
+              <Route path="documents" element={<VehiclePaper />} />
+              <Route path="drivers-license" element={<DriversLicense />} />
+              <Route path="plate-number" element={<PlateNumber />} />
+              <Route path="plate-number/:type" element={<PlateDetails />} />
+              <Route
+                path="local-government-papers"
+                element={<LocalGovPaper />}
+              />
+              <Route path="tint-permit" element={<TintPermit />} />
+              <Route
+                path="international-driver's-license"
+                element={<IntlDriverLicense />}
+              />
+              <Route path="confirm-request" element={<ConfirmRequest />} />
+            </Route>
+            <Route path="garage" element={<Garage />} />
+            <Route path="traffic-rules" element={<TrafficRules />} />
             <Route
-              path="international-driver's-license"
-              element={<IntlDriverLicense />}
-            />
-            <Route path="confirm-request" element={<ConfirmRequest />} />
-          </Route>
-          <Route path="garage" element={
-            <ProtectedRoute>
-              <Garage />
-            </ProtectedRoute>
-          } />
-          <Route path="traffic-rules" element={
-            <ProtectedRoute>
-              <TrafficRules />
-            </ProtectedRoute>
-          } />
-          <Route
-            path="payment"
-            element={
-              <ProtectedRoute>
+              path="payment"
+              element={
                 <PaymentOptions availableBalance={3000} renewalCost={1000} />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="settings" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Settings />} />
+              }
+            />
+            <Route path="settings">
+              <Route index element={<Settings />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import cardValidator from "card-validator";
-import AppLayout from "../../components/AppLayout";
 import { useNavigate } from "react-router-dom";
 
 export default function PaymentOptions() {
@@ -79,7 +78,7 @@ export default function PaymentOptions() {
   const isCvvValid = /^[0-9]{3,4}$/.test(cvv);
 
   return (
-    <AppLayout>
+    <>
       {/* Header */}
       <div className="px-3 sm:px-6 lg:px-8">
         <div className="relative mb-6 flex h-12 items-center sm:h-12">
@@ -428,6 +427,6 @@ export default function PaymentOptions() {
           )}
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

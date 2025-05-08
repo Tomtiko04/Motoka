@@ -6,8 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Cog, Sparkles, Menu } from "lucide-react"
 import SearchBar from "./search-bar"
 import SettingsSidebar from "./settings-sidebar"
-import { IoIosArrowBack } from "react-icons/io";
-import AppLayout from "../../../components/AppLayout";
 
 export default function SettingsLayout({ children, activePage, expandedSection, onNavigate, onSectionToggle }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -65,94 +63,90 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
 
   return (
     <>
-      <AppLayout>
-        <div className=" px-4 sm:px-6 lg:px-8">
-          <header className="flex items-center justify-center mb-6 mt-3 relative">
-            {isMobile && (
-              <button
+      <div className="container mx-auto px-4 py-5 md:py-8">
+        <header className="relative mb-6 flex items-center justify-center">
+          {isMobile && (
+            <button
+              onClick={toggleMobileMenu}
+              className="absolute left-0 rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200 md:hidden"
+            >
+              <Menu className="h-5 w-5 text-gray-600" />
+            </button>
+          )}
+          {!isMobile && (
+            <button
+              onClick={() => onNavigate("main")}
+              className="absolute left-0 rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200"
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-600" />
+            </button>
+          )}
+          <div className="flex items-center text-xl font-medium">
+            <Cog className="mr-2 h-5 w-5 text-sky-500" />
+            <h1 className="text-center text-xl font-medium text-[#05243F] md:text-2xl">
+              {getTitle()}
+            </h1>
+          </div>
+        </header>
+
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
+          <div className="grid md:grid-cols-2 lg:grid-cols-5">
+            {/* Mobile sidebar overlay */}
+            {isMobile && isMobileMenuOpen && (
+              <div
+                className="bg-opacity-50 fixed inset-0 z-40 bg-black"
                 onClick={toggleMobileMenu}
-                className="absolute left-0 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors md:hidden"
               >
-                <Menu className="h-5 w-5 text-gray-600" />
-              </button>
-            )}
-            {!isMobile && (
-             <button
-                onClick={() => onNavigate("main")}
-                className="absolute top-1/4 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
-              >
-                <IoIosArrowBack className="h-5 w-5 text-gray-600" />
-              </button>
-            )}
-
-              
-              <div>
-
-                <h1 className="text-center flex items-center justify-center text-xl md:text-2xl font-medium text-[#05243F]">
-                  <Cog className="h-5 w-5 text-sky-500 mr-2" />{getTitle()}
-                  
-                </h1>
-                <p className="mt-2 text-center text-sm font-normal text-[#05243F]/40">
-                  This is Sub Title
-                </p>
-              </div>
-            
-          </header>
-
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="grid md:grid-cols-2 lg:grid-cols-5">
-              {/* Mobile sidebar overlay */}
-              {isMobile && isMobileMenuOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu}>
-                  <div
-                    className="absolute top-0 left-0 w-3/4 h-full bg-white z-50 overflow-y-auto"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="p-4 border-b">
-                      <SearchBar />
-                    </div>
-                    <SettingsSidebar
-                      activePage={activePage}
-                      expandedSection={expandedSection}
-                      onNavigate={(page) => {
-                        onNavigate(page)
-                        setIsMobileMenuOpen(false)
-                      }}
-                      onSectionToggle={onSectionToggle}
-                    />
+                <div
+                  className="absolute top-0 left-0 z-50 h-full w-3/4 overflow-y-auto bg-white"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="border-b p-4">
+                    <SearchBar />
                   </div>
-                </div>
-              )}
-
-              {/* Desktop sidebar */}
-              <div className="hidden md:block lg:col-span-2 border-r border-gray-100  ">
-                <div className="p-4">
-                  <SearchBar />
-                </div>
-                <div className=" scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-4">
                   <SettingsSidebar
                     activePage={activePage}
                     expandedSection={expandedSection}
-                    onNavigate={onNavigate}
+                    onNavigate={(page) => {
+                      onNavigate(page);
+                      setIsMobileMenuOpen(false);
+                    }}
                     onSectionToggle={onSectionToggle}
                   />
                 </div>
               </div>
+            )}
 
-              {/* Main content */}
-              <div className="lg:col-span-3 p-4 md:p-6 bg-[#F8F8FA]">{children}</div>
+            {/* Desktop sidebar */}
+            <div className="hidden border-r border-gray-100 md:block lg:col-span-2">
+              <div className="p-4">
+                <SearchBar />
+              </div>
+              <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-4">
+                <SettingsSidebar
+                  activePage={activePage}
+                  expandedSection={expandedSection}
+                  onNavigate={onNavigate}
+                  onSectionToggle={onSectionToggle}
+                />
+              </div>
+            </div>
+
+            {/* Main content */}
+            <div className="bg-[#F8F8FA] p-4 md:p-6 lg:col-span-3">
+              {children}
             </div>
           </div>
+        </div>
 
-          {/* <div className="fixed bottom-6 right-6">
+        {/* <div className="fixed bottom-6 right-6">
             <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors">
               <span>Ask Mo</span>
               <Sparkles className="h-5 w-5" />
             </button>
           </div> */}
-        </div>
-      </AppLayout>
+      </div>
     </>
-  )
+  );
 }
 
