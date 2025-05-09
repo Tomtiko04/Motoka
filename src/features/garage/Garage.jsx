@@ -1,12 +1,19 @@
 import React from "react";
 import { FaRegEye, FaCarAlt, FaPlus } from "react-icons/fa";
-import { PiHandWavingFill } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import WelcomeSection from "../../components/WelcomeSection";
 import NavigationTabs from "../../components/NavigationTabs";
+import AddCarCard from "../../components/AddCarCard";
+import { useGetCars } from "../car/useCar";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import CarDetailsCard from "../../components/CarDetailsCard";
 
 export default function Garage() {
+  const { cars, isLoading } = useGetCars();
+
+  console.log(cars);
+
   const navigate = useNavigate();
   function handleLicence() {
     navigate("/");
@@ -16,14 +23,13 @@ export default function Garage() {
     navigate("licenses/renew");
   }
 
-  function handleAddCar(){
+  function handleAddCar() {
     navigate("/add-car");
   }
 
   const userName = localStorage.getItem("userInfo")
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
-
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -34,9 +40,30 @@ export default function Garage() {
       <NavigationTabs onLicenseClick={handleLicence} activeTab="garage" />
 
       {/* Car Details Card */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* First car */}
-        <div className="rounded-2xl bg-white px-4 py-5">
+      {isLoading ? (
+        <div className="flex justify-center items-center py-5">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {Array.isArray(cars?.cars) &&
+            cars?.cars.map((car, index) => (
+              <CarDetailsCard
+                key={index}
+                carDetail={car}
+                onRenewClick={handleRenewLicense}
+              />
+            ))}
+          <AddCarCard onAddCarClick={handleAddCar} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+  /* First car */
+
+  /* <div className="rounded-2xl bg-white px-4 py-5">
           <div className="mb-6">
             <div className="text-sm font-light text-[#05243F]/60">
               Car Model
@@ -93,10 +120,11 @@ export default function Garage() {
               Renew Now
             </button>
           </div>
-        </div>
+        </div> */
 
-        {/* second car */}
-        <div className="rounded-2xl bg-white px-4 py-5">
+  /* second car */
+
+  /* <div className="rounded-2xl bg-white px-4 py-5">
           <div className="mb-6">
             <div className="text-sm font-light text-[#05243F]/60">
               Car Model
@@ -153,23 +181,4 @@ export default function Garage() {
               Renew Now
             </button>
           </div>
-        </div>
-
-        {/* When you mouse hover the plus icon it should rotate */}
-        <div className="flex items-center justify-center rounded-2xl bg-white p-6">
-          <button
-            onClick={handleAddCar}
-            className="flex flex-col items-center gap-2"
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3] text-xl hover:animate-spin">
-              <FaPlus className="text-xl text-white" />
-            </span>
-            <span className="text-base font-medium text-[#05243F]">
-              Add a New Car
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+        </div> */
