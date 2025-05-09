@@ -1,6 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
 @import "tailwindcss";
-
 
 *,
 *::before,
@@ -9,7 +8,8 @@
   /* padding: 0;
   margin: 0; */
 }
-html, body {
+html,
+body {
   overflow-x: hidden;
 }
 html {
@@ -21,18 +21,18 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   font-size: 1.6rem;
-  background-color: #F4F5FC;
-  background-image: url('./assets/images/Subtract.png');
+  background-color: #f4f5fc;
+  background-image: url("./assets/images/Subtract.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-header{
-    /* padding-inline: 3em; */
+header {
+  /* padding-inline: 3em; */
 }
 
-img{
+img {
   display: block;
   width: 100%;
 }
@@ -51,6 +51,19 @@ button {
 
 *:disabled {
   cursor: not-allowed;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding: 10px; */
+}
+
+.spinner-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 /* select:disabled,
@@ -87,6 +100,6 @@ img {
   max-width: 100%;
 }
 
-.ai-button{
-    background-image: linear-gradient(#EBB850, #BA8823);
+.ai-button {
+  background-image: linear-gradient(#ebb850, #ba8823);
 }
