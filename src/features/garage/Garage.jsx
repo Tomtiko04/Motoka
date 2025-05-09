@@ -46,15 +46,33 @@ export default function Garage() {
         </div>
       ) : (
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {Array.isArray(cars?.cars) &&
-            cars?.cars.map((car, index) => (
+          {Array.isArray(cars?.cars) && cars?.cars.length > 0 ? (
+            cars.cars.map((car, index) => (
               <CarDetailsCard
                 key={index}
                 carDetail={car}
                 onRenewClick={handleRenewLicense}
               />
-            ))}
-          <AddCarCard onAddCarClick={handleAddCar} />
+            ))
+          ) : (
+            <div className="col-span-2 flex flex-col items-center justify-center rounded-2xl bg-white p-8 text-center">
+              <FaCarAlt className="mb-4 text-5xl text-[#2389E3]/20" />
+              <h3 className="mb-2 text-xl font-semibold text-[#05243F]">No Cars Found</h3>
+              <p className="mb-6 text-sm text-[#05243F]/60">
+                You haven't added any cars to your garage yet. Add your first car to get started!
+              </p>
+              <button
+                onClick={handleAddCar}
+                className="flex items-center gap-2 rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+              >
+                <FaPlus className="text-sm" />
+                Add Your First Car
+              </button>
+            </div>
+          )}
+          {Array.isArray(cars?.cars) && cars?.cars.length > 0 && (
+            <AddCarCard onAddCarClick={handleAddCar} />
+          )}
         </div>
       )}
     </div>
