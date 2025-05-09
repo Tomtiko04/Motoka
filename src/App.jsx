@@ -89,11 +89,12 @@ export default function App() {
               }
             />
           </Route>
+          <Route path="add-car" element={<AddCar />} />
 
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="add-car" element={<AddCar />} />
+            {/* <Route path="add-car" element={<AddCar />} /> */}
             <Route path="licenses">
               <Route index element={<Licenses />} />
               <Route path="renew" element={<RenewLicense />} />
