@@ -10,10 +10,10 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
   useEffect(() => {
     const loadCarLogo = async () => {
       try {
-        const carMake = carDetail?.vehicle_make?.toLowerCase() || '';
+        const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
         if (carMake) {
           const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
-          const response = await fetch(logoUrl, { method: 'HEAD' });
+          const response = await fetch(logoUrl, { method: "HEAD" });
           if (response.ok) {
             setCarLogo(logoUrl);
           } else {
@@ -28,6 +28,40 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
     loadCarLogo();
   }, [carDetail?.vehicle_make]);
 
+  // Another solution that works but we will need to upload our logo on that platform
+  // useEffect(() => {
+  //   const loadCarLogo = async () => {
+  //     try {
+  //       const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
+  //       if (carMake) {
+  //         const logoUrl = `https://i.ibb.co/${getCarLogoPath(carMake)}`;
+  //         setCarLogo(logoUrl);
+  //       }
+  //     } catch {
+  //       setCarLogo(MercedesLogo);
+  //     }
+  //   };
+
+  //   loadCarLogo();
+  // }, [carDetail?.vehicle_make]);
+
+  // const getCarLogoPath = (carMake) => {
+  //   const logoMap = {
+  //     toyota: "L8QZJ8p/toyota-logo.png",
+  //     bmw: "L8QZJ8p/bmw-logo.png",
+  //     mercedes: "L8QZJ8p/mercedes-logo.png",
+  //     audi: "L8QZJ8p/audi-logo.png",
+  //     honda: "L8QZJ8p/honda-logo.png",
+  //     ford: "L8QZJ8p/ford-logo.png",
+  //     hyundai: "L8QZJ8p/hyundai-logo.png",
+  //     kia: "L8QZJ8p/kia-logo.png",
+  //     nissan: "L8QZJ8p/nissan-logo.png",
+  //     volkswagen: "L8QZJ8p/volkswagen-logo.png",
+  //   };
+
+  //   return logoMap[carMake] || "L8QZJ8p/default-car-logo.png";
+  // };
+
   return (
     <div className="rounded-2xl bg-white px-4 py-5">
       <div className="mb-6">
@@ -40,6 +74,7 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
                 lazyloading="lazy"
                 alt={carDetail?.vehicle_make || "Car"}
                 className="h-6 w-6 object-contain"
+                // onError={() => setCarLogo(MercedesLogo)}
               />
             </div>
             <h3 className="text-xl font-semibold text-[#05243F]">
@@ -91,9 +126,11 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
       </div>
     </div>
   );
-} 
+}
 
-{/* <div className="flex items-center gap-2 rounded-full bg-[#FFE8E8] px-4 py-1.5">
+{
+  /* <div className="flex items-center gap-2 rounded-full bg-[#FFE8E8] px-4 py-1.5">
   <span className="h-2 w-2 rounded-full bg-[#DB8888]"></span>
   <span className="text-sm font-medium text-[#05243F]">License Expired</span>
-</div>; */}
+</div>; */
+}

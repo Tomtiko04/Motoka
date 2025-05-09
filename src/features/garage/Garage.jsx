@@ -20,7 +20,7 @@ export default function Garage() {
   }
 
   function handleRenewLicense() {
-    navigate("licenses/renew");
+    navigate("/licenses/renew");
   }
 
   function handleAddCar() {
