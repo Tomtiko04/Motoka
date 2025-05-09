@@ -34,7 +34,7 @@ export async function updateProfile(profileData) {
 // Change password
 export async function changePassword(passwordData) {
   try {
-    const { data } = await api.post("/settings/change-password", passwordData)
+    const { data } = await api.put("/settings/change-password", passwordData)
     return data
   } catch (error) {
     if (error.response) {

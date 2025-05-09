@@ -111,7 +111,7 @@ export default function ProfileInformation({ onNavigate }) {
             onClick={handleEditClick}
             className="w-full rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#A73957] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95"
           >
-            Edit Profil
+            Edit Profile
           </button>
         </div>
       </div>
