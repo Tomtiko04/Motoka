@@ -11,7 +11,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   function handleRenewLicense() {
-    navigate("licenses/renew");
+    navigate("/licenses/renew");
   }
 
   function handleGarage() {

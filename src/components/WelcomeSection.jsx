@@ -65,15 +65,22 @@
 //       </div>
 //     </div>
 //   );
-// } 
+// }
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { formatCurrency } from "../utils/formatCurrency";
 
 export default function WelcomeSection({ userName }) {
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(() => {
+    const savedState = localStorage.getItem("showBalance");
+    return savedState !== null ? JSON.parse(savedState) : true;
+  });
   const balance = 234098;
+
+  useEffect(() => {
+    localStorage.setItem("showBalance", JSON.stringify(showBalance));
+  }, [showBalance]);
 
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-4 sm:mb-8">

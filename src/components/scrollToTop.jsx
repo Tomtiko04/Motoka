@@ -12,7 +12,7 @@ const ScrollToTop = (props) => {
    window.scrollTo({ top: 0, behavior: "smooth" });
 
    return () => {
-     window.history.scrollRestoration = "smooth";
+     window.history.scrollRestoration = "auto";
    };
  }, [pathname]);
 
