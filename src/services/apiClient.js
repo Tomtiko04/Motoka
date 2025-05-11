@@ -30,19 +30,19 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // If error is 401 and we haven't retried the request
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {
         // Attempt to refresh the token
         const newToken = await refreshToken()
-        // Update the authorization header
+       
         originalRequest.headers.Authorization = `Bearer ${newToken}`
-        // Retry the original request
+     
         return api(originalRequest)
       } catch (refreshError) {
-        // If refresh fails, clear token and redirect to login
+       
         authStorage.removeToken()
         window.location.href = "/auth/login"
         return Promise.reject(refreshError)
@@ -58,17 +58,17 @@ const apiWithCache = {
   get: async (url, config = {}) => {
     const cacheKey = `get:${url}:${JSON.stringify(config)}`
 
-    // Check if we have a cached response and it's not expired
+  
     if (requestCache.has(cacheKey)) {
       const cachedData = requestCache.get(cacheKey)
       if (cachedData.expiry > Date.now()) {
         return cachedData.response
       }
-      // Remove expired cache
+      
       requestCache.delete(cacheKey)
     }
 
-    // Make the actual request
+   
     const response = await api.get(url, config)
 
     
@@ -80,7 +80,7 @@ const apiWithCache = {
     return response
   },
 
-  // Pass through other methods without caching
+
   post: (url, data, config) => api.post(url, data, config),
   put: (url, data, config) => api.put(url, data, config),
   delete: (url, config) => api.delete(url, config),

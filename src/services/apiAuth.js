@@ -46,11 +46,18 @@ export async function refreshToken() {
 
 export async function logout() {
   try {
-    await api.post("/logout");
-  } catch (error) {
-    console.error("Logout failed:", error);
-  } finally {
+    const { data } = await api.post("/logout2");
+ 
     authStorage.removeToken();
+    localStorage.removeItem('userInfo');
+    localStorage.removeItem('rememberedEmail');
+    return data;
+  } catch (error) {
+ 
+    authStorage.removeToken();
+    localStorage.removeItem('userInfo');
+    localStorage.removeItem('rememberedEmail');
+    throw new Error(error.response?.data?.message || "Logout failed");
   }
 }
 
