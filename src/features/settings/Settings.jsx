@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useNavigate } from 'react-router-dom';
 import SettingsLayout from "./components/settings-layout"
 import MainSettings from "./components/main-settings"
 import ProfileInformation from "./components/profile-information"
@@ -34,8 +35,13 @@ export default function SettingsPage() {
   const [activePage, setActivePage] = useState("main")
   const [expandedSection, setExpandedSection] = useState("account")
   const [activeTab, setActiveTab] = useState("collect")
+  const navigate = useNavigate();
 
   const handleNavigate = (page, tab) => {
+    if (page === "login") {
+      navigate("/auth/login");
+      return;
+    }
     setActivePage(page)
 
    
@@ -73,7 +79,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-h-screen bg-gradient-to-b from-sky-50 to-sky-100">
+    <div className="max-h-screen from-sky-50 to-sky-100">
       <SettingsLayout
         activePage={activePage}
         expandedSection={expandedSection}
