@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ChevronLeft, X } from "lucide-react"
 import { useProfile } from "../hooks/useProfile"
 import { authStorage } from "../../../utils/authStorage"
+import { toast } from "react-hot-toast"
 
 export default function DeleteAccount({ onNavigate }) {
   const { deleteUserAccount } = useProfile()
@@ -43,12 +44,15 @@ export default function DeleteAccount({ onNavigate }) {
     try {
       const response = await deleteUserAccount(password)
       if (response && response.success) {
-        // Clear auth token and redirect to login
+       
         authStorage.removeToken()
         window.location.href = "/auth/login"
       }
     } catch (err) {
-      setError(err.message || "An error occurred while deleting account")
+      toast.error(err.response?.data?.message || err.message, {
+        duration: 5000,
+        id: 'account-delete-error'
+      })
     } finally {
       setSubmitting(false)
     }

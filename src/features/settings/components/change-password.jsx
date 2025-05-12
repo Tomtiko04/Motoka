@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ChevronLeft, Eye, EyeOff } from "lucide-react"
 import { useProfile } from "../hooks/useProfile"
+import { toast } from "react-hot-toast"
 
 export default function ChangePassword({ onNavigate }) {
   const { changeUserPassword } = useProfile()
@@ -71,18 +72,21 @@ export default function ChangePassword({ onNavigate }) {
     try {
       const response = await changeUserPassword(formData)
       if (response && response.success) {
-        // Reset form
+        
         setFormData({
           old_password: "",
           new_password: "",
           new_password_confirmation: "",
         })
-
-        // Navigate back after a short delay
         setTimeout(() => {
           onNavigate("main")
         }, 1500)
       }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message, {
+        duration: 5000,
+        id: 'password-change-error'
+      })
     } finally {
       setSubmitting(false)
     }

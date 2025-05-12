@@ -41,7 +41,7 @@ export function useProfile() {
           return null
         }
       } catch (err) {
-        setError(err.message || "An error occurred while fetching profile data")
+        setError(err.message || "An error occurred while fetching profile data", { duration: 3000 })
         return null
       } finally {
         setLoading(false)
@@ -61,7 +61,7 @@ export function useProfile() {
     requestInProgress.current = true
 
     try {
-      const loadingToast = toast.loading("Updating profile...")
+      const loadingToast = toast.loading("Updating profile...", { duration: 3000 })
       const response = await updateProfile(data)
       toast.dismiss(loadingToast)
 
@@ -70,16 +70,16 @@ export function useProfile() {
         setProfileData(response.data || data)
         
         profileFetched.current = false
-        toast.success(response.message || "Profile updated successfully")
+        toast.success(response.message || "Profile updated successfully", { duration: 3000 })
         return response
       } else {
-        toast.error(response.message || "Failed to update profile")
+        toast.error(response.message || "Failed to update profile", { duration: 3000 })
         setError("Failed to update profile")
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while updating profile")
-      setError(err.message || "An error occurred while updating profile")
+      toast.error(err.message || "An error occurred while updating profile", { duration: 3000 })
+      setError(err.message || "An error occurred while updating profile", { duration: 3000 })
       return null
     } finally {
       setLoading(false)
@@ -97,21 +97,21 @@ export function useProfile() {
     requestInProgress.current = true
 
     try {
-      const loadingToast = toast.loading("Changing password...")
+      const loadingToast = toast.loading("Changing password...", { duration: 3000 })
       const response = await changePassword(data)
       toast.dismiss(loadingToast)
 
       if (response.success) {
-        toast.success(response.message || "Password changed successfully")
+        toast.success(response.message || "Password changed successfully", { duration: 3000 })
         return response
       } else {
-        toast.error(response.message || "Failed to change password")
+        toast.error(response.message || "Failed to change password", { duration: 3000 })
         setError("Failed to change password")
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while changing password")
-      setError(err.message || "An error occurred while changing password")
+      toast.error(err.message || "An error occurred while changing password", { duration: 3000 })
+      setError(err.message || "An error occurred while changing password", { duration: 3000 })
       return null
     } finally {
       setLoading(false)
@@ -129,12 +129,12 @@ export function useProfile() {
     requestInProgress.current = true
 
     try {
-      const loadingToast = toast.loading("Deleting account...")
+      const loadingToast = toast.loading("Deleting account...", { duration: 3000 })
       const response = await deleteAccount(password)
       toast.dismiss(loadingToast)
 
       if (response.success) {
-        toast.success(response.message || "Account deleted successfully")
+        toast.success(response.message || "Account deleted successfully", { duration: 3000 })
         return response
       } else {
         toast.error(response.message || "Failed to delete account")
@@ -142,8 +142,8 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while deleting account")
-      setError(err.message || "An error occurred while deleting account")
+      toast.error(err.message || "An error occurred while deleting account", { duration: 3000 })
+      setError(err.message || "An error occurred while deleting account", { duration: 3000 })
       return null
     } finally {
       setLoading(false)

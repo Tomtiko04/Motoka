@@ -68,7 +68,7 @@ const apiWithCache = {
       requestCache.delete(cacheKey)
     }
 
-   
+    // Make the actual request
     const response = await api.get(url, config)
 
     
