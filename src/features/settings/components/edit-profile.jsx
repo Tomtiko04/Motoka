@@ -77,10 +77,7 @@ export default function EditProfile({ onNavigate }) {
         }, 1500)
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message, {
-        duration: 5000,
-        id: 'profile-update-error'
-      })
+      toast.error(err.response?.data?.message || err.message)
     } finally {
       setSubmitting(false)
     }
