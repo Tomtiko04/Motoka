@@ -70,7 +70,7 @@ export default function EditProfile({ onNavigate }) {
         
         resetProfileState()
         
-        
+      
 
         setTimeout(() => {
           onNavigate("profile")
