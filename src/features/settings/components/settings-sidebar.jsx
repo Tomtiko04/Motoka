@@ -14,11 +14,14 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await logout();
-      toast.success("Logged out successfully");
+      const response = await logout();
+      
       onNavigate("login");
     } catch (error) {
-      toast.error(error.message || "Failed to logout");
+      toast.error(error.response?.data?.message || error.message, {
+        duration: 5000,
+        id: 'logout-error'
+      });
     } finally {
       setIsLoggingOut(false);
       setIsModalOpen(false);

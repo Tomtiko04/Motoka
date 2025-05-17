@@ -3,7 +3,12 @@ import { api } from "./apiClient.js"
 // Get user profile
 export async function getProfile() {
   try {
-    const { data } = await api.get("/settings/profile")
+    const { data } = await api.get("/settings/profile", {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    })
     return data
   } catch (error) {
     if (error.response) {
@@ -19,7 +24,6 @@ export async function getProfile() {
 export async function updateProfile(profileData) {
   try {
     const { data } = await api.put("/settings/profile", profileData)
-    // Clear any cached profile data since we've updated it
     return data
   } catch (error) {
     if (error.response) {
