@@ -7,7 +7,7 @@ export async function login({ email, password }) {
     
     // Check if 2FA is required
     if (data.status === "2fa_required") {
-      // Return the entire response for 2FA handling
+    
       return data;
     }
 

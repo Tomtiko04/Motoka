@@ -18,17 +18,16 @@ export function useLogin() {
     onSuccess: (data) => {
       toast.dismiss();
       
-      // Store auth token if available in the response
+      
       if (data.authorization?.token) {
-        // Make sure your authStorage.setToken is called here
-        // This is critical for authentication to work post-2FA
+       
       }
       
-      // Update user data in React Query cache
+     
       queryClient.setQueryData(["user"], data.user);
       toast.success(data.message || "Login successful!");
       
-      // Store user info in localStorage
+     
       if (data.user) {
         const userDetails = {
           user_type_id: data.user.user_type_id,
@@ -54,21 +53,21 @@ export function useLogin() {
     onSuccess: (data) => {
       toast.dismiss();
       
-      // Check if 2FA is required based on API response
+     
       if (data.status === "2fa_required") {
-        // Store the 2FA token for the verification step
+       
         setTwoFactorToken(data["2fa_token"]);
         
-        // Show the 2FA verification modal
+      
         setTwoFactorRequired(true);
         
         toast.success(data.message || "Please enter 2FA verification code");
       } else {
-        // Normal login flow (no 2FA required)
+       
         queryClient.setQueryData(["user"], data.user);
         toast.success(data.message || "User logged in successfully!");
         
-        // Store user info in localStorage
+       
         if (data.user) {
           const userDetails = {
             user_type_id: data.user.user_type_id,
@@ -83,7 +82,7 @@ export function useLogin() {
       }
     },
     onError: (err) => {
-      toast.dismiss(); // Dismiss loading toast on error
+      toast.dismiss(); 
       if (err.message === "Please verify your email before logging in.") {
         toast.error(err.message);
         navigate("/auth/verify-account");
@@ -114,7 +113,7 @@ export function useSignup() {
   const { mutate: signupUser, isLoading: isSigningUp } = useMutation({
     mutationFn: signupApi,
     onSuccess: (data, variables) => {
-      toast.dismiss(); // Dismiss loading toast on success
+      toast.dismiss(); 
       const userEmail = variables.email;
       localStorage.setItem("pendingVerificationEmail", userEmail);
       toast.success(
@@ -124,7 +123,7 @@ export function useSignup() {
       navigate("/auth/verify-account");
     },
     onError: (err) => {
-      toast.dismiss(); // Dismiss loading toast on error
+      toast.dismiss(); 
       toast.error(err.message || "An error occurred during signup.");
     },
     retry: false,

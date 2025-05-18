@@ -3,16 +3,16 @@ import toast from "react-hot-toast";
 
 export default function TwoFactorVerification({ onVerify, onCancel, isVerifying }) {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown
+  const [timeLeft, setTimeLeft] = useState(600); 
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    // Focus the first input on mount
+    
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
 
-    // Start countdown timer
+   
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 0) {
@@ -27,31 +27,30 @@ export default function TwoFactorVerification({ onVerify, onCancel, isVerifying 
   }, []);
 
   const handleChange = (index, value) => {
-    // Only allow numbers
+    
     if (!/^\d*$/.test(value)) return;
 
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
 
-    // Auto-focus next input if not the last
+   
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    // Handle backspace
+   
     if (e.key === "Backspace" && !code[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
   };
 
   const handleResend = async () => {
-    // For this implementation, we'll just show a toast notification
-    // In a real implementation, you would call an API to resend the code
+   
     toast.success("Verification code resent!");
-    setTimeLeft(600); // Reset timer to 10 minutes
+    setTimeLeft(600); 
   };
 
   const handleSubmit = async () => {
@@ -64,7 +63,7 @@ export default function TwoFactorVerification({ onVerify, onCancel, isVerifying 
     try {
       await onVerify(fullCode);
     } catch (error) {
-      // Error handling is done in the parent component
+    
     }
   };
 

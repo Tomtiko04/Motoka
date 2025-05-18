@@ -7,18 +7,18 @@ import VerifyTwoFactor from './ui/VerifyTwoFactor';
 import toast from "react-hot-toast";
 
 export default function TwoFactorAuth({ onNavigate }) {
-  const [selectedMethod, setSelectedMethod] = useState("email"); // Set email as default to match the design
+  const [selectedMethod, setSelectedMethod] = useState("email"); 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [showVerification, setShowVerification] = useState(false);
-  const [email] = useState(localStorage.getItem('userEmail')); // Assuming you have the user's email stored
+  const [email] = useState(localStorage.getItem('userEmail')); 
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
-    setIsVerifying(true); // Set loading state to true immediately
+    setIsVerifying(true); 
 
     try {
       let response;
@@ -34,14 +34,14 @@ export default function TwoFactorAuth({ onNavigate }) {
         if (selectedMethod === "email") {
           toast.success("Please check your email for the verification code.");
         }
-        setShowVerification(true); // Show the verification component
+        setShowVerification(true);
       } else {
         toast.error(response.message || `Failed to enable 2FA via ${selectedMethod === "email" ? "email" : "mobile app"}`);
       }
     } catch (error) {
       toast.error(error.message || "An error occurred");
     } finally {
-      setIsVerifying(false); // Reset loading state after the API call
+      setIsVerifying(false); 
     }
   };
 
@@ -59,7 +59,7 @@ export default function TwoFactorAuth({ onNavigate }) {
       
       if (response.success) {
         toast.success("2FA has been successfully enabled!");
-        setShowVerification(false); // Hide the verification modal after success
+        setShowVerification(false); 
       } else {
         toast.error(response.message || "Verification failed");
       }

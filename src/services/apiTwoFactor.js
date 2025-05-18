@@ -9,7 +9,7 @@ export async function verifyLoginTwoFactor(twoFactorToken, code) {
       code
     });
     
-    // Store the token after successful 2FA verification
+   
     if (data?.authorization?.token) {
       authStorage.setToken(data.authorization.token);
     }
@@ -58,7 +58,7 @@ export async function enableTwoFactorApp() {
 // Verify 2FA code sent via email
 export async function verifyTwoFactorEmail(code) {
   try {
-    // Send code properly formatted as JSON
+  
     const { data } = await api.post("/2fa/verify-email", { code });
     return data;
   } catch (error) {
@@ -74,7 +74,7 @@ export async function verifyTwoFactorEmail(code) {
 // Verify 2FA code from mobile app
 export async function verifyTwoFactorApp(code) {
   try {
-    // Send code properly formatted as JSON
+
     const { data } = await api.post("/2fa/verify-app", { code });
     return data;
   } catch (error) {
