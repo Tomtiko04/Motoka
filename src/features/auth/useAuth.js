@@ -1,33 +1,86 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { login as loginApi } from "../../services/apiAuth";
+import { verifyLoginTwoFactor } from "../../services/apiTwoFactor";
 import { signupRequest as signupApi } from "../../services/apiAuth";
 import { verifyAccount as verifyApi } from "../../services/apiAuth";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export function useLogin() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [twoFactorToken, setTwoFactorToken] = useState("");
 
-  const { mutate: login, isLoading: isLoggingIn } = useMutation({
-    mutationFn: loginApi,
+  const { mutate: verifyTwoFactor, isLoading: isVerifyingTwoFactor } = useMutation({
+    mutationFn: (code) => verifyLoginTwoFactor(twoFactorToken, code),
     onSuccess: (data) => {
       toast.dismiss();
+      
+      // Store auth token if available in the response
+      if (data.authorization?.token) {
+        // Make sure your authStorage.setToken is called here
+        // This is critical for authentication to work post-2FA
+      }
+      
+      // Update user data in React Query cache
       queryClient.setQueryData(["user"], data.user);
-      toast.success(data.message || "User logged in successfully!");
-      localStorage.removeItem("userInfo");
-      if (data) {
+      toast.success(data.message || "Login successful!");
+      
+      // Store user info in localStorage
+      if (data.user) {
         const userDetails = {
-          user_type_id: data.user_type_id,
-          name: data.name,
-          email: data.email,
-          phone_number: data.phone_number,
+          user_type_id: data.user.user_type_id,
+          name: data.user.name,
+          email: data.user.email,
+          phone_number: data.user.phone_number,
         };
         localStorage.setItem("userInfo", JSON.stringify(userDetails));
-        localStorage.setItem("rememberedEmail", JSON.stringify(data.email));
       }
-
+      
+      setTwoFactorRequired(false);
       navigate("/");
+    },
+    onError: (err) => {
+      toast.dismiss();
+      toast.error(err.message || "Failed to verify 2FA code");
+    },
+    retry: false,
+  });
+
+  const { mutate: login, isLoading: isLoggingIn } = useMutation({
+    mutationFn: (formData) => loginApi(formData),
+    onSuccess: (data) => {
+      toast.dismiss();
+      
+      // Check if 2FA is required based on API response
+      if (data.status === "2fa_required") {
+        // Store the 2FA token for the verification step
+        setTwoFactorToken(data["2fa_token"]);
+        
+        // Show the 2FA verification modal
+        setTwoFactorRequired(true);
+        
+        toast.success(data.message || "Please enter 2FA verification code");
+      } else {
+        // Normal login flow (no 2FA required)
+        queryClient.setQueryData(["user"], data.user);
+        toast.success(data.message || "User logged in successfully!");
+        
+        // Store user info in localStorage
+        if (data.user) {
+          const userDetails = {
+            user_type_id: data.user.user_type_id,
+            name: data.user.name,
+            email: data.user.email,
+            phone_number: data.user.phone_number,
+          };
+          localStorage.setItem("userInfo", JSON.stringify(userDetails));
+        }
+        
+        navigate("/");
+      }
     },
     onError: (err) => {
       toast.dismiss(); // Dismiss loading toast on error
@@ -41,12 +94,23 @@ export function useLogin() {
     retry: false,
   });
 
-  return { login, isLoggingIn };
+  const cancelTwoFactor = () => {
+    setTwoFactorRequired(false);
+    setTwoFactorToken("");
+  };
+
+  return { 
+    login, 
+    isLoggingIn, 
+    twoFactorRequired, 
+    verifyTwoFactor, 
+    isVerifyingTwoFactor,
+    cancelTwoFactor
+  };
 }
 
 export function useSignup() {
   const navigate = useNavigate();
-
   const { mutate: signupUser, isLoading: isSigningUp } = useMutation({
     mutationFn: signupApi,
     onSuccess: (data, variables) => {
@@ -65,13 +129,11 @@ export function useSignup() {
     },
     retry: false,
   });
-
   return { signupUser, isSigningUp };
 }
 
 export function useVerifyAccount() {
   const navigate = useNavigate();
-
   const { mutate: verifyAccount, isLoading: isVerifying } = useMutation({
     mutationFn: verifyApi,
     onSuccess: (data) => {
@@ -88,6 +150,5 @@ export function useVerifyAccount() {
     },
     retry: false,
   });
-
   return { verifyAccount, isVerifying };
 }
