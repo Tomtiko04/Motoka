@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function OrderList({ 
   items, 
@@ -7,13 +8,12 @@ export default function OrderList({
   buttonText = "Pay Now",
   currency = "₦"
 }) {
+  const navigate = useNavigate();
   const total = items?.reduce((sum, item) => sum + item.amount, 0);
 
   const handlePayment = async () => {
     try {
-      // Here you can integrate your payment gateway
-      // For example: const result = await processPayment(total);
-      onPaymentSuccess?.(total, items);
+      navigate("/payment");
     } catch (error) {
       onPaymentError?.(error);
     }

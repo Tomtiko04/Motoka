@@ -4,9 +4,17 @@ import MercedesLogo from "../assets/images/mercedes-logo.png";
 
 const defaultLogo = MercedesLogo;
 
-export default function CarDetailsCard({ onRenewClick, carDetail }) {
-  const [carLogo, setCarLogo] = useState(MercedesLogo);
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
+export default function CarDetailsCard({onRenewClick, carDetail }) {
+  const [carLogo, setCarLogo] = useState(MercedesLogo);
   useEffect(() => {
     const loadCarLogo = async () => {
       try {
@@ -98,7 +106,7 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
         <div>
           <div className="text-sm text-[#05243F]/60">Exp. Date</div>
           <div className="text-base font-semibold text-[#05243F]">
-            {carDetail?.expiry_date || "-"}
+            {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>

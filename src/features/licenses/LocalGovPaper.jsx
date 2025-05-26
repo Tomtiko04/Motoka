@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { LuUpload } from "react-icons/lu";
 import LicenseLayout from "./components/LicenseLayout";
 import ActionButton from "./components/ActionButton";
+import { useNavigate } from "react-router-dom";
 
 export default function LocalGovPaper() {
   const fileInputRef = useRef(null);
@@ -10,6 +11,7 @@ export default function LocalGovPaper() {
     vehiclelicense: null,
     affidavit: null,
   });
+  const navigate = useNavigate();
   const handleFileUpload = (e, type) => {
     e.preventDefault();
     const input =
@@ -38,7 +40,20 @@ export default function LocalGovPaper() {
   };
 
   function handleSubmit(){
-    console.log("submit");
+    if (!formData.vehiclelicense) {
+      toast.error("Please upload vehicle license");
+      return;
+    }
+    
+    navigate("/payment", {
+      state: {
+        type: "local_gov_paper",
+        amount: 30000,
+        details: {
+          vehicleLicense: formData.vehiclelicense?.name
+        }
+      }
+    });
   }
   return (
     <LicenseLayout
