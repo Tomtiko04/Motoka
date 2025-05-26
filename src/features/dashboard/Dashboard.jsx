@@ -19,8 +19,8 @@ export default function Dashboard() {
   const { cars, isLoading } = useGetCars();
   const navigate = useNavigate();
 
-  function handleRenewLicense() {
-    navigate("/licenses/renew");
+  function handleRenewLicense(carDetail) {
+    navigate("/licenses/renew", { state: { carDetail } });
   }
 
   function handleGarage() {

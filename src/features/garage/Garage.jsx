@@ -12,8 +12,6 @@ import CarDetailsCard from "../../components/CarDetailsCard";
 export default function Garage() {
   const { cars, isLoading } = useGetCars();
 
-  console.log(cars);
-
   const navigate = useNavigate();
   function handleLicence() {
     navigate("/");

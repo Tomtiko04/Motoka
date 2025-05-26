@@ -181,7 +181,7 @@ export default function RenewLicense() {
                   Delivery Fee
                 </div>
                 <input
-                disabled="true"
+                disabled={true}
                   type="text"
                   value={deliveryDetails.fee}
                   onChange={(e) => handleDeliveryChange("fee", e.target.value)}
