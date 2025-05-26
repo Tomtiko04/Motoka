@@ -73,6 +73,7 @@ export default function Dashboard() {
                     <div >
                       <CarDetailsCard
                         carDetail={car}
+                        isRenew={true}
                         onRenewClick={handleRenewLicense}
                       />
                     </div>

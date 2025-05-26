@@ -13,8 +13,13 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-export default function CarDetailsCard({onRenewClick, carDetail }) {
+export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
+
+  const handleRenewClick = () => {
+    onRenewClick(carDetail);
+  };
+
   useEffect(() => {
     const loadCarLogo = async () => {
       try {
@@ -125,12 +130,14 @@ export default function CarDetailsCard({onRenewClick, carDetail }) {
             Expires in 3 days
           </span>
         </div>
-        <button
-          onClick={onRenewClick}
-          className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
-        >
-          Renew Now
-        </button>
+        {isRenew && (
+          <button
+            onClick={handleRenewClick}
+            className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+          >
+            Renew Now
+          </button>
+        )}
       </div>
     </div>
   );

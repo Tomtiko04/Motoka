@@ -19,8 +19,8 @@ export default function Garage() {
     navigate("/");
   }
 
-  function handleRenewLicense() {
-    navigate("/licenses/renew");
+  function handleRenewLicense(carDetail) {
+    navigate("/licenses/renew", { state: { carDetail } });
   }
 
   function handleAddCar() {
@@ -50,6 +50,7 @@ export default function Garage() {
             cars.cars.map((car, index) => (
               <CarDetailsCard
                 key={index}
+                isRenew={true}
                 carDetail={car}
                 onRenewClick={handleRenewLicense}
               />
