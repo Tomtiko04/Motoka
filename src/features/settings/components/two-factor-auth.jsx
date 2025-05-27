@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { enableTwoFactorEmail, verifyTwoFactorEmail, enableTwoFactorApp, verifyTwoFactorApp } from '../../../services/apiTwoFactor';
-import VerifyTwoFactor from './ui/VerifyTwoFactor';
+import VerifyTwoFactor from './ui/verifyTwoFactor.jsx';
 import toast from "react-hot-toast";
 
 export default function TwoFactorAuth({ onNavigate }) {
