@@ -103,15 +103,16 @@ export default function VehiclePaper() {
 
     totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
 
-    navigate("/payment", {
+    navigate("/licenses/confirm-request", {
       state: {
         type: "vehicle_paper",
         amount: totalAmount,
         details: {
           paperType: type.title,
-          items
-        }
-      }
+          items,
+          description: type.description,
+        },
+      },
     });
   };
 
