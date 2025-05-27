@@ -120,20 +120,27 @@ export default function DriversLicense() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validate form
-    if (!validateForm()) return;
-    console.log("Confirm and submit clicked");
-    // Navigate to confirm request with form data
-    navigate("/licenses/confirm-request", {
+    if (!validateForm()) {
+      toast.error("Please fill all required fields correctly");
+      return;
+    }
+
+    const selectedYears = document.querySelector('select').value;
+    const yearMatch = selectedYears.match(/\d+/);
+    const years = yearMatch ? parseInt(yearMatch[0]) : 1;
+    const amount = years * 30000;
+
+    navigate("/payment", {
       state: {
-        type: "drivers-license",
-        items: [
-          { name: "Driver's License", amount: 30000 },
-          { name: "Processing Fee", amount: 2000 },
-        ],
-        backTo: "/licenses/drivers-license",
-        formData,
-      },
+        type: "drivers_license",
+        amount,
+        details: {
+          licenseType,
+          renewType: licenseType === "Renew" ? renewType : null,
+          years,
+          ...formData
+        }
+      }
     });
   };
 

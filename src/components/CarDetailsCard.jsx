@@ -4,8 +4,21 @@ import MercedesLogo from "../assets/images/mercedes-logo.png";
 
 const defaultLogo = MercedesLogo;
 
-export default function CarDetailsCard({ onRenewClick, carDetail }) {
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
+
+  const handleRenewClick = () => {
+    onRenewClick(carDetail);
+  };
 
   useEffect(() => {
     const loadCarLogo = async () => {
@@ -98,7 +111,7 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
         <div>
           <div className="text-sm text-[#05243F]/60">Exp. Date</div>
           <div className="text-base font-semibold text-[#05243F]">
-            {carDetail?.expiry_date || "-"}
+            {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
@@ -117,12 +130,14 @@ export default function CarDetailsCard({ onRenewClick, carDetail }) {
             Expires in 3 days
           </span>
         </div>
-        <button
-          onClick={onRenewClick}
-          className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
-        >
-          Renew Now
-        </button>
+        {isRenew && (
+          <button
+            onClick={handleRenewClick}
+            className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+          >
+            Renew Now
+          </button>
+        )}
       </div>
     </div>
   );
