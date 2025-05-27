@@ -4,14 +4,21 @@ import { authStorage } from "../utils/authStorage";
 export async function login({ email, password }) {
   try {
     const { data } = await api.post("/login2", { email, password });
+    
+    // Check if 2FA is required
+    if (data.status === "2fa_required") {
+    
+      return data;
+    }
 
+    // Normal login flow
     const token = data?.authorization?.token;
     if (!token) throw new Error("Invalid token response");
 
     // Stores token securely
     authStorage.setToken(token);
 
-    return data.user;
+    return data;
   } catch (error) {
     if (error.response) {
       const errorMessage =
@@ -108,21 +115,3 @@ export async function verifyAccount({ code, email }) {
     }
   }
 }
-
-// export async function logout() {
-//   try {
-//     await api.post("/logout");
-//     Cookies.remove("authToken"); // Remove token from cookies
-//   } catch (error) {
-//     console.error("Logout failed:", error);
-//   }
-// }
-
-// export async function getCurrentUser() {
-//   try {
-//     const { data } = await api.get("/user");
-//     return data.user;
-//   } catch {
-//     return null;
-//   }
-// }

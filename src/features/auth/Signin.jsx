@@ -4,11 +4,20 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
 import toast from "react-hot-toast";
 import { useLogin } from "./useAuth";
+import TwoFactorVerification from "../../components/TwoFA/TwoFactorVerification";
 
 export default function Signin() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { login, isLoggingIn } = useLogin();
+  const { 
+    login, 
+    isLoggingIn, 
+    twoFactorRequired, 
+    verifyTwoFactor, 
+    isVerifyingTwoFactor,
+    cancelTwoFactor 
+  } = useLogin();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,7 +31,10 @@ export default function Signin() {
     // Retrieve stored email from localStorage
     const storedEmail = localStorage.getItem("rememberedEmail");
     if (storedEmail) {
-      setFormData(prev => ({ ...prev, email: storedEmail }));
+      setFormData(prev => ({ 
+        ...prev, 
+        email: storedEmail.startsWith('"') ? JSON.parse(storedEmail) : storedEmail 
+      }));
       setRememberMe(true);
     }
   }, []);
@@ -82,8 +94,15 @@ export default function Signin() {
       } catch (error) {
         toast.dismiss(loadingToast);
         toast.error(error.message || "Login failed");
-        throw newErrors(error.message);
       }
+    }
+  };
+
+  const handleVerifyTwoFactor = async (code) => {
+    try {
+      await verifyTwoFactor(code);
+    } catch (error) {
+      // Error handling is done in the mutation
     }
   };
 
@@ -245,6 +264,15 @@ export default function Signin() {
           </div>
         </div>
       </div>
+
+      {/* 2FA Verification Modal */}
+      {twoFactorRequired && (
+        <TwoFactorVerification
+          onVerify={handleVerifyTwoFactor}
+          onCancel={cancelTwoFactor}
+          isVerifying={isVerifyingTwoFactor}
+        />
+      )}
     </div>
   );
 }
