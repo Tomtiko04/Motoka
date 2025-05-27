@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function OrderList({ 
   items, 
@@ -7,13 +8,21 @@ export default function OrderList({
   buttonText = "Pay Now",
   currency = "₦"
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const orderDetails = location.state;
+
   const total = items?.reduce((sum, item) => sum + item.amount, 0);
 
   const handlePayment = async () => {
     try {
-      // Here you can integrate your payment gateway
-      // For example: const result = await processPayment(total);
-      onPaymentSuccess?.(total, items);
+      navigate("/payment", {
+        state: {
+          type: orderDetails?.type || "vehicle_paper",
+          amount: total,
+          details: orderDetails?.details
+        }
+      });
     } catch (error) {
       onPaymentError?.(error);
     }
@@ -21,6 +30,12 @@ export default function OrderList({
 
   return (
     <div className="mx-auto w-full max-w-md">
+      {orderDetails?.details?.description && (
+        <div className="mb-6 rounded-[12px] bg-[#FDF6E8] p-4">
+          <h3 className="mb-2 text-sm font-medium text-[#05243F]">Package Details</h3>
+          <p className="text-sm text-[#05243F]/60">{orderDetails.details.description}</p>
+        </div>
+      )}
       <div className="space-y-2">
         {items.map((item) => (
           <div

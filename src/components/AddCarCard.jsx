@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 
 export default function AddCarCard({ onAddCarClick }) {
   return (
-    <div className="flex items-center justify-center rounded-2xl bg-white p-6">
+    <div className="flex items-center justify-center rounded-2xl bg-white p-6 h-full">
       <button
         onClick={onAddCarClick}
         type="button"

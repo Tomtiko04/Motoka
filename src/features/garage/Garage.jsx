@@ -12,15 +12,13 @@ import CarDetailsCard from "../../components/CarDetailsCard";
 export default function Garage() {
   const { cars, isLoading } = useGetCars();
 
-  console.log(cars);
-
   const navigate = useNavigate();
   function handleLicence() {
     navigate("/");
   }
 
-  function handleRenewLicense() {
-    navigate("/licenses/renew");
+  function handleRenewLicense(carDetail) {
+    navigate("/licenses/renew", { state: { carDetail } });
   }
 
   function handleAddCar() {
@@ -50,6 +48,7 @@ export default function Garage() {
             cars.cars.map((car, index) => (
               <CarDetailsCard
                 key={index}
+                isRenew={true}
                 carDetail={car}
                 onRenewClick={handleRenewLicense}
               />

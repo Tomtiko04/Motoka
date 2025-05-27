@@ -19,8 +19,8 @@ export default function Dashboard() {
   const { cars, isLoading } = useGetCars();
   const navigate = useNavigate();
 
-  function handleRenewLicense() {
-    navigate("/licenses/renew");
+  function handleRenewLicense(carDetail) {
+    navigate("/licenses/renew", { state: { carDetail } });
   }
 
   function handleGarage() {
@@ -51,50 +51,52 @@ export default function Dashboard() {
 
       <div className="mb-8">
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center">
+          <div className="flex h-64 items-center justify-center ">
             <LoadingSpinner />
           </div>
         ) : Array.isArray(cars?.cars) && cars.cars.length > 0 ? (
-          <Swiper
-            modules={[Pagination, Autoplay]}
-            spaceBetween={24}
-            slidesPerView={1}
-            pagination={{ clickable: true }}
-            autoplay={{
-              delay: 5000,
-              disableOnInteraction: false,
-            }}
-            breakpoints={{
-              1024: {
-                slidesPerView: 2,
-              },
-            }}
-            className="!pb-12"
-          >
-            {sortedCars.map((car, index) => (
-              <SwiperSlide key={car.id || index}>
-                <CarDetailsCard
-                  carDetail={car}
-                  onRenewClick={handleRenewLicense}
-                />
-              </SwiperSlide>
-            ))}
-            <SwiperSlide>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
+            <div>
+              <Swiper
+                modules={[Pagination, Autoplay]}
+                spaceBetween={24}
+                slidesPerView={1}
+                pagination={{ clickable: true }}
+                autoplay={{
+                  delay: 5000,
+                  disableOnInteraction: false,
+                }}
+                // className="!pb-12 h-full"
+              >
+                {sortedCars.map((car, index) => (
+                  <SwiperSlide key={car.id || index} >
+                    <div >
+                      <CarDetailsCard
+                        carDetail={car}
+                        isRenew={true}
+                        onRenewClick={handleRenewLicense}
+                      />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+            <div>
               <AddCarCard onAddCarClick={handleAddCar} />
-            </SwiperSlide>
-          </Swiper>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="flex h-64 items-center justify-center rounded-2xl bg-white p-8 text-center text-gray-500">
               <div>
                 <FaCarAlt className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <p className="text-lg font-medium">No cars found</p>
-                <p className="mt-1 text-sm">
-                  Add your first car to get started
-                </p>
+                <p className="mt-1 text-sm">Add your first car to get started</p>
               </div>
             </div>
-            <AddCarCard onAddCarClick={handleAddCar} />
+            <div >
+              <AddCarCard onAddCarClick={handleAddCar} />
+            </div>
           </div>
         )}
       </div>
