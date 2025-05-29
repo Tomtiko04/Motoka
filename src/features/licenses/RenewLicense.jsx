@@ -44,7 +44,7 @@ export default function RenewLicense() {
     const totalAmount = amount + Number(deliveryDetails.fee);
     
     const paymentData = {
-      amount: totalAmount,
+      amount: totalAmount * 100,
       email: carDetail?.email || email,
       address: deliveryDetails.address,
       lg: deliveryDetails.lg,
@@ -55,7 +55,8 @@ export default function RenewLicense() {
     startPayment(paymentData, {
       onSuccess: (data) => {
         console.log("Payment initialized:", data);
-        navigate("/payment");
+        // navigate("/payment");
+        
       },
       onError: (error) => {
         console.error("Payment initialization failed:", error);

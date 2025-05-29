@@ -4,12 +4,16 @@ import { initializePayment as initializePaymentApi } from "../../services/apiRen
 // import { initializePayment as initializePaymentApi} from "../services/apiRenew";
 
 export function useInitializePayment() {
-  const {
-    mutate: startPayment,
-    isPending: isPaymentInitializing,
-  } = useMutation({
-    mutationFn: initializePaymentApi,
-  });
+  const { mutate: startPayment, isPending: isPaymentInitializing } =
+    useMutation({
+      mutationFn: initializePaymentApi,
+      onSuccess: (data) => {
+        if (data.status && data.data.authorization_url) {
+          // Redirect to Paystack checkout page
+          window.location.href = data.data.authorization_url;
+        }
+      },
+    });
 
   return {
     startPayment,
