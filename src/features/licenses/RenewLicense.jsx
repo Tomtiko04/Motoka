@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 // import { FaCarAlt, FaPlus } from "react-icons/fa";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
-import { initializePayment } from "./useRenew";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
+import { useInitializePayment } from "./useRenew";
 
 const formatDate = (dateString) => {
   if (!dateString) return "-";
@@ -19,17 +19,17 @@ const formatDate = (dateString) => {
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
-  const carDetail = location.state?.carDetail;
-  const { isInitialize, isInitializeLoading } = initializePayment();
+  const carDetail = location?.state?.carDetail;
+  const { startPayment, isPaymentInitializing } = useInitializePayment();
   const email = "ogunneyeoyinkansola@gmail.com"
 
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
     state: "",
-    fee: "7000",
+    fee: "5000",
     contact: "",
-    amount: "30000",
+    amount: "30000"
   });
 
   const handleDeliveryChange = (field, value) => {
@@ -40,7 +40,27 @@ export default function RenewLicense() {
   };
 
   const handlePayNow = () => {
-    // Handle payment logic here
+    const amount = 30000; 
+    const totalAmount = amount + Number(deliveryDetails.fee);
+    
+    const paymentData = {
+      amount: totalAmount,
+      email: carDetail?.email || email,
+      address: deliveryDetails.address,
+      lg: deliveryDetails.lg,
+      state: deliveryDetails.state,
+      contact: deliveryDetails.contact,
+    };
+
+    startPayment(paymentData, {
+      onSuccess: (data) => {
+        console.log("Payment initialized:", data);
+        navigate("/payment");
+      },
+      onError: (error) => {
+        console.error("Payment initialization failed:", error);
+      },
+    });
   };
 
   return (
@@ -241,18 +261,18 @@ export default function RenewLicense() {
               </div>
 
               {/* Pay Now Button */}
-              {!isInitializeLoading ? (
-                <button
-                  onClick={handlePayNow}
-                  className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3]"
-                >
-                  ₦35,000 Pay Now
-                </button>
-              ) : (
-                <button className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3]">
-                  loading...
-                </button>
-              )}
+              <button
+                onClick={handlePayNow}
+                disabled={isPaymentInitializing}
+                className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
+              >
+                ₦
+                {(
+                  Number(deliveryDetails.amount) + Number(deliveryDetails.fee)
+                ).toLocaleString()}{" "}
+                Pay Now
+                {isPaymentInitializing && "..."}
+              </button>
             </div>
           </div>
         </div>
