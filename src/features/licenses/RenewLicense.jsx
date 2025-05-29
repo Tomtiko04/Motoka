@@ -32,6 +32,15 @@ export default function RenewLicense() {
     amount: "30000"
   });
 
+  const isFormValid = () => {
+    return (
+      deliveryDetails.address.trim() !== "" &&
+      deliveryDetails.lg.trim() !== "" &&
+      deliveryDetails.state.trim() !== "" &&
+      deliveryDetails.contact.trim() !== ""
+    );
+  };
+
   const handleDeliveryChange = (field, value) => {
     setDeliveryDetails((prev) => ({
       ...prev,
@@ -264,7 +273,7 @@ export default function RenewLicense() {
               {/* Pay Now Button */}
               <button
                 onClick={handlePayNow}
-                disabled={isPaymentInitializing}
+                disabled={isPaymentInitializing || !isFormValid()}
                 className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
                 ₦
