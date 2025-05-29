@@ -35,7 +35,7 @@ export default function SearchBar() {
                     </svg>
                 </div>
                 <input type="search" id="default-search" class="block w-full pl-10 pr-4 py-2 text-sm text-gray-900 border-none rounded-full bg-white focus:ring-[#2389E3]-500 focus:border-[#2389E3]-500 dark:bg-white dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-[#2389E3]-500 dark:focus:border-[#2389E3]-500" placeholder="Search " required />
-                <button type="submit" class="text-white absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-[#2389E3] hover:bg-[#2389E3]-800 focus:ring-4 focus:outline-none focus:ring-[#2389E3]-300 font-medium rounded-full text-sm px-4 py-1 dark:bg-[#2389E3]-600 dark:hover:bg-[#2389E3]-700 dark:focus:ring-[#2389E3]-800">Search</button>
+                <button type="submit" class="text-white absolute right-1 top-1/2 transform -translate-y-1/2 bg-[#45A1F2] hover:bg-[#45A1F2]-800 focus:ring-4 focus:outline-none focus:ring-[#2389E3]-300 font-sm rounded-full text-sm px-4 py-1 dark:bg-[#2389E3]-600 dark:hover:bg-[#2389E3]-700 dark:focus:ring-[#2389E3]-800">Search</button>
             </div>
         </form>
 

@@ -11,51 +11,43 @@ export default function EditProfile({ onNavigate }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    // address: "",
-    // gender: "",
+    address: "",
+    gender: "",
   })
  
   const [displayData, setDisplayData] = useState({
     name: "",
     email: "",
+    address: "",
+    gender: "",
   })
   const [submitting, setSubmitting] = useState(false)
   const [fetchInitiated, setFetchInitiated] = useState(false)
 
   useEffect(() => {
-   
-    if (!fetchInitiated && !profileData) {
-      setFetchInitiated(true)
-      fetchProfile().then((data) => {
+    const loadProfile = async () => {
+      if (!fetchInitiated && !profileData) {
+        setFetchInitiated(true)
+        const data = await fetchProfile(true)
         if (data) {
           const newFormData = {
             name: data.name || "",
             email: data.email || "",
-            // address: data.address || "",
-            // gender: data.gender || "",
+            address: data.address || "",
+            gender: data.gender || "",
           }
           setFormData(newFormData)
           setDisplayData({
             name: data.name || "",
             email: data.email || "",
+            address: data.address || "",
+            gender: data.gender || "",
           })
         }
-      })
-    } else if (profileData && !formData.name) {
-    
-      const newFormData = {
-        name: profileData.name || "",
-        email: profileData.email || "",
-        // address: profileData.address || "",
-        // gender: profileData.gender || "",
       }
-      setFormData(newFormData)
-      setDisplayData({
-        name: profileData.name || "",
-        email: profileData.email || "",
-      })
     }
-  }, [fetchProfile, fetchInitiated, profileData, formData.name])
+    loadProfile()
+  }, [fetchProfile, fetchInitiated, profileData])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -74,16 +66,18 @@ export default function EditProfile({ onNavigate }) {
     try {
       const response = await updateUserProfile(formData)
       if (response && response.success) {
-       
-        resetProfileState()
-
+        await fetchProfile(true)
         
+        resetProfileState()
+        
+      
+
         setTimeout(() => {
           onNavigate("profile")
         }, 1500)
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while updating profile")
+      toast.error(err.response?.data?.message || err.message)
     } finally {
       setSubmitting(false)
     }
@@ -116,7 +110,7 @@ export default function EditProfile({ onNavigate }) {
         <div className="relative">
           <Avatar src={profileData?.image} alt={displayData.name} />
         </div>
-        <div>
+        <div className="text-right">
           <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">{displayData.name}</h2>
           <p className="text-base font-normal text-[#05243F]/40 sm:text-lg">{displayData.email}</p>
         </div>
@@ -133,7 +127,7 @@ export default function EditProfile({ onNavigate }) {
             type="text"
             value={formData.name}
             onChange={handleChange}
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F66]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
@@ -147,7 +141,7 @@ export default function EditProfile({ onNavigate }) {
             type="text"
             value={formData.address}
             onChange={handleChange}
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
@@ -160,7 +154,7 @@ export default function EditProfile({ onNavigate }) {
             name="gender"
             value={formData.gender}
             onChange={handleChange}
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           >
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
@@ -179,7 +173,7 @@ export default function EditProfile({ onNavigate }) {
             type="email"
             value={formData.email}
             onChange={handleChange}
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 

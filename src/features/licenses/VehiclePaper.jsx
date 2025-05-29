@@ -76,6 +76,7 @@ export default function VehiclePaper() {
 
   const handleLicenseSelect = (type) => {
     let items = [];
+    let totalAmount = 0;
 
     switch (type.title) {
       case "Private":
@@ -100,10 +101,17 @@ export default function VehiclePaper() {
         return;
     }
 
+    totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+
     navigate("/licenses/confirm-request", {
       state: {
-        type: "license",
-        items,
+        type: "vehicle_paper",
+        amount: totalAmount,
+        details: {
+          paperType: type.title,
+          items,
+          description: type.description,
+        },
       },
     });
   };

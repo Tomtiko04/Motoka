@@ -1,11 +1,24 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaCarAlt, FaPlus } from "react-icons/fa";
 import MercedesLogo from "../../assets/images/mercedes-logo.png";
+import CarDetailsCard from "../../components/CarDetailsCard";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
 export default function RenewLicense() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const carDetail = location.state?.carDetail;
+
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     fee: "",
@@ -45,7 +58,7 @@ export default function RenewLicense() {
         <div className="relative grid grid-cols-1 gap-10 md:grid-cols-2">
           {/* Left Column - Car Details */}
           <div className="mt-2">
-            <div className="rounded-2xl bg-white px-4 py-5 shadow">
+            {/* <div className="rounded-2xl bg-white px-4 py-5 shadow">
               <div className="mb-6">
                 <div className="text-sm font-light text-[#05243F]/60">
                   Car Model
@@ -54,13 +67,13 @@ export default function RenewLicense() {
                   <div className="flex items-center gap-2">
                     <div className="">
                       <img
-                        src={MercedesLogo}
-                        alt="Mercedes"
+                        src={carDetail?.carLogo || MercedesLogo}
+                        alt={carDetail?.vehicle_make || "Car"}
                         className="h-6 w-6"
                       />
                     </div>
                     <h3 className="text-xl font-semibold text-[#05243F]">
-                      Mercedes Benz
+                      {carDetail?.vehicle_model || "-"}
                     </h3>
                   </div>
                   <div>
@@ -73,21 +86,21 @@ export default function RenewLicense() {
                 <div>
                   <div className="text-sm text-[#05243F]/60">Plate No:</div>
                   <div className="text-base font-semibold text-[#05243F]">
-                    LSD1234
+                    {carDetail?.plate_number || "-"}
                   </div>
                 </div>
                 <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
                 <div>
                   <div className="text-sm text-[#05243F]/60">Exp. Date</div>
                   <div className="text-base font-semibold text-[#05243F]">
-                    04-05-25
+                    {carDetail?.expiry_date || "-"}
                   </div>
                 </div>
                 <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
                 <div>
                   <div className="text-sm text-[#05243F]/60">Car Type</div>
                   <div className="text-base font-semibold text-[#05243F]">
-                    Saloon
+                    {carDetail?.vehicle_make || "-"}
                   </div>
                 </div>
               </div>
@@ -100,7 +113,9 @@ export default function RenewLicense() {
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
+
+            <CarDetailsCard carDetail={carDetail} isRenew={false}/>
 
             {/* Document Details */}
             <div className="mt-8">
@@ -166,6 +181,7 @@ export default function RenewLicense() {
                   Delivery Fee
                 </div>
                 <input
+                disabled={true}
                   type="text"
                   value={deliveryDetails.fee}
                   onChange={(e) => handleDeliveryChange("fee", e.target.value)}

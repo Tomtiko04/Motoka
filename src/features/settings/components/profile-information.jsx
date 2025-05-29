@@ -12,14 +12,23 @@ export default function ProfileInformation({ onNavigate }) {
   const [fetchInitiated, setFetchInitiated] = useState(false)
 
   useEffect(() => {
-   
     const loadProfile = async () => {
-      setFetchInitiated(true)
-      await fetchProfile(true) 
+      if (!fetchInitiated) {
+        setFetchInitiated(true)
+        await fetchProfile(true) 
+      }
     }
 
     loadProfile()
-  }, [fetchProfile])
+  }, [fetchProfile, fetchInitiated])
+
+  // Add this effect to refresh data when component mounts
+  useEffect(() => {
+    const refreshData = async () => {
+      await fetchProfile(true) 
+    }
+    refreshData()
+  }, [])
 
   const handleEditClick = () => {
     onNavigate("edit-profile")
@@ -55,7 +64,7 @@ export default function ProfileInformation({ onNavigate }) {
         <div className="relative">
           <Avatar src={profileData?.image} alt={profileData?.name} />
         </div>
-        <div>
+        <div className="text-right">
           <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">{profileData?.name || "User"}</h2>
           <p className="text-base font-normal text-[#05243F]/40 sm:text-lg">
             {profileData?.email || "user@example.com"}
@@ -70,7 +79,7 @@ export default function ProfileInformation({ onNavigate }) {
             type="text"
             value={profileData?.name || ""}
             readOnly
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
@@ -80,7 +89,7 @@ export default function ProfileInformation({ onNavigate }) {
             type="text"
             value={profileData?.address || "Not provided"}
             readOnly
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
@@ -90,7 +99,7 @@ export default function ProfileInformation({ onNavigate }) {
             type="text"
             value={profileData?.gender || "Not provided"}
             readOnly
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 
@@ -100,7 +109,7 @@ export default function ProfileInformation({ onNavigate }) {
             type="email"
             value={profileData?.email || ""}
             readOnly
-            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
         </div>
 

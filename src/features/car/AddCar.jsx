@@ -370,9 +370,15 @@ export default function AddCar() {
             id={name}
             name={name}
             selected={formData[name] ? new Date(formData[name]) : null}
-            onChange={(date) =>
-              handleChange({ target: { name, value: date.toISOString() } })
-            }
+            onChange={(date) => {
+              const formattedDate = date.toISOString().split('T')[0];
+              handleChange({ 
+                target: { 
+                  name, 
+                  value: formattedDate
+                } 
+              });
+            }}
             dateFormat="dd/MM/yyyy"
             className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
               errors[name]

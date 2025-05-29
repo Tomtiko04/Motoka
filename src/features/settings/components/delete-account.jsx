@@ -103,9 +103,9 @@ export default function DeleteAccount({ onNavigate }) {
 
             <form onSubmit={handleDeleteAccount} className="space-y-4">
               <div>
-                <p className="text-gray-700 mb-2">
-                  This action cannot be undone. Please type <strong>DELETE</strong> to confirm.
-                </p>
+                <h4 className="mb-2">
+                  <span className="text-gray-700">This action cannot be undone. Please type </span><strong className="text-red-600">DELETE</strong> <span className="text-gray-700">to confirm.</span>
+                </h4>
                 <input
                   type="text"
                   value={confirmText}

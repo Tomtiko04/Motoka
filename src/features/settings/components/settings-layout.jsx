@@ -27,35 +27,35 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
     return () => window.removeEventListener("resize", checkIfMobile)
   }, [])
 
-  const getTitle = () => {
+  const getTitleParts = () => {
     switch (activePage) {
       case "main":
-        return "Settings"
+        return { section: "Settings", page: "" };
       case "profile":
-        return "Settings/Profile Information"
+        return { section: "Settings", page: "Profile Information" };
       case "password":
-        return "Settings/Change Password"
+        return { section: "Settings", page: "Change Password" };
       case "2fa":
-        return "Settings/2FA"
+        return { section: "Settings", page: "2FA" };
       case "payment":
       case "payment-with-cards":
-        return "Settings/Saved Payment Method"
+        return { section: "Settings", page: "Saved Payment Method" };
       case "add-card":
-        return "Settings/Add a Bank Card/Account"
+        return { section: "Settings", page: "Add a Bank Card/Account" };
       case "transaction":
-        return "Settings/Transaction History"
+        return { section: "Settings", page: "Transaction History" };
       case "auto-renewal":
-        return "Settings/Auto Renewal"
+        return { section: "Settings", page: "Auto Renewal" };
       case "billing":
-        return "Settings/Billing Address"
+        return { section: "Settings", page: "Billing Address" };
       case "push-notification":
-        return "Settings/Push Notification"
+        return { section: "Settings", page: "Push Notification" };
       case "custom-notification":
-        return "Settings/Customized Notification"
+        return { section: "Settings", page: "Customized Notification" };
       default:
-        return "Settings"
+        return { section: "Settings", page: "" };
     }
-  }
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -83,8 +83,23 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
           )}
           <div className="flex items-center text-xl font-medium">
             <Cog className="mr-2 h-5 w-5 text-sky-500" />
-            <h1 className="text-center text-xl font-medium text-[#05243F] md:text-2xl">
-              {getTitle()}
+            <h1 className="text-center text-xl font-medium md:text-2xl">
+              {(() => {
+                const { section, page } = getTitleParts();
+                if (!page) {
+                
+                  return (
+                    <span className="text-[#05243F]">{section}</span>
+                  );
+                }
+                
+                return (
+                  <>
+                    <span className="text-[#697B8C4A] ">{section}/</span>
+                    <span className="text-[#05243F] ">{page}</span>
+                  </>
+                );
+              })()}
             </h1>
           </div>
         </header>
@@ -101,7 +116,7 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
                   className="absolute top-0 left-0 z-50 h-full w-3/4 overflow-y-auto bg-white"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="border-b p-4">
+                  <div className="border-b p-3">
                     <SearchBar />
                   </div>
                   <SettingsSidebar
