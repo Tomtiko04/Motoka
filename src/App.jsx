@@ -32,6 +32,7 @@ import AuthLayout from "./features/auth/AuthLayout.jsx";
 import AppLayout from "./components/AppLayout";
 import GuestRoute from "./components/GuestRoute";
 import ScrollToTop from "./components/scrollToTop.jsx";
+import AddCarRoute from "./components/AddCarRoute";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -80,21 +81,26 @@ export default function App() {
                 </GuestRoute>
               }
             />
+            {/* Remove GuestRoute from verification-success */}
             <Route
               path="verification-success"
-              element={
-                <GuestRoute>
-                  <VerificationSuccess />
-                </GuestRoute>
-              }
+              element={<VerificationSuccess />}
             />
           </Route>
-          <Route path="add-car" element={<AddCar />} />
+
+          {/* Add Car Route - Special case outside AppLayout */}
+          <Route 
+            path="add-car" 
+            element={
+              <AddCarRoute>
+                <AddCar />
+              </AddCarRoute>
+            } 
+          />
 
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            {/* <Route path="add-car" element={<AddCar />} /> */}
             <Route path="licenses">
               <Route index element={<Licenses />} />
               <Route path="renew" element={<RenewLicense />} />
