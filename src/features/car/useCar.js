@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { addCar as addCarApi, getCars as getCarsApi } from "../../services/apiCar";
+import { authStorage } from "../../utils/authStorage";
 
 export function useAddCar() {
   const queryClient = useQueryClient();
@@ -24,15 +25,34 @@ export function useAddCar() {
         date_issued: formData.dateIssued || null,
         expiry_date: formData.expiryDate || null,
       };
+      
+      console.log('Adding car with data:', transformedData);
       return addCarApi(transformedData);
     },
     onSuccess: (data) => {
       toast.dismiss();
       queryClient.invalidateQueries({ queryKey: ["cars"] });
       toast.success(data.message || "Car registered successfully!");
+      
+      // Only remove registration token if it was used for this operation
+      const registrationToken = authStorage.getRegistrationToken();
+      if (registrationToken) {
+        console.log('Removing registration token after successful car creation');
+        authStorage.removeRegistrationToken();
+      }
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to add car");
+      console.error('Error adding car:', error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to add car";
+      toast.error(errorMessage);
+      
+      // Only redirect to login if not using registration token
+      const registrationToken = authStorage.getRegistrationToken();
+      if (error.response?.status === 401 && !registrationToken) {
+        console.log('Token invalid, clearing and redirecting to login');
+        authStorage.clearAll();
+        window.location.href = '/auth/login';
+      }
     },
   });
 
@@ -48,9 +68,10 @@ export function useGetCars() {
     queryKey: ["cars"],
     queryFn: getCarsApi,
     onError: (error) => {
+      console.error('Error fetching cars:', error);
       toast.error(error.message || "Failed to fetch cars");
     },
   });
 
-  return {cars, isLoading,  error}
+  return { cars, isLoading, error };
 }

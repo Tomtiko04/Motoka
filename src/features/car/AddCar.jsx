@@ -310,9 +310,9 @@ export default function AddCar() {
 
       if (
         formData.registrationNo &&
-        !/^[A-Z0-9]{3,8}$/.test(formData.registrationNo)
+        !/^[A-Za-z0-9]{3,8}$/.test(formData.registrationNo)
       ) {
-        newErrors.registrationNo = "Please enter a valid registration number";
+        newErrors.registrationNo = "Please enter a valid registration number (3-8 alphanumeric characters)";
       }
     }
 

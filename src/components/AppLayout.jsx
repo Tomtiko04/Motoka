@@ -1,16 +1,22 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FaBell, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import { Cookie } from "lucide-react";
+import { Cookie, LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
+import { logout } from "../services/apiAuth";
 
 import { authStorage } from "../utils/authStorage";
 
 import Avarta from "../assets/images/avarta.png";
 import Logo from "../assets/images/Logo.png";
 
-export default function AppLayout() {
+export default function AppLayout({ onNavigate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -35,15 +41,20 @@ export default function AppLayout() {
     document.body.style.overflow = !isMenuOpen ? "hidden" : "";
   };
 
-  const handleLogout = () => {
-    Cookie.remove("authToken");
-    localStorage.removeItem("userInfo");
-
-    toast.success("Logged out successfully");
-
-    setIsMenuOpen(false);
-
-    navigate("/auth/login");
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      const response = await logout();
+      navigate("/auth/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message, {
+        duration: 5000,
+        id: 'logout-error'
+      });
+    } finally {
+      setIsLoggingOut(false);
+      setIsModalOpen(false);
+    }
   };
 
   function handleHome() {
@@ -178,14 +189,20 @@ export default function AppLayout() {
                 ))}
                 {/* Logout Button */}
                 <button
-                  onClick={handleLogout}
                   className="mt-4 flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-[#A73957] hover:bg-[#F4F5FC]"
+                  onClick={() => {
+                    setIsModalOpen(true);
+                    setIsMenuOpen(false);
+                    document.body.style.overflow = "";
+                  }}
                 >
                   <FaSignOutAlt className="h-4 w-4" />
                   <span>Logout</span>
                 </button>
               </nav>
             </div>
+
+           
             {/* Mobile User Actions */}
             <div className="border-t border-[#F4F5FC] p-4">
               <div className="flex items-center justify-between">
@@ -206,6 +223,55 @@ export default function AppLayout() {
             </div>
           </div>
         </div>
+
+         {/* Logout Modal */}
+         {isModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="bg-red-100 p-3 rounded-full">
+                    <LogOut className="h-6 w-6 text-red-500" />
+                  </div>
+                </div>
+                
+                <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">
+                  Confirm Logout
+                </h2>
+                
+                <p className="text-gray-600 text-center mb-6">
+                  Are you sure you want to log out? You will need to log in again to access your account.
+                </p>
+
+                <div className="flex flex-col space-y-3">
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2"
+                  >
+                    {isLoggingOut ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Logging out...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="h-5 w-5" />
+                        <span>Yes, Logout</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    disabled={isLoggingOut}
+                    className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
         {/* Main Content */}
         <main className="mx-auto max-w-7xl py-6">
