@@ -13,13 +13,36 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
+// Helper function to determine status based on reminder message
+const getReminderStatus = (message) => {
+  if (!message) return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+  
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('expired') || lowerMessage.includes('0 day')) {
+    return { type: 'expired', bgColor: '#FFE8E8', dotColor: '#DB8888' };
+  } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
+    return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+  } else {
+    return { type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' };
+  }
+};
+
+export default function CarDetailsCard({ 
+  onRenewClick, 
+  carDetail, 
+  isRenew, 
+  reminderData = [] 
+}) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
+  const [reminderMessage, setReminderMessage] = useState("No reminder available");
+  const [reminderStatus, setReminderStatus] = useState({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
 
   const handleRenewClick = () => {
     onRenewClick(carDetail);
   };
 
+  // Load car logo
   useEffect(() => {
     const loadCarLogo = async () => {
       try {
@@ -41,39 +64,22 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
     loadCarLogo();
   }, [carDetail?.vehicle_make]);
 
-  // Another solution that works but we will need to upload our logo on that platform
-  // useEffect(() => {
-  //   const loadCarLogo = async () => {
-  //     try {
-  //       const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
-  //       if (carMake) {
-  //         const logoUrl = `https://i.ibb.co/${getCarLogoPath(carMake)}`;
-  //         setCarLogo(logoUrl);
-  //       }
-  //     } catch {
-  //       setCarLogo(MercedesLogo);
-  //     }
-  //   };
-
-  //   loadCarLogo();
-  // }, [carDetail?.vehicle_make]);
-
-  // const getCarLogoPath = (carMake) => {
-  //   const logoMap = {
-  //     toyota: "L8QZJ8p/toyota-logo.png",
-  //     bmw: "L8QZJ8p/bmw-logo.png",
-  //     mercedes: "L8QZJ8p/mercedes-logo.png",
-  //     audi: "L8QZJ8p/audi-logo.png",
-  //     honda: "L8QZJ8p/honda-logo.png",
-  //     ford: "L8QZJ8p/ford-logo.png",
-  //     hyundai: "L8QZJ8p/hyundai-logo.png",
-  //     kia: "L8QZJ8p/kia-logo.png",
-  //     nissan: "L8QZJ8p/nissan-logo.png",
-  //     volkswagen: "L8QZJ8p/volkswagen-logo.png",
-  //   };
-
-  //   return logoMap[carMake] || "L8QZJ8p/default-car-logo.png";
-  // };
+  // Process reminder data
+  useEffect(() => {
+    if (reminderData && reminderData.length > 0) {
+      const reminderObj = reminderData[0];
+      if (reminderObj && reminderObj.reminder && reminderObj.reminder.message) {
+        setReminderMessage(reminderObj.reminder.message);
+        setReminderStatus(getReminderStatus(reminderObj.reminder.message));
+      } else {
+        setReminderMessage("No active reminders");
+        setReminderStatus({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
+      }
+    } else {
+      setReminderMessage("No reminder available");
+      setReminderStatus({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
+    }
+  }, [reminderData]);
 
   return (
     <div className="rounded-2xl bg-white px-4 py-5">
@@ -84,10 +90,10 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
             <div className="">
               <img
                 src={carLogo}
-                lazyloading="lazy"
+                loading="lazy"
                 alt={carDetail?.vehicle_make || "Car"}
                 className="h-6 w-6 object-contain"
-                // onError={() => setCarLogo(MercedesLogo)}
+                onError={() => setCarLogo(MercedesLogo)}
               />
             </div>
             <h3 className="text-xl font-semibold text-[#05243F]">
@@ -104,7 +110,7 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
         <div>
           <div className="text-sm text-[#05243F]/60">Plate No:</div>
           <div className="text-base font-semibold text-[#05243F]">
-            {carDetail?.plate_number || "-"}
+            {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
@@ -124,10 +130,16 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 rounded-full bg-[#FFEFCE] px-4 py-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#FDB022]"></span>
+        <div 
+          className="flex items-center gap-2 rounded-full px-4 py-1.5"
+          style={{ backgroundColor: reminderStatus.bgColor }}
+        >
+          <span 
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: reminderStatus.dotColor }}
+          ></span>
           <span className="text-sm font-medium text-[#05243F]">
-            Expires in 3 days
+            {reminderMessage}
           </span>
         </div>
         {isRenew && (
@@ -141,11 +153,4 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
       </div>
     </div>
   );
-}
-
-{
-  /* <div className="flex items-center gap-2 rounded-full bg-[#FFE8E8] px-4 py-1.5">
-  <span className="h-2 w-2 rounded-full bg-[#DB8888]"></span>
-  <span className="text-sm font-medium text-[#05243F]">License Expired</span>
-</div>; */
 }
