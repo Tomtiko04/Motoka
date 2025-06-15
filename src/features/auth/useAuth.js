@@ -19,16 +19,13 @@ export function useLogin() {
     onSuccess: (data) => {
       toast.dismiss();
       
-      
       if (data.authorization?.token) {
-       
+        // Handle token storage if needed
       }
       
-     
       queryClient.setQueryData(["user"], data.user);
       toast.success(data.message || "Login successful!");
       
-     
       if (data.user) {
         const userDetails = {
           user_type_id: data.user.user_type_id,
@@ -52,23 +49,16 @@ export function useLogin() {
   const { mutate: login, isLoading: isLoggingIn } = useMutation({
     mutationFn: (formData) => loginApi(formData),
     onSuccess: (data) => {
-      toast.dismiss();
+      // Don't dismiss toast here - let the calling component handle it
       
-     
       if (data.status === "2fa_required") {
-       
         setTwoFactorToken(data["2fa_token"]);
-        
-      
         setTwoFactorRequired(true);
-        
         toast.success(data.message || "Please enter 2FA verification code");
       } else {
-       
         queryClient.setQueryData(["user"], data.user);
         toast.success(data.message || "User logged in successfully!");
         
-       
         if (data.user) {
           const userDetails = {
             user_type_id: data.user.user_type_id,
@@ -83,13 +73,16 @@ export function useLogin() {
       }
     },
     onError: (err) => {
-      toast.dismiss(); 
+      // Don't dismiss toast here - let the calling component handle it
       if (err.message === "Please verify your email before logging in.") {
         toast.error(err.message);
         navigate("/auth/verify-account");
       } else {
         toast.error(err.message || "An error occurred while logging in.");
       }
+    },
+    onSettled: () => {
+      // This ensures any loading states are properly cleared regardless of success/error
     },
     retry: false,
   });

@@ -238,7 +238,7 @@ export default function AppLayout({ onNavigate }) {
                   Confirm Logout
                 </h2>
                 
-                <p className="text-gray-600 text-center mb-6">
+                <p className="text-gray-600 text-center mb-6 text-sm">
                   Are you sure you want to log out? You will need to log in again to access your account.
                 </p>
 
