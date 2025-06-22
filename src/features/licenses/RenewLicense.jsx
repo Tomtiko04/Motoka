@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
-import { FaCarAlt, FaPlus } from "react-icons/fa";
-import MercedesLogo from "../../assets/images/mercedes-logo.png";
+// import { FaCarAlt, FaPlus } from "react-icons/fa";
+// import MercedesLogo from "../../assets/images/mercedes-logo.png";
+import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
+import { useInitializePayment } from "./useRenew";
 
 const formatDate = (dateString) => {
   if (!dateString) return "-";
@@ -17,13 +19,27 @@ const formatDate = (dateString) => {
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
-  const carDetail = location.state?.carDetail;
+  const carDetail = location?.state?.carDetail;
+  const { startPayment, isPaymentInitializing } = useInitializePayment();
+  const email = "ogunneyeoyinkansola@gmail.com"
 
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
-    fee: "",
+    lg: "",
+    state: "",
+    fee: "5000",
     contact: "",
+    amount: "30000"
   });
+
+  const isFormValid = () => {
+    return (
+      deliveryDetails.address.trim() !== "" &&
+      deliveryDetails.lg.trim() !== "" &&
+      deliveryDetails.state.trim() !== "" &&
+      deliveryDetails.contact.trim() !== ""
+    );
+  };
 
   const handleDeliveryChange = (field, value) => {
     setDeliveryDetails((prev) => ({
@@ -33,7 +49,28 @@ export default function RenewLicense() {
   };
 
   const handlePayNow = () => {
-    // Handle payment logic here
+    const amount = 30000; 
+    const totalAmount = amount + Number(deliveryDetails.fee);
+    
+    const paymentData = {
+      amount: totalAmount * 100,
+      email: carDetail?.email || email,
+      address: deliveryDetails.address,
+      lg: deliveryDetails.lg,
+      state: deliveryDetails.state,
+      contact: deliveryDetails.contact,
+    };
+
+    startPayment(paymentData, {
+      onSuccess: (data) => {
+        console.log("Payment initialized:", data);
+        // navigate("/payment");
+        
+      },
+      onError: (error) => {
+        console.error("Payment initialization failed:", error);
+      },
+    });
   };
 
   return (
@@ -115,7 +152,7 @@ export default function RenewLicense() {
               </div>
             </div> */}
 
-            <CarDetailsCard carDetail={carDetail} isRenew={false}/>
+            <CarDetailsCard carDetail={carDetail} isRenew={false} />
 
             {/* Document Details */}
             <div className="mt-8">
@@ -155,7 +192,7 @@ export default function RenewLicense() {
                   Renewal Amount
                 </div>
                 <div className="mt-3 w-full rounded-[10px] border-3 border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/40">
-                  ₦30,000
+                  {formatCurrency(deliveryDetails.amount)}
                 </div>
               </div>
 
@@ -175,15 +212,42 @@ export default function RenewLicense() {
                 />
               </div>
 
+              <div className="mb-6 grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-[#05243F]">LG</div>
+                  <input
+                    type="text"
+                    value={deliveryDetails.lg}
+                    onChange={(e) => handleDeliveryChange("lg", e.target.value)}
+                    className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                    placeholder="Enter LG"
+                  />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-[#05243F]">
+                    State
+                  </div>
+                  <input
+                    type="text"
+                    value={deliveryDetails.state}
+                    onChange={(e) =>
+                      handleDeliveryChange("state", e.target.value)
+                    }
+                    className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                    placeholder="Enter state"
+                  />
+                </div>
+              </div>
+
               {/* Delivery Fee */}
               <div className="mb-6">
                 <div className="text-sm font-medium text-[#05243F]">
                   Delivery Fee
                 </div>
                 <input
-                disabled={true}
+                  disabled={true}
                   type="text"
-                  value={deliveryDetails.fee}
+                  value={formatCurrency(deliveryDetails.fee)}
                   onChange={(e) => handleDeliveryChange("fee", e.target.value)}
                   className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
                   placeholder="Enter delivery fee"
@@ -209,9 +273,15 @@ export default function RenewLicense() {
               {/* Pay Now Button */}
               <button
                 onClick={handlePayNow}
-                className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3]"
+                disabled={isPaymentInitializing || !isFormValid()}
+                className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
-                ₦35,000 Pay Now
+                ₦
+                {(
+                  Number(deliveryDetails.amount) + Number(deliveryDetails.fee)
+                ).toLocaleString()}{" "}
+                Pay Now
+                {isPaymentInitializing && "..."}
               </button>
             </div>
           </div>

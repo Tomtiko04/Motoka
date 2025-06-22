@@ -79,7 +79,7 @@ export default function CarDetailsCard({
       setReminderMessage("No reminder available");
       setReminderStatus({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
     }
-  }, [reminderData]);
+  }, []);
 
   return (
     <div className="rounded-2xl bg-white px-4 py-5">

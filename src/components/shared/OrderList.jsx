@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 export default function OrderList({ 
   items, 
-  onPaymentSuccess, 
   onPaymentError,
   buttonText = "Pay Now",
   currency = "₦"
