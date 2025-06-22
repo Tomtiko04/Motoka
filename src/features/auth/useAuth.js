@@ -6,6 +6,7 @@ import { signupRequest as signupApi } from "../../services/apiAuth";
 import { verifyAccount as verifyApi } from "../../services/apiAuth";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { authStorage } from "../../utils/authStorage";
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -18,16 +19,13 @@ export function useLogin() {
     onSuccess: (data) => {
       toast.dismiss();
       
-      
       if (data.authorization?.token) {
-       
+  
       }
       
-     
       queryClient.setQueryData(["user"], data.user);
       toast.success(data.message || "Login successful!");
       
-     
       if (data.user) {
         const userDetails = {
           user_type_id: data.user.user_type_id,
@@ -51,23 +49,15 @@ export function useLogin() {
   const { mutate: login, isLoading: isLoggingIn } = useMutation({
     mutationFn: (formData) => loginApi(formData),
     onSuccess: (data) => {
-      toast.dismiss();
       
-     
       if (data.status === "2fa_required") {
-       
         setTwoFactorToken(data["2fa_token"]);
-        
-      
         setTwoFactorRequired(true);
-        
         toast.success(data.message || "Please enter 2FA verification code");
       } else {
-       
         queryClient.setQueryData(["user"], data.user);
         toast.success(data.message || "User logged in successfully!");
         
-       
         if (data.user) {
           const userDetails = {
             user_type_id: data.user.user_type_id,
@@ -82,13 +72,16 @@ export function useLogin() {
       }
     },
     onError: (err) => {
-      toast.dismiss(); 
+    
       if (err.message === "Please verify your email before logging in.") {
         toast.error(err.message);
         navigate("/auth/verify-account");
       } else {
         toast.error(err.message || "An error occurred while logging in.");
       }
+    },
+    onSettled: () => {
+    
     },
     retry: false,
   });

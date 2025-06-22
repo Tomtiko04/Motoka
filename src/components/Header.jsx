@@ -10,12 +10,12 @@ export default function Header() {
             <img src={Logo} alt="Motoka" className="h-8 w-auto" />
             <h1 className="text-xl font-bold text-[#05243F]">Motoka</h1>
           </div>
-          <div>
+          {/* <div>
             <button className="ai-button flex flex-row items-center justify-between gap-x-2 rounded-full px-4 py-2 text-white">
               <BsStars />
               <span className="text-base font-bold">MO'</span>
             </button>
-          </div>
+          </div> */}
         </header>
       </div>
     </div>
