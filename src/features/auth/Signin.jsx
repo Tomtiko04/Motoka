@@ -209,7 +209,7 @@ export default function Signin() {
               )}
             </div>
 
-            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div className="flex space-y-2 flex-row items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
