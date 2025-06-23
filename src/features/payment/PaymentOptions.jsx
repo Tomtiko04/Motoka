@@ -1,16 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import cardValidator from "card-validator";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { initiateMonicreditPayment, verifyMonicreditPayment } from "../../services/apiMonicredit";
 
 export default function PaymentOptions() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const paymentData = location.state || {};
   const [selectedPayment, setSelectedPayment] = useState("wallet");
 
+  // Monicredit payment state
+  const [monicreditAuthUrl, setMonicreditAuthUrl] = useState("");
+  const [monicreditTransId, setMonicreditTransId] = useState("");
+  const [monicreditStatus, setMonicreditStatus] = useState(null);
+  const [monicreditLoading, setMonicreditLoading] = useState(false);
+  const [monicreditError, setMonicreditError] = useState("");
+  
   const paymentMethods = [
     { id: "wallet", label: "Wallet Balance: N30,876" },
     { id: "transfer", label: "Pay Via Transfer" },
     { id: "card", label: "Pay Via Card" },
+    { id: "Monicredit_Transfer", label: "Pay Via Monicredit Transfer" },
   ];
 
   const walletDetails = {
@@ -76,6 +87,50 @@ export default function PaymentOptions() {
   const isMonthValid = month >= 1 && month <= 12;
   const isYearValid = year >= currentYear && year <= currentYear + 15;
   const isCvvValid = /^[0-9]{3,4}$/.test(cvv);
+
+  // Initiate Monicredit payment when selected
+  useEffect(() => {
+    if (selectedPayment === "Monicredit_Transfer" && !monicreditAuthUrl && !monicreditLoading) {
+      async function initiateMonicredit() {
+        setMonicreditLoading(true);
+        setMonicreditError("");
+        try {
+          // Generate a new unique order_id for each payment attempt
+          const newOrderId = Date.now().toString() + Math.floor(Math.random() * 1000).toString();
+          const data = await initiateMonicreditPayment({ ...paymentData, order_id: newOrderId });
+          setMonicreditAuthUrl(data.authorization_url);
+          setMonicreditTransId(data.id);
+        } catch (err) {
+          setMonicreditError(err.message || "Failed to initiate payment. Please try again.");
+        } finally {
+          setMonicreditLoading(false);
+        }
+      }
+      initiateMonicredit();
+    }
+  }, [selectedPayment]);
+  // Handler for verifying payment
+  const handleVerifyMonicredit = async () => {
+    setMonicreditLoading(true);
+    setMonicreditError("");
+    try {
+      const result = await verifyMonicreditPayment(monicreditTransId);
+      setMonicreditStatus(result);
+    } catch (err) {
+      setMonicreditError(err.message || "Failed to verify payment. Please try again.");
+    } finally {
+      setMonicreditLoading(false);
+    }
+  };
+
+  // Helper to open Monicredit payment in a new tab with absolute URL
+  const openMonicreditPayment = () => {
+    let url = monicreditAuthUrl;
+    if (url && !/^https?:\/\//i.test(url)) {
+      url = "https://" + url.replace(/^\/+/, "");
+    }
+    window.open(url, "_blank");
+  };
 
   return (
     <>
@@ -245,6 +300,7 @@ export default function PaymentOptions() {
               </button>
             </div>
           )}
+
 
           {selectedPayment === "card" && (
             <div>
@@ -423,6 +479,66 @@ export default function PaymentOptions() {
               <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
                 Make Payment
               </button>
+            </div>
+          )}
+
+           {selectedPayment === "Monicredit_Transfer" && (
+            <div>
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
+                Transfer Method
+              </h2>
+              {monicreditLoading ? (
+                <div className="flex flex-col items-center justify-center min-h-[300px]">
+                  <span className="text-3xl font-bold text-[#2284DB] animate-pulse mb-2">Loading...</span>
+                  {/* Optional: Add a spinner below */}
+                  <svg className="animate-spin h-8 w-8 text-[#2284DB]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
+                </div>
+              ) : (
+                <>
+                  {monicreditError && (
+                    <div className="text-center text-red-500 mb-4">{monicreditError}</div>
+                  )}
+                  <div className="mb-6 text-center">
+                    <h3 className="text-lg font-semibold text-[#05243F] mb-2">
+                      How to Complete Your Payment
+                    </h3>
+                    <ol className="list-decimal list-inside text-[#697C8C] text-base space-y-1">
+                      <li>
+                        Click the <span className="font-semibold text-[#2284DB]">Proceed to Monicredit Payment</span> button below.
+                      </li>
+                      <li>
+                        A secure Monicredit payment page will open in a new tab.
+                      </li>
+                      <li>
+                        Follow the instructions on the Monicredit page to complete your payment using your preferred method (Transfer, Card, QR, or Wallet).
+                      </li>
+                      <li>
+                        After successful payment, you will receive a confirmation from Monicredit.
+                      </li>
+                      <li>
+                        You can return to this page to continue or check your payment status.
+                      </li>
+                    </ol>
+                    <div className="mt-4 text-sm text-[#F26060]">
+                      <span className="font-semibold">Note:</span> Do not close the payment tab until your payment is completed.
+                    </div>
+                  </div>
+                  {monicreditAuthUrl && (
+                    <button
+                      className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white"
+                      onClick={openMonicreditPayment}
+                    >
+                      Proceed to Monicredit Payment
+                    </button>
+                  )}
+                  {monicreditStatus && (
+                    <div className={`mt-4 text-center font-semibold ${monicreditStatus.status ? 'text-green-600' : 'text-red-600'}`}>{monicreditStatus.message}</div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
