@@ -14,7 +14,7 @@ export function useLogin() {
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState("");
 
-  const { mutate: verifyTwoFactor, isLoading: isVerifyingTwoFactor } = useMutation({
+  const { mutate: verifyTwoFactor, isPending: isVerifyingTwoFactor } = useMutation({
     mutationFn: (code) => verifyLoginTwoFactor(twoFactorToken, code),
     onSuccess: (data) => {
       toast.dismiss();
@@ -46,7 +46,7 @@ export function useLogin() {
     retry: false,
   });
 
-  const { mutate: login, isLoading: isLoggingIn } = useMutation({
+  const { mutate: login, isPending: isLoggingIn } = useMutation({
     mutationFn: (formData) => loginApi(formData),
     onSuccess: (data) => {
       
@@ -103,7 +103,7 @@ export function useLogin() {
 
 export function useSignup() {
   const navigate = useNavigate();
-  const { mutate: signupUser, isLoading: isSigningUp } = useMutation({
+  const { mutate: signupUser, isPending: isSigningUp } = useMutation({
     mutationFn: signupApi,
     onSuccess: (data, variables) => {
       toast.dismiss(); 
@@ -126,7 +126,7 @@ export function useSignup() {
 
 export function useVerifyAccount() {
   const navigate = useNavigate();
-  const { mutate: verifyAccount, isLoading: isVerifying } = useMutation({
+  const { mutate: verifyAccount, isPending: isVerifying } = useMutation({
     mutationFn: verifyApi,
     onSuccess: (data) => {
       toast.dismiss();

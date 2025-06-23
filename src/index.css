@@ -4,7 +4,7 @@
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   /* padding: 0;
   margin: 0; */
 }
@@ -18,7 +18,7 @@ html {
 
 body {
   font-family: "Lexend", sans-serif;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   line-height: 1.5;
   font-size: 1.6rem;
   background-color: #f4f5fc;
@@ -26,10 +26,6 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-}
-
-header {
-  /* padding-inline: 3em; */
 }
 
 img {
@@ -85,7 +81,7 @@ select:focus {
   line-height: 0;
 } */
 
-p,
+/* p,
 h1,
 h2,
 h3,
@@ -94,7 +90,7 @@ h5,
 h6 {
   overflow-wrap: break-word;
   hyphens: auto;
-}
+} */
 
 img {
   max-width: 100%;

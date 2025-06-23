@@ -17,16 +17,15 @@ export default function VerifyAccount() {
     if (storedEmail) {
       setEmail(storedEmail);
     } else {
-      navigate("/auth/signup", { replace: true }); // Navigate before setting state
-      return; // Exit early to prevent setting state after redirect
+      navigate("/auth/signup", { replace: true });
+      return;
     }
     setLoading(false);
   }, [navigate]);
 
   useEffect(() => {
-    if (loading) return; // Prevents running before email is checked
+    if (loading) return;
 
-    // Focus the first input on mount
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
@@ -45,20 +44,27 @@ export default function VerifyAccount() {
     return () => clearInterval(timer);
   }, [loading]);
 
+  const handlePaste = (e) => {
+    const paste = e.clipboardData.getData("text");
+    if (paste.length === 6 && /^\d+$/.test(paste)) {
+      const newCode = paste.split("");
+      setCode(newCode);
+      handleVerify(paste);
+      inputRefs.current[5]?.focus();
+    }
+  };
+
   const handleChange = (index, value) => {
-    // Only allow numbers
     if (!/^\d*$/.test(value)) return;
 
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
 
-    // Auto-focus next input if not the last
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
     }
 
-    // Check if the full code is entered
     const fullCode = newCode.join("");
     if (fullCode.length === 6) {
       handleVerify(fullCode);
@@ -75,10 +81,9 @@ export default function VerifyAccount() {
   const handleResend = () => {
     // Reset timer
     setTimeLeft(60);
-    // TODO: Implement resend logic
   };
 
-  const handleVerify = async (fullCode) => {
+  const handleVerify = (fullCode) => {
     if (fullCode.length !== 6) {
       toast.error("The code must be 6 characters long.");
       return;
@@ -87,7 +92,7 @@ export default function VerifyAccount() {
     const loadingToast = toast.loading("Verifying account...");
 
     try {
-      await verifyAccount(
+      verifyAccount(
         { code: fullCode, email: email },
         {
           onSuccess: () => {
@@ -102,7 +107,6 @@ export default function VerifyAccount() {
       toast.dismiss(loadingToast);
       toast.error(error.message || "Verification failed. Please try again.");
     }
-
   };
 
   const formatTime = (seconds) => {
@@ -127,21 +131,24 @@ export default function VerifyAccount() {
           <label className="mb-3 block text-sm font-medium text-[#05243F] sm:mb-4">
             Input Code
           </label>
-          <div className="flex gap-1.5 sm:gap-2 md:gap-3">
-            {code.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className={`h-10 w-10 rounded-lg text-center text-sm font-medium text-[#05243F]/40 transition-colors duration-300 focus:outline-none sm:h-12 sm:w-12 sm:text-base md:h-14 md:w-14 ${
-                  digit ? "bg-[#FFF4DD]" : "bg-[#F4F5FC]"
-                }`}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div className="flex gap-2 sm:gap-3">
+              {code.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  className={`h-10 w-10 rounded-lg text-center text-sm font-medium text-[#05243F]/40 transition-colors duration-300 focus:outline-none sm:h-12 sm:w-12 sm:text-base md:h-14 md:w-14 ${
+                    digit ? "bg-[#FFF4DD]" : "bg-[#F4F5FC]"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="mt-4 flex flex-col space-y-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
