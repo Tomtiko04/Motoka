@@ -16,6 +16,9 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
+const bvn = import.meta.env.VITE_MONICREDIT_BVN;
+const nin = import.meta.env.VITE_MONICREDIT_NIN;
+
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,28 +52,41 @@ export default function RenewLicense() {
   };
 
   const handlePayNow = () => {
-    const amount = 30000; 
+    const amount = 200; // Set price to 200 Naira
     const totalAmount = amount + Number(deliveryDetails.fee);
+    const order_id = Date.now().toString(); // unique order id
+
+    // If you want to support multiple cars, replace [carDetail] with your array
+    const items = [
+      {
+        item: carDetail.id, // use car id as required by backend
+        revenue_head_code: "REV67505e736a592",
+        unit_cost: amount, // set unit_cost to 200 Naira
+      }
+    ];
     
+    // Prepare all data to pass to PaymentOptions
     const paymentData = {
-      amount: totalAmount * 100,
+      order_id,
+      first_name: carDetail?.name_of_owner || "",
+      last_name: carDetail?.last_name || "", // fallback if available
+      amount: amount, // amount in kobo if backend expects kobo
+      phone: deliveryDetails.contact, // use phone instead of contact
       email: carDetail?.email || email,
       address: deliveryDetails.address,
       lg: deliveryDetails.lg,
       state: deliveryDetails.state,
-      contact: deliveryDetails.contact,
+      bvn,
+      nin,
+      carDetail,
+      deliveryDetails,
+      items,
+      currency: "NGN",
+      paytype: "standard",
     };
 
-    startPayment(paymentData, {
-      onSuccess: (data) => {
-        console.log("Payment initialized:", data);
-        // navigate("/payment");
-        
-      },
-      onError: (error) => {
-        console.error("Payment initialization failed:", error);
-      },
-    });
+    // Navigate to PaymentOptions and pass data via state
+    navigate("/payment", { state: paymentData });
   };
 
   return (
@@ -279,8 +295,7 @@ export default function RenewLicense() {
                 ₦
                 {(
                   Number(deliveryDetails.amount) + Number(deliveryDetails.fee)
-                ).toLocaleString()}{" "}
-                Pay Now
+                ).toLocaleString()} Pay Now
                 {isPaymentInitializing && "..."}
               </button>
             </div>

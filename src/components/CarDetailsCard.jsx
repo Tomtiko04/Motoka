@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import MercedesLogo from "../assets/images/mercedes-logo.png";
+import { api } from "../services/apiClient";
 
 const defaultLogo = MercedesLogo;
 
@@ -19,8 +20,8 @@ const getReminderStatus = (message) => {
   
   const lowerMessage = message.toLowerCase();
   
-  if (lowerMessage.includes('expired') || lowerMessage.includes('0 day')) {
-    return { type: 'expired', bgColor: '#FFE8E8', dotColor: '#DB8888' };
+  if (lowerMessage.includes('expiered') || lowerMessage.includes('0 day')) {
+    return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
   } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
     return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
   } else {
@@ -35,7 +36,7 @@ export default function CarDetailsCard({
   reminderData = [] 
 }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
-  const [reminderMessage, setReminderMessage] = useState("No reminder available");
+  const [reminderMessage, setReminderMessage] = useState("Loading...");
   const [reminderStatus, setReminderStatus] = useState({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
 
   const handleRenewClick = () => {
@@ -66,20 +67,23 @@ export default function CarDetailsCard({
 
   // Process reminder data
   useEffect(() => {
-    if (reminderData && reminderData.length > 0) {
-      const reminderObj = reminderData[0];
-      if (reminderObj && reminderObj.reminder && reminderObj.reminder.message) {
-        setReminderMessage(reminderObj.reminder.message);
-        setReminderStatus(getReminderStatus(reminderObj.reminder.message));
-      } else {
-        setReminderMessage("No active reminders");
+    async function fetchReminder() {
+      try {
+        const res = await api.get(`/reminder`);
+        const reminderArr = res.data.data || [];
+        const reminderObj = reminderArr.find(
+          (item) => String(item.car_id) === String(carDetail.id)
+        );
+        const message = reminderObj?.reminder?.message || "No reminder available";
+        setReminderMessage(message);
+        setReminderStatus(getReminderStatus(message));
+      } catch (e) {
+        setReminderMessage("No reminder available");
         setReminderStatus({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
       }
-    } else {
-      setReminderMessage("No reminder available");
-      setReminderStatus({ type: 'normal', bgColor: '#E8F5E8', dotColor: '#4CAF50' });
     }
-  }, []);
+    if (carDetail?.id) fetchReminder();
+  }, [carDetail?.id]);
 
   return (
     <div className="rounded-2xl bg-white px-4 py-5">
@@ -145,7 +149,8 @@ export default function CarDetailsCard({
         {isRenew && (
           <button
             onClick={handleRenewClick}
-            className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+            className="rounded-full cursor-pointer bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+            style={{ pointerEvents: 'auto' }}
           >
             Renew Now
           </button>
