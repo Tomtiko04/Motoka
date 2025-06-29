@@ -487,6 +487,84 @@ export default function AddCar() {
     </div>
   );
 
+  // Auto-fill function to populate form with sample data
+  const handleAutoFill = () => {
+    // Generate random sample data
+    const sampleNames = ["John Doe", "Sarah Johnson", "Michael Brown", "Emily Davis", "David Wilson"];
+    const sampleAddresses = [
+      "123 Main Street, Lagos, Nigeria",
+      "456 Victoria Island, Lagos, Nigeria", 
+      "789 Ikeja, Lagos, Nigeria",
+      "321 Lekki Phase 1, Lagos, Nigeria",
+      "654 Surulere, Lagos, Nigeria"
+    ];
+    const sampleColors = ["Black", "White", "Silver", "Gray", "Red", "Blue"];
+    const samplePhoneNumbers = ["08012345678", "08123456789", "07012345678", "09012345678"];
+    
+    // Get random values
+    const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+    const randomAddress = sampleAddresses[Math.floor(Math.random() * sampleAddresses.length)];
+    const randomColor = sampleColors[Math.floor(Math.random() * sampleColors.length)];
+    const randomPhone = samplePhoneNumbers[Math.floor(Math.random() * samplePhoneNumbers.length)];
+    
+    // Randomly decide if car is registered or not (70% chance of being registered)
+    const isRegistered = Math.random() > 0.3;
+    
+    // Generate random dates (only for registered cars)
+    let randomIssueDate, randomExpiryDate;
+    if (isRegistered) {
+      const today = new Date();
+      randomIssueDate = new Date(today.getFullYear() - Math.floor(Math.random() * 5), 
+                                Math.floor(Math.random() * 12), 
+                                Math.floor(Math.random() * 28) + 1);
+      randomExpiryDate = new Date(randomIssueDate.getFullYear() + 5, 
+                                 randomIssueDate.getMonth(), 
+                                 randomIssueDate.getDate());
+    }
+    
+    // Try to use actual car data if available
+    let selectedMake = "Toyota";
+    let selectedModel = "Camry";
+    let selectedYear = "2020";
+    
+    if (carTypes.length > 0) {
+      const randomCar = carTypes[Math.floor(Math.random() * carTypes.length)];
+      selectedMake = randomCar.make;
+      selectedModel = randomCar.model;
+      selectedYear = randomCar.year;
+    }
+    
+    // Generate realistic registration and serial numbers
+    const registrationNumber = `LSD${Math.floor(Math.random() * 9000) + 1000}`;
+    const chassisNumber = `JTDKN3DU0E${Math.floor(Math.random() * 9000000) + 1000000}`;
+    const engineNumber = `2AR-FE${Math.floor(Math.random() * 900000) + 100000}`;
+    
+    const sampleData = {
+      ownerName: randomName,
+      address: randomAddress,
+      vehicleMake: selectedMake,
+      vehicleModel: selectedModel,
+      registrationNo: isRegistered ? registrationNumber : "",
+      chassisNo: chassisNumber,
+      engineNo: engineNumber,
+      vehicleYear: selectedYear,
+      vehicleColor: randomColor,
+      dateIssued: isRegistered ? randomIssueDate.toISOString().split('T')[0] : "",
+      expiryDate: isRegistered ? randomExpiryDate.toISOString().split('T')[0] : "",
+      isRegistered: isRegistered,
+      phoneNo: isRegistered ? "" : randomPhone,
+    };
+
+    // Set the form data with sample values
+    setFormData(sampleData);
+    
+    // Clear any existing errors
+    setErrors({});
+    
+    // Show success message
+    toast.success(`Form auto-filled with ${isRegistered ? 'registered' : 'unregistered'} car data!`);
+  };
+
   return (
     <>
       <Header />
@@ -498,7 +576,11 @@ export default function AddCar() {
             <div className="mt-2 mb-7">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-medium text-[#05243F]">Add Car</h2>
-                <button className="flex items-center justify-between gap-x-2 rounded-[20px] bg-white px-3 py-1.5 font-semibold text-[#EBB950] shadow-[0_2px_8px_0_rgba(235,184,80,0.32)]">
+                <button 
+                  type="button"
+                  onClick={handleAutoFill}
+                  className="flex items-center justify-between gap-x-2 rounded-[20px] bg-white px-3 py-1.5 font-semibold text-[#EBB950] shadow-[0_2px_8px_0_rgba(235,184,80,0.32)] hover:bg-[#FFF4DD] transition-colors duration-200"
+                >
                   <BsStars />
                   <span className="text-base font-semibold">Auto Fill</span>
                 </button>
