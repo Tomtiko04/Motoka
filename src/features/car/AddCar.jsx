@@ -256,7 +256,7 @@ export default function AddCar() {
       { name: "vehicleColor", label: "Vehicle Color" },
     ];
 
-    // Add conditional required fields based on registration status
+  
     if (formData.isRegistered) {
       requiredFields.push(
         { name: "registrationNo", label: "Registration Number" },
@@ -267,14 +267,14 @@ export default function AddCar() {
       requiredFields.push({ name: "phoneNo", label: "Phone Number" });
     }
 
-    // Check required fields
+ 
     requiredFields.forEach(({ name, label }) => {
       if (!formData[name]?.trim()) {
         newErrors[name] = `${label} is required`;
       }
     });
 
-    // Additional validation rules
+   
     if (formData.vehicleYear && !/^\d{4}$/.test(formData.vehicleYear)) {
       newErrors.vehicleYear = "Please enter a valid year (YYYY)";
     } else if (formData.vehicleYear) {
@@ -283,7 +283,7 @@ export default function AddCar() {
       if (year > currentYear) {
         newErrors.vehicleYear = "Year cannot be in the future";
       } else if (year < 1886) {
-        // First automobile was invented in 1886
+      
         newErrors.vehicleYear = "Please enter a valid year";
       }
     }
@@ -489,7 +489,7 @@ export default function AddCar() {
 
   // Auto-fill function to populate form with sample data
   const handleAutoFill = () => {
-    // Generate random sample data
+   
     const sampleNames = ["John Doe", "Sarah Johnson", "Michael Brown", "Emily Davis", "David Wilson"];
     const sampleAddresses = [
       "123 Main Street, Lagos, Nigeria",
@@ -501,16 +501,16 @@ export default function AddCar() {
     const sampleColors = ["Black", "White", "Silver", "Gray", "Red", "Blue"];
     const samplePhoneNumbers = ["08012345678", "08123456789", "07012345678", "09012345678"];
     
-    // Get random values
+  
     const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
     const randomAddress = sampleAddresses[Math.floor(Math.random() * sampleAddresses.length)];
     const randomColor = sampleColors[Math.floor(Math.random() * sampleColors.length)];
     const randomPhone = samplePhoneNumbers[Math.floor(Math.random() * samplePhoneNumbers.length)];
     
-    // Randomly decide if car is registered or not (70% chance of being registered)
+   
     const isRegistered = Math.random() > 0.3;
     
-    // Generate random dates (only for registered cars)
+   
     let randomIssueDate, randomExpiryDate;
     if (isRegistered) {
       const today = new Date();
@@ -522,7 +522,7 @@ export default function AddCar() {
                                  randomIssueDate.getDate());
     }
     
-    // Try to use actual car data if available
+  
     let selectedMake = "Toyota";
     let selectedModel = "Camry";
     let selectedYear = "2020";
@@ -534,7 +534,7 @@ export default function AddCar() {
       selectedYear = randomCar.year;
     }
     
-    // Generate realistic registration and serial numbers
+    
     const registrationNumber = `LSD${Math.floor(Math.random() * 9000) + 1000}`;
     const chassisNumber = `JTDKN3DU0E${Math.floor(Math.random() * 9000000) + 1000000}`;
     const engineNumber = `2AR-FE${Math.floor(Math.random() * 900000) + 100000}`;
@@ -555,13 +555,13 @@ export default function AddCar() {
       phoneNo: isRegistered ? "" : randomPhone,
     };
 
-    // Set the form data with sample values
+
     setFormData(sampleData);
     
-    // Clear any existing errors
+
     setErrors({});
     
-    // Show success message
+
     toast.success(`Form auto-filled with ${isRegistered ? 'registered' : 'unregistered'} car data!`);
   };
 
