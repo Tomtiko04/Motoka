@@ -6,6 +6,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import { useInitializePayment } from "./useRenew";
+import { useReminders } from '../../context/ReminderContext';
 
 const formatDate = (dateString) => {
   if (!dateString) return "-";
@@ -25,6 +26,8 @@ export default function RenewLicense() {
   const carDetail = location?.state?.carDetail;
   const { startPayment, isPaymentInitializing } = useInitializePayment();
   const email = "ogunneyeoyinkansola@gmail.com"
+  const { reminders } = useReminders();
+  const getCarReminder = (carId) => reminders.find(r => String(r.car_id) === String(carId));
 
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
@@ -34,6 +37,21 @@ export default function RenewLicense() {
     contact: "",
     amount: "30000"
   });
+
+  const [selectedDocs, setSelectedDocs] = useState([]);
+  const docOptions = [
+    "Road Worthiness",
+    "Vehicle License",
+    "Insurance",
+    "Proof of Ownership"
+  ];
+  const handleToggleDoc = (doc) => {
+    setSelectedDocs((prev) =>
+      prev.includes(doc)
+        ? prev.filter((d) => d !== doc)
+        : [...prev, doc]
+    );
+  };
 
   const isFormValid = () => {
     return (
@@ -168,24 +186,26 @@ export default function RenewLicense() {
               </div>
             </div> */}
 
-            <CarDetailsCard carDetail={carDetail} isRenew={false} />
+            <CarDetailsCard carDetail={carDetail} isRenew={false} reminderObj={getCarReminder(carDetail.id)} />
 
             {/* Document Details */}
             <div className="mt-8">
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
               <div className="flex flex-wrap gap-3">
-                <button className="rounded-full bg-[#F4F5FC] px-5 py-2.5 text-sm font-medium text-[#05243F] transition-colors hover:bg-[#E5F3FF]">
-                  Road Worthiness
-                </button>
-                <button className="rounded-full bg-[#F4F5FC] px-5 py-2.5 text-sm font-medium text-[#05243F] transition-colors hover:bg-[#E5F3FF]">
-                  Vehicle License
-                </button>
-                <button className="rounded-full bg-[#F4F5FC] px-5 py-2.5 text-sm font-medium text-[#05243F] transition-colors hover:bg-[#E5F3FF]">
-                  Insurance
-                </button>
-                <button className="rounded-full bg-[#F4F5FC] px-5 py-2.5 text-sm font-medium text-[#05243F] transition-colors hover:bg-[#E5F3FF]">
-                  Proof of Ownership
-                </button>
+                {docOptions.map((doc) => (
+                  <button
+                    key={doc}
+                    type="button"
+                    onClick={() => handleToggleDoc(doc)}
+                    className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors
+                      ${selectedDocs.includes(doc)
+                        ? "bg-green-500 text-white"
+                        : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"}
+                    `}
+                  >
+                    {doc}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
