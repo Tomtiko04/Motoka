@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 // import { FaCarAlt, FaPlus } from "react-icons/fa";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useInitializePayment } from "./useRenew";
 import { useReminders } from '../../context/ReminderContext';
+import { fetchPaymentSchedules, fetchPaymentHeads, initiateMonicreditPayment } from '../../services/apiMonicredit';
 
 const formatDate = (dateString) => {
   if (!dateString) return "-";
@@ -24,27 +24,69 @@ export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  const { startPayment, isPaymentInitializing } = useInitializePayment();
-  const email = "ogunneyeoyinkansola@gmail.com"
+  // Get user info from localStorage
+  const userInfo = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo"))
+    : {};
+  const email = userInfo.email || "";
+  const firstName = userInfo.name || "";
   const { reminders } = useReminders();
   const getCarReminder = (carId) => reminders.find(r => String(r.car_id) === String(carId));
 
+  // Payment data
+  const [paymentHeads, setPaymentHeads] = useState([]);
+  const [paymentSchedules, setPaymentSchedules] = useState([]);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+  const [selectedDocs, setSelectedDocs] = useState([]);
+  const [selectedSchedules, setSelectedSchedules] = useState([]); // array of payment schedule objects
+  const [isPaymentInitializing, setIsPaymentInitializing] = useState(false);
+
+  // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
     state: "",
     fee: "5000",
     contact: "",
-    amount: "30000"
+    amount: "0"
   });
 
-  const [selectedDocs, setSelectedDocs] = useState([]);
-  const docOptions = [
-    "Road Worthiness",
-    "Vehicle License",
-    "Insurance",
-    "Proof of Ownership"
-  ];
+  // Fetch payment heads and schedules on mount
+  useEffect(() => {
+    async function fetchData() {
+      setLoadingPayments(true);
+      try {
+        const [heads, schedules] = await Promise.all([
+          fetchPaymentHeads(),
+          fetchPaymentSchedules()
+        ]);
+        setPaymentHeads(heads);
+        setPaymentSchedules(schedules);
+      } catch (e) {
+        setPaymentHeads([]);
+        setPaymentSchedules([]);
+      } finally {
+        setLoadingPayments(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // When selectedDocs changes, update selectedSchedules and amount
+  useEffect(() => {
+    // Find payment schedules for selected docs
+    const selected = paymentSchedules.filter(sch =>
+      selectedDocs.includes(sch.payment_head?.payment_head_name)
+    );
+    setSelectedSchedules(selected);
+    // Sum the amounts for all selected (unit_cost)
+    const total = selected.reduce((sum, sch) => sum + Number(sch.amount), 0);
+    setDeliveryDetails((prev) => ({ ...prev, amount: total })); // store as number
+  }, [selectedDocs, paymentSchedules]);
+
+  // Document options from payment heads
+  const docOptions = paymentHeads.map(h => h.payment_head_name);
+
   const handleToggleDoc = (doc) => {
     setSelectedDocs((prev) =>
       prev.includes(doc)
@@ -58,7 +100,8 @@ export default function RenewLicense() {
       deliveryDetails.address.trim() !== "" &&
       deliveryDetails.lg.trim() !== "" &&
       deliveryDetails.state.trim() !== "" &&
-      deliveryDetails.contact.trim() !== ""
+      deliveryDetails.contact.trim() !== "" &&
+      selectedSchedules.length > 0
     );
   };
 
@@ -69,42 +112,17 @@ export default function RenewLicense() {
     }));
   };
 
-  const handlePayNow = () => {
-    const amount = 200; // Set price to 200 Naira
-    const totalAmount = amount + Number(deliveryDetails.fee);
-    const order_id = Date.now().toString(); // unique order id
-
-    // If you want to support multiple cars, replace [carDetail] with your array
-    const items = [
-      {
-        item: carDetail.id, // use car id as required by backend
-        revenue_head_code: "REV67505e736a592",
-        unit_cost: amount, // set unit_cost to 200 Naira
-      }
-    ];
-    
-    // Prepare all data to pass to PaymentOptions
-    const paymentData = {
-      order_id,
-      first_name: carDetail?.name_of_owner || "",
-      last_name: carDetail?.last_name || "", // fallback if available
-      amount: amount, // amount in kobo if backend expects kobo
-      phone: deliveryDetails.contact, // use phone instead of contact
-      email: carDetail?.email || email,
-      address: deliveryDetails.address,
-      lg: deliveryDetails.lg,
-      state: deliveryDetails.state,
-      bvn,
-      nin,
-      carDetail,
+  // Payment logic
+  const handlePayNow = async () => {
+    // Only navigate to payment selector, do not initiate payment here
+    const paymentPayload = {
+      selectedSchedules,
       deliveryDetails,
-      items,
-      currency: "NGN",
-      paytype: "standard",
+      selectedDocs,
+      carDetail,
+      // add any other info needed for payment
     };
-
-    // Navigate to PaymentOptions and pass data via state
-    navigate("/payment", { state: paymentData });
+    navigate("/payment", { state: paymentPayload });
   };
 
   return (
@@ -192,7 +210,9 @@ export default function RenewLicense() {
             <div className="mt-8">
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
               <div className="flex flex-wrap gap-3">
-                {docOptions.map((doc) => (
+                {loadingPayments ? (
+                  <span>Loading...</span>
+                ) : docOptions.map((doc) => (
                   <button
                     key={doc}
                     type="button"
@@ -228,7 +248,7 @@ export default function RenewLicense() {
                   Renewal Amount
                 </div>
                 <div className="mt-3 w-full rounded-[10px] border-3 border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/40">
-                  {formatCurrency(deliveryDetails.amount)}
+                  {formatCurrency(Number(deliveryDetails.amount))}
                 </div>
               </div>
 

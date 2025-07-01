@@ -95,9 +95,18 @@ export default function PaymentOptions() {
         setMonicreditLoading(true);
         setMonicreditError("");
         try {
-          // Generate a new unique order_id for each payment attempt
-          const newOrderId = Date.now().toString() + Math.floor(Math.random() * 1000).toString();
-          const data = await initiateMonicreditPayment({ ...paymentData, order_id: newOrderId });
+          // Build items from selectedSchedules
+          let items = (paymentData.selectedSchedules || []).map(sch => ({
+            payment_schedule_id: sch.id,
+            // revenue_head_code: sch.revenue_head?.revenue_head_code, // dynamic, commented out for now
+            revenue_head_code: "REV686003f87e350", // hardcoded for testing
+            unit_cost: Number(sch.amount)
+          }));
+          const deliveryFee = Number(paymentData.deliveryDetails?.fee || 0);
+          if (items.length > 0 && deliveryFee > 0) {
+            items[0].unit_cost += deliveryFee;
+          }
+          const data = await initiateMonicreditPayment({ items });
           setMonicreditAuthUrl(data.authorization_url);
           setMonicreditTransId(data.id);
         } catch (err) {
