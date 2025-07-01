@@ -21,7 +21,7 @@ export default function PaymentOptions() {
     { id: "wallet", label: "Wallet Balance: N30,876" },
     { id: "transfer", label: "Pay Via Transfer" },
     { id: "card", label: "Pay Via Card" },
-    { id: "Monicredit_Transfer", label: "Pay Via Monicredit Transfer" },
+    { id: "Monicredit_Transfer", label: "Pay Via Monicredit" },
   ];
 
   const walletDetails = {
@@ -518,7 +518,7 @@ export default function PaymentOptions() {
                       <li>
                         Click the <span className="font-semibold text-[#2284DB]">Proceed to Monicredit Payment</span> button below.
                       </li>
-                      <li>
+                      {/* <li>
                         A secure Monicredit payment page will open in a new tab.
                       </li>
                       <li>
@@ -529,7 +529,7 @@ export default function PaymentOptions() {
                       </li>
                       <li>
                         You can return to this page to continue or check your payment status.
-                      </li>
+                      </li> */}
                     </ol>
                     <div className="mt-4 text-sm text-[#F26060]">
                       <span className="font-semibold">Note:</span> Do not close the payment tab until your payment is completed.

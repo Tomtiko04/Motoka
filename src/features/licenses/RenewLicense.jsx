@@ -46,7 +46,7 @@ export default function RenewLicense() {
     address: "",
     lg: "",
     state: "",
-    fee: "5000",
+    fee: "50",
     contact: "",
     amount: "0"
   });
