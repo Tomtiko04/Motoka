@@ -1,6 +1,9 @@
-// hooks/useRenew.js
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { initializePayment as initializePaymentApi } from "../../services/apiRenew";
+import {
+  getAllLocalGovernment as getAllLocalGovernmentApi,
+  getAllState as getAllStateApi,
+} from "../../services/apiAddress";
 // import { initializePayment as initializePaymentApi} from "../services/apiRenew";
 
 export function useInitializePayment() {
@@ -19,4 +22,22 @@ export function useInitializePayment() {
     startPayment,
     isPaymentInitializing,
   };
+}
+
+export function useGetState() {
+  const { data, isPending } = useQuery({
+    queryKey: ["states"],
+    queryFn: getAllStateApi,
+  });
+
+  return { data, isPending };
+}
+
+export function useGetLocalGovernment() {
+  const { data, isPending } = useQuery({
+    queryKey: ["LG"],
+    queryFn: getAllLocalGovernmentApi,
+  });
+
+  return { data, isPending };
 }

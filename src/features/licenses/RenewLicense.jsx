@@ -5,7 +5,7 @@ import { IoIosArrowBack } from "react-icons/io";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useInitializePayment } from "./useRenew";
+import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useRenew";
 
 const formatDate = (dateString) => {
   if (!dateString) return "-";
@@ -21,7 +21,9 @@ export default function RenewLicense() {
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
   const { startPayment, isPaymentInitializing } = useInitializePayment();
-  const email = "ogunneyeoyinkansola@gmail.com"
+  const email = "ogunneyeoyinkansola@gmail.com";
+  const {data:isState, isPending:isGettingState} = useGetState();
+  const {data:isLG, isPending:isGettingLG} = useGetLocalGovernment();
 
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
