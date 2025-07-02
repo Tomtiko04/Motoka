@@ -5,16 +5,8 @@ import { IoIosArrowBack } from "react-icons/io";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useInitializePayment } from "./useRenew";
-
-const formatDate = (dateString) => {
-  if (!dateString) return "-";
-  const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useRenew";
+import SearchableSelect from "../../components/shared/SearchableSelect";
 
 const bvn = import.meta.env.VITE_MONICREDIT_BVN;
 const nin = import.meta.env.VITE_MONICREDIT_NIN;
@@ -24,7 +16,9 @@ export default function RenewLicense() {
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
   const { startPayment, isPaymentInitializing } = useInitializePayment();
-  const email = "ogunneyeoyinkansola@gmail.com"
+  const email = "ogunneyeoyinkansola@gmail.com";
+  const {data:state, isPending:isGettingState} = useGetState();
+  const {data:lg, isPending:isGettingLG} = useGetLocalGovernment();
 
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
@@ -34,6 +28,9 @@ export default function RenewLicense() {
     contact: "",
     amount: "30000"
   });
+
+  const isState = state?.data;
+  const isLG = lg?.data;
 
   const isFormValid = () => {
     return (
@@ -230,27 +227,42 @@ export default function RenewLicense() {
 
               <div className="mb-6 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm font-medium text-[#05243F]">LG</div>
-                  <input
-                    type="text"
-                    value={deliveryDetails.lg}
-                    onChange={(e) => handleDeliveryChange("lg", e.target.value)}
-                    className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                    placeholder="Enter LG"
+                  <SearchableSelect
+                    label="State"
+                    name="state"
+                    value={deliveryDetails.state}
+                    onChange={(e) => {
+                      handleDeliveryChange("state", e.target.value);
+                      handleDeliveryChange("lg", "");
+                    }}
+                    options={
+                      Array.isArray(isState)
+                        ? isState.map((state) => ({
+                            id: state.id,
+                            name: state.state_name,
+                          }))
+                        : []
+                    }
+                    placeholder="Select state"
+                    filterKey="name"
+                    isLoading={isGettingState}
                   />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#05243F]">
-                    State
-                  </div>
-                  <input
-                    type="text"
-                    value={deliveryDetails.state}
-                    onChange={(e) =>
-                      handleDeliveryChange("state", e.target.value)
+                  <SearchableSelect
+                    label="Local Government"
+                    name="lg"
+                    value={deliveryDetails.lg}
+                    onChange={(e) => handleDeliveryChange("lg", e.target.value)}
+                    options={
+                      Array.isArray(isLG)
+                        ? isLG.map((lg) => ({ id: lg.id, name: lg.lga_name }))
+                        : []
                     }
-                    className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                    placeholder="Enter state"
+                    placeholder="Select LG"
+                    filterKey="name"
+                    isLoading={isGettingLG}
+                    disabled={!deliveryDetails.state}
                   />
                 </div>
               </div>
