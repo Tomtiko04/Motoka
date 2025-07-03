@@ -1,113 +1,57 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import ImageSlider from "../../components/ImageSlider";
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import ImageSlider from "../../components/ImageSlider";
+
+const schema = yup.object().shape({
+  name: yup.string().required("Username is required"),
+  email: yup.string().email("Invalid email format").required("Email is required"),
+  password: yup.string().min(8, "Password must be at least 8 characters").required("Password is required"),
+  confirmPassword: yup.string().oneOf([yup.ref('password'), undefined], "Passwords do not match").required("Please confirm your password"),
+  terms: yup.boolean().oneOf([true], "You must accept the Terms & Conditions"),
+});
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    terms: false,
-  });
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    terms: "",
-  });
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-    // Clear error when user starts typing or checking
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let newErrors = {};
-    let isValid = true;
-
-    // Validate name
-    if (!formData.name) {
-      newErrors.name = "Username is required";
-      isValid = false;
-    }
-
-    // Validate email
-    if (!formData.email.trim()) {
-      newErrors.email = "Email/Phone number is required";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-      isValid = false;
-    }
-
-    // Validate password
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-      isValid = false;
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-      isValid = false;
-    }
-
-    // Validate confirm password
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-      isValid = false;
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-      isValid = false;
-    }
-
-    // Validate terms
-    if (!formData.terms) {
-      newErrors.terms = "You must accept the Terms & Conditions";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    if (isValid) {
-      const loadingToast = toast.loading("Creating your account...");
-      console.log(formData);
-      try {
-        await signupUser(
-          {
-            name: formData.name,
-            email: formData.email,
-            password: formData.password.trim(),
-            password_confirmation: formData.confirmPassword.trim(),
+  const onSubmit =  (data) => {
+    const loadingToast = toast.loading("Creating your account...");
+    try {
+        signupUser(
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password.trim(),
+          password_confirmation: data.confirmPassword.trim(),
+        },
+        {
+          onSuccess: () => {
+            toast.dismiss(loadingToast);
           },
-          {
-            onSuccess: () => {
-              toast.dismiss(loadingToast);
-            },
-            onError: () => {
-              toast.dismiss(loadingToast);
-            },
+          onError: () => {
+            toast.dismiss(loadingToast);
           },
-        );
-      } catch (error) {
-        toast.dismiss(loadingToast);
-        toast.error(error.message || "Signup failed");
-      }
+        },
+      );
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error(error.message || "Signup failed");
     }
   };
 
@@ -136,7 +80,10 @@ export default function Signup() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4 sm:space-y-5"
+          >
             <div>
               <label
                 htmlFor="name"
@@ -146,16 +93,14 @@ export default function Signup() {
               </label>
               <input
                 id="name"
-                name="name"
                 type="text"
-                value={formData.name}
-                onChange={handleChange}
+                {...register("name")}
                 placeholder="Tomtiko"
                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
               />
               {errors.name && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.name}
+                  {errors.name.message}
                 </p>
               )}
             </div>
@@ -169,16 +114,14 @@ export default function Signup() {
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
+                {...register("email")}
                 placeholder="sample@gmail.com"
                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
               />
               {errors.email && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.email}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -193,15 +136,13 @@ export default function Signup() {
               <div className="relative">
                 <input
                   id="password"
-                  name="password"
+                  {...register("password")}
                   type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
                   className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                 />
                 <div
-                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
                     <FaRegEyeSlash size={20} />
@@ -212,7 +153,7 @@ export default function Signup() {
               </div>
               {errors.password && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.password}
+                  {errors.password.message}
                 </p>
               )}
             </div>
@@ -227,15 +168,13 @@ export default function Signup() {
               <div className="relative">
                 <input
                   id="confirmPassword"
-                  name="confirmPassword"
+                  {...register("confirmPassword")}
                   type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
                   className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                 />
                 <div
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
                     <FaRegEyeSlash size={20} />
@@ -246,7 +185,7 @@ export default function Signup() {
               </div>
               {errors.confirmPassword && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.confirmPassword}
+                  {errors.confirmPassword.message}
                 </p>
               )}
             </div>
@@ -255,10 +194,8 @@ export default function Signup() {
               <div className="flex items-center">
                 <input
                   id="terms"
-                  name="terms"
+                  {...register("terms")}
                   type="checkbox"
-                  checked={formData.terms}
-                  onChange={handleChange}
                   className="h-4 w-4 cursor-pointer rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC]"
                 />
                 <label
@@ -270,7 +207,7 @@ export default function Signup() {
               </div>
               {errors.terms && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957] sm:mt-0">
-                  {errors.terms}
+                  {errors.terms.message}
                 </p>
               )}
             </div>

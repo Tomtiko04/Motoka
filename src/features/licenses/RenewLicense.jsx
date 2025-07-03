@@ -5,17 +5,8 @@ import { IoIosArrowBack } from "react-icons/io";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useReminders } from '../../context/ReminderContext';
-import { fetchPaymentSchedules, fetchPaymentHeads, initiateMonicreditPayment } from '../../services/apiMonicredit';
-
-const formatDate = (dateString) => {
-  if (!dateString) return "-";
-  const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useRenew";
+import SearchableSelect from "../../components/shared/SearchableSelect";
 
 const bvn = import.meta.env.VITE_MONICREDIT_BVN;
 const nin = import.meta.env.VITE_MONICREDIT_NIN;
@@ -24,24 +15,11 @@ export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  // Get user info from localStorage
-  const userInfo = localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : {};
-  const email = userInfo.email || "";
-  const firstName = userInfo.name || "";
-  const { reminders } = useReminders();
-  const getCarReminder = (carId) => reminders.find(r => String(r.car_id) === String(carId));
+  const { startPayment, isPaymentInitializing } = useInitializePayment();
+  const email = "ogunneyeoyinkansola@gmail.com";
+  const {data:state, isPending:isGettingState} = useGetState();
+  const {data:lg, isPending:isGettingLG} = useGetLocalGovernment();
 
-  // Payment data
-  const [paymentHeads, setPaymentHeads] = useState([]);
-  const [paymentSchedules, setPaymentSchedules] = useState([]);
-  const [loadingPayments, setLoadingPayments] = useState(true);
-  const [selectedDocs, setSelectedDocs] = useState([]);
-  const [selectedSchedules, setSelectedSchedules] = useState([]); // array of payment schedule objects
-  const [isPaymentInitializing, setIsPaymentInitializing] = useState(false);
-
-  // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
@@ -51,49 +29,8 @@ export default function RenewLicense() {
     amount: "0"
   });
 
-  // Fetch payment heads and schedules on mount
-  useEffect(() => {
-    async function fetchData() {
-      setLoadingPayments(true);
-      try {
-        const [heads, schedules] = await Promise.all([
-          fetchPaymentHeads(),
-          fetchPaymentSchedules()
-        ]);
-        setPaymentHeads(heads);
-        setPaymentSchedules(schedules);
-      } catch (e) {
-        setPaymentHeads([]);
-        setPaymentSchedules([]);
-      } finally {
-        setLoadingPayments(false);
-      }
-    }
-    fetchData();
-  }, []);
-
-  // When selectedDocs changes, update selectedSchedules and amount
-  useEffect(() => {
-    // Find payment schedules for selected docs
-    const selected = paymentSchedules.filter(sch =>
-      selectedDocs.includes(sch.payment_head?.payment_head_name)
-    );
-    setSelectedSchedules(selected);
-    // Sum the amounts for all selected (unit_cost)
-    const total = selected.reduce((sum, sch) => sum + Number(sch.amount), 0);
-    setDeliveryDetails((prev) => ({ ...prev, amount: total })); // store as number
-  }, [selectedDocs, paymentSchedules]);
-
-  // Document options from payment heads
-  const docOptions = paymentHeads.map(h => h.payment_head_name);
-
-  const handleToggleDoc = (doc) => {
-    setSelectedDocs((prev) =>
-      prev.includes(doc)
-        ? prev.filter((d) => d !== doc)
-        : [...prev, doc]
-    );
-  };
+  const isState = state?.data;
+  const isLG = lg?.data;
 
   const isFormValid = () => {
     return (
@@ -270,27 +207,42 @@ export default function RenewLicense() {
 
               <div className="mb-6 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm font-medium text-[#05243F]">LG</div>
-                  <input
-                    type="text"
-                    value={deliveryDetails.lg}
-                    onChange={(e) => handleDeliveryChange("lg", e.target.value)}
-                    className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                    placeholder="Enter LG"
+                  <SearchableSelect
+                    label="State"
+                    name="state"
+                    value={deliveryDetails.state}
+                    onChange={(e) => {
+                      handleDeliveryChange("state", e.target.value);
+                      handleDeliveryChange("lg", "");
+                    }}
+                    options={
+                      Array.isArray(isState)
+                        ? isState.map((state) => ({
+                            id: state.id,
+                            name: state.state_name,
+                          }))
+                        : []
+                    }
+                    placeholder="Select state"
+                    filterKey="name"
+                    isLoading={isGettingState}
                   />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#05243F]">
-                    State
-                  </div>
-                  <input
-                    type="text"
-                    value={deliveryDetails.state}
-                    onChange={(e) =>
-                      handleDeliveryChange("state", e.target.value)
+                  <SearchableSelect
+                    label="Local Government"
+                    name="lg"
+                    value={deliveryDetails.lg}
+                    onChange={(e) => handleDeliveryChange("lg", e.target.value)}
+                    options={
+                      Array.isArray(isLG)
+                        ? isLG.map((lg) => ({ id: lg.id, name: lg.lga_name }))
+                        : []
                     }
-                    className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                    placeholder="Enter state"
+                    placeholder="Select LG"
+                    filterKey="name"
+                    isLoading={isGettingLG}
+                    disabled={!deliveryDetails.state}
                   />
                 </div>
               </div>
