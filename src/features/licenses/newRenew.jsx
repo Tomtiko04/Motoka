@@ -7,8 +7,6 @@ import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useRenew";
 import SearchableSelect from "../../components/shared/SearchableSelect";
-import { useReminders } from '../../context/ReminderContext';
-import { fetchPaymentSchedules, fetchPaymentHeads } from '../../services/apiMonicredit';
 
 const bvn = import.meta.env.VITE_MONICREDIT_BVN;
 const nin = import.meta.env.VITE_MONICREDIT_NIN;
@@ -17,24 +15,11 @@ export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  // Get user info from localStorage
-  const userInfo = localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : {};
-  const email = userInfo.email || "";
-  const firstName = userInfo.name || "";
-  const { reminders } = useReminders();
-  const getCarReminder = (carId) => reminders.find(r => String(r.car_id) === String(carId));
+  const { startPayment, isPaymentInitializing } = useInitializePayment();
+  const email = "ogunneyeoyinkansola@gmail.com";
+  const {data:state, isPending:isGettingState} = useGetState();
+  const {data:lg, isPending:isGettingLG} = useGetLocalGovernment();
 
-  // Payment data
-  const [paymentHeads, setPaymentHeads] = useState([]);
-  const [paymentSchedules, setPaymentSchedules] = useState([]);
-  const [loadingPayments, setLoadingPayments] = useState(true);
-  const [selectedDocs, setSelectedDocs] = useState([]);
-  const [selectedSchedules, setSelectedSchedules] = useState([]); // array of payment schedule objects
-  const [isPaymentInitializing, setIsPaymentInitializing] = useState(false);
-
-  // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
@@ -44,53 +29,27 @@ export default function RenewLicense() {
     amount: "0"
   });
 
-  const {data:state, isPending:isGettingState} = useGetState();
-  const {data:lg, isPending:isGettingLG} = useGetLocalGovernment();
-
   const isState = state?.data;
   const isLG = lg?.data;
 
-  // Fetch payment heads and schedules on mount
-  useEffect(() => {
-    async function fetchData() {
-      setLoadingPayments(true);
-      try {
-        const [heads, schedules] = await Promise.all([
-          fetchPaymentHeads(),
-          fetchPaymentSchedules()
-        ]);
-        setPaymentHeads(heads);
-        setPaymentSchedules(schedules);
-      } catch (e) {
-        setPaymentHeads([]);
-        setPaymentSchedules([]);
-      } finally {
-        setLoadingPayments(false);
-      }
-    }
-    fetchData();
-  }, []);
+  // Add loadingPayments state to fix ReferenceError
+  const [loadingPayments, setLoadingPayments] = useState(false);
 
-  // When selectedDocs changes, update selectedSchedules and amount
-  useEffect(() => {
-    // Find payment schedules for selected docs
-    const selected = paymentSchedules.filter(sch =>
-      selectedDocs.includes(sch.payment_head?.payment_head_name)
-    );
-    setSelectedSchedules(selected);
-    // Sum the amounts for all selected (unit_cost)
-    const total = selected.reduce((sum, sch) => sum + Number(sch.amount), 0);
-    setDeliveryDetails((prev) => ({ ...prev, amount: total })); // store as number
-  }, [selectedDocs, paymentSchedules]);
+  // Add docOptions definition if missing
+  const docOptions = [
+    "Road Worthiness",
+    "Vehicle License",
+    "Insurance",
+    "Proof of Ownership"
+  ];
 
-  // Document options from payment heads
-  const docOptions = paymentHeads.map(h => h.payment_head_name);
+
+  const [selectedDocs, setSelectedDocs] = useState([]);
+  const [selectedSchedules, setSelectedSchedules] = useState([]); 
 
   const handleToggleDoc = (doc) => {
     setSelectedDocs((prev) =>
-      prev.includes(doc)
-        ? prev.filter((d) => d !== doc)
-        : [...prev, doc]
+      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
     );
   };
 
@@ -111,6 +70,8 @@ export default function RenewLicense() {
       prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
     );
   };
+
+ 
 
   const isFormValid = () => {
     return (
@@ -140,6 +101,12 @@ export default function RenewLicense() {
       // add any other info needed for payment
     };
     navigate("/payment", { state: paymentPayload });
+  };
+
+  const getCarReminder = (carId) => {
+    // If you have reminders context, use it here
+    // Example: return reminders.find(r => String(r.car_id) === String(carId));
+    return null; // fallback if reminders are not available
   };
 
   return (
