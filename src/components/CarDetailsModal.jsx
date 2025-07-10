@@ -5,9 +5,18 @@ import useModalStore from "../store/modalStore";
 const DetailItem = ({ label, value }) => (
   <div className="grid grid-cols-2 items-center py-3 border-b border-gray-200 last:border-b-0">
     <p className="text-gray-500 text-sm">{label}</p>
-    <p className="text-gray-800 font-semibold text-sm text-right">{value}</p>
+    <p className="text-[#05243F] font-semibold text-sm text-right">{value}</p>
   </div>
 );
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 export default function CarDetailsModal() {
   const { isOpen, onConfirm, hideModal, carDetail } = useModalStore();
@@ -57,14 +66,8 @@ export default function CarDetailsModal() {
           <DetailItem label="Engine No" value={carDetail.engine_no} />
           <DetailItem label="Vehicle Color" value={carDetail.vehicle_color} />
           <DetailItem label="Vehicle Year" value={carDetail.vehicle_year} />
-          <DetailItem
-            label="Date Issued"
-            value={new Date(carDetail.date_issued).toLocaleDateString()}
-          />
-          <DetailItem
-            label="Expiry Date"
-            value={new Date(carDetail.expiry_date).toLocaleDateString()}
-          />
+          <DetailItem label="Date Issued" value={formatDate(carDetail.date_issued)} />
+          <DetailItem label="Expiry Date" value={formatDate(carDetail.expiry_date)} />
         </div>
       </div>
     </div>
