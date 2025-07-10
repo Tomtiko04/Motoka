@@ -11,9 +11,28 @@ const api = axios.create({
 
 // Add security headers to all requests
 api.interceptors.request.use((config) => {
-  const token = authStorage.getToken()
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  // Use registrationToken for /add-car, otherwise use authToken
+  const registrationToken = authStorage.getRegistrationToken()
+  const authToken = authStorage.getToken()
+
+  // For car-related endpoints, try registration token first
+  if (
+    config.url &&
+    (config.url.includes("add-car") ||
+      config.url.includes("car/reg") ||
+      config.url.includes("car-types") ||
+      config.url.includes("cars"))
+  ) {
+    if (registrationToken) {
+      console.log(`Using registration token for ${config.url}`)
+      config.headers.Authorization = `Bearer ${registrationToken}`
+    } else if (authToken) {
+      console.log(`Using auth token for ${config.url}`)
+      config.headers.Authorization = `Bearer ${authToken}`
+    }
+  } else if (authToken) {
+    // For all other endpoints, use auth token
+    config.headers.Authorization = `Bearer ${authToken}`
   }
 
   // Add security headers
@@ -29,23 +48,23 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
+    const registrationToken = authStorage.getRegistrationToken();
+    const isRegistrationRequest = originalRequest.url?.includes("add-car") || originalRequest.url?.includes("car/reg");
 
-    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
-      try {
-        // Attempt to refresh the token
-        const newToken = await refreshToken()
-       
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
-     
-        return api(originalRequest)
-      } catch (refreshError) {
-       
-        authStorage.removeToken()
-        window.location.href = "/auth/login"
-        return Promise.reject(refreshError)
+      // Only attempt token refresh if not using registration token
+      if (!isRegistrationRequest || !registrationToken) {
+        try {
+          const newToken = await refreshToken()
+          originalRequest.headers.Authorization = `Bearer ${newToken}`
+          return api(originalRequest)
+        } catch (refreshError) {
+          authStorage.removeToken()
+          window.location.href = "/auth/login"
+          return Promise.reject(refreshError)
+        }
       }
     }
 

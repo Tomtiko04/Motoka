@@ -1,21 +1,31 @@
+"use client"
+
+import React, { useState, useEffect } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+
 import Logo from "../assets/images/motoka logo.svg";
 import { BsStars } from "react-icons/bs";
 
 export default function Header() {
+  const navigate = useNavigate();
+  function handleHome() {
+    navigate("/");
+  }
   return (
-    <div className="bg-white">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-0">
-        <header className="flex h-[3.3em] items-center justify-between bg-white">
-          <div className="flex flex-row items-center justify-center gap-x-3">
+    <div className="w-full bg-white">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <header className="flex flex-wrap items-center justify-between py-4">
+          <div onClick={handleHome} className="flex cursor-pointer items-center gap-2">
             <img src={Logo} alt="Motoka" className="h-8 w-auto" />
-            <h1 className="text-xl font-bold text-[#05243F]">Motoka</h1>
+            <h1 className="text-base font-bold whitespace-nowrap text-[#05243F] sm:text-lg">
+              Motoka
+            </h1>
           </div>
-          <div>
-            <button className="ai-button flex flex-row items-center justify-between gap-x-2 rounded-full px-4 py-2 text-white">
-              <BsStars />
-              <span className="text-base font-bold">MO'</span>
-            </button>
-          </div>
+
+          <button className="mt-2 flex items-center gap-2 rounded-full ai-button px-4 py-2 text-sm font-semibold text-white sm:mt-0">
+            <BsStars />
+            <span className="whitespace-nowrap">MO'</span>
+          </button>
         </header>
       </div>
     </div>

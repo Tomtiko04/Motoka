@@ -77,13 +77,12 @@ export async function signupRequest({ name, email, password, password_confirmati
       password_confirmation,
     });
 
-    // const token = data?.authorization?.token;
-    // if (!token) throw new Error("Signup successful, but no token received.");
+    // Store registration token if present
+    if (data.authorization?.token) {
+      authStorage.setRegistrationToken(data.authorization.token);
+    }
 
-    // Stores token securely
-    // authStorage.setToken(token);
-
-    return data.user;
+    return data; 
   } catch (error) {
     if (error.response) {
       const errorMessage =
@@ -99,19 +98,48 @@ export async function signupRequest({ name, email, password, password_confirmati
   }
 }
 
+
+
+
+
+
 export async function verifyAccount({ code, email }) {
   try {
-    const { data } = await api.post("/verify/user/verify", { code, email });
-    return data;
+    const { data } = await api.post("/verify/user/verify", { code, email })
+
+    
+    if (data.user) {
+      authStorage.setUserInfo(data.user)
+    }
+
+    // Store the auth token if provided after verification
+    if (data.authorization?.token) {
+     
+      authStorage.setToken(data.authorization.token)
+
+      // Also ensure we have a registration token for the add-car flow
+      // This is crucial - we need to make sure the registration token exists
+      if (!authStorage.getRegistrationToken()) {
+       
+        authStorage.setRegistrationToken(data.authorization.token)
+      }
+    }
+
+    
+    // console.log("Account verified successfully:", {
+    //   hasAuthToken: !!authStorage.getToken(),
+    //   hasRegistrationToken: !!authStorage.getRegistrationToken(),
+    //   user: !!data.user,
+    // })
+
+    return data
   } catch (error) {
     if (error.response) {
       const errorMessage =
-        error.response.data?.email?.[0] ||
-        error.response.data?.message ||
-        "Account Verification Failed";
-      throw new Error(errorMessage);
+        error.response.data?.email?.[0] || error.response.data?.message || "Account Verification Failed"
+      throw new Error(errorMessage)
     } else {
-      throw new Error(error.message || "Account Verification Failed");
+      throw new Error(error.message || "Account Verification Failed")
     }
   }
 }

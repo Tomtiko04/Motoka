@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
+import { api } from "../../services/apiClient";
+import { getReminder } from "../../services/apiReminder";
+import { useReminders } from '../../context/ReminderContext';
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -35,14 +38,23 @@ export default function Dashboard() {
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
 
+  // Use reminders from context
+  const { reminders, loading: reminderLoading } = useReminders();
+
   const sortedCars = React.useMemo(() => {
     if (!Array.isArray(cars?.cars)) return [];
     return [...cars.cars].sort((a, b) => {
-      const dateA = new Date(a.expiryDate);
-      const dateB = new Date(b.expiryDate);
+      const dateA = new Date(a.expiryDate || a.expiry_date);
+      const dateB = new Date(b.expiryDate || b.expiry_date);
       return dateA - dateB;
     });
   }, [cars?.cars]);
+
+  // Helper function to find matching reminder for a car
+  const getCarReminder = (carId) => {
+    if (!reminders || reminders.length === 0) return null;
+    return reminders.find(reminder => String(reminder.car_id) === String(carId));
+  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -68,17 +80,22 @@ export default function Dashboard() {
                 }}
                 // className="!pb-12 h-full"
               >
-                {sortedCars.map((car, index) => (
-                  <SwiperSlide key={car.id || index} >
-                    <div >
-                      <CarDetailsCard
-                        carDetail={car}
-                        isRenew={true}
-                        onRenewClick={handleRenewLicense}
-                      />
-                    </div>
-                  </SwiperSlide>
-                ))}
+                {sortedCars.map((car, index) => {
+                  const carReminder = getCarReminder(car.id);
+                  
+                  return (
+                    <SwiperSlide key={car.id || index}>
+                      <div>
+                        <CarDetailsCard
+                          carDetail={car}
+                          isRenew={true}
+                          onRenewClick={handleRenewLicense}
+                          reminderObj={carReminder}
+                        />
+                      </div>
+                    </SwiperSlide>
+                  );
+                })}
               </Swiper>
             </div>
             <div>
@@ -94,7 +111,7 @@ export default function Dashboard() {
                 <p className="mt-1 text-sm">Add your first car to get started</p>
               </div>
             </div>
-            <div >
+            <div>
               <AddCarCard onAddCarClick={handleAddCar} />
             </div>
           </div>

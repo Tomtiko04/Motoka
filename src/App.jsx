@@ -32,6 +32,9 @@ import AuthLayout from "./features/auth/AuthLayout.jsx";
 import AppLayout from "./components/AppLayout";
 import GuestRoute from "./components/GuestRoute";
 import ScrollToTop from "./components/scrollToTop.jsx";
+import AddCarRoute from "./components/AddCarRoute";
+import useModalStore from "./store/modalStore.js";
+import CarDetailsModal from "./components/CarDetailsModal.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -46,11 +49,13 @@ export default function App() {
       },
     },
   });
+  const { isOpen } = useModalStore();
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <ScrollToTop />
+        {isOpen && <CarDetailsModal />}
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
@@ -80,21 +85,26 @@ export default function App() {
                 </GuestRoute>
               }
             />
+            {/* Remove GuestRoute from verification-success */}
             <Route
               path="verification-success"
-              element={
-                <GuestRoute>
-                  <VerificationSuccess />
-                </GuestRoute>
-              }
+              element={<VerificationSuccess />}
             />
           </Route>
-          <Route path="add-car" element={<AddCar />} />
+
+          {/* Add Car Route - Special case outside AppLayout */}
+          <Route 
+            path="add-car" 
+            element={
+              <AddCarRoute>
+                <AddCar />
+              </AddCarRoute>
+            } 
+          />
 
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            {/* <Route path="add-car" element={<AddCar />} /> */}
             <Route path="licenses">
               <Route index element={<Licenses />} />
               <Route path="renew" element={<RenewLicense />} />

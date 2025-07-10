@@ -1,25 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import MercedesLogo from "../assets/images/mercedes-logo.png";
+import useModalStore from "../store/modalStore";
 
 const defaultLogo = MercedesLogo;
 
 const formatDate = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
   return `${day}-${month}-${year}`;
 };
 
-export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
+// Helper function to determine status based on reminder message
+const getReminderStatus = (message) => {
+  if (!message) return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+  
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('expiered') || lowerMessage.includes('0 day')) {
+    return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
+  } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
+    return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+  } else {
+    return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
+  }
+};
+
+export default function CarDetailsCard({ 
+  onRenewClick, 
+  carDetail, 
+  isRenew, 
+  reminderObj // now a single object, not array
+}) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
+  // const [reminderMessage, setReminderMessage] = useState("Loading...");
+  // const [reminderStatus, setReminderStatus] = useState({
+  //   type: "normal",
+  //   bgColor: "#E8F5E8",
+  //   dotColor: "#4CAF50",
+  // });
+  const { showModal } = useModalStore();
 
   const handleRenewClick = () => {
     onRenewClick(carDetail);
   };
 
+  // Load car logo
   useEffect(() => {
     const loadCarLogo = async () => {
       try {
@@ -37,46 +66,18 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
         setCarLogo(defaultLogo);
       }
     };
-
     loadCarLogo();
   }, [carDetail?.vehicle_make]);
 
-  // Another solution that works but we will need to upload our logo on that platform
-  // useEffect(() => {
-  //   const loadCarLogo = async () => {
-  //     try {
-  //       const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
-  //       if (carMake) {
-  //         const logoUrl = `https://i.ibb.co/${getCarLogoPath(carMake)}`;
-  //         setCarLogo(logoUrl);
-  //       }
-  //     } catch {
-  //       setCarLogo(MercedesLogo);
-  //     }
-  //   };
-
-  //   loadCarLogo();
-  // }, [carDetail?.vehicle_make]);
-
-  // const getCarLogoPath = (carMake) => {
-  //   const logoMap = {
-  //     toyota: "L8QZJ8p/toyota-logo.png",
-  //     bmw: "L8QZJ8p/bmw-logo.png",
-  //     mercedes: "L8QZJ8p/mercedes-logo.png",
-  //     audi: "L8QZJ8p/audi-logo.png",
-  //     honda: "L8QZJ8p/honda-logo.png",
-  //     ford: "L8QZJ8p/ford-logo.png",
-  //     hyundai: "L8QZJ8p/hyundai-logo.png",
-  //     kia: "L8QZJ8p/kia-logo.png",
-  //     nissan: "L8QZJ8p/nissan-logo.png",
-  //     volkswagen: "L8QZJ8p/volkswagen-logo.png",
-  //   };
-
-  //   return logoMap[carMake] || "L8QZJ8p/default-car-logo.png";
-  // };
+  // Use reminderObj prop for message and status
+  const reminderMessage = reminderObj?.reminder?.message || "No reminder available";
+  const reminderStatus = getReminderStatus(reminderMessage);
 
   return (
-    <div className="rounded-2xl bg-white px-4 py-5">
+    <div
+      className="rounded-2xl bg-white px-4 py-5 cursor-pointer"
+      onClick={() => showModal(true, carDetail)}
+    >
       <div className="mb-6">
         <div className="text-sm font-light text-[#05243F]/60">Car Model</div>
         <div className="flex items-center justify-between py-2">
@@ -84,10 +85,10 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
             <div className="">
               <img
                 src={carLogo}
-                lazyloading="lazy"
+                loading="lazy"
                 alt={carDetail?.vehicle_make || "Car"}
                 className="h-6 w-6 object-contain"
-                // onError={() => setCarLogo(MercedesLogo)}
+                onError={() => setCarLogo(MercedesLogo)}
               />
             </div>
             <h3 className="text-xl font-semibold text-[#05243F]">
@@ -104,7 +105,7 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
         <div>
           <div className="text-sm text-[#05243F]/60">Plate No:</div>
           <div className="text-base font-semibold text-[#05243F]">
-            {carDetail?.plate_number || "-"}
+            {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
@@ -124,28 +125,36 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 rounded-full bg-[#FFEFCE] px-4 py-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#FDB022]"></span>
+        <div
+          className="flex items-center gap-2 rounded-full px-4 py-1.5"
+          style={{ backgroundColor: reminderStatus.bgColor }}
+        >
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: reminderStatus.dotColor }}
+          ></span>
           <span className="text-sm font-medium text-[#05243F]">
-            Expires in 3 days
+            {reminderMessage}
           </span>
         </div>
         {isRenew && (
           <button
             onClick={handleRenewClick}
-            className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+            className="cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+            style={{ pointerEvents: "auto" }}
           >
             Renew Now
           </button>
         )}
       </div>
+
+      {/* {isModal && (
+        <CarDetailsModal
+          isOpen={isModal}
+          carDetail={carDetail}
+          onClose={() => setIsModal(false)}
+        />
+      )} */}
     </div>
   );
-}
-
-{
-  /* <div className="flex items-center gap-2 rounded-full bg-[#FFE8E8] px-4 py-1.5">
-  <span className="h-2 w-2 rounded-full bg-[#DB8888]"></span>
-  <span className="text-sm font-medium text-[#05243F]">License Expired</span>
-</div>; */
 }

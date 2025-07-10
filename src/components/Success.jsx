@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function Success() {
   const navigate = useNavigate();
+  
+
+
 
   return (
     <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8">
