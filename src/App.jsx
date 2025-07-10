@@ -33,6 +33,8 @@ import AppLayout from "./components/AppLayout";
 import GuestRoute from "./components/GuestRoute";
 import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
+import useModalStore from "./store/modalStore.js";
+import CarDetailsModal from "./components/CarDetailsModal.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -47,11 +49,13 @@ export default function App() {
       },
     },
   });
+  const { isOpen } = useModalStore();
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <ScrollToTop />
+        {isOpen && <CarDetailsModal />}
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
