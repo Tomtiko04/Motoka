@@ -74,10 +74,7 @@ export default function CarDetailsCard({
   const reminderStatus = getReminderStatus(reminderMessage);
 
   return (
-    <div
-      className="rounded-2xl bg-white px-4 py-5 cursor-pointer"
-      onClick={() => showModal(true, carDetail)}
-    >
+    <div className="rounded-2xl bg-white px-4 py-5">
       <div className="mb-6">
         <div className="text-sm font-light text-[#05243F]/60">Car Model</div>
         <div className="flex items-center justify-between py-2">
@@ -91,7 +88,11 @@ export default function CarDetailsCard({
                 onError={() => setCarLogo(MercedesLogo)}
               />
             </div>
-            <h3 className="text-xl font-semibold text-[#05243F]">
+            <h3
+              className="text-xl font-semibold text-[#05243F] cursor-pointer"
+              role="button"
+              onClick={() => showModal(true, carDetail)}
+            >
               {carDetail?.vehicle_model || "-"}
             </h3>
           </div>
