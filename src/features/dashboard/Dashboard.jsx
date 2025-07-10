@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import { api } from "../../services/apiClient";
 import { getReminder } from "../../services/apiReminder";
+import { useReminders } from '../../context/ReminderContext';
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -19,8 +20,6 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function Dashboard() {
   const { cars, isLoading } = useGetCars();
-  const [reminderData, setReminderData] = useState([]);
-  const [reminderLoading, setReminderLoading] = useState(false);
   const navigate = useNavigate();
 
   function handleRenewLicense(carDetail) {
@@ -39,26 +38,8 @@ export default function Dashboard() {
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
 
-  // Fetch reminder data
-  useEffect(() => {
-    const fetchReminderData = async () => {
-      setReminderLoading(true);
-      try {
-        const data = await getReminder();
-        if (data.status === "success" && Array.isArray(data.data)) {
-          setReminderData(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching reminder data:", error);
-      } finally {
-        setReminderLoading(false);
-      }
-    };
-
-    if (cars?.cars && Array.isArray(cars.cars) && cars.cars.length > 0) {
-      fetchReminderData();
-    }
-  }, [cars?.cars]);
+  // Use reminders from context
+  const { reminders, loading: reminderLoading } = useReminders();
 
   const sortedCars = React.useMemo(() => {
     if (!Array.isArray(cars?.cars)) return [];
@@ -71,8 +52,8 @@ export default function Dashboard() {
 
   // Helper function to find matching reminder for a car
   const getCarReminder = (carId) => {
-    if (!reminderData || reminderData.length === 0) return null;
-    return reminderData.find(reminder => String(reminder.car_id) === String(carId));
+    if (!reminders || reminders.length === 0) return null;
+    return reminders.find(reminder => String(reminder.car_id) === String(carId));
   };
 
   return (
@@ -109,8 +90,7 @@ export default function Dashboard() {
                           carDetail={car}
                           isRenew={true}
                           onRenewClick={handleRenewLicense}
-                          reminderData={carReminder ? [carReminder] : []}
-                          reminderLoading={reminderLoading}
+                          reminderObj={carReminder}
                         />
                       </div>
                     </SwiperSlide>
