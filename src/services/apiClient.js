@@ -6,7 +6,7 @@ import { authStorage } from "../utils/authStorage"
 const requestCache = new Map()
 
 const api = axios.create({
-  baseURL: "https://backend.motoka.com.ng/api",
+  baseURL: "https://api.motoka.ng/api",
 })
 
 // Add security headers to all requests
