@@ -11,7 +11,13 @@ import ImageSlider from "../../components/ImageSlider";
 const schema = yup.object().shape({
   name: yup.string().required("Username is required"),
   email: yup.string().email("Invalid email format").required("Email is required"),
-  password: yup.string().min(8, "Password must be at least 8 characters").required("Password is required"),
+  nin: yup.string().required("NIN is required"),
+  password: yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[0-9]/, 'Password must contain at least one number')
+    .matches(/[@$!%*?&]/, 'Password must contain at least one special character')
+    .required('Password is required'),
   confirmPassword: yup.string().oneOf([yup.ref('password'), undefined], "Passwords do not match").required("Please confirm your password"),
   terms: yup.boolean().oneOf([true], "You must accept the Terms & Conditions"),
 });
@@ -39,6 +45,7 @@ export default function Signup() {
           email: data.email,
           password: data.password.trim(),
           password_confirmation: data.confirmPassword.trim(),
+          nin: data.nin,
         },
         {
           onSuccess: () => {
@@ -122,6 +129,27 @@ export default function Signup() {
               {errors.email && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
                   {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="nin"
+                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+              >
+                NIN 
+              </label>
+              <input
+                id="nin"
+                type="number"
+                {...register("nin")}
+                placeholder=""
+                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+              />
+              {errors.nin && (
+                <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                  {errors.nin.message}
                 </p>
               )}
             </div>
