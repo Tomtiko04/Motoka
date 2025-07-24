@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
-import { api } from "../../services/apiClient";
-import { getReminder } from "../../services/apiReminder";
 import { useReminders } from '../../context/ReminderContext';
 
 import "swiper/css";

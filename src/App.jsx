@@ -93,13 +93,13 @@ export default function App() {
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}
-          <Route 
-            path="add-car" 
+          <Route
+            path="add-car"
             element={
               <AddCarRoute>
                 <AddCar />
               </AddCarRoute>
-            } 
+            }
           />
 
           {/* Protected Routes */}
