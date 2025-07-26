@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { BsStars } from "react-icons/bs";
 import Header from "../../components/Header";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -7,10 +8,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "../../services/apiClient";
 import PropTypes from "prop-types";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { BsStars } from "react-icons/bs";
 
 const SearchableSelect = ({
   label,
@@ -23,7 +20,7 @@ const SearchableSelect = ({
   filterKey,
   allowCustom = true,
   disabled = false,
-  isLoading = false
+  isLoading = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -95,7 +92,7 @@ const SearchableSelect = ({
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
           </div>
         )}
-        {!isLoading && value && (
+        {!isLoading && !error && value && (
           <div className="absolute top-1/2 right-3 -translate-y-1/2">
             <svg
               className="h-5 w-5 text-green-500"
@@ -124,7 +121,6 @@ const SearchableSelect = ({
           </div>
         )}
       </div>
-      {/* Might remove TODO */}
       {error && (
         <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
           {error}
@@ -138,105 +134,44 @@ SearchableSelect.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    [PropTypes.string]: PropTypes.string
-  })).isRequired,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      [PropTypes.string]: PropTypes.string,
+    }),
+  ).isRequired,
   placeholder: PropTypes.string,
- error: PropTypes.string,  
- name: PropTypes.string.isRequired,
+  error: PropTypes.string,
+  name: PropTypes.string.isRequired,
   filterKey: PropTypes.string.isRequired,
   allowCustom: PropTypes.bool,
   disabled: PropTypes.bool,
-  isLoading: PropTypes.bool
-};
-
-const registeredSchema = yup.object().shape({
-  ownerName: yup.string().required("Name of Owner is required"),
-  address: yup.string().required("Address is required"),
-  vehicleMake: yup.string().required("Vehicle Make is required"),
-  vehicleModel: yup.string().required("Vehicle Model is required"),
-  chassisNo: yup.string().required("Chassis Number is required"),
-  engineNo: yup.string().required("Engine Number is required"),
-  vehicleYear: yup
-    .string()
-    .required("Vehicle Year is required")
-    .matches(/^\d{4}$/, "Please enter a valid year (YYYY)"),
-  vehicleColor: yup.string().required("Vehicle Color is required"),
-  registrationNo: yup
-    .string()
-    .required("Registration Number is required")
-    .matches(/^[A-Za-z0-9]{3,8}$/, "Please enter a valid registration number (3-8 alphanumeric characters)"),
-  dateIssued: yup.string().required("Date Issued is required"),
-  expiryDate: yup.string().required("Expiry Date is required"),
-});
-
-const unregisteredSchema = yup.object().shape({
-  ownerName: yup.string().required("Name of Owner is required"),
-  address: yup.string().required("Address is required"),
-  vehicleMake: yup.string().required("Vehicle Make is required"),
-  vehicleModel: yup.string().required("Vehicle Model is required"),
-  chassisNo: yup.string().required("Chassis Number is required"),
-  engineNo: yup.string().required("Engine Number is required"),
-  vehicleYear: yup
-    .string()
-    .required("Vehicle Year is required")
-    .matches(/^\d{4}$/, "Please enter a valid year (YYYY)"),
-  vehicleColor: yup.string().required("Vehicle Color is required"),
-  phoneNo: yup
-    .string()
-    .required("Phone Number is required")
-    .matches(/^(0\d{10}|(\+234|234)\d{10})$/, "Enter a valid Nigerian phone number"),
-});
-
-const defaultRegistered = {
-  ownerName: "",
-  address: "",
-  vehicleMake: "",
-  vehicleModel: "",
-  registrationNo: "",
-  chassisNo: "",
-  engineNo: "",
-  vehicleYear: "",
-  vehicleColor: "",
-  dateIssued: "",
-  expiryDate: "",
-  isRegistered: true,
-};
-const defaultUnregistered = {
-  ownerName: "",
-  address: "",
-  vehicleMake: "",
-  vehicleModel: "",
-  chassisNo: "",
-  engineNo: "",
-  vehicleYear: "",
-  vehicleColor: "",
-  phoneNo: "",
+  isLoading: PropTypes.bool,
 };
 
 export default function AddCar() {
-  const [isRegistered, setIsRegistered] = useState(true);
+  const [formData, setFormData] = useState({
+    ownerName: "",
+    address: "",
+    vehicleMake: "",
+    vehicleModel: "",
+    carType: "",
+    registrationNo: "",
+    chassisNo: "",
+    engineNo: "",
+    vehicleYear: "",
+    vehicleColor: "",
+    dateIssued: "",
+    expiryDate: "",
+    isRegistered: true,
+    phoneNo: "",
+  });
+
   const [carTypes, setCarTypes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const { addCar, isAdding } = useAddCar();
   const navigate = useNavigate();
-
-  // Choose schema and default values based on car type
-  const schema = isRegistered ? registeredSchema : unregisteredSchema;
-  const defaultValues = isRegistered ? defaultRegistered : defaultUnregistered;
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues,
-    mode: "onChange",
-  });
 
   useEffect(() => {
     const fetchCarTypes = async () => {
@@ -255,13 +190,9 @@ export default function AddCar() {
         setIsLoading(false);
       }
     };
+
     fetchCarTypes();
   }, []);
-
-  // Reset form when toggling car type
-  useEffect(() => {
-    reset(defaultValues);
-  }, [isRegistered]);
 
   const uniqueMakes = useMemo(
     () =>
@@ -275,15 +206,9 @@ export default function AddCar() {
   const uniqueModels = useMemo(
     () =>
       carTypes
-        .filter(
-          (car) =>
-            car.make ===
-            (isRegistered
-              ? defaultRegistered.vehicleMake
-              : defaultUnregistered.vehicleMake),
-        )
+        .filter((car) => car.make === formData.vehicleMake)
         .map((car) => ({ id: car.id, model: car.model })),
-    [carTypes, isRegistered],
+    [carTypes, formData.vehicleMake],
   );
 
   const uniqueYears = useMemo(
@@ -311,31 +236,211 @@ export default function AddCar() {
     [],
   );
 
-  const onSubmit = async (data) => {
-    try {
-      const loadingToast = toast.loading("Registering car...");
-      addCar(
-        { ...data, isRegistered },
-        {
-          onSuccess: () => {
-            toast.dismiss(loadingToast);
-            navigate("/");
-          },
-          onError: () => {
-            toast.dismiss(loadingToast);
-          },
-        },
-      );
-    } catch {
-      toast.error("Failed to submit form. Please try again.");
+  const carTypeOptions = useMemo(
+    () => [
+      { id: 1, type: "private" },
+      { id: 2, type: "commercial" },
+      { id: 3, type: "government" },
+    ],
+    [],
+  );
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "vehicleMake" && {
+        vehicleModel: "",
+        vehicleYear: "",
+      }),
+    }));
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
     }
   };
 
-  const handleRegistrationTypeChange = (reg) => {
-    setIsRegistered(reg);
+  const validateForm = () => {
+    const newErrors = {};
+    const requiredFields = [
+      { name: "ownerName", label: "Name of Owner" },
+      { name: "address", label: "Address" },
+      { name: "vehicleMake", label: "Vehicle Make" },
+      { name: "vehicleModel", label: "Vehicle Model" },
+      { name: "carType", label: "Car Type" },
+      { name: "chassisNo", label: "Chassis Number" },
+      { name: "engineNo", label: "Engine Number" },
+      { name: "vehicleYear", label: "Vehicle Year" },
+      { name: "vehicleColor", label: "Vehicle Color" },
+    ];
+
+    if (formData.isRegistered) {
+      requiredFields.push(
+        { name: "registrationNo", label: "Registration Number" },
+        { name: "dateIssued", label: "Date Issued" },
+        { name: "expiryDate", label: "Expiry Date" },
+      );
+    } else {
+      requiredFields.push({ name: "phoneNo", label: "Phone Number" });
+    }
+
+    requiredFields.forEach(({ name, label }) => {
+      if (!formData[name]?.trim()) {
+        newErrors[name] = `${label} is required`;
+      }
+    });
+
+    if (formData.vehicleYear && !/^\d{4}$/.test(formData.vehicleYear)) {
+      newErrors.vehicleYear = "Please enter a valid year (YYYY)";
+    } else if (formData.vehicleYear) {
+      const year = parseInt(formData.vehicleYear);
+      const currentYear = new Date().getFullYear();
+      if (year > currentYear) {
+        newErrors.vehicleYear = "Year cannot be in the future";
+      } else if (year < 1886) {
+        newErrors.vehicleYear = "Please enter a valid year";
+      }
+    }
+
+    if (
+      formData.phoneNo &&
+      !/^\d{10,12}$/.test(formData.phoneNo.replace(/\D/g, ""))
+    ) {
+      newErrors.phoneNo = "Please enter a valid phone number (10-12 digits)";
+    }
+
+    if (formData.isRegistered) {
+      const today = new Date();
+      const dateIssued = new Date(formData.dateIssued);
+      const expiryDate = new Date(formData.expiryDate);
+
+      if (dateIssued > today) {
+        newErrors.dateIssued = "Issue date cannot be in the future";
+      }
+
+      if (expiryDate <= dateIssued) {
+        newErrors.expiryDate = "Expiry date must be after issue date";
+      }
+
+      if (
+        formData.registrationNo &&
+        !/^[A-Za-z0-9]{3,8}$/.test(formData.registrationNo)
+      ) {
+        newErrors.registrationNo =
+          "Please enter a valid registration number (3-8 alphanumeric characters)";
+      }
+    }
+
+    return newErrors;
   };
 
-  // Render field helpers
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      return;
+    }
+
+    try {
+      const loadingToast = toast.loading("Registering car...");
+      addCar(formData, {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          navigate("/");
+        },
+        onError: () => {
+          toast.dismiss(loadingToast);
+        },
+      });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setErrors({
+        submit: "Failed to submit form. Please try again.",
+      });
+    }
+  };
+
+  const handleRegistrationTypeChange = (isRegistered) => {
+    setFormData((prev) => ({
+      ...prev,
+      isRegistered,
+    }));
+    setErrors({});
+  };
+
+  const renderDateField = (name, label) => (
+    <div>
+      <label
+        htmlFor={name}
+        className="mb-2 block text-sm font-medium text-[#05243F]"
+      >
+        {label}
+        <span className="ml-0.5 text-[#A73957B0]">*</span>
+      </label>
+      <div className="relative">
+        <div className="w-full">
+          <DatePicker
+            id={name}
+            name={name}
+            selected={formData[name] ? new Date(formData[name]) : null}
+            onChange={(date) => {
+              const formattedDate = date.toISOString().split("T")[0];
+              handleChange({
+                target: {
+                  name,
+                  value: formattedDate,
+                },
+              });
+            }}
+            dateFormat="dd/MM/yyyy"
+            className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
+              errors[name]
+                ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+                : formData[name]
+                  ? "border-2 border-green-500"
+                  : ""
+            }`}
+            placeholderText={`Select ${label.toLowerCase()}`}
+            maxDate={name === "dateIssued" ? new Date() : undefined}
+            minDate={
+              name === "expiryDate"
+                ? formData.dateIssued
+                  ? new Date(formData.dateIssued)
+                  : new Date()
+                : undefined
+            }
+            wrapperClassName="w-full"
+          />
+        </div>
+        {!errors[name] && formData[name] && (
+          <div className="absolute top-1/2 right-3 -translate-y-1/2">
+            <svg
+              className="h-5 w-5 text-green-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+      {errors[name] && (
+        <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
+          {errors[name]}
+        </p>
+      )}
+    </div>
+  );
+
   const renderField = (name, label, placeholder, type = "text") => (
     <div>
       <label
@@ -349,69 +454,52 @@ export default function AddCar() {
         <input
           type={type}
           id={name}
-          {...register(name)}
+          name={name}
+          value={formData[name]}
+          onChange={handleChange}
           placeholder={placeholder}
           className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
             errors[name]
               ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
-              : name?.trim()
+              : formData[name]?.trim()
                 ? "border-2 border-green-500"
                 : ""
           }`}
         />
+        {errors[name] && (
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg
+              className="h-5 w-5 text-[#A73957B0]"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
+        {!errors[name] && formData[name]?.trim() && (
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg
+              className="h-5 w-5 text-green-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
       </div>
       {errors[name] && (
         <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
-          {errors[name].message}
-        </p>
-      )}
-    </div>
-  );
-
-  // Date field with react-datepicker
-  const renderDateField = (name, label) => (
-    <div>
-      <label
-        htmlFor={name}
-        className="mb-2 block text-sm font-medium text-[#05243F]"
-      >
-        {label}
-        <span className="ml-0.5 text-[#A73957B0]">*</span>
-      </label>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <DatePicker
-            id={name}
-            selected={field.value ? new Date(field.value) : null}
-            onChange={(date) =>
-              field.onChange(date ? date.toISOString().split("T")[0] : "")
-            }
-            dateFormat="dd/MM/yyyy"
-            className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
-              errors[name]
-                ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
-                : name
-                  ? "border-2 border-green-500"
-                  : ""
-            }`}
-            placeholderText={`Select ${label.toLowerCase()}`}
-            maxDate={name === "dateIssued" ? new Date() : undefined}
-            minDate={
-              name === "expiryDate"
-                ? control._formValues.dateIssued
-                  ? new Date(control._formValues.dateIssued)
-                  : new Date()
-                : undefined
-            }
-            wrapperClassName="w-full"
-          />
-        )}
-      />
-      {errors[name] && (
-        <p className="mt-1 flex items-center gap-1 text-sm text-[#A73957B0]">
-          {errors[name].message}
+          {errors[name]}
         </p>
       )}
     </div>
@@ -470,6 +558,7 @@ export default function AddCar() {
     let selectedMake = "Toyota";
     let selectedModel = "Camry";
     let selectedYear = "2020";
+    let selectedCarType = "Private";
 
     if (carTypes.length > 0) {
       const randomCar = carTypes[Math.floor(Math.random() * carTypes.length)];
@@ -487,6 +576,7 @@ export default function AddCar() {
       address: randomAddress,
       vehicleMake: selectedMake,
       vehicleModel: selectedModel,
+      carType: selectedCarType,
       registrationNo: isRegistered ? registrationNumber : "",
       chassisNo: chassisNumber,
       engineNo: engineNumber,
@@ -535,13 +625,14 @@ export default function AddCar() {
                 Please ensure you provide accurate details.
               </p>
             </div>
+
             {/* Registration Type Toggle */}
             <div className="mb-6 flex gap-4">
               <button
                 type="button"
                 onClick={() => handleRegistrationTypeChange(true)}
                 className={`rounded-[26px] border px-4 py-2 text-sm font-medium transition-colors ${
-                  isRegistered
+                  formData.isRegistered
                     ? "border-[#2389E3] text-[#05243F]"
                     : "border-[#F4F5FC] text-[#697C8C]"
                 }`}
@@ -552,7 +643,7 @@ export default function AddCar() {
                 type="button"
                 onClick={() => handleRegistrationTypeChange(false)}
                 className={`rounded-[26px] border px-4 py-2 text-sm font-medium transition-colors ${
-                  !isRegistered
+                  !formData.isRegistered
                     ? "border-[#2389E3] text-[#05243F]"
                     : "border-[#F4F5FC] text-[#697C8C]"
                 }`}
@@ -561,96 +652,77 @@ export default function AddCar() {
               </button>
             </div>
           </div>
+
           {/* Scrollable Form Section */}
           <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-8">
             <div className="py-2">
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="mr-4 space-y-4"
-              >
+              <form onSubmit={handleSubmit} className="mr-4 space-y-4">
                 {renderField("ownerName", "Name of Owner", "Ali Johnson")}
-                {!isRegistered &&
-                  renderField("phoneNo", "Phone Number", "08012345678")}
+                {!formData.isRegistered &&
+                  renderField("phoneNo", "Phone Number", "087654323456")}
                 {renderField(
                   "address",
                   "Address",
                   "Jd Street, Off motoka road.",
                 )}
-                {/* Vehicle Make */}
-                <Controller
-                  control={control}
+                <SearchableSelect
+                  label="Vehicle Make"
                   name="vehicleMake"
-                  render={({ field }) => (
-                    <SearchableSelect
-                      label="Vehicle Make"
-                      name="vehicleMake"
-                      value={field.value}
-                      onChange={field.onChange}
-                      options={uniqueMakes}
-                      placeholder="Select vehicle make"
-                      error={errors.vehicleMake?.message}
-                      filterKey="make"
-                      isLoading={isLoading}
-                    />
-                  )}
+                  value={formData.vehicleMake}
+                  onChange={handleChange}
+                  options={uniqueMakes}
+                  placeholder="Select vehicle make"
+                  error={errors.vehicleMake}
+                  filterKey="make"
+                  isLoading={isLoading}
                 />
-                {/* Vehicle Model */}
-                <Controller
-                  control={control}
+                <SearchableSelect
+                  label="Vehicle Model"
                   name="vehicleModel"
-                  render={({ field }) => (
-                    <SearchableSelect
-                      label="Vehicle Model"
-                      name="vehicleModel"
-                      value={field.value}
-                      onChange={field.onChange}
-                      options={uniqueModels}
-                      placeholder="Select vehicle model"
-                      error={errors.vehicleModel?.message}
-                      filterKey="model"
-                      disabled={!control._formValues.vehicleMake}
-                      isLoading={isLoading}
-                    />
-                  )}
+                  value={formData.vehicleModel}
+                  onChange={handleChange}
+                  options={uniqueModels}
+                  placeholder="Select vehicle model"
+                  error={errors.vehicleModel}
+                  filterKey="model"
+                  disabled={!formData.vehicleMake}
+                  isLoading={isLoading}
                 />
-                {/* Vehicle Year */}
-                <Controller
-                  control={control}
+                <SearchableSelect
+                  label="Car Type"
+                  name="carType"
+                  value={formData.carType}
+                  onChange={handleChange}
+                  options={carTypeOptions}
+                  placeholder="Select car type"
+                  error={errors.carType}
+                  filterKey="type"
+                />
+                <SearchableSelect
+                  label="Vehicle Year"
                   name="vehicleYear"
-                  render={({ field }) => (
-                    <SearchableSelect
-                      label="Vehicle Year"
-                      name="vehicleYear"
-                      value={field.value}
-                      onChange={field.onChange}
-                      options={uniqueYears}
-                      placeholder="Select vehicle year"
-                      error={errors.vehicleYear?.message}
-                      filterKey="year"
-                      isLoading={isLoading}
-                    />
-                  )}
+                  value={formData.vehicleYear}
+                  onChange={handleChange}
+                  options={uniqueYears}
+                  placeholder="Select vehicle year"
+                  error={errors.vehicleYear}
+                  filterKey="year"
+                  isLoading={isLoading}
                 />
-                {/* Vehicle Color */}
-                <Controller
-                  control={control}
+                <SearchableSelect
+                  label="Vehicle Color"
                   name="vehicleColor"
-                  render={({ field }) => (
-                    <SearchableSelect
-                      label="Vehicle Color"
-                      name="vehicleColor"
-                      value={field.value}
-                      onChange={field.onChange}
-                      options={uniqueColors}
-                      placeholder="Select vehicle color"
-                      error={errors.vehicleColor?.message}
-                      filterKey="color"
-                    />
-                  )}
+                  value={formData.vehicleColor}
+                  onChange={handleChange}
+                  options={uniqueColors}
+                  placeholder="Select vehicle color"
+                  error={errors.vehicleColor}
+                  filterKey="color"
                 />
                 {renderField("chassisNo", "Chassis Number", "123489645432")}
                 {renderField("engineNo", "Engine Number", "4567890")}
-                {isRegistered && (
+
+                {formData.isRegistered && (
                   <>
                     {renderField(
                       "registrationNo",
@@ -661,19 +733,27 @@ export default function AddCar() {
                     {renderDateField("expiryDate", "Expiry Date")}
                   </>
                 )}
-                <div className="sticky bottom-0 mt-4 flex justify-center rounded-b-[20px] bg-white p-6 pt-4 sm:p-8 sm:pt-4">
-                  <button
-                    type="submit"
-                    disabled={isAdding}
-                    className={`rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] active:scale-95 ${
-                      isAdding ? "cursor-not-allowed opacity-70" : ""
-                    }`}
-                  >
-                    {isAdding ? "Processing..." : "Confirm and Proceed"}
-                  </button>
-                </div>
               </form>
             </div>
+          </div>
+
+          {/* Fixed Footer Section */}
+          <div className="sticky bottom-0 mt-4 flex justify-center rounded-b-[20px] bg-white p-6 pt-4 sm:p-8 sm:pt-4">
+            {errors.submit && (
+              <p className="mb-4 text-center text-sm text-[#A73957B0]">
+                {errors.submit}
+              </p>
+            )}
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isAdding}
+              className={`rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] active:scale-95 ${
+                isAdding ? "cursor-not-allowed opacity-70" : ""
+              }`}
+            >
+              {isAdding ? "Processing..." : "Confirm and Proceed"}
+            </button>
           </div>
         </div>
       </div>
