@@ -21,7 +21,7 @@ import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/DriversLicense.jsx";
-import Settings from "./features/settings/Settings.jsx"
+import Settings from "./features/settings/Settings.jsx";
 import PlateNumber from "./features/licenses/PlateNumber.jsx";
 import PlateDetails from "./features/licenses/platenumber/PlateDetails.jsx";
 import LocalGovPaper from "./features/licenses/LocalGovPaper.jsx";
@@ -35,7 +35,10 @@ import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
-
+import CarDocuments from "./pages/CarDocuments.jsx";
+import CartPage from "./features/ladipo/CartPage.jsx";
+import Ladipo from "./features/ladipo/Ladipo.jsx";
+import ProductModal from "./features/ladipo/components/modal.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -93,13 +96,13 @@ export default function App() {
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}
-          <Route 
-            path="add-car" 
+          <Route
+            path="add-car"
             element={
               <AddCarRoute>
                 <AddCar />
               </AddCarRoute>
-            } 
+            }
           />
 
           {/* Protected Routes */}
@@ -133,6 +136,11 @@ export default function App() {
             />
             <Route path="settings">
               <Route index element={<Settings />} />
+            </Route>
+            <Route path="ladipo">
+              <Route index element={<Ladipo />} />
+              <Route path=":slug" element={<ProductModal />} />
+              <Route path="cart-page" element={<CartPage />} />
             </Route>
           </Route>
         </Routes>
