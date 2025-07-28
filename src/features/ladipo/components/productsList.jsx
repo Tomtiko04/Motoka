@@ -1,16 +1,7 @@
 import { Link } from "react-router-dom";
 import ProductsData from "../../../Data/Products";
 import ProductCard from "./productCard";
-function ProductsList({
-  selectedProduct,
-  setSelectedProduct,
-  setShowModal,
-  filteredRules,
-  selectedCategory,
-  setSelectedCategory,
-  selectedClass,
-  setSelectedClass,
-}) {
+function ProductsList({ selectedProduct, setSelectedProduct, setShowModal, filteredRules, selectedCategory, setSelectedCategory, selectedClass, setSelectedClass}) {
   const filteredProducts = ProductsData.filter(
     (item) => item.category === selectedCategory,
   );
@@ -26,12 +17,10 @@ function ProductsList({
 
   return (
     <>
-      {/* {filteredRules.length > 0 ? ( */}
       {filteredProducts.length > 0 ? (
         <>
           <div className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-4 sm:gap-5">
             {filteredProducts.map((product) => {
-              // ProductsData.flatMap(group => group.productInfo).map((product) => {
               const slug = `${product.title.toLowerCase().replace(/\s+/g, "-")}-${product.id}`;
               return (
                 <Link key={product.id} to={`/ladipo/${slug}`}>
@@ -51,31 +40,6 @@ function ProductsList({
         </>
       ) : (
         <>
-          {/* {ProductsData.map((product,index)=>(
-                <div className="p-5" key={index}> 
-                    <div className="flex justify-between text-[15px] text-[#697C8C] font-[600] mb-4">
-                        <p className="text-[#EBB850]">{product.class}</p>
-                        <p>See All</p>
-                    </div>
-                <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
-                
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            imageUrl={product.imageUrl}
-                            description={product.description}
-                            title={product.title}
-                            price={product.price}
-                            setSelectedProduct={ setSelectedProduct}
-                            setShowModal={setShowModal}
-                            // setShowModal={setShowModal}
-                        />
-                    
-        
-                </div>
-
-                </div>
-                ))} */}
           {Object.entries(shownClasses).map(
             ([className, classProducts], index) => (
               <div className="p-5" key={index}>
@@ -88,7 +52,7 @@ function ProductsList({
                     See All
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-5 sm:grid-cols-4 items-stretch">
                   {(selectedClass
                     ? classProducts
                     : classProducts.slice(0, 4)
@@ -106,14 +70,10 @@ function ProductsList({
                   ))}
                 </div>
               </div>
-            ),
+            )
           )}
         </>
-        // {/* // </> */}
       )}
-      {/* //   <p className="text-sm text-[#05243F]/60">
-                //     Error Loading Items
-                //    </p> */}
     </>
   );
 }

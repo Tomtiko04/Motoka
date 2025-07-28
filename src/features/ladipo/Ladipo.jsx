@@ -38,26 +38,21 @@ function Ladipo() {
 
     return ( 
         <LadipoLayout
-      title="Ladipo"
-      showModal={showModal}
-      setShowModal={setShowModal}
-    >
-      
-
+          title="Ladipo"
+          showModal={showModal}
+          setShowModal={setShowModal}
+        >
         {showModal?(
           <ProductModal selectedProduct={selectedProduct}/>
         ):(
           <>
           <div className="flex flex-col">
-        <div className="flex flex-col sm:flex-row justify-between items-center border-b-2 border-[#05243F0D] pb-5 px-4 sm:px-5 ">
-           
+            <div className="flex flex-col sm:flex-row justify-between items-center border-b-2 border-[#05243F0D] pb-5 px-4 sm:px-5 ">
             <SearchBar
-                          // onSearch={handleSearch}
-                          searchTerm={searchTerm}
-                          setSearchTerm={setSearchTerm}
-                          handleSearch={handleSearch}
-                        />
-            {/* </div> */}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              handleSearch={handleSearch}
+            />
             <div className="flex items-center gap-2 w-full justify-center sm:justify-end mt-5 sm:mt-0">
             <p className="text-[#00000040] text-[13px]">Don’t know what to buy?</p>
             <div className="text-[13px]">
@@ -67,20 +62,20 @@ function Ladipo() {
             </button>
           </div>
             </div>
-        </div >
+        </div>
         <Categories 
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
         />
         <ProductsList 
-        selectedProduct={selectedProduct}
-        setSelectedProduct={setSelectedProduct}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        setShowModal={setShowModal}
-        filteredRules={filteredRules}
-        setSelectedClass={setSelectedCategory}
-        selectedClass={selectedClass}
+          selectedProduct={selectedProduct}
+          setSelectedProduct={setSelectedProduct}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          setShowModal={setShowModal}
+          filteredRules={filteredRules}
+          setSelectedClass={setSelectedCategory}
+          selectedClass={selectedClass}
         />
       </div>
         </>
