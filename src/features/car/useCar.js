@@ -24,6 +24,7 @@ export function useAddCar() {
         registration_no: formData.registrationNo || null,
         date_issued: formData.dateIssued || null,
         expiry_date: formData.expiryDate || null,
+        car_type: formData.carType || null,
       };
       
       console.log('Adding car with data:', transformedData);

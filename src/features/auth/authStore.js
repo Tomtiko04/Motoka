@@ -23,9 +23,9 @@ const useAuthStore = create(
       setUser: (userData) => set({ user: userData }),
     }),
     {
-      name: 'auth-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }), // only persist the token, user and isAuthenticated status
+      name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );
