@@ -4,9 +4,9 @@ import { login as loginApi } from "../../services/apiAuth";
 import { verifyLoginTwoFactor } from "../../services/apiTwoFactor";
 import { signupRequest as signupApi } from "../../services/apiAuth";
 import { verifyAccount as verifyApi } from "../../services/apiAuth";
+import { resendVerificationCode as resendApi } from "../../services/apiAuth";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { authStorage } from "../../utils/authStorage";
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -14,50 +14,18 @@ export function useLogin() {
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState("");
 
-  const { mutate: verifyTwoFactor, isPending: isVerifyingTwoFactor } = useMutation({
-    mutationFn: (code) => verifyLoginTwoFactor(twoFactorToken, code),
-    onSuccess: (data) => {
-      toast.dismiss();
-      
-      if (data.authorization?.token) {
-  
-      }
-      
-      queryClient.setQueryData(["user"], data.user);
-      toast.success(data.message || "Login successful!");
-      
-      if (data.user) {
-        const userDetails = {
-          user_type_id: data.user.user_type_id,
-          name: data.user.name,
-          email: data.user.email,
-          phone_number: data.user.phone_number,
-        };
-        localStorage.setItem("userInfo", JSON.stringify(userDetails));
-      }
-      
-      setTwoFactorRequired(false);
-      navigate("/");
-    },
-    onError: (err) => {
-      toast.dismiss();
-      toast.error(err.message || "Failed to verify 2FA code");
-    },
-    retry: false,
-  });
+  const { mutate: verifyTwoFactor, isPending: isVerifyingTwoFactor } =
+    useMutation({
+      mutationFn: (code) => verifyLoginTwoFactor(twoFactorToken, code),
+      onSuccess: (data) => {
+        toast.dismiss();
 
-  const { mutate: login, isPending: isLoggingIn } = useMutation({
-    mutationFn: (formData) => loginApi(formData),
-    onSuccess: (data) => {
-      
-      if (data.status === "2fa_required") {
-        setTwoFactorToken(data["2fa_token"]);
-        setTwoFactorRequired(true);
-        toast.success(data.message || "Please enter 2FA verification code");
-      } else {
+        if (data.authorization?.token) {
+        }
+
         queryClient.setQueryData(["user"], data.user);
-        toast.success(data.message || "User logged in successfully!");
-        
+        toast.success(data.message || "Login successful!");
+
         if (data.user) {
           const userDetails = {
             user_type_id: data.user.user_type_id,
@@ -67,12 +35,42 @@ export function useLogin() {
           };
           localStorage.setItem("userInfo", JSON.stringify(userDetails));
         }
-        
+
+        setTwoFactorRequired(false);
+        navigate("/");
+      },
+      onError: (err) => {
+        toast.dismiss();
+        toast.error(err.message || "Failed to verify 2FA code");
+      },
+      retry: false,
+    });
+
+  const { mutate: login, isPending: isLoggingIn } = useMutation({
+    mutationFn: (formData) => loginApi(formData),
+    onSuccess: (data) => {
+      if (data.status === "2fa_required") {
+        setTwoFactorToken(data["2fa_token"]);
+        setTwoFactorRequired(true);
+        toast.success(data.message || "Please enter 2FA verification code");
+      } else {
+        queryClient.setQueryData(["user"], data.user);
+        toast.success(data.message || "User logged in successfully!");
+
+        if (data.user) {
+          const userDetails = {
+            user_type_id: data.user.user_type_id,
+            name: data.user.name,
+            email: data.user.email,
+            phone_number: data.user.phone_number,
+          };
+          localStorage.setItem("userInfo", JSON.stringify(userDetails));
+        }
+
         navigate("/");
       }
     },
     onError: (err) => {
-    
       if (err.message === "Please verify your email before logging in.") {
         toast.error(err.message);
         navigate("/auth/verify-account");
@@ -80,9 +78,7 @@ export function useLogin() {
         toast.error(err.message || "An error occurred while logging in.");
       }
     },
-    onSettled: () => {
-    
-    },
+    onSettled: () => {},
     retry: false,
   });
 
@@ -91,13 +87,13 @@ export function useLogin() {
     setTwoFactorToken("");
   };
 
-  return { 
-    login, 
-    isLoggingIn, 
-    twoFactorRequired, 
-    verifyTwoFactor, 
+  return {
+    login,
+    isLoggingIn,
+    twoFactorRequired,
+    verifyTwoFactor,
     isVerifyingTwoFactor,
-    cancelTwoFactor
+    cancelTwoFactor,
   };
 }
 
@@ -106,7 +102,7 @@ export function useSignup() {
   const { mutate: signupUser, isPending: isSigningUp } = useMutation({
     mutationFn: signupApi,
     onSuccess: (data, variables) => {
-      toast.dismiss(); 
+      toast.dismiss();
       const userEmail = variables.email;
       localStorage.setItem("pendingVerificationEmail", userEmail);
       toast.success(
@@ -116,7 +112,7 @@ export function useSignup() {
       navigate("/auth/verify-account");
     },
     onError: (err) => {
-      toast.dismiss(); 
+      toast.dismiss();
       toast.error(err.message || "An error occurred during signup.");
     },
     retry: false,
@@ -143,4 +139,18 @@ export function useVerifyAccount() {
     retry: false,
   });
   return { verifyAccount, isVerifying };
+}
+
+export function useResendVerification() {
+  const { mutate: resendCode, isPending: isResending } = useMutation({
+    mutationFn: resendApi,
+    onSuccess: (data) => {
+      toast.success(data.message || "Verification code resent!");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to resend code.");
+    },
+    retry: false,
+  });
+  return { resendCode, isResending };
 }

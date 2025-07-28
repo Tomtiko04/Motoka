@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useVerifyAccount } from "./useAuth";
+import { useVerifyAccount, useResendVerification } from "./useAuth";
 import toast from "react-hot-toast";
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
   const { verifyAccount, isVerifying } = useVerifyAccount();
+  const { resendCode, isResending } = useResendVerification();
   const [email, setEmail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -79,8 +80,9 @@ export default function VerifyAccount() {
   };
 
   const handleResend = () => {
-    // Reset timer
-    setTimeLeft(60);
+    if (!email) return;
+    resendCode(email);
+    setTimeLeft(600); // Reset timer to 10 minutes
   };
 
   const handleVerify = (fullCode) => {
@@ -158,17 +160,17 @@ export default function VerifyAccount() {
             </p>
             <button
               onClick={handleResend}
-              disabled={timeLeft > 0}
+              disabled={timeLeft > 0 || isResending}
               className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957] disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
             >
-              Resend
+              {isResending ? "Resending..." : "Resend"}
             </button>
           </div>
         </div>
 
         <button
           onClick={() => handleVerify(code.join(""))}
-          disabled={code.join("").length !== 6}
+          disabled={isVerifying || code.join("").length !== 6}
           type="submit"
           className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-36 sm:text-base md:mt-10"
         >
