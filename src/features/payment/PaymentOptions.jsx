@@ -132,14 +132,13 @@ export default function PaymentOptions() {
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifyError, setVerifyError] = useState("");
 
-  // Handler for verifying payment (bank transfer)
+ 
   const handleVerifyBankTransfer = async () => {
     setVerifying(true);
     setVerifyError("");
     setVerifyResult(null);
     try {
-      // Use reference or order_id from paymentData
-      const reference = paymentData?.customer?.reference || paymentData?.order_id;
+      const reference = paymentData?.transid;
       if (!reference) throw new Error("No payment reference found.");
       const result = await verifyPaymentApi(reference);
       setVerifyResult(result);

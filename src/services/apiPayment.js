@@ -26,3 +26,12 @@ export async function getPaymentHistory() {
     throw new Error(error.response?.data?.message || error.message);
   }
 }
+
+export async function getCarPaymentReceipt(carId) {
+  try {
+    const { data } = await api.get(`/payment/car-receipt/${carId}`);
+    return data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
