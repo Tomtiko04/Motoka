@@ -159,6 +159,15 @@ export default function PaymentOptions() {
     window.open(url, "_blank");
   };
 
+  React.useEffect(() => {
+    if (verifyResult && verifyResult.status) {
+      const timeout = setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000); // 2 seconds delay
+      return () => clearTimeout(timeout);
+    }
+  }, [verifyResult, navigate]);
+
   return (
     <>
       {/* Header */}
