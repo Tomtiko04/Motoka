@@ -39,6 +39,7 @@ import CarDocuments from "./pages/CarDocuments.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
+import CarReceipt from "./pages/CarReceipt.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -142,6 +143,7 @@ export default function App() {
               <Route path=":slug" element={<ProductModal />} />
               <Route path="cart-page" element={<CartPage />} />
             </Route>
+            <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
           </Route>
         </Routes>
       </BrowserRouter>
