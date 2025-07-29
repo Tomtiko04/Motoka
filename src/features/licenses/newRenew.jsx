@@ -5,18 +5,15 @@ import { IoIosArrowBack } from "react-icons/io";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useRenew";
+import { useGetLocalGovernment, useGetState } from "./useRenew";
+import { useInitializePayment } from "./usePayment";
 import SearchableSelect from "../../components/shared/SearchableSelect";
-
-const bvn = import.meta.env.VITE_MONICREDIT_BVN;
-const nin = import.meta.env.VITE_MONICREDIT_NIN;
 
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  const { startPayment, isPaymentInitializing } = useInitializePayment();
-  const email = "ogunneyeoyinkansola@gmail.com";
+  const { startPayment, isPaymentInitializing, error: paymentError } = useInitializePayment();
   const {data:state, isPending:isGettingState} = useGetState();
   const {data:lg, isPending:isGettingLG} = useGetLocalGovernment();
 
@@ -43,7 +40,6 @@ export default function RenewLicense() {
     "Proof of Ownership"
   ];
 
-
   const [selectedDocs, setSelectedDocs] = useState([]);
   const [selectedSchedules, setSelectedSchedules] = useState([]); 
 
@@ -52,26 +48,6 @@ export default function RenewLicense() {
       prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
     );
   };
-
-  const handleToggleSchedule = (schedule) => {
-    setSelectedSchedules((prev) =>
-      prev.includes(schedule) ? prev.filter((s) => s !== schedule) : [...prev, schedule]
-    );
-  };
-
-  const handleScheduleChange = (schedule) => {
-    setSelectedSchedules((prev) =>
-      prev.includes(schedule) ? prev.filter((s) => s !== schedule) : [...prev, schedule]
-    );
-  };
-
-  const handleDocChange = (doc) => {
-    setSelectedDocs((prev) =>
-      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
-    );
-  };
-
- 
 
   const isFormValid = () => {
     return (
@@ -90,17 +66,49 @@ export default function RenewLicense() {
     }));
   };
 
+  // Helper function to get state_id and lga_id
+  const getStateId = () => {
+    if (!deliveryDetails.state || !isState) return null;
+    const selectedState = isState.find(s => s.state_name === deliveryDetails.state);
+    return selectedState?.id || null;
+  };
+
+  const getLgaId = () => {
+    if (!deliveryDetails.lg || !isLG) return null;
+    const selectedLga = isLG.find(l => l.lga_name === deliveryDetails.lg);
+    return selectedLga?.id || null;
+  };
+
   // Payment logic
   const handlePayNow = async () => {
-    // Only navigate to payment selector, do not initiate payment here
-    const paymentPayload = {
-      selectedSchedules,
-      deliveryDetails,
-      selectedDocs,
-      carDetail,
-      // add any other info needed for payment
-    };
-    navigate("/payment", { state: paymentPayload });
+    if (!isFormValid()) {
+      return;
+    }
+
+    const stateId = getStateId();
+    const lgaId = getLgaId();
+
+    if (!stateId || !lgaId) {
+      console.error("Invalid state or LGA selection");
+      return;
+    }
+
+    // Create payload for each selected schedule
+    const paymentPayloads = selectedSchedules.map(schedule => ({
+      car_id: carDetail?.id,
+      payment_schedule_id: schedule.id,
+      meta_data: {
+        delivery_address: deliveryDetails.address,
+        delivery_contact: deliveryDetails.contact,
+        state_id: stateId,
+        lga_id: lgaId
+      }
+    }));
+
+    // Initialize payment for the first schedule (you might want to handle multiple payments differently)
+    if (paymentPayloads.length > 0) {
+      startPayment(paymentPayloads[0]);
+    }
   };
 
   const getCarReminder = (carId) => {
@@ -131,63 +139,6 @@ export default function RenewLicense() {
         <div className="relative grid grid-cols-1 gap-10 md:grid-cols-2">
           {/* Left Column - Car Details */}
           <div className="mt-2">
-            {/* <div className="rounded-2xl bg-white px-4 py-5 shadow">
-              <div className="mb-6">
-                <div className="text-sm font-light text-[#05243F]/60">
-                  Car Model
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <div className="">
-                      <img
-                        src={carDetail?.carLogo || MercedesLogo}
-                        alt={carDetail?.vehicle_make || "Car"}
-                        className="h-6 w-6"
-                      />
-                    </div>
-                    <h3 className="text-xl font-semibold text-[#05243F]">
-                      {carDetail?.vehicle_model || "-"}
-                    </h3>
-                  </div>
-                  <div>
-                    <FaCarAlt className="text-3xl text-[#2389E3]" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-6 flex items-center">
-                <div>
-                  <div className="text-sm text-[#05243F]/60">Plate No:</div>
-                  <div className="text-base font-semibold text-[#05243F]">
-                    {carDetail?.plate_number || "-"}
-                  </div>
-                </div>
-                <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-                <div>
-                  <div className="text-sm text-[#05243F]/60">Exp. Date</div>
-                  <div className="text-base font-semibold text-[#05243F]">
-                    {carDetail?.expiry_date || "-"}
-                  </div>
-                </div>
-                <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-                <div>
-                  <div className="text-sm text-[#05243F]/60">Car Type</div>
-                  <div className="text-base font-semibold text-[#05243F]">
-                    {carDetail?.vehicle_make || "-"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full">
-                <div className="flex items-center gap-2 rounded-full bg-[#FFEFCE] px-4 py-1.5">
-                  <span className="h-2 w-2 rounded-full bg-[#FDB022]"></span>
-                  <span className="text-sm font-medium text-[#05243F]">
-                    Expires in 3 days
-                  </span>
-                </div>
-              </div>
-            </div> */}
-
             <CarDetailsCard carDetail={carDetail} isRenew={false} reminderObj={getCarReminder(carDetail.id)} />
 
             {/* Document Details */}
@@ -324,6 +275,13 @@ export default function RenewLicense() {
                   placeholder="08012345678"
                 />
               </div>
+
+              {/* Error Message */}
+              {paymentError && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                  {paymentError.message}
+                </div>
+              )}
 
               {/* Pay Now Button */}
               <button
