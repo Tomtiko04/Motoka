@@ -159,13 +159,13 @@ export default function PaymentOptions() {
   };
 
   React.useEffect(() => {
-    if (verifyResult && verifyResult.status) {
+    if (verifyResult && verifyResult.status && paymentData?.car_id) {
       const timeout = setTimeout(() => {
-        navigate("/dashboard");
+        navigate(`/payment/car-receipt/${paymentData.car_id}`);
       }, 2000); // 2 seconds delay
       return () => clearTimeout(timeout);
     }
-  }, [verifyResult, navigate]);
+  }, [verifyResult, navigate, paymentData]);
 
   return (
     <>
