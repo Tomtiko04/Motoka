@@ -4,8 +4,8 @@ import cardValidator from "card-validator";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   initiateMonicreditPayment,
-  verifyMonicreditPayment,
 } from "../../services/apiMonicredit";
+import { verifyPayment as verifyPaymentApi } from "../../services/apiPayment";
 
 export default function PaymentOptions() {
   const navigate = useNavigate();
@@ -15,8 +15,8 @@ export default function PaymentOptions() {
 
   // Monicredit payment state
   const [monicreditAuthUrl, setMonicreditAuthUrl] = useState("");
-  const [monicreditTransId, setMonicreditTransId] = useState("");
-  const [monicreditStatus, setMonicreditStatus] = useState(null);
+  // const [monicreditTransId, setMonicreditTransId] = useState("");
+  // const [monicreditStatus, setMonicreditStatus] = useState(null);
   const [monicreditLoading, setMonicreditLoading] = useState(false);
   const [monicreditError, setMonicreditError] = useState("");
 
@@ -115,7 +115,7 @@ export default function PaymentOptions() {
           }
           const data = await initiateMonicreditPayment({ items });
           setMonicreditAuthUrl(data.authorization_url);
-          setMonicreditTransId(data.id);
+          // setMonicreditTransId(data.id);
         } catch (err) {
           setMonicreditError(
             err.message || "Failed to initiate payment. Please try again.",
@@ -127,19 +127,26 @@ export default function PaymentOptions() {
       initiateMonicredit();
     }
   }, [selectedPayment]);
-  // Handler for verifying payment
-  const handleVerifyMonicredit = async () => {
-    setMonicreditLoading(true);
-    setMonicreditError("");
+
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState(null);
+  const [verifyError, setVerifyError] = useState("");
+
+  // Handler for verifying payment (bank transfer)
+  const handleVerifyBankTransfer = async () => {
+    setVerifying(true);
+    setVerifyError("");
+    setVerifyResult(null);
     try {
-      const result = await verifyMonicreditPayment(monicreditTransId);
-      setMonicreditStatus(result);
+      // Use reference or order_id from paymentData
+      const reference = paymentData?.customer?.reference || paymentData?.order_id;
+      if (!reference) throw new Error("No payment reference found.");
+      const result = await verifyPaymentApi(reference);
+      setVerifyResult(result);
     } catch (err) {
-      setMonicreditError(
-        err.message || "Failed to verify payment. Please try again.",
-      );
+      setVerifyError(err.message || "Failed to verify payment. Please try again.");
     } finally {
-      setMonicreditLoading(false);
+      setVerifying(false);
     }
   };
 
@@ -314,9 +321,21 @@ export default function PaymentOptions() {
                       </p>
                     </div>
                   </div>
-                  <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
-                    I've Made Payment
+                  <button
+                    className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] disabled:opacity-50"
+                    onClick={handleVerifyBankTransfer}
+                    disabled={verifying}
+                  >
+                    {verifying ? "Verifying..." : "I've Made Payment"}
                   </button>
+                  {verifyResult && (
+                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.status ? "text-green-600" : "text-red-600"}`}>
+                      {verifyResult.message}
+                    </div>
+                  )}
+                  {verifyError && (
+                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">{verifyError}</div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center text-sm font-normal text-red-500">
@@ -584,13 +603,13 @@ export default function PaymentOptions() {
                       Proceed to Monicredit Payment
                     </button>
                   )}
-                  {monicreditStatus && (
+                  {/* {monicreditStatus && (
                     <div
                       className={`mt-4 text-center font-semibold ${monicreditStatus.status ? "text-green-600" : "text-red-600"}`}
                     >
                       {monicreditStatus.message}
                     </div>
-                  )}
+                  )} */}
                 </>
               )}
             </div>
