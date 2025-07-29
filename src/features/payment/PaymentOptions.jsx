@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import cardValidator from "card-validator";
 import { useNavigate, useLocation } from "react-router-dom";
-import { initiateMonicreditPayment, verifyMonicreditPayment } from "../../services/apiMonicredit";
+import {
+  initiateMonicreditPayment,
+  verifyMonicreditPayment,
+} from "../../services/apiMonicredit";
 
 export default function PaymentOptions() {
   const navigate = useNavigate();
   const location = useLocation();
-  const paymentData = location.state || {};
+  const paymentData = location.state?.paymentData;
   const [selectedPayment, setSelectedPayment] = useState("wallet");
 
   // Monicredit payment state
@@ -16,7 +19,7 @@ export default function PaymentOptions() {
   const [monicreditStatus, setMonicreditStatus] = useState(null);
   const [monicreditLoading, setMonicreditLoading] = useState(false);
   const [monicreditError, setMonicreditError] = useState("");
-  
+
   const paymentMethods = [
     { id: "wallet", label: "Wallet Balance: N30,876" },
     { id: "transfer", label: "Pay Via Transfer" },
@@ -90,17 +93,21 @@ export default function PaymentOptions() {
 
   // Initiate Monicredit payment when selected
   useEffect(() => {
-    if (selectedPayment === "Monicredit_Transfer" && !monicreditAuthUrl && !monicreditLoading) {
+    if (
+      selectedPayment === "Monicredit_Transfer" &&
+      !monicreditAuthUrl &&
+      !monicreditLoading
+    ) {
       async function initiateMonicredit() {
         setMonicreditLoading(true);
         setMonicreditError("");
         try {
           // Build items from selectedSchedules
-          let items = (paymentData.selectedSchedules || []).map(sch => ({
+          let items = (paymentData.selectedSchedules || []).map((sch) => ({
             payment_schedule_id: sch.id,
             // revenue_head_code: sch.revenue_head?.revenue_head_code, // dynamic, commented out for now
             revenue_head_code: "REV686003f87e350", // hardcoded for testing
-            unit_cost: Number(sch.amount)
+            unit_cost: Number(sch.amount),
           }));
           const deliveryFee = Number(paymentData.deliveryDetails?.fee || 0);
           if (items.length > 0 && deliveryFee > 0) {
@@ -110,7 +117,9 @@ export default function PaymentOptions() {
           setMonicreditAuthUrl(data.authorization_url);
           setMonicreditTransId(data.id);
         } catch (err) {
-          setMonicreditError(err.message || "Failed to initiate payment. Please try again.");
+          setMonicreditError(
+            err.message || "Failed to initiate payment. Please try again.",
+          );
         } finally {
           setMonicreditLoading(false);
         }
@@ -126,7 +135,9 @@ export default function PaymentOptions() {
       const result = await verifyMonicreditPayment(monicreditTransId);
       setMonicreditStatus(result);
     } catch (err) {
-      setMonicreditError(err.message || "Failed to verify payment. Please try again.");
+      setMonicreditError(
+        err.message || "Failed to verify payment. Please try again.",
+      );
     } finally {
       setMonicreditLoading(false);
     }
@@ -238,78 +249,83 @@ export default function PaymentOptions() {
           {selectedPayment === "transfer" && (
             <div>
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
-                Transfer Method
+                Bank Transfer Details
               </h2>
-              <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-4">
-                <div className="text-center">
-                  <h3 className="text-sm font-normal text-[#05243F]/40">
-                    Transfer
-                  </h3>
-                  <p className="mt-2 text-4xl font-semibold text-[#2284DB]">
-                    N35,000
-                  </p>
-                  <p className="mt-3 text-[15px] text-[#05243F]/40">
-                    Account No. Expires in
-                    <span className="ml-1 font-semibold text-[#EBB850]">
-                      30
-                    </span>
-                    mins
-                  </p>
-                </div>
-
-                <div className="mt-5 space-y-4">
-                  <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                    <span className="text-[15px] font-light text-[#05243F]/60">
-                      Account Number:
-                    </span>
-                    <span className="text-base font-semibold text-[#05243F]">
-                      0987654322
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                    <span className="text-[15px] font-light text-[#05243F]/60">
-                      Bank Name:
-                    </span>
-                    <span className="text-base font-semibold text-[#05243F]">
-                      Paystack
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                    <span className="text-[15px] font-light text-[#05243F]/60">
-                      Account Name:
-                    </span>
-                    <span className="text-base font-semibold text-[#05243F]">
-                      Money Credit
-                    </span>
-                  </div>
-                  <div className="flex justify-between pb-3">
-                    <span className="text-[15px] font-light text-[#05243F]/60">
-                      Amount:
-                    </span>
-                    <span className="text-base font-semibold text-[#05243F]">
-                      N35,000
-                    </span>
-                  </div>
-                </div>
-
-                <div className="rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
-                  <div className="flex gap-3">
-                    <span className="text-base font-medium text-[#05243F]">
-                      Note:
-                    </span>
-                    <p className="text-sm font-normal text-[#05243F]/60">
-                      Kindly transfer the exact amount to the account details
-                      above
+              {paymentData ? (
+                <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-4">
+                  <div className="text-center">
+                    <h3 className="text-sm font-normal text-[#05243F]/40">
+                      Transfer
+                    </h3>
+                    <p className="mt-2 text-4xl font-semibold text-[#2284DB]">
+                      ₦{paymentData.total_amount}
+                    </p>
+                    <p className="mt-3 text-[15px] text-[#05243F]/40">
+                      Account No. Expires in
+                      <span className="ml-1 font-semibold text-[#EBB850]">
+                        30
+                      </span>
+                      mins
                     </p>
                   </div>
+                  <div className="mt-5 space-y-4">
+                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                      <span className="text-[15px] font-light text-[#05243F]/60">
+                        Account Number:
+                      </span>
+                      <span className="text-base font-semibold text-[#05243F]">
+                        {paymentData.customer?.account_number}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                      <span className="text-[15px] font-light text-[#05243F]/60">
+                        Bank Name:
+                      </span>
+                      <span className="text-base font-semibold text-[#05243F]">
+                        {paymentData.customer?.bank_name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                      <span className="text-[15px] font-light text-[#05243F]/60">
+                        Account Name:
+                      </span>
+                      <span className="text-base font-semibold text-[#05243F]">
+                        {paymentData.customer?.account_name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
+                      <span className="text-[15px] font-light text-[#05243F]/60">
+                        Amount:
+                      </span>
+                      <span className="text-base font-semibold text-[#05243F]">
+                        ₦{paymentData.total_amount}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
+                    <div className="flex gap-3">
+                      <span className="text-base font-medium text-[#05243F]">
+                        Note:
+                      </span>
+                      <p className="text-sm font-normal text-[#05243F]/60">
+                        Kindly transfer the exact amount to the account details
+                        above. After payment, click the button below to confirm.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+                    I've Made Payment
+                  </button>
                 </div>
-              </div>
-              <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
-                I've Made Payment
-              </button>
+              ) : (
+                <div className="text-center text-sm font-normal text-red-500">
+                  No payment records found. It looks like you haven’t initiated
+                  any payments yet.
+                </div>
+              )}
             </div>
           )}
-
 
           {selectedPayment === "card" && (
             <div>
@@ -491,32 +507,56 @@ export default function PaymentOptions() {
             </div>
           )}
 
-           {selectedPayment === "Monicredit_Transfer" && (
+          {selectedPayment === "Monicredit_Transfer" && (
             <div>
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Transfer Method
               </h2>
               {monicreditLoading ? (
-                <div className="flex flex-col items-center justify-center min-h-[300px]">
-                  <span className="text-3xl font-bold text-[#2284DB] animate-pulse mb-2">Loading...</span>
+                <div className="flex min-h-[300px] flex-col items-center justify-center">
+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">
+                    Loading...
+                  </span>
                   {/* Optional: Add a spinner below */}
-                  <svg className="animate-spin h-8 w-8 text-[#2284DB]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  <svg
+                    className="h-8 w-8 animate-spin text-[#2284DB]"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    ></path>
                   </svg>
                 </div>
               ) : (
                 <>
                   {monicreditError && (
-                    <div className="text-center text-red-500 mb-4">{monicreditError}</div>
+                    <div className="mb-4 text-center text-red-500">
+                      {monicreditError}
+                    </div>
                   )}
                   <div className="mb-6 text-center">
-                    <h3 className="text-lg font-semibold text-[#05243F] mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-[#05243F]">
                       How to Complete Your Payment
                     </h3>
-                    <ol className="list-decimal list-inside text-[#697C8C] text-base space-y-1">
+                    <ol className="list-inside list-decimal space-y-1 text-base text-[#697C8C]">
                       <li>
-                        Click the <span className="font-semibold text-[#2284DB]">Proceed to Monicredit Payment</span> button below.
+                        Click the{" "}
+                        <span className="font-semibold text-[#2284DB]">
+                          Proceed to Monicredit Payment
+                        </span>{" "}
+                        button below.
                       </li>
                       {/* <li>
                         A secure Monicredit payment page will open in a new tab.
@@ -532,7 +572,8 @@ export default function PaymentOptions() {
                       </li> */}
                     </ol>
                     <div className="mt-4 text-sm text-[#F26060]">
-                      <span className="font-semibold">Note:</span> Do not close the payment tab until your payment is completed.
+                      <span className="font-semibold">Note:</span> Do not close
+                      the payment tab until your payment is completed.
                     </div>
                   </div>
                   {monicreditAuthUrl && (
@@ -544,7 +585,11 @@ export default function PaymentOptions() {
                     </button>
                   )}
                   {monicreditStatus && (
-                    <div className={`mt-4 text-center font-semibold ${monicreditStatus.status ? 'text-green-600' : 'text-red-600'}`}>{monicreditStatus.message}</div>
+                    <div
+                      className={`mt-4 text-center font-semibold ${monicreditStatus.status ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {monicreditStatus.message}
+                    </div>
                   )}
                 </>
               )}

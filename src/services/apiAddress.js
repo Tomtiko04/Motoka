@@ -9,9 +9,9 @@ const getAllState = async() => {
   }
 };
 
-const getAllLocalGovernment = async () => {
+const getAllLocalGovernment = async (stateId) => {
   try {
-    const { data } = await api.get("/get-lga/27");
+    const { data } = await api.get(`/get-lga/${stateId}`);
     return data;
   } catch (error) {
     throw new Error(error.message);

@@ -5,27 +5,23 @@ import { IoIosArrowBack } from "react-icons/io";
 // import MercedesLogo from "../../assets/images/mercedes-logo.png";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useRenew";
+import { useGetLocalGovernment, useGetState } from "./useRenew";
+import { useInitializePayment } from "./usePayment";
 import SearchableSelect from "../../components/shared/SearchableSelect";
-import { useReminders } from '../../context/ReminderContext';
-import { fetchPaymentSchedules, fetchPaymentHeads } from '../../services/apiMonicredit';
+import { useReminders } from "../../context/ReminderContext";
+import {
+  fetchPaymentSchedules,
+  fetchPaymentHeads,
+} from "../../services/apiMonicredit";
 import { ClipLoader } from "react-spinners";
-
-const bvn = import.meta.env.VITE_MONICREDIT_BVN;
-const nin = import.meta.env.VITE_MONICREDIT_NIN;
 
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  // Get user info from localStorage
-  const userInfo = localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : {};
-  const email = userInfo.email || "";
-  const firstName = userInfo.name || "";
   const { reminders } = useReminders();
-  const getCarReminder = (carId) => reminders.find(r => String(r.car_id) === String(carId));
+  const getCarReminder = (carId) =>
+    reminders.find((r) => String(r.car_id) === String(carId));
 
   // Payment data
   const [paymentHeads, setPaymentHeads] = useState([]);
@@ -33,23 +29,33 @@ export default function RenewLicense() {
   const [loadingPayments, setLoadingPayments] = useState(true);
   const [selectedDocs, setSelectedDocs] = useState([]);
   const [selectedSchedules, setSelectedSchedules] = useState([]); // array of payment schedule objects
-  const [isPaymentInitializing, setIsPaymentInitializing] = useState(false);
 
   // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
     state: "",
-    fee: "50",
+    fee: "0",
     contact: "",
-    amount: "0"
+    amount: "0",
   });
 
-  const {data:state, isPending:isGettingState} = useGetState();
-  const {data:lg, isPending:isGettingLG} = useGetLocalGovernment();
+  // LGA options for the selected state
+  const [lgaOptions, setLgaOptions] = useState([]);
+
+  const { data: state, isPending: isGettingState } = useGetState();
+  const {
+    mutate: fetchLGAs,
+    data: lgaData,
+    isPending: isGettingLG,
+  } = useGetLocalGovernment();
+  const {
+    startPayment,
+    isPaymentInitializing,
+    data: paymentInitData,
+  } = useInitializePayment();
 
   const isState = state?.data;
-  const isLG = lg?.data;
 
   // Fetch payment heads and schedules on mount
   useEffect(() => {
@@ -58,11 +64,12 @@ export default function RenewLicense() {
       try {
         const [heads, schedules] = await Promise.all([
           fetchPaymentHeads(),
-          fetchPaymentSchedules()
+          fetchPaymentSchedules(),
         ]);
         setPaymentHeads(heads);
         setPaymentSchedules(schedules);
-      } catch (e) {
+      } catch (error) {
+        console.error("Error fetching payment data:", error);
         setPaymentHeads([]);
         setPaymentSchedules([]);
       } finally {
@@ -75,8 +82,8 @@ export default function RenewLicense() {
   // When selectedDocs changes, update selectedSchedules and amount
   useEffect(() => {
     // Find payment schedules for selected docs
-    const selected = paymentSchedules.filter(sch =>
-      selectedDocs.includes(sch.payment_head?.payment_head_name)
+    const selected = paymentSchedules.filter((sch) =>
+      selectedDocs.includes(sch.payment_head?.payment_head_name),
     );
     setSelectedSchedules(selected);
     // Sum the amounts for all selected (unit_cost)
@@ -84,32 +91,21 @@ export default function RenewLicense() {
     setDeliveryDetails((prev) => ({ ...prev, amount: total })); // store as number
   }, [selectedDocs, paymentSchedules]);
 
+  // Update lgaOptions when lgaData changes
+  useEffect(() => {
+    if (lgaData && lgaData.data) {
+      setLgaOptions(lgaData.data);
+    } else {
+      setLgaOptions([]);
+    }
+  }, [lgaData]);
+
   // Document options from payment heads
-  const docOptions = paymentHeads.map(h => h.payment_head_name);
+  const docOptions = paymentHeads.map((h) => h.payment_head_name);
 
   const handleToggleDoc = (doc) => {
     setSelectedDocs((prev) =>
-      prev.includes(doc)
-        ? prev.filter((d) => d !== doc)
-        : [...prev, doc]
-    );
-  };
-
-  const handleToggleSchedule = (schedule) => {
-    setSelectedSchedules((prev) =>
-      prev.includes(schedule) ? prev.filter((s) => s !== schedule) : [...prev, schedule]
-    );
-  };
-
-  const handleScheduleChange = (schedule) => {
-    setSelectedSchedules((prev) =>
-      prev.includes(schedule) ? prev.filter((s) => s !== schedule) : [...prev, schedule]
-    );
-  };
-
-  const handleDocChange = (doc) => {
-    setSelectedDocs((prev) =>
-      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
+      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc],
     );
   };
 
@@ -130,18 +126,113 @@ export default function RenewLicense() {
     }));
   };
 
+  // When state changes, fetch LGAs for that state
+  const handleStateChange = (e) => {
+    const selectedStateName = e.target.value;
+    handleDeliveryChange("state", selectedStateName);
+    handleDeliveryChange("lg", "");
+    // Find state_id
+    const selectedState = isState?.find(
+      (s) => s.state_name === selectedStateName,
+    );
+    if (selectedState) {
+      fetchLGAs(selectedState.id);
+    } else {
+      setLgaOptions([]);
+    }
+    // Reset delivery fee when state changes
+    handleDeliveryChange("fee", "0");
+  };
+
+  // When LGA changes, set delivery fee
+  const handleLgaChange = (e) => {
+    const selectedLgaName = e.target.value;
+    handleDeliveryChange("lg", selectedLgaName);
+    const selectedLga = lgaOptions.find(
+      (lga) => lga.lga_name === selectedLgaName,
+    );
+    if (selectedLga && selectedLga.delivery_fee) {
+      handleDeliveryChange("fee", selectedLga.delivery_fee.fee);
+    } else {
+      handleDeliveryChange("fee", "0");
+    }
+  };
+
+  // Helper function to get state_id and lga_id
+  const getStateId = () => {
+    if (!deliveryDetails.state || !isState) return null;
+    const selectedState = isState.find(
+      (s) => s.state_name === deliveryDetails.state,
+    );
+    return selectedState?.id || null;
+  };
+
+  const getLgaId = () => {
+    if (!deliveryDetails.lg || !lgaOptions) return null;
+    const selectedLga = lgaOptions.find(
+      (l) => l.lga_name === deliveryDetails.lg,
+    );
+    return selectedLga?.id || null;
+  };
+
   // Payment logic
   const handlePayNow = async () => {
-    // Only navigate to payment selector, do not initiate payment here
-    const paymentPayload = {
-      selectedSchedules,
-      deliveryDetails,
-      selectedDocs,
-      carDetail,
-      // add any other info needed for payment
-    };
-    navigate("/payment", { state: paymentPayload });
+    if (!isFormValid()) {
+      return;
+    }
+
+    const stateId = getStateId();
+    const lgaId = getLgaId();
+
+    if (!stateId || !lgaId) {
+      console.error("Invalid state or LGA selection");
+      return;
+    }
+
+    // Create payload for each selected schedule
+    const paymentPayloads = selectedSchedules.map((schedule) => ({
+      car_id: carDetail?.id,
+      payment_schedule_id: schedule.id,
+      meta_data: {
+        delivery_address: deliveryDetails.address,
+        delivery_contact: deliveryDetails.contact,
+        state_id: stateId,
+        lga_id: lgaId,
+      },
+    }));
+
+    // Initialize payment for the first schedule (you might want to handle multiple payments differently)
+    if (paymentPayloads.length > 0) {
+      startPayment(paymentPayloads[0]);
+    }
+
+    // TODO works for multiple
+    // const paymentPayload = {
+    //   car_id: carDetail?.id,
+    //   payment_schedule_id: selectedSchedules.map((schedule) => schedule.id),
+    //   meta_data: {
+    //     delivery_address: deliveryDetails.address,
+    //     delivery_contact: deliveryDetails.contact,
+    //     state_id: stateId,
+    //     lga_id: lgaId,
+    //   },
+    // };
+
+    // if (paymentPayload.payment_schedule_id.length > 0) {
+    //   startPayment(paymentPayload);
+    // }
   };
+
+  // Navigate to payment page after successful payment initialization
+  React.useEffect(() => {
+    if (
+      paymentInitData &&
+      paymentInitData.data &&
+      paymentInitData.data.data
+    ) {
+      navigate("/payment", { state: { paymentData: paymentInitData.data.data } });
+    }
+  }, [paymentInitData, navigate]);
 
   return (
     <>
@@ -163,64 +254,7 @@ export default function RenewLicense() {
       {/* Main Content */}
       <div className="mx-auto max-w-4xl rounded-[20px] bg-[#F9FAFC] p-8">
         <div className="relative grid grid-cols-1 gap-10 md:grid-cols-2">
-          {/* Left Column - Car Details */}
           <div className="mt-2">
-            {/* <div className="rounded-2xl bg-white px-4 py-5 shadow">
-              <div className="mb-6">
-                <div className="text-sm font-light text-[#05243F]/60">
-                  Car Model
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <div className="">
-                      <img
-                        src={carDetail?.carLogo || MercedesLogo}
-                        alt={carDetail?.vehicle_make || "Car"}
-                        className="h-6 w-6"
-                      />
-                    </div>
-                    <h3 className="text-xl font-semibold text-[#05243F]">
-                      {carDetail?.vehicle_model || "-"}
-                    </h3>
-                  </div>
-                  <div>
-                    <FaCarAlt className="text-3xl text-[#2389E3]" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-6 flex items-center">
-                <div>
-                  <div className="text-sm text-[#05243F]/60">Plate No:</div>
-                  <div className="text-base font-semibold text-[#05243F]">
-                    {carDetail?.plate_number || "-"}
-                  </div>
-                </div>
-                <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-                <div>
-                  <div className="text-sm text-[#05243F]/60">Exp. Date</div>
-                  <div className="text-base font-semibold text-[#05243F]">
-                    {carDetail?.expiry_date || "-"}
-                  </div>
-                </div>
-                <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-                <div>
-                  <div className="text-sm text-[#05243F]/60">Car Type</div>
-                  <div className="text-base font-semibold text-[#05243F]">
-                    {carDetail?.vehicle_make || "-"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full">
-                <div className="flex items-center gap-2 rounded-full bg-[#FFEFCE] px-4 py-1.5">
-                  <span className="h-2 w-2 rounded-full bg-[#FDB022]"></span>
-                  <span className="text-sm font-medium text-[#05243F]">
-                    Expires in 3 days
-                  </span>
-                </div>
-              </div>
-            </div> */}
 
             <CarDetailsCard
               carDetail={carDetail}
@@ -233,7 +267,7 @@ export default function RenewLicense() {
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
               <div className="flex flex-wrap gap-3">
                 {loadingPayments ? (
-                  <div className="mx-auto flex items-center justify-center my-10">
+                  <div className="mx-auto my-10 flex items-center justify-center">
                     <div>
                       <ClipLoader color="#2284DB" />
                     </div>
@@ -258,10 +292,8 @@ export default function RenewLicense() {
             </div>
           </div>
 
-          {/* Vertical Divider */}
           <div className="absolute top-0 left-1/2 hidden h-full w-[1px] -translate-x-1/2 bg-[#e9ecff] md:block"></div>
 
-          {/* Right Column - Payment Details */}
           <div className="mt-2">
             <div className="rounded-2xl px-4">
               <div className="mb-6">
@@ -302,10 +334,7 @@ export default function RenewLicense() {
                     label="State"
                     name="state"
                     value={deliveryDetails.state}
-                    onChange={(e) => {
-                      handleDeliveryChange("state", e.target.value);
-                      handleDeliveryChange("lg", "");
-                    }}
+                    onChange={handleStateChange}
                     options={
                       Array.isArray(isState)
                         ? isState.map((state) => ({
@@ -324,10 +353,13 @@ export default function RenewLicense() {
                     label="Local Government"
                     name="lg"
                     value={deliveryDetails.lg}
-                    onChange={(e) => handleDeliveryChange("lg", e.target.value)}
+                    onChange={handleLgaChange}
                     options={
-                      Array.isArray(isLG)
-                        ? isLG.map((lg) => ({ id: lg.id, name: lg.lga_name }))
+                      Array.isArray(lgaOptions)
+                        ? lgaOptions.map((lg) => ({
+                            id: lg.id,
+                            name: lg.lga_name,
+                          }))
                         : []
                     }
                     placeholder="Select LG"
@@ -368,6 +400,13 @@ export default function RenewLicense() {
                   placeholder="08012345678"
                 />
               </div>
+
+              {/* Error Message */}
+              {/* {paymentError && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                  {paymentError.message}
+                </div>
+              )} */}
 
               {/* Pay Now Button */}
               <button
