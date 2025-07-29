@@ -9,6 +9,7 @@ import { useGetLocalGovernment, useGetState, useInitializePayment } from "./useR
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { useReminders } from '../../context/ReminderContext';
 import { fetchPaymentSchedules, fetchPaymentHeads } from '../../services/apiMonicredit';
+import { ClipLoader } from "react-spinners";
 
 const bvn = import.meta.env.VITE_MONICREDIT_BVN;
 const nin = import.meta.env.VITE_MONICREDIT_NIN;
@@ -221,28 +222,38 @@ export default function RenewLicense() {
               </div>
             </div> */}
 
-            <CarDetailsCard carDetail={carDetail} isRenew={false} reminderObj={getCarReminder(carDetail.id)} />
+            <CarDetailsCard
+              carDetail={carDetail}
+              isRenew={false}
+              reminderObj={getCarReminder(carDetail?.id)}
+            />
 
             {/* Document Details */}
             <div className="mt-8">
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
               <div className="flex flex-wrap gap-3">
                 {loadingPayments ? (
-                  <span>Loading...</span>
-                ) : docOptions.map((doc) => (
-                  <button
-                    key={doc}
-                    type="button"
-                    onClick={() => handleToggleDoc(doc)}
-                    className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors
-                      ${selectedDocs.includes(doc)
-                        ? "bg-green-500 text-white"
-                        : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"}
-                    `}
-                  >
-                    {doc}
-                  </button>
-                ))}
+                  <div className="mx-auto flex items-center justify-center my-10">
+                    <div>
+                      <ClipLoader color="#2284DB" />
+                    </div>
+                  </div>
+                ) : (
+                  docOptions.map((doc) => (
+                    <button
+                      key={doc}
+                      type="button"
+                      onClick={() => handleToggleDoc(doc)}
+                      className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
+                        selectedDocs.includes(doc)
+                          ? "bg-[#2284DB] text-white"
+                          : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"
+                      } `}
+                    >
+                      {doc}
+                    </button>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -367,7 +378,8 @@ export default function RenewLicense() {
                 ₦
                 {(
                   Number(deliveryDetails.amount) + Number(deliveryDetails.fee)
-                ).toLocaleString()} Pay Now
+                ).toLocaleString()}{" "}
+                Pay Now
                 {isPaymentInitializing && "..."}
               </button>
             </div>
