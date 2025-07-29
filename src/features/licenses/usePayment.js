@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { initializePayment as initializePaymentApi, verifyPayment as verifyPaymentApi, getPaymentHistory as getPaymentHistoryApi } from "../../services/apiPayment";
+import { initializePayment as initializePaymentApi, verifyPayment as verifyPaymentApi, getPaymentHistory as getPaymentHistoryApi, getCarPaymentReceipt } from "../../services/apiPayment";
 import toast from "react-hot-toast";
 
 export function useInitializePayment() {
@@ -48,5 +48,14 @@ export function useGetPaymentHistory() {
     queryFn: getPaymentHistoryApi,
   });
 
+  return { data, isPending, error };
+}
+
+export function useCarPaymentReceipt(carId) {
+  const { data, isPending, error } = useQuery({
+    queryKey: ["car-payment-receipt", carId],
+    queryFn: () => getCarPaymentReceipt(carId),
+    enabled: !!carId,
+  });
   return { data, isPending, error };
 }
