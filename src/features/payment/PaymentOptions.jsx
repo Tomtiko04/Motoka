@@ -138,9 +138,12 @@ export default function PaymentOptions() {
     setVerifyError("");
     setVerifyResult(null);
     try {
+      console.log("transid",paymentData?.transid);
       const reference = paymentData?.transid;
+      console.log("reference",reference);
       if (!reference) throw new Error("No payment reference found.");
       const result = await verifyPaymentApi(reference);
+      console.log("result",result);
       setVerifyResult(result);
     } catch (err) {
       setVerifyError(err.message || "Failed to verify payment. Please try again.");
@@ -159,7 +162,7 @@ export default function PaymentOptions() {
   };
 
   React.useEffect(() => {
-    if (verifyResult && verifyResult.status && paymentData?.car_id) {
+    if (verifyResult && verifyResult.data.status && paymentData?.car_id) {
       const timeout = setTimeout(() => {
         navigate(`/payment/car-receipt/${paymentData.car_id}`);
       }, 2000); // 2 seconds delay
@@ -337,8 +340,8 @@ export default function PaymentOptions() {
                     {verifying ? "Verifying..." : "I've Made Payment"}
                   </button>
                   {verifyResult && (
-                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.status ? "text-green-600" : "text-red-600"}`}>
-                      {verifyResult.message}
+                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data.status ? "text-green-600" : "text-red-600"}`}>
+                      {verifyResult.data.message}
                     </div>
                   )}
                   {verifyError && (
