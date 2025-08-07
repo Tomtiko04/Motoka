@@ -7,6 +7,7 @@ import ActionButton from "./components/ActionButton";
 import { LuUpload } from "react-icons/lu";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import LicenseSample from "../../assets/images/license-sample.png";
+import { useCreateDriverLicense } from "./useLicense";
 
 export default function DriversLicense() {
   const fileInputRef = useRef(null);
@@ -25,17 +26,19 @@ export default function DriversLicense() {
     placeOfBirth: "",
     stateOfOrigin: "",
     localGovernment: "",
+    bloodGroup: "O+",
     height: "",
     occupation: "",
     nextOfKin: "",
-    nextOfKinNumber: "",
-    motherName: "",
-    licenseNumber: "",
+    nextOfKinPhone: "",
+    motherMaidenName: "",
+    licenseYear: null,
     passportPhoto: null,
     affidavit: null,
   });
   const [errors, setErrors] = useState({});
-  const [isUploading, setIsUploading] = useState(false);
+
+  const { createLicense, isCreating } = useCreateDriverLicense();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -108,40 +111,75 @@ export default function DriversLicense() {
     if (!formData.height) newErrors.height = "Height is required";
     if (!formData.occupation) newErrors.occupation = "Occupation is required";
     if (!formData.nextOfKin) newErrors.nextOfKin = "Next of Kin is required";
-    if (!formData.nextOfKinNumber)
-      newErrors.nextOfKinNumber = "Next of Kin number is required";
-    if (!formData.motherName) newErrors.motherName = "Mother name is required";
-    if (!formData.licenseNumber)
-      newErrors.licenseNumber = "License number is required";
+    if (!formData.nextOfKinPhone)
+      newErrors.nextOfKinPhone = "Next of Kin phone number is required";
+    if (!formData.motherMaidenName)
+      newErrors.motherMaidenName = "Mother's maiden name is required";
+    
+    // Check for passport photograph requirement
+    if (!formData.passportPhoto) {
+      newErrors.passportPhoto = "Passport photograph is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
       toast.error("Please fill all required fields correctly");
       return;
     }
 
-    const selectedYears = document.querySelector('select').value;
-    const yearMatch = selectedYears.match(/\d+/);
-    const years = yearMatch ? parseInt(yearMatch[0]) : 1;
-    const amount = years * 30000;
+    const payload = {
+      license_type: licenseType.toLowerCase(),
+      full_name: formData.fullName,
+      phone_number: formData.phoneNumber,
+      address: formData.address,
+      date_of_birth: formData.dateOfBirth,
+      place_of_birth: formData.placeOfBirth,
+      state_of_origin: formData.stateOfOrigin,
+      local_government: formData.localGovernment,
+      blood_group: formData.bloodGroup,
+      height: formData.height,
+      occupation: formData.occupation,
+      next_of_kin: formData.nextOfKin,
+      next_of_kin_phone: formData.nextOfKinPhone,
+      mother_maiden_name: formData.motherMaidenName,
+      license_year: formData.licenseYear,
+      passport_photograph: formData.passportPhoto,
+    };
 
-    navigate("/payment", {
-      state: {
-        type: "drivers_license",
-        amount,
-        details: {
-          licenseType,
-          renewType: licenseType === "Renew" ? renewType : null,
-          years,
-          ...formData
-        }
-      }
-    });
+    try {
+      await createLicense(payload, {
+        onSuccess: () => {
+          const amount = formData.licenseYear * 30000;
+          navigate("/licenses/confirm-request", {
+            state: {
+              type: "license",
+              items: [
+                {
+                  name: `${licenseType} Driver's License${licenseType === "Renew" && renewType ? ` (${renewType})` : ""}`,
+                  amount,
+                  years: formData.licenseYear,
+                  ...formData,
+                },
+              ],
+              details: {
+                licenseType,
+                renewType: licenseType === "Renew" ? renewType : null,
+                description: "This is for your Driver's License",
+                years: formData.licenseYear,
+                ...formData,
+              },
+            },
+          });
+        },
+      });
+    } catch (error) {
+      console.error("License creation failed:", error);
+    }
   };
 
   return (
@@ -159,7 +197,7 @@ export default function DriversLicense() {
             <p className="mb-5 text-sm font-normal text-[#05243F]/40">
               Please pick the type of driver's license we can help you with.
             </p>
-            <div className="flex w-[140px] flex-row md:flex-col gap-2">
+            <div className="flex w-[140px] flex-row gap-2 md:flex-col">
               <button
                 type="button"
                 onClick={() => setLicenseType("New")}
@@ -192,7 +230,7 @@ export default function DriversLicense() {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute left-0 mt-1 w-fit rounded-[26px] border-2 border-[#2389E3] py-1 shadow-sm bg-white sm:w-full">
+                  <div className="absolute left-0 mt-1 w-fit rounded-[26px] border-2 border-[#2389E3] bg-white py-1 shadow-sm sm:w-full">
                     <button
                       type="button"
                       onClick={() => {
@@ -226,33 +264,38 @@ export default function DriversLicense() {
             {/* Upload Section */}
             {(licenseType === "New" ||
               (licenseType === "Renew" && renewType === "Expired")) && (
-              <label
-                htmlFor="passport-upload"
-                className="block cursor-pointer"
-                onClick={(e) => handleFileUpload(e, "passportPhoto")}
-              >
-                <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
-                  <input
-                    id="passport-upload"
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={(e) => handleFileChange(e, "passportPhoto")}
-                    onClick={(e) => e.stopPropagation()}
-                    className="hidden"
-                  />
-                  <span>
-                    <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
-                  </span>
-                  <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
-                    {formData.passportPhoto
-                      ? formData.passportPhoto.name
-                      : licenseType === "New"
-                        ? "Upload Passport Photograph"
-                        : "Upload Expired Driver's License"}
-                  </p>
-                </div>
-              </label>
+              <div>
+                <label
+                  htmlFor="passport-upload"
+                  className="block cursor-pointer"
+                  onClick={(e) => handleFileUpload(e, "passportPhoto")}
+                >
+                  <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
+                    <input
+                      id="passport-upload"
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={(e) => handleFileChange(e, "passportPhoto")}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hidden"
+                    />
+                    <span>
+                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                    </span>
+                    <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
+                      {formData.passportPhoto
+                        ? formData.passportPhoto.name
+                        : licenseType === "New"
+                          ? "Upload Passport Photograph"
+                          : "Upload Expired Driver's License"}
+                    </p>
+                  </div>
+                </label>
+                {errors.passportPhoto && (
+                  <p className="mt-1 text-sm text-red-500">{errors.passportPhoto}</p>
+                )}
+              </div>
             )}
 
             {/* New License Form */}
@@ -337,9 +380,20 @@ export default function DriversLicense() {
                   <p className="mb-1 text-sm font-medium text-[#05243F]">
                     Blood Group
                   </p>
-                  <select>
-                    <option>0+</option>
-                    <option>A</option>
+                  <select
+                    name="bloodGroup"
+                    value={formData.bloodGroup}
+                    onChange={handleInputChange}
+                    className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none"
+                  >
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
                   </select>
                 </div>
                 <FormInput
@@ -372,20 +426,20 @@ export default function DriversLicense() {
                 />
                 <FormInput
                   label="Next of Kin's Phone Number"
-                  name="nextOfKinNumber"
+                  name="nextOfKinPhone"
                   type="tel"
-                  value={formData.nextOfKinNumber}
+                  value={formData.nextOfKinPhone}
                   onChange={handleInputChange}
-                  error={errors.nextOfKinNumber}
+                  error={errors.nextOfKinPhone}
                   placeholder="Tomtiko"
                   required
                 />
                 <FormInput
                   label="Mother's Maiden Name"
-                  name="motherName"
-                  value={formData.motherName}
+                  name="motherMaidenName"
+                  value={formData.motherMaidenName}
                   onChange={handleInputChange}
-                  error={errors.motherName}
+                  error={errors.motherMaidenName}
                   placeholder="Tomtiko"
                   required
                 />
@@ -393,19 +447,26 @@ export default function DriversLicense() {
                   <p className="mb-1 text-sm font-medium text-[#05243F]">
                     License Years
                   </p>
-                  <select className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none">
-                    <option className="text-[#05243F]/40">1 year</option>
-                    <option className="text-[#05243F]/40">2 years</option>
-                    <option className="text-[#05243F]/40">3 years</option>
-                    <option className="text-[#05243F]/40">4 years</option>
+                  <select
+                    name="licenseYear"
+                    value={formData.licenseYear}
+                    onChange={handleInputChange}
+                    className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none"
+                  >
+                    <option value={1}>1 year</option>
+                    <option value={2}>2 years</option>
+                    <option value={3}>3 years</option>
+                    <option value={4}>4 years</option>
+                    <option value={5}>5 years</option>
                   </select>
                 </div>
-                <div className="sticky bottom-0 mt-4 flex justify-center sm:mt-5 bg-white">
+                <div className="sticky bottom-0 mt-4 flex justify-center bg-white sm:mt-5">
                   <ActionButton
                     onClick={handleSubmit}
                     className="w-full md:w-[60%]"
+                    disabled={isCreating}
                   >
-                    Confirm and Proceed
+                    {isCreating ? "Creating License..." : "Confirm and Proceed"}
                   </ActionButton>
                 </div>
               </div>
@@ -456,8 +517,9 @@ export default function DriversLicense() {
                   <ActionButton
                     onClick={handleSubmit}
                     className="w-full md:w-[60%]"
+                    disabled={isCreating}
                   >
-                    Confirm and Proceed
+                    {isCreating ? "Creating License..." : "Confirm and Proceed"}
                   </ActionButton>
                 </div>
               </div>
