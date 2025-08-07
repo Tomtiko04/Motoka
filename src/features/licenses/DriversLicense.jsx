@@ -32,7 +32,7 @@ export default function DriversLicense() {
     nextOfKin: "",
     nextOfKinPhone: "",
     motherMaidenName: "",
-    licenseYear: 1,
+    licenseYear: null,
     passportPhoto: null,
     affidavit: null,
   });
@@ -155,13 +155,21 @@ export default function DriversLicense() {
       await createLicense(payload, {
         onSuccess: () => {
           const amount = formData.licenseYear * 30000;
-          navigate("/payment", {
+          navigate("/licenses/confirm-request", {
             state: {
-              type: "drivers_license",
-              amount,
+              type: "license",
+              items: [
+                {
+                  name: `${licenseType} Driver's License${licenseType === "Renew" && renewType ? ` (${renewType})` : ""}`,
+                  amount,
+                  years: formData.licenseYear,
+                  ...formData,
+                },
+              ],
               details: {
                 licenseType,
                 renewType: licenseType === "Renew" ? renewType : null,
+                description: "This is for your Driver's License",
                 years: formData.licenseYear,
                 ...formData,
               },
