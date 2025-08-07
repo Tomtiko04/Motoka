@@ -115,6 +115,11 @@ export default function DriversLicense() {
       newErrors.nextOfKinPhone = "Next of Kin phone number is required";
     if (!formData.motherMaidenName)
       newErrors.motherMaidenName = "Mother's maiden name is required";
+    
+    // Check for passport photograph requirement
+    if (!formData.passportPhoto) {
+      newErrors.passportPhoto = "Passport photograph is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -143,6 +148,7 @@ export default function DriversLicense() {
       next_of_kin_phone: formData.nextOfKinPhone,
       mother_maiden_name: formData.motherMaidenName,
       license_year: formData.licenseYear,
+      passport_photograph: formData.passportPhoto,
     };
 
     try {
@@ -165,7 +171,6 @@ export default function DriversLicense() {
       });
     } catch (error) {
       console.error("License creation failed:", error);
-      // Error handling is already done in the hook
     }
   };
 
@@ -251,33 +256,38 @@ export default function DriversLicense() {
             {/* Upload Section */}
             {(licenseType === "New" ||
               (licenseType === "Renew" && renewType === "Expired")) && (
-              <label
-                htmlFor="passport-upload"
-                className="block cursor-pointer"
-                onClick={(e) => handleFileUpload(e, "passportPhoto")}
-              >
-                <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
-                  <input
-                    id="passport-upload"
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={(e) => handleFileChange(e, "passportPhoto")}
-                    onClick={(e) => e.stopPropagation()}
-                    className="hidden"
-                  />
-                  <span>
-                    <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
-                  </span>
-                  <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
-                    {formData.passportPhoto
-                      ? formData.passportPhoto.name
-                      : licenseType === "New"
-                        ? "Upload Passport Photograph"
-                        : "Upload Expired Driver's License"}
-                  </p>
-                </div>
-              </label>
+              <div>
+                <label
+                  htmlFor="passport-upload"
+                  className="block cursor-pointer"
+                  onClick={(e) => handleFileUpload(e, "passportPhoto")}
+                >
+                  <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
+                    <input
+                      id="passport-upload"
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={(e) => handleFileChange(e, "passportPhoto")}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hidden"
+                    />
+                    <span>
+                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                    </span>
+                    <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
+                      {formData.passportPhoto
+                        ? formData.passportPhoto.name
+                        : licenseType === "New"
+                          ? "Upload Passport Photograph"
+                          : "Upload Expired Driver's License"}
+                    </p>
+                  </div>
+                </label>
+                {errors.passportPhoto && (
+                  <p className="mt-1 text-sm text-red-500">{errors.passportPhoto}</p>
+                )}
+              </div>
             )}
 
             {/* New License Form */}
