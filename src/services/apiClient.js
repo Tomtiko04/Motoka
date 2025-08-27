@@ -7,7 +7,7 @@ const requestCache = new Map()
 
 const api = axios.create({
   baseURL: "https://api.motoka.ng/api",
-})
+});
 
 // Add security headers to all requests
 api.interceptors.request.use((config) => {

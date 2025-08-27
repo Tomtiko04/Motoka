@@ -2,16 +2,16 @@ import { api } from "./apiClient";
 
 const getAllState = async() => {
   try {
-    const { data } = await api.get("/car/get-all-state");
+    const { data } = await api.get("/get-all-state");
     return data;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
-const getAllLocalGovernment = async () => {
+const getAllLocalGovernment = async (stateId) => {
   try {
-    const { data } = await api.get("/car/get-lga/27");
+    const { data } = await api.get(`/get-lga/${stateId}`);
     return data;
   } catch (error) {
     throw new Error(error.message);
