@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FaBell, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
@@ -7,9 +5,7 @@ import { toast } from "react-hot-toast";
 import { Cookie, LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { logout } from "../services/apiAuth";
-
 import { authStorage } from "../utils/authStorage";
-
 import Avarta from "../assets/images/avarta.png";
 import Logo from "../assets/images/Logo.png";
 
@@ -77,17 +73,22 @@ export default function AppLayout({ onNavigate }) {
                   Motoka
                 </span>
               </div>
-
               {/* Mobile menu button and notifications */}
               <div className="flex items-center gap-4 md:hidden">
-                <div className="relative">
+                <div className="relative " onClick={()=>navigate("/ladipo/cart-page")}>
+                  <Icon icon="mynaui:cart-solid" fontSize={24} color="#2284DB" className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"/>
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
+                    1
+                  </span>
+                </div>
+                <div className="relative" onClick={()=>navigate("/notification")}>
                   <Icon
                     icon="ri:notification-4-fill"
                     fontSize={20}
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    3
+                    2
                   </span>
                 </div>
                 <button
@@ -101,7 +102,6 @@ export default function AppLayout({ onNavigate }) {
                   )}
                 </button>
               </div>
-
               {/* Desktop Navigation */}
               <nav className="hidden space-x-6 md:flex">
                 {navLinks.map((link) => (
@@ -118,10 +118,15 @@ export default function AppLayout({ onNavigate }) {
                   </Link>
                 ))}
               </nav>
-
               {/* User Actions */}
               <div className="hidden items-center gap-4 md:flex">
-                <div className="relative">
+                <div className="relative " onClick={()=>navigate("/ladipo/cart-page")}>
+                  <Icon icon="mynaui:cart-solid" fontSize={24} color="#2284DB" className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"/>
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
+                    1
+                  </span>
+                </div>
+                <div className="relative" onClick={()=>navigate("/notification")}>
                   <Icon
                     icon="ri:notification-4-fill"
                     fontSize={20}
@@ -130,7 +135,7 @@ export default function AppLayout({ onNavigate }) {
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
                     3
                   </span>
-                </div>
+                </div>                
                 {/* When you click it will show a drop down */}
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img
