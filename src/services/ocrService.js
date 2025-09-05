@@ -23,6 +23,83 @@ class OCRService {
     }
   }
 
+  // Draw an image/blob onto a canvas, optionally rotate, and apply simple grayscale/contrast
+  async preprocessToBlob(input, rotateDeg = 0) {
+    const imageUrl = URL.createObjectURL(input);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = imageUrl;
+      });
+
+      const width = rotateDeg % 180 === 0 ? img.naturalWidth : img.naturalHeight;
+      const height = rotateDeg % 180 === 0 ? img.naturalHeight : img.naturalWidth;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      // rotate
+      ctx.save();
+      ctx.translate(width / 2, height / 2);
+      ctx.rotate((rotateDeg * Math.PI) / 180);
+      ctx.drawImage(
+        img,
+        -img.naturalWidth / 2,
+        -img.naturalHeight / 2,
+        img.naturalWidth,
+        img.naturalHeight,
+      );
+      ctx.restore();
+
+      // grayscale + slight contrast boost
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const contrast = 1.1; // mild boost
+      for (let p = 0; p < data.length; p += 4) {
+        const r = data[p];
+        const g = data[p + 1];
+        const b = data[p + 2];
+        // grayscale
+        let v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        // contrast adjustment around 128
+        v = (v - 128) * contrast + 128;
+        v = Math.max(0, Math.min(255, v));
+        data[p] = data[p + 1] = data[p + 2] = v;
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      return await new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), 'image/png', 0.95);
+      });
+    } finally {
+      URL.revokeObjectURL(imageUrl);
+    }
+  }
+
+  async recognizeWithBestRotation(fileOrBlob) {
+    const rotations = [0, 90, 180, 270];
+    let best = { text: '', confidence: -1 };
+    for (const deg of rotations) {
+      try {
+        const preBlob = await this.preprocessToBlob(fileOrBlob, deg);
+        const { data } = await this.worker.recognize(preBlob);
+        const conf = typeof data.confidence === 'number' ? data.confidence : 0;
+        if (conf > best.confidence) {
+          best = { text: data.text, confidence: conf };
+        }
+        // short-circuit if very high confidence
+        if (best.confidence >= 85) break;
+      } catch (e) {
+        // ignore rotation failure and continue
+      }
+    }
+    return best.text;
+  }
+
   async extractText(file) {
     if (!this.isInitialized) {
       await this.initialize();
@@ -45,12 +122,10 @@ class OCRService {
         
         // If direct extraction fails or returns empty, convert to image and use OCR
         const imageBlob = await pdfService.convertPDFToImage(file);
-        const { data: { text: ocrText } } = await this.worker.recognize(imageBlob);
-        text = ocrText;
+        text = await this.recognizeWithBestRotation(imageBlob);
       } else {
         // Handle image files
-        const { data: { text: ocrText } } = await this.worker.recognize(file);
-        text = ocrText;
+        text = await this.recognizeWithBestRotation(file);
       }
       
       return text;
