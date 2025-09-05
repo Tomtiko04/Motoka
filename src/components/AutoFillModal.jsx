@@ -14,6 +14,7 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
   const [error, setError] = useState(null);
   const [processingStep, setProcessingStep] = useState('');
   const [showRawText, setShowRawText] = useState(false);
+  const [hasAutoApplied, setHasAutoApplied] = useState(false);
 
   const handleFileSelect = (file, error) => {
     setSelectedFile(file);
@@ -63,6 +64,15 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
       setProcessingStep('Processing complete!');
       
       toast.success('Document processed successfully!');
+
+      // Auto-apply to the form immediately so the user sees the fields filled
+      try {
+        const mergedData = { ...formData, ...parsedData };
+        onAutoFill(mergedData);
+        setHasAutoApplied(true);
+      } catch {
+        // non-fatal; user can still click the button to apply
+      }
     } catch (err) {
       console.error('OCR processing error:', err);
       setError(err.message || 'Failed to process document. Please try again.');
@@ -235,6 +245,12 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
 
           {/* Extracted Data */}
           {renderExtractedData()}
+
+          {hasAutoApplied && (
+            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+              <p className="text-xs text-green-800">Extracted data has been applied to the form. You can close this window or adjust any fields manually.</p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -265,7 +281,7 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
               className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
             >
               <FiCheck className="h-4 w-4" />
-              Auto Fill Form
+              Apply to Form Again
             </button>
           )}
         </div>

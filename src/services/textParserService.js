@@ -3,20 +3,22 @@ class TextParserService {
     this.patterns = {
       // Name patterns
       name: [
-        /(?:name|owner|full name)[\s:]*([A-Za-z\s]+)/i,
-        /^([A-Za-z\s]+)$/m,
+        /(?:owners?\s+name|name|owner|full name)[\s:]*([A-Za-z\s.]+)/i,
+        /(?:mr|mrs|miss|dr)\.?\s+([A-Za-z\s.]+)/i,
+        /^([A-Za-z\s.]+)$/m,
       ],
       
       // Address patterns
       address: [
         /(?:address|residence|location)[\s:]*([A-Za-z0-9\s,.-]+)/i,
         /(?:street|road|avenue|drive)[\s:]*([A-Za-z0-9\s,.-]+)/i,
+        /(\d+,\s*[A-Za-z0-9\s,.-]+(?:street|road|avenue|drive))/i,
       ],
       
       // Vehicle make patterns
       vehicleMake: [
-        /(?:make|manufacturer|brand)[\s:]*([A-Za-z\s]+)/i,
-        /(?:toyota|honda|ford|bmw|mercedes|audi|nissan|hyundai|kia|volkswagen|chevrolet|mazda|subaru|lexus|infiniti|acura|porsche|jaguar|land rover|volvo|saab|mini|smart|fiat|alfa romeo|maserati|ferrari|lamborghini|bentley|rolls royce|aston martin|mclaren|lotus|tesla|peugeot|renault|citroen|opel|seat|skoda|dacia|suzuki|isuzu|mitsubishi|daihatsu|proton|perodua|geely|haval|great wall|chery|byd|mg|tata|mahindra|maruti|bajaj|hero|yamaha|kawasaki|ducati|harley davidson)/i,
+        /(?:vehicle\s+make|make|manufacturer|brand)[\s:]*([A-Za-z\s-]+)/i,
+        /(?:toyota|honda|ford|bmw|mercedes-benz|mercedes|audi|nissan|hyundai|kia|volkswagen|chevrolet|mazda|subaru|lexus|infiniti|acura|porsche|jaguar|land rover|volvo|saab|mini|smart|fiat|alfa romeo|maserati|ferrari|lamborghini|bentley|rolls royce|aston martin|mclaren|lotus|tesla|peugeot|renault|citroen|opel|seat|skoda|dacia|suzuki|isuzu|mitsubishi|daihatsu|proton|perodua|geely|haval|great wall|chery|byd|mg|tata|mahindra|maruti|bajaj|hero|yamaha|kawasaki|ducati|harley davidson)/i,
       ],
       
       // Vehicle model patterns (include common MB models, C300 etc.)
@@ -40,7 +42,7 @@ class TextParserService {
       
       // Engine number patterns (alphanumeric 6-20)
       engineNo: [
-        /(?:engine|motor)[\s:]*([A-Za-z0-9]{6,20})/i,
+        /(?:engine\s+number|engine|motor)[\s:]*([A-Za-z0-9]{6,20})/i,
         /\b([A-Za-z0-9]{6,20})\b/,
       ],
       
@@ -52,7 +54,7 @@ class TextParserService {
       
       // Color patterns
       vehicleColor: [
-        /(?:color|colour)[\s:]*([A-Za-z]+)/i,
+        /(?:colour\s+name|color|colour)[\s:]*([A-Za-z]+)/i,
         /(?:black|white|silver|gray|grey|red|blue|green|brown|beige|gold|yellow|orange|purple|pink)/i,
       ],
       
@@ -64,13 +66,14 @@ class TextParserService {
       
       // Date patterns with month names
       dateIssued: [
-        /(?:issued|issue date|date issued)[\s:]*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
+        /(?:date\s+issued|issued|issue date|date issued)[\s:]*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
         /(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/,
         /(?:issued|issue date|date issued)[\s:]*(\d{1,2}\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+(\d{2,4}))/i,
       ],
       
       expiryDate: [
-        /(?:expiry|expire|expiration|valid until)[\s:]*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
+        /(?:expiry\s+date|expiry|expire|expiration|valid until)[\s:]*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
+        /(?:feb\s+\d{4}|expiry\s+\d{4})/i, // Special case for "FEB 2026" format
         /(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/,
         /(?:expiry|expire|expiration|valid until)[\s:]*(\d{1,2}\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+(\d{2,4}))/i,
       ],
@@ -83,8 +86,14 @@ class TextParserService {
     // Clean the text
     const cleanText = text.replace(/\s+/g, ' ').trim();
     
-    // Extract each field
+    // Special handling for Nigerian license format
+    this.parseNigerianLicense(cleanText, extractedData);
+    
+    // Extract each field using patterns
     Object.keys(this.patterns).forEach(field => {
+      // Skip if already extracted by special parsing
+      if (extractedData[field]) return;
+      
       const patterns = this.patterns[field];
       let value = null;
       
@@ -102,6 +111,80 @@ class TextParserService {
     });
     
     return extractedData;
+  }
+
+  parseNigerianLicense(text, extractedData) {
+    // Owner's Name: "Mr RASAK 0. AWONUGA" - look for the pattern after "Owners Name:"
+    const nameMatch = text.match(/owners?\s+name[:\s]*([A-Za-z\s.]+?)(?:\n|address|$)/i);
+    if (nameMatch) {
+      extractedData.ownerName = nameMatch[1].trim();
+    }
+    
+    // Also try to find "Mr RASAK 0. AWONUGA" pattern directly
+    const directNameMatch = text.match(/mr\s+([A-Za-z\s.]+)/i);
+    if (directNameMatch && !extractedData.ownerName) {
+      extractedData.ownerName = `Mr ${directNameMatch[1].trim()}`;
+    }
+    
+    // Address: "104, FOLAGBADE STREET, IJEBU ODE" - look for pattern after "Address:"
+    const addressMatch = text.match(/address[:\s]*([A-Za-z0-9\s,.-]+?)(?:\n|file|$)/i);
+    if (addressMatch) {
+      extractedData.address = addressMatch[1].trim();
+    }
+    
+    // Also try to find address pattern directly
+    const directAddressMatch = text.match(/(\d+,\s*[A-Za-z0-9\s,.-]+(?:street|road|avenue|drive))/i);
+    if (directAddressMatch && !extractedData.address) {
+      extractedData.address = directAddressMatch[1].trim();
+    }
+    
+    // Vehicle Make: Look for any vehicle make pattern
+    const makeMatch = text.match(/vehicle\s+make[:\s]*([A-Za-z\s-]+)/i);
+    if (makeMatch) {
+      extractedData.vehicleMake = makeMatch[1].trim().toLowerCase();
+    }
+    
+    // Vehicle Model: Look for common model patterns (C300, E300, etc.)
+    const modelMatch = text.match(/c\s*300|e\s*300|s\s*300|glc|gle|gla|glb|gls|a\s*class|b\s*class|clk|cls|slk|ml|gl|sprinter|vito|viano/i);
+    if (modelMatch) {
+      extractedData.vehicleModel = modelMatch[0].toLowerCase().replace(/\s+/g, '');
+    }
+    
+    // Chassis Number: Look for any VIN pattern (17 characters, alphanumeric)
+    const chassisMatch = text.match(/chassis\s+number[:\s]*([A-HJ-NPR-Z0-9]{11,17})/i);
+    if (chassisMatch) {
+      extractedData.chassisNo = chassisMatch[1].trim().toUpperCase();
+    }
+    
+    // Engine Number: Look for patterns like "g" or other short alphanumeric
+    const engineMatch = text.match(/engine\s+number[:\s]*([A-Za-z0-9]+)/i);
+    if (engineMatch) {
+      extractedData.engineNo = engineMatch[1].trim().toUpperCase();
+    }
+    
+    // Color: "Black" - look for the exact color
+    const colorMatch = text.match(/colour\s+name[:\s]*([A-Za-z]+)/i);
+    if (colorMatch) {
+      extractedData.vehicleColor = colorMatch[1].trim().toLowerCase();
+    }
+    
+    // Date: "22/05/2025"
+    const dateMatch = text.match(/date[:\s]*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i);
+    if (dateMatch) {
+      extractedData.dateIssued = this.parseDate(dateMatch[1]);
+    }
+    
+    // Look for "FEB 2026" format for expiry
+    const expiryMatch = text.match(/(feb|jan|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})/i);
+    if (expiryMatch) {
+      const monthMap = {
+        jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+        jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+      };
+      const month = monthMap[expiryMatch[1].toLowerCase()];
+      const year = expiryMatch[2];
+      extractedData.expiryDate = `${year}-${month}-01`;
+    }
   }
 
   cleanValue(field, value) {
@@ -153,6 +236,16 @@ class TextParserService {
     };
 
     const lower = dateString.toLowerCase();
+    
+    // Handle "FEB 2026" format (month + year only)
+    const monthYearMatch = lower.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+(\d{4})/);
+    if (monthYearMatch) {
+      const month = monthMap[monthYearMatch[1]];
+      const year = monthYearMatch[2];
+      return `${year}-${month}-01`; // Default to 1st of month
+    }
+    
+    // Handle full month name format
     const monthName = lower.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*/);
     if (monthName) {
       const m = monthMap[monthName[1]];
