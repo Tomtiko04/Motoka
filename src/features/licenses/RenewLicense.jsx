@@ -1,27 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { IoIosArrowBack } from "react-icons/io";
-// import { FaCarAlt, FaPlus } from "react-icons/fa";
-// import MercedesLogo from "../../assets/images/mercedes-logo.png";
+import { useGetState, useGetLocalGovernment } from "./useRenew";
+import { useInitializePayment } from "./usePayment";
+import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
+import { Icon } from "@iconify/react";
+import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useGetLocalGovernment, useGetState } from "./useRenew";
-import { useInitializePayment } from "./usePayment";
 import SearchableSelect from "../../components/shared/SearchableSelect";
-import { useReminders } from "../../context/ReminderContext";
-import {
-  fetchPaymentSchedules,
-  fetchPaymentHeads,
-} from "../../services/apiMonicredit";
 import { ClipLoader } from "react-spinners";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  const { reminders } = useReminders();
   const getCarReminder = (carId) =>
-    reminders.find((r) => String(r.car_id) === String(carId));
+    carDetail?.reminder || null;
 
   // Payment data
   const [paymentHeads, setPaymentHeads] = useState([]);
@@ -191,7 +185,7 @@ export default function RenewLicense() {
 
     // Create payload for each selected schedule
     const paymentPayloads = selectedSchedules.map((schedule) => ({
-      car_id: carDetail?.id,
+      car_slug: carDetail?.slug,
       payment_schedule_id: schedule.id,
       meta_data: {
         delivery_address: deliveryDetails.address,
@@ -243,7 +237,7 @@ export default function RenewLicense() {
             onClick={() => navigate(-1)}
             className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
           >
-            <IoIosArrowBack className="h-5 w-5" />
+            <FaArrowLeft className="h-5 w-5" />
           </button>
           <h1 className="text-center text-2xl font-medium text-[#05243F]">
             Renew License

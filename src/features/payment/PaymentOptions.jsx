@@ -138,8 +138,8 @@ export default function PaymentOptions() {
     setVerifyError("");
     setVerifyResult(null);
     try {
-      console.log("transid",paymentData?.transid);
-      const reference = paymentData?.transid;
+      console.log("transid",paymentData?.order_id);
+      const reference = paymentData?.order_id;
       console.log("reference",reference);
       if (!reference) throw new Error("No payment reference found.");
       const result = await verifyPaymentApi(reference);
@@ -162,9 +162,9 @@ export default function PaymentOptions() {
   };
 
   React.useEffect(() => {
-    if (verifyResult && verifyResult.data.status && paymentData?.car_id) {
+    if (verifyResult && verifyResult.data.status && paymentData?.car_slug) {
       const timeout = setTimeout(() => {
-        navigate(`/payment/car-receipt/${paymentData.car_id}`);
+        navigate(`/payment/car-receipt/${paymentData.car_slug}`);
       }, 2000); // 2 seconds delay
       return () => clearTimeout(timeout);
     }
