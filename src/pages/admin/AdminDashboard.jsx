@@ -11,53 +11,91 @@ import {
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardStats();
+    fetchDashboardData();
   }, []);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      
+      // Fetch all dashboard data in parallel
+      const [statsResponse, ordersResponse, transactionsResponse] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/recent-orders`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/recent-transactions`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+      ]);
 
-      const data = await response.json();
-      if (data.status) {
-        setStats(data.data);
+      const [statsData, ordersData, transactionsData] = await Promise.all([
+        statsResponse.json(),
+        ordersResponse.json(),
+        transactionsResponse.json()
+      ]);
+
+      if (statsData.status) {
+        setStats(statsData.data);
+      }
+      
+      if (ordersData.status) {
+        setRecentOrders(ordersData.data);
+      }
+      
+      if (transactionsData.status) {
+        setRecentTransactions(transactionsData.data);
       }
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mock data for recent orders and transactions
-  const recentOrders = [
-    { id: '#123567', type: 'License Renewal', amount: 'N50,000', status: 'New' },
-    { id: '#123568', type: 'License Renewal', amount: 'N50,000', status: 'New' },
-    { id: '#123569', type: 'License Renewal', amount: 'N50,000', status: 'New' },
-    { id: '#123570', type: 'License Renewal', amount: 'N50,000', status: 'Done' },
-    { id: '#123571', type: 'License Renewal', amount: 'N50,000', status: 'Done' },
-    { id: '#123572', type: 'License Renewal', amount: 'N50,000', status: 'Declined' },
-    { id: '#123573', type: 'License Renewal', amount: 'N50,000', status: 'Declined' },
-    { id: '#123574', type: 'License Renewal', amount: 'N50,000', status: 'Declined' },
-    { id: '#123575', type: 'License Renewal', amount: 'N50,000', status: 'Declined' },
-  ];
+  // Helper function to format order status
+  const formatOrderStatus = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'New';
+      case 'in_progress':
+        return 'In Progress';
+      case 'completed':
+        return 'Done';
+      case 'declined':
+        return 'Declined';
+      default:
+        return status;
+    }
+  };
 
-  const recentTransactions = [
-    { id: 'ABC-1234', type: 'License Renewal', date: '2025/01/15', amount: 'N150,000' },
-    { id: 'ABC-1235', type: 'License Renewal', date: '2025/01/15', amount: 'N150,000' },
-    { id: 'ABC-1236', type: 'License Renewal', date: '2025/01/15', amount: 'N150,000' },
-    { id: 'ABC-1237', type: 'License Renewal', date: '2025/01/15', amount: 'N150,000' },
-    { id: 'ABC-1238', type: 'License Renewal', date: '2025/01/15', amount: 'N150,000' },
-  ];
+  // Helper function to format order type
+  const formatOrderType = (orderType) => {
+    switch (orderType) {
+      case 'car_renewal':
+        return 'Car Renewal';
+      case 'driver_license':
+        return 'Driver License';
+      default:
+        return orderType;
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -258,17 +296,25 @@ const AdminDashboard = () => {
             <a href="/admin/orders" className="text-blue-600 text-sm font-medium">See More</a>
           </div>
           <div className="space-y-3">
-            {recentOrders.slice(0, 5).map((order, index) => (
-              <div key={index} className="flex items-center justify-between py-2">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{order.id} {order.type}</p>
-                  <p className="text-sm text-gray-600">{order.amount}</p>
+            {recentOrders.length > 0 ? (
+              recentOrders.slice(0, 5).map((order, index) => (
+                <div key={index} className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      #{order.id} {formatOrderType(order.order_type)}
+                    </p>
+                    <p className="text-sm text-gray-600">₦{parseFloat(order.amount).toLocaleString()}</p>
+                  </div>
+                  <span className={`text-sm font-medium ${getStatusColor(formatOrderStatus(order.status))}`}>
+                    {formatOrderStatus(order.status)}
+                  </span>
                 </div>
-                <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {order.status}
-                </span>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-500 text-sm">No recent orders</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -280,18 +326,30 @@ const AdminDashboard = () => {
           <a href="/admin/transactions" className="text-blue-600 text-sm font-medium">See More</a>
         </div>
         <div className="space-y-3">
-          {recentTransactions.map((transaction, index) => (
-            <div key={index} className="flex items-center space-x-3 py-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <DocumentTextIcon className="h-4 w-4 text-blue-600" />
+          {recentTransactions.length > 0 ? (
+            recentTransactions.map((transaction, index) => (
+              <div key={index} className="flex items-center space-x-3 py-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <DocumentTextIcon className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {transaction.gateway_reference || transaction.id} {formatOrderType(transaction.payment_type || 'Payment')}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(transaction.created_at).toLocaleDateString('en-GB')}
+                  </p>
+                </div>
+                <p className="text-sm font-medium text-blue-600">
+                  ₦{parseFloat(transaction.amount).toLocaleString()}
+                </p>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">{transaction.id} {transaction.type}</p>
-                <p className="text-sm text-gray-600">{transaction.date}</p>
-              </div>
-              <p className="text-sm font-medium text-blue-600">{transaction.amount}</p>
+            ))
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-500 text-sm">No recent transactions</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
