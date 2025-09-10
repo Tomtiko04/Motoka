@@ -12,12 +12,15 @@ import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Verification from "./pages/Verification.jsx";
 import VerificationSuccess from "./features/auth/VerificationSuccess";
+import OTPLogin from "./features/auth/OTPLogin.jsx";
 import AddCar from "./features/car/AddCar.jsx";
 import Dashboard from "./features/dashboard/Dashboard.jsx";
 import RenewLicense from "./features/licenses/RenewLicense";
 import Garage from "./features/garage/Garage.jsx";
 import Licenses from "./features/licenses/Licenses.jsx";
 import PaymentOptions from "./features/payment/PaymentOptions.jsx";
+import PaystackPayment from "./features/payment/PaystackPayment.jsx";
+import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/DriversLicense.jsx";
@@ -72,6 +75,14 @@ export default function App() {
               element={
                 <GuestRoute>
                   <SignIn />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="otp-login"
+              element={
+                <GuestRoute>
+                  <OTPLogin />
                 </GuestRoute>
               }
             />
@@ -137,6 +148,8 @@ export default function App() {
                 <PaymentOptions availableBalance={3000} renewalCost={1000} />
               }
             />
+            <Route path="payment/paystack" element={<PaystackPayment />} />
+            <Route path="payment/paystack/callback" element={<PaystackCallback />} />
             <Route path="settings">
               <Route index element={<Settings />} />
             </Route>

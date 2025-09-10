@@ -127,31 +127,61 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6">
         {/* Total Amount */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Amount</p>
               <p className="text-2xl font-bold text-blue-600">
-                ₦{stats ? parseFloat(stats.total_payments).toLocaleString() : '0'}
+                ₦{stats ? parseFloat(stats.total_amount).toLocaleString() : '0'}
               </p>
             </div>
             <ArrowUpIcon className="h-5 w-5 text-green-500" />
           </div>
         </div>
 
-        {/* Pending Payments */}
+        {/* Completed Amount */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Payments</p>
+              <p className="text-sm font-medium text-gray-600">Completed Amount</p>
+              <p className="text-2xl font-bold text-green-600">
+                ₦{stats ? parseFloat(stats.completed_amount).toLocaleString() : '0'}
+              </p>
+            </div>
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 text-sm font-bold">✓</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Pending Amount */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Pending Amount</p>
               <p className="text-2xl font-bold text-orange-600">
-                ₦{stats ? parseFloat(stats.pending_payments).toLocaleString() : '0'}
+                ₦{stats ? parseFloat(stats.pending_amount).toLocaleString() : '0'}
               </p>
             </div>
             <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
               <span className="text-orange-600 text-sm font-bold">⏳</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Declined Amount */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Declined Amount</p>
+              <p className="text-2xl font-bold text-red-600">
+                ₦{stats ? parseFloat(stats.declined_amount).toLocaleString() : '0'}
+              </p>
+            </div>
+            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-red-600 text-sm font-bold">✗</span>
             </div>
           </div>
         </div>

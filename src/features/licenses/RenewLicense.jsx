@@ -224,9 +224,29 @@ export default function RenewLicense() {
       paymentInitData.data &&
       paymentInitData.data.data
     ) {
-      navigate("/payment", { state: { paymentData: paymentInitData.data.data } });
+      // Create a complete payment data object that includes all necessary information
+      const completePaymentData = {
+        ...paymentInitData.data.data,
+        car_slug: carDetail?.slug,
+        selectedSchedules: selectedSchedules,
+        deliveryDetails: {
+          address: deliveryDetails.address,
+          contact: deliveryDetails.contact,
+          state_id: getStateId(),
+          lga_id: getLgaId(),
+        },
+        // Ensure meta_data is available
+        meta_data: {
+          delivery_address: deliveryDetails.address,
+          delivery_contact: deliveryDetails.contact,
+          state_id: getStateId(),
+          lga_id: getLgaId(),
+        }
+      };
+      
+      navigate("/payment", { state: { paymentData: completePaymentData } });
     }
-  }, [paymentInitData, navigate]);
+  }, [paymentInitData, navigate, carDetail, selectedSchedules, deliveryDetails]);
 
   return (
     <>
