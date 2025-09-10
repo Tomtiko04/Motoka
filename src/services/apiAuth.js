@@ -54,7 +54,7 @@ export async function refreshToken() {
 
 export async function logout() {
   try {
-    const { data } = await api.post("/logout2");
+    const { data } = await api.post("/logout");
 
     authStorage.removeToken();
     localStorage.removeItem("userInfo");

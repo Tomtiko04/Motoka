@@ -27,10 +27,28 @@ const AdminLayout = () => {
     setAdminUser(JSON.parse(user));
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      // Call backend logout API to revoke the token
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL}/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+      // Continue with logout even if API call fails
+    } finally {
+      // Always clear local storage and redirect
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      navigate('/admin/login');
+    }
   };
 
   const navigation = [
