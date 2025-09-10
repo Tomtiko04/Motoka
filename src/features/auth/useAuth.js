@@ -5,6 +5,7 @@ import { verifyLoginTwoFactor } from "../../services/apiTwoFactor";
 import { signupRequest as signupApi } from "../../services/apiAuth";
 import { verifyAccount as verifyApi } from "../../services/apiAuth";
 import { resendVerificationCode as resendApi } from "../../services/apiAuth";
+import { sendLoginOtp as sendLoginOtpApi, verifyLoginOtp as verifyLoginOtpApi } from "../../services/apiAuth";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -82,6 +83,43 @@ export function useLogin() {
     retry: false,
   });
 
+  // Send OTP for passwordless login (email)
+  const { mutate: sendLoginOtp, isPending: isSendingLoginOtp } = useMutation({
+    mutationFn: (email) => sendLoginOtpApi(email),
+    onSuccess: (data) => {
+      toast.success(data.message || "OTP sent to your email");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to send OTP");
+    },
+    retry: false,
+  });
+
+  // Verify OTP for passwordless login
+  const { mutate: verifyLoginOtp, isPending: isVerifyingLoginOtp } = useMutation({
+    mutationFn: ({ email, otp }) => verifyLoginOtpApi({ email, otp }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["user"], data.user);
+      toast.success(data.message || "Login successful!");
+
+      if (data.user) {
+        const userDetails = {
+          user_type_id: data.user.user_type_id,
+          name: data.user.name,
+          email: data.user.email,
+          phone_number: data.user.phone_number,
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userDetails));
+      }
+
+      navigate("/");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Invalid OTP");
+    },
+    retry: false,
+  });
+
   const cancelTwoFactor = () => {
     setTwoFactorRequired(false);
     setTwoFactorToken("");
@@ -94,6 +132,10 @@ export function useLogin() {
     verifyTwoFactor,
     isVerifyingTwoFactor,
     cancelTwoFactor,
+    sendLoginOtp,
+    isSendingLoginOtp,
+    verifyLoginOtp,
+    isVerifyingLoginOtp,
   };
 }
 

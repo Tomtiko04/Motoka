@@ -10,24 +10,38 @@ import * as yup from "yup";
 import TwoFactorVerification from "../../components/TwoFA/TwoFactorVerification";
 
 const schema = yup.object().shape({
-  email: yup.string().email("Invalid email format").required("Email is required"),
+  email: yup
+    .string()
+    .email("Invalid email format")
+    .required("Email is required"),
   password: yup.string().required("Password is required"),
 });
 
 export default function Signin() {
-  const { 
-    login, 
-    isLoggingIn, 
-    twoFactorRequired, 
-    verifyTwoFactor, 
+  const {
+    login,
+    isLoggingIn,
+    twoFactorRequired,
+    verifyTwoFactor,
     isVerifyingTwoFactor,
-    cancelTwoFactor 
+    cancelTwoFactor,
+    sendLoginOtp,
+    isSendingLoginOtp,
+    verifyLoginOtp,
+    isVerifyingLoginOtp,
   } = useLogin();
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    trigger,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
   });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [otpModalOpen, setOtpModalOpen] = useState(false);
 
   const onSubmit = async (data) => {
     const loadingToast = toast.loading("Logging in...");
@@ -50,7 +64,7 @@ export default function Signin() {
           onError: () => {
             toast.dismiss(loadingToast);
           },
-        }
+        },
       );
     } catch (error) {
       toast.dismiss(loadingToast);
@@ -64,6 +78,49 @@ export default function Signin() {
     } catch (error) {
       // Error handling is done in the mutation
     }
+  };
+
+  // OTP passwordless login flow
+  const handleSendOtp = async () => {
+    const email = getValues("email");
+    if (!email) {
+      toast.error("Please enter your email to receive OTP");
+      return;
+    }
+    // Validate only the email field before sending OTP
+    const isEmailValid = await trigger("email");
+    if (!isEmailValid) return;
+
+    const loadingToast = toast.loading("Sending OTP...");
+    sendLoginOtp(email, {
+      onSuccess: () => {
+        toast.dismiss(loadingToast);
+        setOtpModalOpen(true);
+      },
+      onError: (err) => {
+        toast.dismiss(loadingToast);
+        toast.error(err.message || "Failed to send OTP");
+      },
+    });
+  };
+
+  const handleVerifyOtp = async (code) => {
+    const email = getValues("email");
+    if (!email) {
+      toast.error("Email missing. Please enter your email and resend OTP.");
+      return;
+    }
+    verifyLoginOtp(
+      { email, otp: code },
+      {
+        onSuccess: () => {
+          setOtpModalOpen(false);
+        },
+        onError: () => {
+          // toast handled in mutation
+        },
+      },
+    );
   };
 
   return (
@@ -93,7 +150,10 @@ export default function Signin() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 sm:space-y-3">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-2 sm:space-y-3"
+          >
             <div>
               <label
                 htmlFor="email"
@@ -105,9 +165,11 @@ export default function Signin() {
                 id="email"
                 {...register("email")}
                 placeholder="sample@gmail.com"
-                disabled={isLoggingIn}
+                disabled={isLoggingIn || isSendingLoginOtp}
                 className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
-                  isLoggingIn ? "cursor-not-allowed opacity-50" : ""
+                  isLoggingIn || isSendingLoginOtp
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
                 }`}
               />
               {errors.email && (
@@ -137,8 +199,8 @@ export default function Signin() {
                 <div
                   onClick={() => !isLoggingIn && setShowPassword(!showPassword)}
                   className={`absolute top-1/2 right-3 -translate-y-1/2 transform text-[#05243F] opacity-40 transition-opacity duration-300 sm:right-4 ${
-                    isLoggingIn 
-                      ? "cursor-not-allowed" 
+                    isLoggingIn
+                      ? "cursor-not-allowed"
                       : "cursor-pointer hover:opacity-100"
                   }`}
                 >
@@ -156,17 +218,21 @@ export default function Signin() {
               )}
             </div>
 
-            <div className="flex space-y-2 flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-between space-y-2">
               <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={(e) => !isLoggingIn && setRememberMe(e.target.checked)}
+                  onChange={(e) =>
+                    !isLoggingIn && setRememberMe(e.target.checked)
+                  }
                   disabled={isLoggingIn}
                   className={`h-3 w-3 rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC] ${
-                    isLoggingIn ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                    isLoggingIn
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
                   }`}
                 />
                 <label
@@ -183,8 +249,8 @@ export default function Signin() {
                 <Link
                   to="/forgot-password"
                   className={`text-[#A73957] opacity-70 transition-opacity duration-300 ${
-                    isLoggingIn 
-                      ? "cursor-not-allowed pointer-events-none opacity-30" 
+                    isLoggingIn
+                      ? "pointer-events-none cursor-not-allowed opacity-30"
                       : "hover:opacity-100"
                   }`}
                 >
@@ -193,13 +259,13 @@ export default function Signin() {
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="submit"
                 disabled={isLoggingIn}
-                className={`mx-auto mt-3 flex w-full justify-center rounded-3xl bg-[#2389E3] px-3 py-1.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-6 sm:w-36 sm:py-2 ${
-                  isLoggingIn 
-                    ? "cursor-not-allowed opacity-50 transform-none hover:bg-[#2389E3] hover:text-white" 
+                className={`flex-1 rounded-3xl bg-[#2389E3] px-3 py-1.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:w-36 sm:py-2 ${
+                  isLoggingIn
+                    ? "transform-none cursor-not-allowed opacity-50 hover:bg-[#2389E3] hover:text-white"
                     : ""
                 }`}
               >
@@ -211,6 +277,19 @@ export default function Signin() {
                 ) : (
                   "Login"
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={isSendingLoginOtp || isLoggingIn}
+                className={`flex-1 rounded-3xl border border-[#2389E3] px-3 py-1.5 text-sm font-semibold text-[#2389E3] transition-all duration-300 hover:bg-[#f0f9ff] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:w-48 sm:py-2 ${
+                  isSendingLoginOtp || isLoggingIn
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                }`}
+              >
+                {isSendingLoginOtp ? "Sending OTP..." : "Login with OTP"}
               </button>
             </div>
           </form>
@@ -230,11 +309,11 @@ export default function Signin() {
                 Login with socials
               </span>
               <div className="flex justify-center gap-x-2">
-                <button 
+                <button
                   disabled={isLoggingIn}
                   className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${
-                    isLoggingIn 
-                      ? "cursor-not-allowed opacity-50" 
+                    isLoggingIn
+                      ? "cursor-not-allowed opacity-50"
                       : "hover:bg-[#FFF4DD] active:scale-95"
                   }`}
                 >
@@ -244,11 +323,11 @@ export default function Signin() {
                     className="mx-auto h-4 w-4"
                   />
                 </button>
-                <button 
+                <button
                   disabled={isLoggingIn}
                   className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${
-                    isLoggingIn 
-                      ? "cursor-not-allowed opacity-50" 
+                    isLoggingIn
+                      ? "cursor-not-allowed opacity-50"
                       : "hover:bg-[#FFF4DD] active:scale-95"
                   }`}
                 >
@@ -268,6 +347,15 @@ export default function Signin() {
               onVerify={handleVerifyTwoFactor}
               onCancel={cancelTwoFactor}
               isVerifying={isVerifyingTwoFactor}
+            />
+          )}
+
+          {/* OTP Login Verification Modal */}
+          {otpModalOpen && (
+            <TwoFactorVerification
+              onVerify={handleVerifyOtp}
+              onCancel={() => setOtpModalOpen(false)}
+              isVerifying={isVerifyingLoginOtp}
             />
           )}
         </div>
