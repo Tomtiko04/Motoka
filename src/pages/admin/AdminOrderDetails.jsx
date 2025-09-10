@@ -274,7 +274,7 @@ const AdminOrderDetails = () => {
                 <MapPinIcon className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">{order.delivery_address}</p>
-                  <p className="text-sm text-gray-500">{order.state}, {order.lga}</p>
+                  <p className="text-sm text-gray-500">{order.state_name || order.state}, {order.lga_name || order.lga}</p>
                 </div>
               </div>
               <div className="flex items-center">

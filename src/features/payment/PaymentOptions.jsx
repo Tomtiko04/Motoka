@@ -13,7 +13,7 @@ export default function PaymentOptions() {
   const navigate = useNavigate();
   const location = useLocation();
   const paymentData = location.state?.paymentData;
-  const [selectedPayment, setSelectedPayment] = useState("wallet");
+  const [selectedPayment, setSelectedPayment] = useState("transfer");
 
   // Monicredit payment state
   const [monicreditAuthUrl, setMonicreditAuthUrl] = useState("");

@@ -20,7 +20,7 @@ const getReminderStatus = (message) => {
   
   const lowerMessage = message.toLowerCase();
   
-  if (lowerMessage.includes('expiered') || lowerMessage.includes('0 day')) {
+  if (lowerMessage.includes('expired') || lowerMessage.includes('expiered') || lowerMessage.includes('0 day') || lowerMessage.includes('overdue')) {
     return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
   } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
     return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
@@ -150,7 +150,7 @@ export default function CarDetailsCard({
       </div>
 
       {/* Enhanced Reminder Display - Using Backend Data */}
-      {daysLeft !== null && (
+      {/* {daysLeft !== null && (
         <div className="mt-3 flex items-center justify-between">
           <div className="text-xs text-[#05243F]/60">
             Expiry Status
@@ -169,7 +169,7 @@ export default function CarDetailsCard({
             })()}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* {isModal && (
         <CarDetailsModal
