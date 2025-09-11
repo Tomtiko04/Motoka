@@ -35,11 +35,16 @@ import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
-import CarDocuments from "./pages/CarDocuments.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
+import AdminDashboard from "./Admin/pages/AdminDashboard.jsx";
+import AdminLayout from "./Admin/component/AdminLayout.jsx";
+import Orders from "./Admin/pages/Orders.jsx";
+import Agents from "./Admin/pages/Agents.jsx";
+import Transactions from "./Admin/pages/Transactions.jsx";
+import Cars from "./Admin/pages/Cars.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -144,6 +149,15 @@ export default function App() {
               <Route path="cart-page" element={<CartPage />} />
             </Route>
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
+          </Route>
+
+          <Route element={<AdminLayout />}>
+            <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="admin/dashboard" element={<AdminDashboard />} />
+            <Route path="admin/order" element={<Orders />}/>
+            <Route path="admin/agent" element={<Agents />}/>
+            <Route path="admin/transaction" element={<Transactions />} />
+            <Route path="admin/car" element={<Cars />}/>
           </Route>
         </Routes>
       </BrowserRouter>
