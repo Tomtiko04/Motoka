@@ -14,34 +14,53 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-// Helper function to determine status based on reminder message
-const getReminderStatus = (message) => {
-  if (!message) return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
-  
-  const lowerMessage = message.toLowerCase();
-  
-  if (lowerMessage.includes('expiered') || lowerMessage.includes('0 day')) {
-    return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
-  } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
-    return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
-  } else {
-    return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
+// Helper function to derive status and colors from backend reminder
+const deriveReminderStyle = (reminder) => {
+  // Default colors
+  const styles = {
+    danger: { bgColor: "#FFE8E8", dotColor: "#DB8888" },
+    warning: { bgColor: "#FFEFCE", dotColor: "#FDB022" },
+    success: { bgColor: "#E8F5E8", dotColor: "#4CAF50" },
+    info: { bgColor: "#E6F4FF", dotColor: "#2389E3" },
+  };
+
+  if (!reminder) return { ...styles.warning, type: "warning", message: "No reminder available" };
+
+  const message = reminder.message || reminder.text || "";
+  const rawStatus = (reminder.status || reminder.level || "").toString().toLowerCase();
+
+  // If backend provides a status/level, map directly
+  if (rawStatus.includes("danger") || rawStatus.includes("expired") || rawStatus.includes("critical")) {
+    return { ...styles.danger, type: "danger", message: message || "Expired" };
   }
+  if (rawStatus.includes("warn") || rawStatus.includes("pending") || rawStatus.includes("soon")) {
+    return { ...styles.warning, type: "warning", message: message || "Due soon" };
+  }
+  if (rawStatus.includes("success") || rawStatus.includes("ok") || rawStatus.includes("active")) {
+    return { ...styles.success, type: "success", message: message || "Active" };
+  }
+  if (rawStatus.includes("info")) {
+    return { ...styles.info, type: "info", message: message || "Info" };
+  }
+
+  // Fallback to message heuristics
+  const lowerMessage = (message || "").toLowerCase();
+  if (lowerMessage.includes("expired") || lowerMessage.includes("expiered") || lowerMessage.includes("0 day")) {
+    return { ...styles.danger, type: "danger", message };
+  }
+  if (/(1|2|3)\s*day/.test(lowerMessage) || lowerMessage.includes("due soon")) {
+    return { ...styles.warning, type: "warning", message };
+  }
+  return { ...styles.success, type: "success", message: message || "Up to date" };
 };
 
 export default function CarDetailsCard({ 
   onRenewClick, 
   carDetail, 
   isRenew, 
-  reminderObj // now a single object, not array
+  reminderObj // legacy: an object possibly with { reminder: { message, status } }
 }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
-  // const [reminderMessage, setReminderMessage] = useState("Loading...");
-  // const [reminderStatus, setReminderStatus] = useState({
-  //   type: "normal",
-  //   bgColor: "#E8F5E8",
-  //   dotColor: "#4CAF50",
-  // });
   const { showModal } = useModalStore();
 
   const handleRenewClick = () => {
@@ -69,9 +88,9 @@ export default function CarDetailsCard({
     loadCarLogo();
   }, [carDetail?.vehicle_make]);
 
-  // Use reminderObj prop for message and status
-  const reminderMessage = reminderObj?.reminder?.message || "No reminder available";
-  const reminderStatus = getReminderStatus(reminderMessage);
+  // Prefer reminder from carDetail (from GET car endpoint), fallback to prop reminderObj
+  const backendReminder = carDetail?.reminder || reminderObj?.reminder || reminderObj;
+  const { message: reminderMessage, bgColor, dotColor } = deriveReminderStyle(backendReminder);
 
   return (
     <div className="rounded-2xl bg-white px-4 py-5">
@@ -128,11 +147,11 @@ export default function CarDetailsCard({
       <div className="flex items-center justify-between">
         <div
           className="flex items-center gap-2 rounded-full px-4 py-1.5"
-          style={{ backgroundColor: reminderStatus.bgColor }}
+          style={{ backgroundColor: bgColor }}
         >
           <span
             className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: reminderStatus.dotColor }}
+            style={{ backgroundColor: dotColor }}
           ></span>
           <span className="text-sm font-medium text-[#05243F]">
             {reminderMessage}

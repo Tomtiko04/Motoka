@@ -35,3 +35,24 @@ export async function getCarPaymentReceipt(carId) {
     throw new Error(error.response?.data?.message || error.message);
   }
 }
+
+// Paystack: initialize and verify
+export async function initializePaystackPayment(payload) {
+  try {
+    const { data } = await api.post("/paystack/initialize", payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || "Failed to initialize Paystack");
+  }
+}
+
+export async function verifyPaystackPayment(reference) {
+  try {
+    const { data } = await api.get(`/paystack/verify/${reference}`);
+    return data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || "Failed to verify Paystack payment");
+  }
+}

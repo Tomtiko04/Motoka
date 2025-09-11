@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   initiateMonicreditPayment,
 } from "../../services/apiMonicredit";
-import { verifyPayment as verifyPaymentApi } from "../../services/apiPayment";
+import { verifyPayment as verifyPaymentApi, initializePaystackPayment, verifyPaystackPayment } from "../../services/apiPayment";
 
 export default function PaymentOptions() {
   const navigate = useNavigate();
@@ -20,11 +20,18 @@ export default function PaymentOptions() {
   const [monicreditLoading, setMonicreditLoading] = useState(false);
   const [monicreditError, setMonicreditError] = useState("");
 
+  // Paystack payment state
+  const [paystackAuthUrl, setPaystackAuthUrl] = useState("");
+  const [paystackReference, setPaystackReference] = useState("");
+  const [paystackLoading, setPaystackLoading] = useState(false);
+  const [paystackError, setPaystackError] = useState("");
++
   const paymentMethods = [
     { id: "wallet", label: "Wallet Balance: N30,876" },
     { id: "transfer", label: "Pay Via Transfer" },
     { id: "card", label: "Pay Via Card" },
     { id: "Monicredit_Transfer", label: "Pay Via Monicredit" },
+    { id: "Paystack", label: "Pay Via Paystack" },
   ];
 
   const walletDetails = {
@@ -128,6 +135,44 @@ export default function PaymentOptions() {
     }
   }, [selectedPayment]);
 
+  // Initiate Paystack when selected
+  useEffect(() => {
+    if (selectedPayment !== "Paystack" || paystackAuthUrl || paystackLoading) return;
+    async function initPaystack() {
+      try {
+        setPaystackLoading(true);
+        setPaystackError("");
+        const car = paymentData?.carDetail || {};
+        const schedules = paymentData?.selectedSchedules || [];
+        const firstScheduleId = schedules[0]?.id; // if multiple, backend spec needed
+        const delivery = paymentData?.deliveryDetails || {};
+
+        const payload = {
+          car_slug: car.slug || car.car_slug || car.id, // prefer slug, fallback
+          payment_schedule_id: firstScheduleId,
+          meta_data: {
+            delivery_address: delivery.address,
+            delivery_contact: delivery.contact,
+            state_id: delivery.state_id, // ensure caller sets ids
+            lga_id: delivery.lga_id,
+          },
+        };
+        const res = await initializePaystackPayment(payload);
+        // Expecting { authorization_url, reference } or similar
+        const authUrl = res.authorization_url || res.data?.authorization_url || res.url;
+        const reference = res.reference || res.data?.reference || res.data?.reference_code;
+        if (!authUrl) throw new Error("Missing authorization URL from Paystack init");
+        setPaystackAuthUrl(authUrl);
+        if (reference) setPaystackReference(reference);
+      } catch (err) {
+        setPaystackError(err.message || "Failed to initialize Paystack");
+      } finally {
+        setPaystackLoading(false);
+      }
+    }
+    initPaystack();
+  }, [selectedPayment]);
+
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifyError, setVerifyError] = useState("");
@@ -161,13 +206,40 @@ export default function PaymentOptions() {
     window.open(url, "_blank");
   };
 
-  React.useEffect(() => {
-    if (verifyResult && verifyResult.data.status && paymentData?.car_id) {
-      const timeout = setTimeout(() => {
-        navigate(`/payment/car-receipt/${paymentData.car_id}`);
-      }, 2000); // 2 seconds delay
-      return () => clearTimeout(timeout);
+  // Helper to open Paystack page
+  const openPaystackPayment = () => {
+    let url = paystackAuthUrl;
+    if (url && !/^https?:\/\//i.test(url)) {
+      url = "https://" + url.replace(/^\/+/, "");
     }
+    window.open(url, "_blank");
+  };
+
+  const handleVerifyPaystack = async () => {
+    setVerifying(true);
+    setVerifyError("");
+    setVerifyResult(null);
+    try {
+      const ref = paystackReference || paymentData?.transid;
+      if (!ref) throw new Error("No Paystack reference found.");
+      const result = await verifyPaystackPayment(ref);
+      setVerifyResult(result);
+    } catch (err) {
+      setVerifyError(err.message || "Failed to verify Paystack payment.");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  React.useEffect(() => {
+    const status = verifyResult?.data?.status ?? verifyResult?.status;
+    if (verifyResult && status && (paymentData?.car_id || paymentData?.carDetail?.id)) {
+       const timeout = setTimeout(() => {
+        const id = paymentData?.car_id || paymentData?.carDetail?.id;
+        navigate(`/payment/car-receipt/${id}`);
+       }, 2000); // 2 seconds delay
+       return () => clearTimeout(timeout);
+     }
   }, [verifyResult, navigate, paymentData]);
 
   return (
@@ -340,8 +412,8 @@ export default function PaymentOptions() {
                     {verifying ? "Verifying..." : "I've Made Payment"}
                   </button>
                   {verifyResult && (
-                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data.status ? "text-green-600" : "text-red-600"}`}>
-                      {verifyResult.data.message}
+                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
+                      {verifyResult.data?.message || verifyResult.message}
                     </div>
                   )}
                   {verifyError && (
@@ -402,37 +474,8 @@ export default function PaymentOptions() {
 
                   {/* Month/Year and CVV */}
                   {/* TODO: Let add min and max value and error input invalidation */}
-                  {/* <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="number"
-                      placeholder="Month"
-                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Year"
-                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      placeholder="CVV"
-                      className="w-full rounded-[10px] border border-[#E1E6F4] bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none"
-                    />
-
-                    <div className="flex items-center justify-center gap-x-3 rounded-[10px] bg-[#EEF2FF]">
-                      <input
-                        type="checkbox"
-                        id="autoRenew"
-                        className="h-4 w-4 rounded-full border-[#E1E6F4] text-[#2389E3] focus:ring-[#2389E3]"
-                      />
-                      <label
-                        htmlFor="autoRenew"
-                        className="text-sm text-[#05243F]/40"
-                      >
-                        Auto Renew
-                      </label>
-                    </div>
-                  </div> */}
+                  {/* <div className="grid grid-cols-2 gap-2"> */}
+                  {/* ...omitted for brevity... */}
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="number"
@@ -521,7 +564,7 @@ export default function PaymentOptions() {
                         Note:
                       </span>
                       <p className="text-sm text-[#05243F]/60">
-                        Activate Auto renewal to enjoy{" "}
+                        Activate Auto renewal to enjoy {" "}
                         <span className="font-semibold text-[#F26060]">
                           10%
                         </span>{" "}
@@ -582,24 +625,12 @@ export default function PaymentOptions() {
                     </h3>
                     <ol className="list-inside list-decimal space-y-1 text-base text-[#697C8C]">
                       <li>
-                        Click the{" "}
+                        Click the {" "}
                         <span className="font-semibold text-[#2284DB]">
                           Proceed to Monicredit Payment
                         </span>{" "}
                         button below.
                       </li>
-                      {/* <li>
-                        A secure Monicredit payment page will open in a new tab.
-                      </li>
-                      <li>
-                        Follow the instructions on the Monicredit page to complete your payment using your preferred method (Transfer, Card, QR, or Wallet).
-                      </li>
-                      <li>
-                        After successful payment, you will receive a confirmation from Monicredit.
-                      </li>
-                      <li>
-                        You can return to this page to continue or check your payment status.
-                      </li> */}
                     </ol>
                     <div className="mt-4 text-sm text-[#F26060]">
                       <span className="font-semibold">Note:</span> Do not close
@@ -614,17 +645,58 @@ export default function PaymentOptions() {
                       Proceed to Monicredit Payment
                     </button>
                   )}
-                  {/* {monicreditStatus && (
-                    <div
-                      className={`mt-4 text-center font-semibold ${monicreditStatus.status ? "text-green-600" : "text-red-600"}`}
-                    >
-                      {monicreditStatus.message}
-                    </div>
-                  )} */}
                 </>
               )}
             </div>
           )}
++
++          {selectedPayment === "Paystack" && (
++            <div>
++              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">Paystack</h2>
++              {paystackLoading ? (
++                <div className="flex min-h-[200px] flex-col items-center justify-center">
++                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">Loading...</span>
++                </div>
++              ) : (
++                <>
++                  {paystackError && (
++                    <div className="mb-4 text-center text-red-500">{paystackError}</div>
++                  )}
++                  {paystackAuthUrl && (
++                    <button
++                      className="mt-2 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white"
++                      onClick={openPaystackPayment}
++                    >
++                      Proceed to Paystack Payment
++                    </button>
++                  )}
++                  <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
++                    <div className="flex gap-3">
++                      <span className="text-base font-medium text-[#05243F]">Note:</span>
++                      <p className="text-sm font-normal text-[#05243F]/60">
++                        After completing Paystack payment, click verify to confirm your payment.
++                      </p>
++                    </div>
++                  </div>
++                  <button
++                    className="mt-4 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white disabled:opacity-50"
++                    onClick={handleVerifyPaystack}
++                    disabled={verifying || !paystackReference}
++                  >
++                    {verifying ? "Verifying..." : "Verify Paystack Payment"}
++                  </button>
++                  {verifyResult && (
++                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
++                      {verifyResult.data?.message || verifyResult.message}
++                    </div>
++                  )}
++                  {verifyError && (
++                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">{verifyError}</div>
++                  )}
++                </>
++              )}
++            </div>
++          )}
         </div>
       </div>
     </>
