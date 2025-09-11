@@ -10,7 +10,7 @@ import { verifyPayment as verifyPaymentApi, initializePaystackPayment, verifyPay
 export default function PaymentOptions() {
   const navigate = useNavigate();
   const location = useLocation();
-  const paymentData = location.state?.paymentData;
+  const paymentData = location.state?.paymentData || location.state;
   const [selectedPayment, setSelectedPayment] = useState("wallet");
 
   // Monicredit payment state
@@ -25,7 +25,7 @@ export default function PaymentOptions() {
   const [paystackReference, setPaystackReference] = useState("");
   const [paystackLoading, setPaystackLoading] = useState(false);
   const [paystackError, setPaystackError] = useState("");
-+
+
   const paymentMethods = [
     { id: "wallet", label: "Wallet Balance: N30,876" },
     { id: "transfer", label: "Pay Via Transfer" },
@@ -177,18 +177,18 @@ export default function PaymentOptions() {
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifyError, setVerifyError] = useState("");
 
- 
+
   const handleVerifyBankTransfer = async () => {
     setVerifying(true);
     setVerifyError("");
     setVerifyResult(null);
     try {
-      console.log("transid",paymentData?.transid);
+      console.log("transid", paymentData?.transid);
       const reference = paymentData?.transid;
-      console.log("reference",reference);
+      console.log("reference", reference);
       if (!reference) throw new Error("No payment reference found.");
       const result = await verifyPaymentApi(reference);
-      console.log("result",result);
+      console.log("result", result);
       setVerifyResult(result);
     } catch (err) {
       setVerifyError(err.message || "Failed to verify payment. Please try again.");
@@ -234,12 +234,12 @@ export default function PaymentOptions() {
   React.useEffect(() => {
     const status = verifyResult?.data?.status ?? verifyResult?.status;
     if (verifyResult && status && (paymentData?.car_id || paymentData?.carDetail?.id)) {
-       const timeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         const id = paymentData?.car_id || paymentData?.carDetail?.id;
         navigate(`/payment/car-receipt/${id}`);
-       }, 2000); // 2 seconds delay
-       return () => clearTimeout(timeout);
-     }
+      }, 2000); // 2 seconds delay
+      return () => clearTimeout(timeout);
+    }
   }, [verifyResult, navigate, paymentData]);
 
   return (
@@ -272,11 +272,10 @@ export default function PaymentOptions() {
                 <button
                   key={method.id}
                   onClick={() => setSelectedPayment(method.id)}
-                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${
-                    selectedPayment === method.id
+                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${selectedPayment === method.id
                       ? "shadow-sm ring-1 ring-[#2389E3]"
                       : "hover:bg-[#FDF6E8] hover:shadow-sm"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span
@@ -492,11 +491,10 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setMonth(e.target.value)}
-                      className={`w-full rounded-[10px] border ${
-                        touched.month && !isMonthValid
+                      className={`w-full rounded-[10px] border ${touched.month && !isMonthValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     <input
@@ -514,11 +512,10 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setYear(e.target.value)}
-                      className={`w-full rounded-[10px] border ${
-                        touched.year && !isYearValid
+                      className={`w-full rounded-[10px] border ${touched.year && !isYearValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     <input
@@ -534,11 +531,10 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setCvv(e.target.value)}
-                      className={`w-full rounded-[10px] border ${
-                        touched.cvv && !isCvvValid
+                      className={`w-full rounded-[10px] border ${touched.cvv && !isCvvValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     {/* Auto Renew */}
@@ -649,54 +645,54 @@ export default function PaymentOptions() {
               )}
             </div>
           )}
-+
-+          {selectedPayment === "Paystack" && (
-+            <div>
-+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">Paystack</h2>
-+              {paystackLoading ? (
-+                <div className="flex min-h-[200px] flex-col items-center justify-center">
-+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">Loading...</span>
-+                </div>
-+              ) : (
-+                <>
-+                  {paystackError && (
-+                    <div className="mb-4 text-center text-red-500">{paystackError}</div>
-+                  )}
-+                  {paystackAuthUrl && (
-+                    <button
-+                      className="mt-2 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white"
-+                      onClick={openPaystackPayment}
-+                    >
-+                      Proceed to Paystack Payment
-+                    </button>
-+                  )}
-+                  <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
-+                    <div className="flex gap-3">
-+                      <span className="text-base font-medium text-[#05243F]">Note:</span>
-+                      <p className="text-sm font-normal text-[#05243F]/60">
-+                        After completing Paystack payment, click verify to confirm your payment.
-+                      </p>
-+                    </div>
-+                  </div>
-+                  <button
-+                    className="mt-4 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white disabled:opacity-50"
-+                    onClick={handleVerifyPaystack}
-+                    disabled={verifying || !paystackReference}
-+                  >
-+                    {verifying ? "Verifying..." : "Verify Paystack Payment"}
-+                  </button>
-+                  {verifyResult && (
-+                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
-+                      {verifyResult.data?.message || verifyResult.message}
-+                    </div>
-+                  )}
-+                  {verifyError && (
-+                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">{verifyError}</div>
-+                  )}
-+                </>
-+              )}
-+            </div>
-+          )}
+
+          {selectedPayment === "Paystack" && (
+            <div>
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">Paystack</h2>
+              {paystackLoading ? (
+                <div className="flex min-h-[200px] flex-col items-center justify-center">
+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">Loading...</span>
+                </div>
+              ) : (
+                <>
+                  {paystackError && (
+                    <div className="mb-4 text-center text-red-500">{paystackError}</div>
+                  )}
+                  {paystackAuthUrl && (
+                    <button
+                      className="mt-2 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white"
+                      onClick={openPaystackPayment}
+                    >
+                      Proceed to Paystack Payment
+                    </button>
+                  )}
+                  <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
+                    <div className="flex gap-3">
+                      <span className="text-base font-medium text-[#05243F]">Note:</span>
+                      <p className="text-sm font-normal text-[#05243F]/60">
+                        After completing Paystack payment, click verify to confirm your payment.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    className="mt-4 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white disabled:opacity-50"
+                    onClick={handleVerifyPaystack}
+                    disabled={verifying || !paystackReference}
+                  >
+                    {verifying ? "Verifying..." : "Verify Paystack Payment"}
+                  </button>
+                  {verifyResult && (
+                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
+                      {verifyResult.data?.message || verifyResult.message}
+                    </div>
+                  )}
+                  {verifyError && (
+                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">{verifyError}</div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>
