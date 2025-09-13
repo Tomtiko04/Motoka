@@ -121,7 +121,7 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center">
+      <div className="flex items-center justify-center">
         <DocumentTextIcon className="h-6 w-6 text-gray-600 mr-2" />
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
       </div>

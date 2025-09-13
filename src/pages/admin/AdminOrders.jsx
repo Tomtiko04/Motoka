@@ -153,14 +153,14 @@ const AdminOrders = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
+      <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center">
           <ClipboardDocumentListIcon className="h-6 w-6 text-gray-600 mr-2" />
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
         </div>
-        <div className="text-sm text-gray-500">
+        {/* <div className="text-sm text-gray-500">
           {orders.length} orders found
-        </div>
+        </div> */}
       </div>
 
       {/* Search and Filter Bar */}

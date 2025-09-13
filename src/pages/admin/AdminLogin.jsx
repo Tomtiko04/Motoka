@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import Logo from "../../assets/images/motoka logo.svg";
+
 
 const AdminLogin = () => {
   const [step, setStep] = useState('email'); // 'email' or 'otp'
@@ -88,18 +90,8 @@ const AdminLogin = () => {
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full mb-3">
-            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-              {/* Steering wheel outer circle */}
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
-              {/* Steering wheel inner circle */}
-              <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              {/* Horizontal lines */}
-              <line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" strokeWidth="1.5"/>
-              <line x1="12" y1="6" x2="12" y2="18" stroke="currentColor" strokeWidth="1.5"/>
-              {/* Center dot */}
-              <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-            </svg>
+          <div className="inline-flex items-center justify-center w-12 h-12  rounded-full mb-3">
+            <img src={Logo} alt="Motoka" className="h-8 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Motoka Admin</h1>
           <p className="text-sm text-gray-600 mt-1">Secure Admin Access</p>

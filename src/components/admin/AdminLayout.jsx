@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import Logo from "../../assets/images/motoka logo.svg";
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -72,14 +73,8 @@ const AdminLayout = () => {
             {/* Logo */}
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
-                <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
-                    <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                    <line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" strokeWidth="1.5"/>
-                    <line x1="12" y1="6" x2="12" y2="18" stroke="currentColor" strokeWidth="1.5"/>
-                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-                  </svg>
+                <div className="h-8 w-8  rounded-lg flex items-center justify-center mr-3">
+                  <img src={Logo} alt="Motoka" className="h-8 w-auto" />
                 </div>
                 <span className="text-xl font-bold text-gray-900">Motoka</span>
               </div>
