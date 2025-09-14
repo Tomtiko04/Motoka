@@ -12,12 +12,15 @@ import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Verification from "./pages/Verification.jsx";
 import VerificationSuccess from "./features/auth/VerificationSuccess";
+import OTPLogin from "./features/auth/OTPLogin.jsx";
 import AddCar from "./features/car/AddCar.jsx";
 import Dashboard from "./features/dashboard/Dashboard.jsx";
 import RenewLicense from "./features/licenses/RenewLicense";
 import Garage from "./features/garage/Garage.jsx";
 import Licenses from "./features/licenses/Licenses.jsx";
 import PaymentOptions from "./features/payment/PaymentOptions.jsx";
+import PaystackPayment from "./features/payment/PaystackPayment.jsx";
+import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/DriversLicense.jsx";
@@ -39,12 +42,7 @@ import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
-import AdminDashboard from "./Admin/pages/AdminDashboard.jsx";
-import AdminLayout from "./Admin/component/AdminLayout.jsx";
-import Orders from "./Admin/pages/Orders.jsx";
-import Agents from "./Admin/pages/Agents.jsx";
-import Transactions from "./Admin/pages/Transactions.jsx";
-import Cars from "./Admin/pages/Cars.jsx";
+import AdminRoutes from "./routes/AdminRoutes.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -75,6 +73,14 @@ export default function App() {
               element={
                 <GuestRoute>
                   <SignIn />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="otp-login"
+              element={
+                <GuestRoute>
+                  <OTPLogin />
                 </GuestRoute>
               }
             />
@@ -140,6 +146,8 @@ export default function App() {
                 <PaymentOptions availableBalance={3000} renewalCost={1000} />
               }
             />
+            <Route path="payment/paystack" element={<PaystackPayment />} />
+            <Route path="payment/paystack/callback" element={<PaystackCallback />} />
             <Route path="settings">
               <Route index element={<Settings />} />
             </Route>
@@ -151,14 +159,8 @@ export default function App() {
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
           </Route>
 
-          <Route element={<AdminLayout />}>
-            <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="admin/dashboard" element={<AdminDashboard />} />
-            <Route path="admin/order" element={<Orders />}/>
-            <Route path="admin/agent" element={<Agents />}/>
-            <Route path="admin/transaction" element={<Transactions />} />
-            <Route path="admin/car" element={<Cars />}/>
-          </Route>
+          {/* Admin Routes */}
+          <Route path="admin/*" element={<AdminRoutes />} />
         </Routes>
       </BrowserRouter>
       <Toaster

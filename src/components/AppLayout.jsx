@@ -31,9 +31,19 @@ export default function AppLayout({ onNavigate }) {
   ];
 
   useEffect(() => {
-    if (!authStorage.isAuthenticated()) {
-      navigate("/auth/login", { state: { from: location }, replace: true });
-    }
+    // Add a small delay to ensure token storage is complete
+    const checkAuth = () => {
+      if (!authStorage.isAuthenticated()) {
+        toast.error("Please log in to access this page");
+        navigate("/auth/login", { state: { from: location }, replace: true });
+      }
+    };
+    
+    // Check immediately and also after a short delay
+    checkAuth();
+    const timeoutId = setTimeout(checkAuth, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [navigate, location]);
 
   const toggleMenu = () => {

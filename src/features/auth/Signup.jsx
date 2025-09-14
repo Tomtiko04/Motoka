@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
@@ -14,13 +15,13 @@ const schema = yup.object().shape({
     .string()
     .email("Invalid email format")
     .required("Email is required"),
-  // phone: yup
-  //   .string()
-  //   .required("Phone number is required")
-  //   .matches(
-  //     /^(0\d{10}|(\+234|234)\d{10})$/,
-  //     "Enter a valid Nigerian phone number",
-  //   ),
+  phone: yup
+    .string()
+    .required("Phone number is required")
+    .matches(
+      /^(0\d{10}|(\+234|234)\d{10})$/,
+      "Enter a valid Nigerian phone number",
+    ),
   // nin: yup.string().required("NIN is required"),
   password: yup
     .string()
@@ -60,7 +61,7 @@ export default function Signup() {
         {
           name: data.name,
           email: data.email,
-          // phone_number: data.phone,
+          phone_number: data.phone,
           password: data.password.trim(),
           password_confirmation: data.confirmPassword.trim(),
           // nin: data.nin,
@@ -151,7 +152,7 @@ export default function Signup() {
               )}
             </div>
 
-            {/* <div>
+            <div>
               <label
                 htmlFor="phone"
                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
@@ -172,7 +173,7 @@ export default function Signup() {
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label
                 htmlFor="nin"
                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"

@@ -20,7 +20,7 @@ const getReminderStatus = (message) => {
   
   const lowerMessage = message.toLowerCase();
   
-  if (lowerMessage.includes('expiered') || lowerMessage.includes('0 day')) {
+  if (lowerMessage.includes('expired') || lowerMessage.includes('expiered') || lowerMessage.includes('0 day') || lowerMessage.includes('overdue')) {
     return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
   } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
     return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
@@ -32,16 +32,9 @@ const getReminderStatus = (message) => {
 export default function CarDetailsCard({ 
   onRenewClick, 
   carDetail, 
-  isRenew, 
-  reminderObj // now a single object, not array
+  isRenew
 }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
-  // const [reminderMessage, setReminderMessage] = useState("Loading...");
-  // const [reminderStatus, setReminderStatus] = useState({
-  //   type: "normal",
-  //   bgColor: "#E8F5E8",
-  //   dotColor: "#4CAF50",
-  // });
   const { showModal } = useModalStore();
 
   const handleRenewClick = () => {
@@ -69,9 +62,16 @@ export default function CarDetailsCard({
     loadCarLogo();
   }, [carDetail?.vehicle_make]);
 
-  // Use reminderObj prop for message and status
-  const reminderMessage = reminderObj?.reminder?.message || "No reminder available";
+  // Use reminder data directly from carDetail (already embedded by backend)
+  const reminderMessage = carDetail?.reminder?.message || "No reminder available";
   const reminderStatus = getReminderStatus(reminderMessage);
+
+  // Get additional reminder properties from backend
+  const daysLeft = carDetail?.reminder?.days_left;
+  const reminderStatusType = carDetail?.reminder?.status;
+  const isUrgent = carDetail?.reminder?.is_urgent;
+  const isExpired = carDetail?.reminder?.is_expired;
+  const expiresToday = carDetail?.reminder?.expires_today;
 
   return (
     <div className="rounded-2xl bg-white px-4 py-5">
@@ -148,6 +148,28 @@ export default function CarDetailsCard({
           </button>
         )}
       </div>
+
+      {/* Enhanced Reminder Display - Using Backend Data */}
+      {/* {daysLeft !== null && (
+        <div className="mt-3 flex items-center justify-between">
+          <div className="text-xs text-[#05243F]/60">
+            Expiry Status
+          </div>
+          <div className={`text-sm font-semibold ${
+            isExpired ? 'text-red-600' :
+            expiresToday ? 'text-orange-600' :
+            isUrgent ? 'text-orange-600' :
+            'text-green-600'
+          }`}>
+            {(() => {
+              if (isExpired) return `${Math.abs(daysLeft)} days overdue`;
+              if (expiresToday) return 'Expires today';
+              if (daysLeft === 1) return '1 day left';
+              return `${daysLeft} days left`;
+            })()}
+          </div>
+        </div>
+      )} */}
 
       {/* {isModal && (
         <CarDetailsModal

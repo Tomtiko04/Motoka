@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
-import { useReminders } from '../../context/ReminderContext';
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -36,9 +35,6 @@ export default function Dashboard() {
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
 
-  // Use reminders from context
-  const { reminders, loading: reminderLoading } = useReminders();
-
   const sortedCars = React.useMemo(() => {
     if (!Array.isArray(cars?.cars)) return [];
     return [...cars.cars].sort((a, b) => {
@@ -47,12 +43,6 @@ export default function Dashboard() {
       return dateA - dateB;
     });
   }, [cars?.cars]);
-
-  // Helper function to find matching reminder for a car
-  const getCarReminder = (carId) => {
-    if (!reminders || reminders.length === 0) return null;
-    return reminders.find(reminder => String(reminder.car_id) === String(carId));
-  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -78,22 +68,17 @@ export default function Dashboard() {
                 }}
                 // className="!pb-12 h-full"
               >
-                {sortedCars.map((car, index) => {
-                  const carReminder = getCarReminder(car.id);
-                  
-                  return (
-                    <SwiperSlide key={car.id || index}>
-                      <div>
-                        <CarDetailsCard
-                          carDetail={car}
-                          isRenew={true}
-                          onRenewClick={handleRenewLicense}
-                          reminderObj={carReminder}
-                        />
-                      </div>
-                    </SwiperSlide>
-                  );
-                })}
+                {sortedCars.map((car, index) => (
+                  <SwiperSlide key={car.id || index}>
+                    <div>
+                      <CarDetailsCard
+                        carDetail={car}
+                        isRenew={true}
+                        onRenewClick={handleRenewLicense}
+                      />
+                    </div>
+                  </SwiperSlide>
+                ))}
               </Swiper>
             </div>
             <div>
@@ -102,15 +87,19 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="flex h-64 items-center justify-center rounded-2xl bg-white p-8 text-center text-gray-500">
-              <div>
-                <FaCarAlt className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                <p className="text-lg font-medium">No cars found</p>
-                <p className="mt-1 text-sm">Add your first car to get started</p>
-              </div>
-            </div>
-            <div>
-              <AddCarCard onAddCarClick={handleAddCar} />
+            <div className="col-span-2 flex flex-col items-center justify-center rounded-2xl bg-white p-8 text-center">
+              <FaCarAlt className="mb-4 text-5xl text-[#2389E3]/20" />
+              <h3 className="mb-2 text-xl font-semibold text-[#05243F]">No Cars Found</h3>
+              <p className="mb-6 text-sm text-[#05243F]/60">
+                You haven't added any cars to your garage yet. Add your first car to get started!
+              </p>
+              <button
+                onClick={handleAddCar}
+                className="flex items-center gap-2 rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+              >
+                <FaPlus className="text-sm" />
+                Add Your First Car
+              </button>
             </div>
           </div>
         )}
