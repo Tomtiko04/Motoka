@@ -1,12 +1,13 @@
 import axios from "axios"
 import { refreshToken } from "./apiAuth"
 import { authStorage } from "../utils/authStorage"
+import config from "../config/config"
 
 // Create a request cache to prevent duplicate requests
 const requestCache = new Map()
 
 const api = axios.create({
-  baseURL: "https://api.motoka.ng/api",
+  baseURL: config.getApiBaseUrl(),
 });
 
 // Add security headers to all requests

@@ -2,16 +2,18 @@ import React, { useState, useEffect } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import cardValidator from "card-validator";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import {
   initiateMonicreditPayment,
 } from "../../services/apiMonicredit";
-import { verifyPayment as verifyPaymentApi, initializePaystackPayment, verifyPaystackPayment } from "../../services/apiPayment";
+import { verifyPayment as verifyPaymentApi } from "../../services/apiPayment";
+import { usePaystackPayment } from "./usePaystackPayment";
 
 export default function PaymentOptions() {
   const navigate = useNavigate();
   const location = useLocation();
-  const paymentData = location.state?.paymentData || location.state;
-  const [selectedPayment, setSelectedPayment] = useState("wallet");
+  const paymentData = location.state?.paymentData;
+  const [selectedPayment, setSelectedPayment] = useState("transfer");
 
   // Monicredit payment state
   const [monicreditAuthUrl, setMonicreditAuthUrl] = useState("");
@@ -20,18 +22,19 @@ export default function PaymentOptions() {
   const [monicreditLoading, setMonicreditLoading] = useState(false);
   const [monicreditError, setMonicreditError] = useState("");
 
-  // Paystack payment state
-  const [paystackAuthUrl, setPaystackAuthUrl] = useState("");
-  const [paystackReference, setPaystackReference] = useState("");
-  const [paystackLoading, setPaystackLoading] = useState(false);
-  const [paystackError, setPaystackError] = useState("");
+  // Paystack payment hook
+  const {
+    initializePayment: initializePaystack,
+    isInitializing: isPaystackInitializing,
+    error: paystackError,
+  } = usePaystackPayment();
 
   const paymentMethods = [
-    { id: "wallet", label: "Wallet Balance: N30,876" },
+    // { id: "wallet", label: "Wallet Balance: N30,876" },
     { id: "transfer", label: "Pay Via Transfer" },
-    { id: "card", label: "Pay Via Card" },
-    { id: "Monicredit_Transfer", label: "Pay Via Monicredit" },
-    { id: "Paystack", label: "Pay Via Paystack" },
+    // { id: "card", label: "Pay Via Card" },
+    { id: "paystack", label: "Pay Via Paystack", icon: "💳" },
+    // { id: "Monicredit_Transfer", label: "Pay Via Monicredit" },
   ];
 
   const walletDetails = {
@@ -177,15 +180,82 @@ export default function PaymentOptions() {
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifyError, setVerifyError] = useState("");
 
+  // Handle Paystack payment
+  const handlePaystackPayment = async () => {
+    if (!paymentData) {
+      toast.error("No payment data available");
+      return;
+    }
 
+    try {
+      // Debug: Log the payment data to see what we have
+      console.log("Payment Data:", paymentData);
+      
+      // Extract the necessary data from paymentData
+      // The paymentData might have different structures depending on how it was passed
+      const car_slug = paymentData.car_slug || paymentData.car?.slug;
+      const payment_schedule_id = paymentData.payment_schedule_id || paymentData.selectedSchedules?.[0]?.id;
+      const delivery_address = paymentData.delivery_address || paymentData.deliveryDetails?.address || paymentData.meta_data?.delivery_address;
+      const delivery_contact = paymentData.delivery_contact || paymentData.deliveryDetails?.contact || paymentData.meta_data?.delivery_contact;
+      const state_id = paymentData.state_id || paymentData.deliveryDetails?.state_id || paymentData.meta_data?.state_id;
+      const lga_id = paymentData.lga_id || paymentData.deliveryDetails?.lga_id || paymentData.meta_data?.lga_id;
+
+      // Validate required fields
+      if (!car_slug) {
+        toast.error("Car information is missing");
+        return;
+      }
+      
+      if (!payment_schedule_id) {
+        toast.error("Payment schedule information is missing");
+        return;
+      }
+
+      // Prepare data in the format expected by the backend
+      const paystackData = {
+        car_slug: car_slug,
+        payment_schedule_id: payment_schedule_id,
+        meta_data: {
+          delivery_address: delivery_address || "",
+          delivery_contact: delivery_contact || "",
+          state_id: state_id || 1,
+          lga_id: lga_id || 1,
+        }
+      };
+
+      console.log("Paystack Data:", paystackData);
+
+      const result = await initializePaystack(paystackData);
+      
+      if (result?.data?.authorization_url) {
+        // Navigate to Paystack payment page
+        navigate("/payment/paystack", { 
+          state: { 
+            paymentData: {
+              ...paymentData,
+              authorization_url: result.data.authorization_url,
+              reference: result.data.reference
+            }
+          } 
+        });
+      } else {
+        toast.error("Failed to initialize Paystack payment");
+      }
+    } catch (error) {
+      const errorMessage = error.message || "Paystack payment error";
+      toast.error(errorMessage);
+    }
+  };
+
+ 
   const handleVerifyBankTransfer = async () => {
     setVerifying(true);
     setVerifyError("");
     setVerifyResult(null);
     try {
-      console.log("transid", paymentData?.transid);
-      const reference = paymentData?.transid;
-      console.log("reference", reference);
+      console.log("transid",paymentData?.order_id);
+      const reference = paymentData?.order_id;
+      console.log("reference",reference);
       if (!reference) throw new Error("No payment reference found.");
       const result = await verifyPaymentApi(reference);
       console.log("result", result);
@@ -232,11 +302,9 @@ export default function PaymentOptions() {
   };
 
   React.useEffect(() => {
-    const status = verifyResult?.data?.status ?? verifyResult?.status;
-    if (verifyResult && status && (paymentData?.car_id || paymentData?.carDetail?.id)) {
+    if (verifyResult && verifyResult.data.status && paymentData?.car_slug) {
       const timeout = setTimeout(() => {
-        const id = paymentData?.car_id || paymentData?.carDetail?.id;
-        navigate(`/payment/car-receipt/${id}`);
+        navigate(`/payment/car-receipt/${paymentData.car_slug}`);
       }, 2000); // 2 seconds delay
       return () => clearTimeout(timeout);
     }
@@ -691,6 +759,70 @@ export default function PaymentOptions() {
                   )}
                 </>
               )}
+            </div>
+          )}
+
+          {selectedPayment === "paystack" && (
+            <div>
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
+                Paystack Payment
+              </h2>
+              <div className="space-y-4">
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">💳</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Secure Payment</h3>
+                      <p className="text-sm text-gray-600">
+                        Pay securely with your card, bank transfer, or mobile money
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {paymentData && (
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">Payment Summary</h4>
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <div className="flex justify-between">
+                        <span>Amount:</span>
+                        <span className="font-semibold">
+                          ₦{parseFloat(paymentData.amount).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Payment Method:</span>
+                        <span>Paystack</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {paystackError && (
+                  <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+                    <p className="text-sm text-red-600">{paystackError}</p>
+                  </div>
+                )}
+
+                <button
+                  onClick={handlePaystackPayment}
+                  disabled={isPaystackInitializing}
+                  className="w-full rounded-lg bg-blue-600 py-3 px-4 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {isPaystackInitializing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Initializing Payment...
+                    </>
+                  ) : (
+                    "Pay with Paystack"
+                  )}
+                </button>
+
+                <div className="text-xs text-gray-500 text-center">
+                  You will be redirected to Paystack's secure payment page
+                </div>
+              </div>
             </div>
           )}
         </div>

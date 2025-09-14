@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
@@ -295,6 +296,16 @@ export default function Signin() {
           </form>
 
           <div className="mt-3">
+            {/* OTP Login Link */}
+            <div className="mt-4 text-center">
+              <Link
+                to="/auth/otp-login"
+                className="text-sm text-[#2389E3] hover:text-[#A73957] transition-colors duration-300"
+              >
+                Login with OTP instead
+              </Link>
+            </div>
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#F2F2F2]"></div>

@@ -14,24 +14,18 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-// Helper function to derive status and colors from backend reminder
-const deriveReminderStyle = (reminder) => {
-  // Default colors
-  const styles = {
-    danger: { bgColor: "#FFE8E8", dotColor: "#DB8888" },
-    warning: { bgColor: "#FFEFCE", dotColor: "#FDB022" },
-    success: { bgColor: "#E8F5E8", dotColor: "#4CAF50" },
-    info: { bgColor: "#E6F4FF", dotColor: "#2389E3" },
-  };
-
-  if (!reminder) return { ...styles.warning, type: "warning", message: "No reminder available" };
-
-  const message = reminder.message || reminder.text || "";
-  const rawStatus = (reminder.status || reminder.level || "").toString().toLowerCase();
-
-  // If backend provides a status/level, map directly
-  if (rawStatus.includes("danger") || rawStatus.includes("expired") || rawStatus.includes("critical")) {
-    return { ...styles.danger, type: "danger", message: message || "Expired" };
+// Helper function to determine status based on reminder message
+const getReminderStatus = (message) => {
+  if (!message) return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+  
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('expired') || lowerMessage.includes('expiered') || lowerMessage.includes('0 day') || lowerMessage.includes('overdue')) {
+    return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
+  } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
+    return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+  } else {
+    return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
   }
   if (rawStatus.includes("warn") || rawStatus.includes("pending") || rawStatus.includes("soon")) {
     return { ...styles.warning, type: "warning", message: message || "Due soon" };
@@ -57,8 +51,7 @@ const deriveReminderStyle = (reminder) => {
 export default function CarDetailsCard({ 
   onRenewClick, 
   carDetail, 
-  isRenew, 
-  reminderObj // legacy: an object possibly with { reminder: { message, status } }
+  isRenew
 }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
@@ -88,9 +81,16 @@ export default function CarDetailsCard({
     loadCarLogo();
   }, [carDetail?.vehicle_make]);
 
-  // Prefer reminder from carDetail (from GET car endpoint), fallback to prop reminderObj
-  const backendReminder = carDetail?.reminder || reminderObj?.reminder || reminderObj;
-  const { message: reminderMessage, bgColor, dotColor } = deriveReminderStyle(backendReminder);
+  // Use reminder data directly from carDetail (already embedded by backend)
+  const reminderMessage = carDetail?.reminder?.message || "No reminder available";
+  const reminderStatus = getReminderStatus(reminderMessage);
+
+  // Get additional reminder properties from backend
+  const daysLeft = carDetail?.reminder?.days_left;
+  const reminderStatusType = carDetail?.reminder?.status;
+  const isUrgent = carDetail?.reminder?.is_urgent;
+  const isExpired = carDetail?.reminder?.is_expired;
+  const expiresToday = carDetail?.reminder?.expires_today;
 
   return (
     <div className="rounded-2xl bg-white px-4 py-5">
@@ -167,6 +167,28 @@ export default function CarDetailsCard({
           </button>
         )}
       </div>
+
+      {/* Enhanced Reminder Display - Using Backend Data */}
+      {/* {daysLeft !== null && (
+        <div className="mt-3 flex items-center justify-between">
+          <div className="text-xs text-[#05243F]/60">
+            Expiry Status
+          </div>
+          <div className={`text-sm font-semibold ${
+            isExpired ? 'text-red-600' :
+            expiresToday ? 'text-orange-600' :
+            isUrgent ? 'text-orange-600' :
+            'text-green-600'
+          }`}>
+            {(() => {
+              if (isExpired) return `${Math.abs(daysLeft)} days overdue`;
+              if (expiresToday) return 'Expires today';
+              if (daysLeft === 1) return '1 day left';
+              return `${daysLeft} days left`;
+            })()}
+          </div>
+        </div>
+      )} */}
 
       {/* {isModal && (
         <CarDetailsModal
