@@ -269,7 +269,6 @@ export default function RenewLicense() {
       <div className="mx-auto max-w-4xl rounded-[20px] bg-[#F9FAFC] p-8">
         <div className="relative grid grid-cols-1 gap-10 md:grid-cols-2">
           <div className="mt-2">
-
             <CarDetailsCard
               carDetail={carDetail}
               isRenew={false}
@@ -360,6 +359,7 @@ export default function RenewLicense() {
                     placeholder="Select state"
                     filterKey="name"
                     isLoading={isGettingState}
+                    className="text-[#05243F] placeholder:text-[#05243F]/40"
                   />
                 </div>
                 <div>
@@ -380,6 +380,7 @@ export default function RenewLicense() {
                     filterKey="name"
                     isLoading={isGettingLG}
                     disabled={!deliveryDetails.state}
+                    className="text-[#05243F] placeholder:text-[#05243F]/40"
                   />
                 </div>
               </div>

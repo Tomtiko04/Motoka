@@ -38,13 +38,11 @@ import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
-import CarDocuments from "./pages/CarDocuments.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
-
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({

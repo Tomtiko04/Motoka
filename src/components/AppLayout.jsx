@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { FaBell, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import { Cookie, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { logout } from "../services/apiAuth";
 
