@@ -12,6 +12,7 @@ import {
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import config from '../../config/config';
 
 const AdminOrderDetails = () => {
   const { slug } = useParams();
@@ -31,7 +32,7 @@ const AdminOrderDetails = () => {
   const fetchOrderDetails = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${slug}`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ const AdminOrderDetails = () => {
   const fetchAgents = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/agents`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/agents`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ const AdminOrderDetails = () => {
     try {
       setProcessing(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${slug}/process`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/process`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,7 +102,7 @@ const AdminOrderDetails = () => {
   const handleStatusUpdate = async (newStatus) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${slug}/status`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

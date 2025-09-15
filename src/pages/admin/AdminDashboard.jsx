@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
+import config from '../../config/config';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -25,19 +26,19 @@ const AdminDashboard = () => {
       
       // Fetch all dashboard data in parallel
       const [statsResponse, ordersResponse, transactionsResponse] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard/stats`, {
+        fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }),
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/recent-orders`, {
+        fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }),
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/recent-transactions`, {
+        fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
