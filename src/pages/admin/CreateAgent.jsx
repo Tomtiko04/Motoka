@@ -11,11 +11,11 @@ import config from '../../config/config';
 
 const CreateAgent = () => {
   const [formData, setFormData] = useState({
-    firstName: 'Ali',
-    surname: 'Johnson',
-    address: 'Jd Street, Off motoko road.',
-    location: 'Jigawa',
-    accountNumber: '4567890',
+    firstName: '',
+    surname: '',
+    address: '',
+    location: '',
+    accountNumber: '',
     stateOfOrigin: '',
     phoneNumber: '',
     email: '',
@@ -289,6 +289,7 @@ const CreateAgent = () => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
+                  placeholder="Enter first name"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -304,6 +305,7 @@ const CreateAgent = () => {
                   name="surname"
                   value={formData.surname}
                   onChange={handleInputChange}
+                  placeholder="Enter surname"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -319,6 +321,7 @@ const CreateAgent = () => {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
+                  placeholder="Enter address"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -334,6 +337,7 @@ const CreateAgent = () => {
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
+                  placeholder="Enter location"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -349,6 +353,7 @@ const CreateAgent = () => {
                   name="accountNumber"
                   value={formData.accountNumber}
                   onChange={handleInputChange}
+                  placeholder="Enter account number"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -414,6 +419,7 @@ const CreateAgent = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
+                  placeholder="Enter phone number"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -429,6 +435,7 @@ const CreateAgent = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  placeholder="Enter email address"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
