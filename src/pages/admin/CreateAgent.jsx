@@ -33,7 +33,18 @@ const CreateAgent = () => {
   // Fetch states on component mount
   useEffect(() => {
     fetchStates();
+    testApiConnection();
   }, []);
+
+  const testApiConnection = async () => {
+    try {
+      const response = await fetch(`${config.getApiBaseUrl()}/test-cors`);
+      const data = await response.json();
+      console.log('API Test Response:', data);
+    } catch (error) {
+      console.error('API Test Error:', error);
+    }
+  };
 
   // Filter states based on search term
   useEffect(() => {
@@ -165,7 +176,12 @@ const CreateAgent = () => {
         }
       });
 
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/agents`, {
+      const apiUrl = `${config.getApiBaseUrl()}/admin/agents`;
+      console.log('API URL:', apiUrl);
+      console.log('Environment:', import.meta.env.VITE_ENV);
+      console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
