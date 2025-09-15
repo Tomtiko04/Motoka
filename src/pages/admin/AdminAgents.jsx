@@ -5,6 +5,7 @@ import {
   PlusIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
+import config from '../../config/config';
 
 const AdminAgents = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const AdminAgents = () => {
   const fetchAgents = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/agents`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/agents`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ const AdminAgents = () => {
               <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
                 {agent.profile_image ? (
                   <img 
-                    src={`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/storage/${agent.profile_image}`}
+                    src={`${config.getApiBaseUrl().replace('/api', '')}/storage/${agent.profile_image}`}
                     alt={agent.name}
                     className="w-full h-full object-cover"
                   />

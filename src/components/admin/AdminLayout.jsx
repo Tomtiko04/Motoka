@@ -10,6 +10,7 @@ import {
   BellIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
+import config from '../../config/config';
 
 const AdminLayout = () => {
   const [adminUser, setAdminUser] = useState(null);
@@ -33,7 +34,7 @@ const AdminLayout = () => {
       // Call backend logout API to revoke the token
       const token = localStorage.getItem('adminToken');
       if (token) {
-        await fetch(`${import.meta.env.VITE_API_BASE_URL}/logout`, {
+        await fetch(`${config.getApiBaseUrl()}/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

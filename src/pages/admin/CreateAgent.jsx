@@ -7,6 +7,7 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import config from '../../config/config';
 
 const CreateAgent = () => {
   const [formData, setFormData] = useState({
@@ -64,7 +65,7 @@ const CreateAgent = () => {
   const fetchStates = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/states`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/states`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -166,7 +167,7 @@ const CreateAgent = () => {
         }
       });
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/agents`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/agents`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
