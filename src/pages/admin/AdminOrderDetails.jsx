@@ -10,6 +10,8 @@ import {
   MapPinIcon,
   PhoneIcon,
   EnvelopeIcon,
+  DocumentArrowUpIcon,
+  PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
@@ -23,10 +25,17 @@ const AdminOrderDetails = () => {
   const [selectedAgent, setSelectedAgent] = useState('');
   const [agents, setAgents] = useState([]);
   const [statusUpdate, setStatusUpdate] = useState('');
+  const [documents, setDocuments] = useState([]);
+  const [documentTypes, setDocumentTypes] = useState([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [sendingDocuments, setSendingDocuments] = useState(false);
 
   useEffect(() => {
     fetchOrderDetails();
     fetchAgents();
+    fetchDocumentTypes();
+    fetchOrderDocuments();
   }, [slug]);
 
   const fetchOrderDetails = async () => {
@@ -141,6 +150,122 @@ const AdminOrderDetails = () => {
         {status.replace('_', ' ').toUpperCase()}
       </span>
     );
+  };
+
+  const fetchDocumentTypes = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/document-types?order_type=${order?.order_type}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setDocumentTypes(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching document types:', error);
+    }
+  };
+
+  const fetchOrderDocuments = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/documents`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setDocuments(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching order documents:', error);
+    }
+  };
+
+  const handleDocumentUpload = async () => {
+    if (uploadedDocuments.length === 0) {
+      toast.error('Please select documents to upload');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const formData = new FormData();
+      
+      uploadedDocuments.forEach((doc, index) => {
+        formData.append(`documents[${index}][file]`, doc.file);
+        formData.append(`documents[${index}][document_type]`, doc.documentType);
+      });
+
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/documents`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        toast.success('Documents uploaded successfully');
+        setUploadedDocuments([]);
+        fetchOrderDocuments();
+      } else {
+        toast.error(data.message || 'Failed to upload documents');
+      }
+    } catch (error) {
+      console.error('Error uploading documents:', error);
+      toast.error('Failed to upload documents');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSendDocuments = async () => {
+    setSendingDocuments(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/send-documents`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject: `Your ${order.order_type?.replace('_', ' ')} documents are ready`,
+          message: `Dear ${order.user?.name},\n\nYour ${order.order_type?.replace('_', ' ')} documents have been processed and are ready for download. Please find the attached documents.\n\nBest regards,\nMotoka Team`,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        toast.success('Documents sent to user successfully');
+      } else {
+        toast.error(data.message || 'Failed to send documents');
+      }
+    } catch (error) {
+      console.error('Error sending documents:', error);
+      toast.error('Failed to send documents');
+    } finally {
+      setSendingDocuments(false);
+    }
+  };
+
+  const addDocument = (documentType, file) => {
+    setUploadedDocuments(prev => [...prev, { documentType, file }]);
+  };
+
+  const removeDocument = (index) => {
+    setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
   };
 
   const formatDate = (dateString) => {
@@ -284,6 +409,120 @@ const AdminOrderDetails = () => {
               </div>
             </div>
           </div>
+
+          {/* Document Upload Section - Only show for in_progress orders */}
+          {order.status === 'in_progress' && (
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Document Upload</h3>
+              
+              {/* Document Types */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Required Documents for {order.order_type?.replace('_', ' ').toUpperCase()}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {documentTypes.map((docType) => (
+                    <div key={docType.id} className="flex items-center p-2 bg-gray-50 rounded-lg">
+                      <DocumentArrowUpIcon className="h-4 w-4 text-gray-400 mr-2" />
+                      <span className="text-sm text-gray-700">{docType.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="space-y-4">
+                {documentTypes.map((docType) => (
+                  <div key={docType.id} className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <div className="text-center">
+                      <DocumentArrowUpIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-gray-900">{docType.name}</p>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          if (e.target.files[0]) {
+                            addDocument(docType.name, e.target.files[0]);
+                          }
+                        }}
+                        className="hidden"
+                        id={`upload-${docType.id}`}
+                      />
+                      <label htmlFor={`upload-${docType.id}`} className="cursor-pointer">
+                        <span className="text-xs text-blue-600 hover:text-blue-800">Click to upload</span>
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Uploaded Documents Preview */}
+              {uploadedDocuments.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Documents to Upload:</h4>
+                  <div className="space-y-2">
+                    {uploadedDocuments.map((doc, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                        <div className="flex items-center">
+                          <DocumentArrowUpIcon className="h-4 w-4 text-blue-600 mr-2" />
+                          <span className="text-sm text-blue-900">
+                            {doc.documentType} - {doc.file.name}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeDocument(index)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <XCircleIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleDocumentUpload}
+                    disabled={uploading}
+                    className="w-full mt-3 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {uploading ? 'Uploading...' : 'Upload Documents'}
+                  </button>
+                </div>
+              )}
+
+              {/* Send Documents Button */}
+              {documents.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={handleSendDocuments}
+                    disabled={sendingDocuments}
+                    className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  >
+                    <PaperAirplaneIcon className="h-4 w-4 mr-2" />
+                    {sendingDocuments ? 'Sending...' : 'Send Documents to User'}
+                  </button>
+                </div>
+              )}
+
+              {/* Uploaded Documents List */}
+              {documents.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents:</h4>
+                  <div className="space-y-2">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                        <div className="flex items-center">
+                          <DocumentArrowUpIcon className="h-4 w-4 text-gray-400 mr-2" />
+                          <span className="text-sm text-gray-900">{doc.document_type}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {new Date(doc.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -321,8 +560,11 @@ const AdminOrderDetails = () => {
               </div>
             )}
 
-            {order.status === 'in_progress' && (
+            {order.status === 'in_progress' && documents.length > 0 && (
               <div className="space-y-3">
+                <div className="text-sm text-gray-600 mb-2">
+                  Documents have been uploaded. You can now complete or decline this order.
+                </div>
                 <button
                   onClick={() => handleStatusUpdate('completed')}
                   className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
@@ -335,6 +577,12 @@ const AdminOrderDetails = () => {
                 >
                   Mark as Declined
                 </button>
+              </div>
+            )}
+
+            {order.status === 'in_progress' && documents.length === 0 && (
+              <div className="text-sm text-gray-500 text-center py-4">
+                Upload documents first to enable order completion
               </div>
             )}
 

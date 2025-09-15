@@ -19,7 +19,6 @@ const CreateAgent = () => {
     stateOfOrigin: '',
     phoneNumber: '',
     email: '',
-    amountToPay: '',
     agentProfile: null,
     ninFront: null,
     ninBack: null,
@@ -136,7 +135,6 @@ const CreateAgent = () => {
         'surname': 'last_name',
         'phoneNumber': 'phone',
         'accountNumber': 'account_number',
-        'amountToPay': 'amount_to_pay'
       };
 
       // Add all form fields with proper mapping
@@ -191,7 +189,6 @@ const CreateAgent = () => {
           stateOfOrigin: '',
           phoneNumber: '',
           email: '',
-          amountToPay: '',
           agentProfile: null,
           ninFront: null,
           ninBack: null,
@@ -436,21 +433,6 @@ const CreateAgent = () => {
                 />
               </div>
 
-              {/* Amount to Pay */}
-              <div>
-                <label htmlFor="amountToPay" className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount to Pay (N)
-                </label>
-                <input
-                  type="number"
-                  id="amountToPay"
-                  name="amountToPay"
-                  value={formData.amountToPay}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  placeholder="Enter amount to pay agent"
-                />
-              </div>
 
               {/* Agent Profile Upload */}
               <div>
