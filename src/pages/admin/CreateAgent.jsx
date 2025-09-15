@@ -130,6 +130,25 @@ const CreateAgent = () => {
         toast.error('Please log in as admin');
         return;
       }
+      
+      // Check if token is valid by making a test request
+      try {
+        const testResponse = await fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (testResponse.status === 401) {
+          toast.dismiss(loadingToast);
+          toast.error('Session expired. Please log in again.');
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin/login';
+          return;
+        }
+      } catch (error) {
+        console.error('Token validation error:', error);
+      }
 
       // Validate required fields
       if (!selectedState) {
@@ -180,6 +199,8 @@ const CreateAgent = () => {
       console.log('API URL:', apiUrl);
       console.log('Environment:', import.meta.env.VITE_ENV);
       console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
+      console.log('Admin Token:', token ? 'Present' : 'Missing');
+      console.log('Token length:', token ? token.length : 0);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -188,6 +209,9 @@ const CreateAgent = () => {
         },
         body: formDataToSend
       });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', [...response.headers.entries()]);
 
       const data = await response.json();
       
