@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import Logo from "../../assets/images/motoka logo.svg";
+import config from '../../config/config';
 
 
 const AdminLogin = () => {
@@ -19,7 +20,7 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/send-otp`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +48,7 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/verify-otp`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
