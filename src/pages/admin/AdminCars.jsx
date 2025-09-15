@@ -8,6 +8,7 @@ import {
   CalendarIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
+import config from '../../config/config';
 
 const AdminCars = () => {
   const [cars, setCars] = useState([]);
@@ -38,7 +39,7 @@ const AdminCars = () => {
         status: statusFilter,
       });
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/cars?${params}`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/cars?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

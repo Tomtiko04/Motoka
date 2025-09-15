@@ -5,6 +5,7 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import config from '../../config/config';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -33,7 +34,7 @@ const AdminOrders = () => {
         status: activeFilter === 'All' ? 'all' : activeFilter.toLowerCase().replace(' ', '_'),
       });
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/admin/orders?${params}`;
+      const url = `${config.getApiBaseUrl()}/admin/orders?${params}`;
       console.log('Fetching orders from:', url);
 
       const response = await fetch(url, {
@@ -94,7 +95,7 @@ const AdminOrders = () => {
   const handleProcessOrder = async (order) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${order.originalOrder.slug}/process`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${order.originalOrder.slug}/process`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
