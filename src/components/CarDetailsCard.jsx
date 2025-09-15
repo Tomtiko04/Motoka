@@ -16,43 +16,30 @@ const formatDate = (dateString) => {
 
 // Helper function to determine status based on reminder message
 const getReminderStatus = (message) => {
-  if (!message) return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
-  
+  if (!message)
+    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
+
   const lowerMessage = message.toLowerCase();
-  
-  if (lowerMessage.includes('expired') || lowerMessage.includes('expiered') || lowerMessage.includes('0 day') || lowerMessage.includes('overdue')) {
-    return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
-  } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
-    return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+
+  if (
+    lowerMessage.includes("expired") ||
+    lowerMessage.includes("expiered") ||
+    lowerMessage.includes("0 day") ||
+    lowerMessage.includes("overdue")
+  ) {
+    return { type: "danger", bgColor: "#FFE8E8", dotColor: "#DB8888" };
+  } else if (
+    lowerMessage.includes("1 day") ||
+    lowerMessage.includes("2 day") ||
+    lowerMessage.includes("3 day")
+  ) {
+    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
   } else {
     return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
   }
-  if (rawStatus.includes("warn") || rawStatus.includes("pending") || rawStatus.includes("soon")) {
-    return { ...styles.warning, type: "warning", message: message || "Due soon" };
-  }
-  if (rawStatus.includes("success") || rawStatus.includes("ok") || rawStatus.includes("active")) {
-    return { ...styles.success, type: "success", message: message || "Active" };
-  }
-  if (rawStatus.includes("info")) {
-    return { ...styles.info, type: "info", message: message || "Info" };
-  }
-
-  // Fallback to message heuristics
-  const lowerMessage = (message || "").toLowerCase();
-  if (lowerMessage.includes("expired") || lowerMessage.includes("expiered") || lowerMessage.includes("0 day")) {
-    return { ...styles.danger, type: "danger", message };
-  }
-  if (/(1|2|3)\s*day/.test(lowerMessage) || lowerMessage.includes("due soon")) {
-    return { ...styles.warning, type: "warning", message };
-  }
-  return { ...styles.success, type: "success", message: message || "Up to date" };
 };
 
-export default function CarDetailsCard({ 
-  onRenewClick, 
-  carDetail, 
-  isRenew
-}) {
+export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
 
@@ -82,7 +69,8 @@ export default function CarDetailsCard({
   }, [carDetail?.vehicle_make]);
 
   // Use reminder data directly from carDetail (already embedded by backend)
-  const reminderMessage = carDetail?.reminder?.message || "No reminder available";
+  const reminderMessage =
+    carDetail?.reminder?.message || "No reminder available";
   const reminderStatus = getReminderStatus(reminderMessage);
 
   // Get additional reminder properties from backend
@@ -108,7 +96,7 @@ export default function CarDetailsCard({
               />
             </div>
             <h3
-              className="text-xl font-semibold text-[#05243F] cursor-pointer"
+              className="cursor-pointer text-xl font-semibold text-[#05243F]"
               role="button"
               onClick={() => showModal(true, carDetail)}
             >
@@ -147,11 +135,11 @@ export default function CarDetailsCard({
       <div className="flex items-center justify-between">
         <div
           className="flex items-center gap-2 rounded-full px-4 py-1.5"
-          style={{ backgroundColor: bgColor }}
+          style={{ backgroundColor: reminderStatus.bgColor }}
         >
           <span
             className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: dotColor }}
+            style={{ backgroundColor: reminderStatus.dotColor }}
           ></span>
           <span className="text-sm font-medium text-[#05243F]">
             {reminderMessage}
