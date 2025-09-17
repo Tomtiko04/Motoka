@@ -133,6 +133,9 @@ const AdminOrderDetails = () => {
       const data = await response.json();
       if (data.status) {
         setOrder(data.data);
+        // Refetch all related data after status update
+        await fetchOrderDetails();
+        await fetchOrderDocuments();
         toast.success('Order status updated successfully!');
       } else {
         toast.error(data.message || 'Failed to update status');
@@ -296,6 +299,8 @@ const AdminOrderDetails = () => {
       if (data.status) {
         toast.dismiss(loadingToast);
         toast.success(`Documents sent successfully to ${data.data?.user_email || order.user?.email}`);
+        // Refresh order data to update documents_sent_at
+        await fetchOrderDetails();
       } else {
         toast.dismiss(loadingToast);
         toast.error(data.message || 'Failed to send documents');
@@ -459,6 +464,12 @@ const AdminOrderDetails = () => {
               <div>
                 <label className="text-sm font-medium text-gray-500">Status</label>
                 <p className="text-sm text-gray-900">{order.status?.replace('_', ' ').toUpperCase()}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Documents Status</label>
+                <p className={`text-sm ${order.documents_sent_at ? 'text-green-600' : 'text-red-600'}`}>
+                  {order.documents_sent_at ? 'Sent to User' : 'Not Sent'}
+                </p>
               </div>
             </div>
           </div>
@@ -661,12 +672,20 @@ const AdminOrderDetails = () => {
                 {documents.length > 0 && (
                   <div className="pt-4 border-t border-gray-200">
                     <div className="text-sm text-gray-600 mb-3">
-                      Documents uploaded. You can now complete or decline this order.
+                      {order.documents_sent_at 
+                        ? "Documents have been sent to the user. You can now complete or decline this order."
+                        : "Documents uploaded. You must send documents to the user before completing this order."
+                      }
                     </div>
                     <div className="space-y-2">
                 <button
                   onClick={() => handleStatusUpdate('completed')}
-                        className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-sm"
+                        className={`w-full py-2 px-4 rounded-lg text-sm ${
+                          order.documents_sent_at 
+                            ? 'bg-green-600 text-white hover:bg-green-700' 
+                            : 'bg-gray-400 text-white cursor-not-allowed'
+                        }`}
+                        disabled={!order.documents_sent_at}
                 >
                   Mark as Completed
                 </button>
