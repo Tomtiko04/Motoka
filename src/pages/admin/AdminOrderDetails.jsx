@@ -40,7 +40,9 @@ const AdminOrderDetails = () => {
   }, [slug]);
 
   useEffect(() => {
+    console.log('useEffect triggered, order?.order_type:', order?.order_type);
     if (order?.order_type) {
+      console.log('Fetching document types and order documents');
       fetchDocumentTypes();
       fetchOrderDocuments();
     }
@@ -164,21 +166,43 @@ const AdminOrderDetails = () => {
     try {
       const token = localStorage.getItem('adminToken');
       console.log('Fetching document types for order_type:', order?.order_type);
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/document-types?order_type=${order?.order_type}`, {
+      console.log('Full order object:', order);
+      
+      if (!order?.order_type) {
+        console.error('No order type available');
+        return;
+      }
+
+      const apiUrl = `${config.getApiBaseUrl()}/admin/document-types?order_type=${order.order_type}`;
+      console.log('API URL:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       console.log('Document types response:', data);
-      if (data.status) {
+      
+      if (data.status && data.data) {
         setDocumentTypes(data.data);
         console.log('Document types set:', data.data);
+      } else {
+        console.error('No document types found or invalid response:', data);
+        setDocumentTypes([]);
       }
     } catch (error) {
       console.error('Error fetching document types:', error);
+      setDocumentTypes([]);
     }
   };
 
@@ -353,9 +377,14 @@ const AdminOrderDetails = () => {
   };
 
   const getRemainingDocumentTypes = () => {
-    return documentTypes.filter(docType => 
+    console.log('getRemainingDocumentTypes called');
+    console.log('documentTypes:', documentTypes);
+    console.log('uploadedDocumentTypes:', uploadedDocumentTypes);
+    const remaining = documentTypes.filter(docType => 
       !uploadedDocumentTypes.includes(docType.document_name)
     );
+    console.log('remaining document types:', remaining);
+    return remaining;
   };
 
   const formatDate = (dateString) => {
@@ -558,6 +587,10 @@ const AdminOrderDetails = () => {
                         </option>
                       ))}
                     </select>
+                    {/* Debug info */}
+                    <div className="text-xs text-gray-400 mt-1">
+                      Debug: {documentTypes.length} document types loaded, {getRemainingDocumentTypes().length} remaining
+                    </div>
                   </div>
 
                   {/* File Upload */}
