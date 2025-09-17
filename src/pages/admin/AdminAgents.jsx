@@ -10,11 +10,13 @@ import config from '../../config/config';
 const AdminAgents = () => {
   const navigate = useNavigate();
   const [agents, setAgents] = useState([]);
+  const [agentPayments, setAgentPayments] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {
     fetchAgents();
+    fetchAgentPayments();
   }, []);
 
   const fetchAgents = async () => {
@@ -38,16 +40,65 @@ const AdminAgents = () => {
     }
   };
 
+  const fetchAgentPayments = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/agent-payments`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      console.log('Agent payments API response:', data);
+      if (data.status) {
+        // Group payments by agent_id and calculate totals
+        const paymentsByAgent = {};
+        console.log('Processing payments:', data.data.data);
+        data.data.data.forEach(payment => {
+          console.log('Processing payment for agent:', payment.agent_id, 'amount:', payment.amount);
+          if (!paymentsByAgent[payment.agent_id]) {
+            paymentsByAgent[payment.agent_id] = {
+              totalAmount: 0,
+              totalCommission: 0,
+              pendingAmount: 0,
+              paidAmount: 0
+            };
+          }
+          paymentsByAgent[payment.agent_id].totalAmount += parseFloat(payment.amount);
+          paymentsByAgent[payment.agent_id].totalCommission += parseFloat(payment.commission_amount);
+          
+          if (payment.status === 'pending') {
+            paymentsByAgent[payment.agent_id].pendingAmount += parseFloat(payment.amount);
+          } else if (payment.status === 'paid') {
+            paymentsByAgent[payment.agent_id].paidAmount += parseFloat(payment.amount);
+          }
+        });
+        console.log('Final paymentsByAgent:', paymentsByAgent);
+        setAgentPayments(paymentsByAgent);
+      }
+    } catch (error) {
+      console.error('Error fetching agent payments:', error);
+    }
+  };
+
   // Transform agents data to match display format
-  const displayAgents = agents.map(agent => ({
-    id: agent.id,
-    name: `${agent.first_name} ${agent.last_name}`,
-    amount: agent.amount_to_pay ? `N${parseFloat(agent.amount_to_pay).toLocaleString()}` : 'N0',
-    location: agent.state,
-    state: agent.state,
-    profile_image: agent.profile_image,
-    status: agent.status
-  }));
+  const displayAgents = agents.map(agent => {
+    const payments = agentPayments[agent.id] || { totalAmount: 0, pendingAmount: 0, paidAmount: 0 };
+    console.log(`Agent ${agent.id} (${agent.first_name} ${agent.last_name}):`, payments);
+    return {
+      id: agent.id,
+      name: `${agent.first_name} ${agent.last_name}`,
+      amount: `N${payments.totalAmount.toLocaleString()}`,
+      pendingAmount: `N${payments.pendingAmount.toLocaleString()}`,
+      paidAmount: `N${payments.paidAmount.toLocaleString()}`,
+      location: agent.state,
+      state: agent.state,
+      profile_image: agent.profile_image,
+      status: agent.status
+    };
+  });
 
   const filters = ['All', 'Active', 'Suspended', 'Deleted'];
 
@@ -109,10 +160,22 @@ const AdminAgents = () => {
                 {agent.name}
               </h3>
               
-              {/* Amount */}
-              <p className="text-sm font-semibold text-gray-900 mb-2">
-                {agent.amount}
+              {/* Total Amount */}
+              <p className="text-sm font-semibold text-gray-900 mb-1">
+                Total: {agent.amount}
               </p>
+              
+              {/* Payment Breakdown */}
+              <div className="text-xs text-gray-600 space-y-1">
+                <div className="flex justify-between">
+                  <span>Pending:</span>
+                  <span className="text-orange-600">{agent.pendingAmount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Paid:</span>
+                  <span className="text-green-600">{agent.paidAmount}</span>
+                </div>
+              </div>
               
               {/* Location */}
               <div className="flex items-center justify-center text-xs text-gray-500">

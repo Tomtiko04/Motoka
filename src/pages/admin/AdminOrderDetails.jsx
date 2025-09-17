@@ -30,18 +30,26 @@ const AdminOrderDetails = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [sendingDocuments, setSendingDocuments] = useState(false);
+  const [currentDocumentType, setCurrentDocumentType] = useState('');
+  const [currentDocumentFile, setCurrentDocumentFile] = useState(null);
+  const [uploadedDocumentTypes, setUploadedDocumentTypes] = useState([]);
 
   useEffect(() => {
     fetchOrderDetails();
     fetchAgents();
-    fetchDocumentTypes();
-    fetchOrderDocuments();
   }, [slug]);
+
+  useEffect(() => {
+    if (order?.order_type) {
+      fetchDocumentTypes();
+      fetchOrderDocuments();
+    }
+  }, [order?.order_type]);
 
   const fetchOrderDetails = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}?v=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -155,6 +163,7 @@ const AdminOrderDetails = () => {
   const fetchDocumentTypes = async () => {
     try {
       const token = localStorage.getItem('adminToken');
+      console.log('Fetching document types for order_type:', order?.order_type);
       const response = await fetch(`${config.getApiBaseUrl()}/admin/document-types?order_type=${order?.order_type}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -163,8 +172,10 @@ const AdminOrderDetails = () => {
       });
 
       const data = await response.json();
+      console.log('Document types response:', data);
       if (data.status) {
         setDocumentTypes(data.data);
+        console.log('Document types set:', data.data);
       }
     } catch (error) {
       console.error('Error fetching document types:', error);
@@ -174,7 +185,7 @@ const AdminOrderDetails = () => {
   const fetchOrderDocuments = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/documents`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/documents?v=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -184,6 +195,9 @@ const AdminOrderDetails = () => {
       const data = await response.json();
       if (data.status) {
         setDocuments(data.data);
+        // Update uploaded document types based on existing documents
+        const uploadedTypes = data.data.map(doc => doc.document_type);
+        setUploadedDocumentTypes(uploadedTypes);
       }
     } catch (error) {
       console.error('Error fetching order documents:', error);
@@ -231,7 +245,14 @@ const AdminOrderDetails = () => {
   };
 
   const handleSendDocuments = async () => {
+    if (documents.length === 0) {
+      toast.error('No documents to send');
+      return;
+    }
+
     setSendingDocuments(true);
+    const loadingToast = toast.loading('Sending documents...');
+
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/send-documents`, {
@@ -241,20 +262,24 @@ const AdminOrderDetails = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          subject: `Your ${order.order_type?.replace('_', ' ')} documents are ready`,
-          message: `Dear ${order.user?.name},\n\nYour ${order.order_type?.replace('_', ' ')} documents have been processed and are ready for download. Please find the attached documents.\n\nBest regards,\nMotoka Team`,
-        }),
+          subject: `Your ${order.order_type?.replace('_', ' ').toUpperCase()} Documents - Motoka`,
+          message: `Dear ${order.user?.first_name || 'Customer'},\n\nPlease find attached the documents for your ${order.order_type?.replace('_', ' ').toUpperCase()} order. These documents are required for your application and have been processed by our team.\n\nOrder Details:\n- Order ID: ${order.slug}\n- Order Type: ${order.order_type?.replace('_', ' ').toUpperCase()}\n- Amount: ₦${order.amount?.toLocaleString()}\n\nIf you have any questions about these documents, please contact our support team.\n\nBest regards,\nMotoka Team`
+        })
       });
 
       const data = await response.json();
+      
       if (data.status) {
-        toast.success('Documents sent to user successfully');
+        toast.dismiss(loadingToast);
+        toast.success(`Documents sent successfully to ${data.data?.user_email || order.user?.email}`);
       } else {
+        toast.dismiss(loadingToast);
         toast.error(data.message || 'Failed to send documents');
       }
     } catch (error) {
-      console.error('Error sending documents:', error);
-      toast.error('Failed to send documents');
+      toast.dismiss(loadingToast);
+      toast.error('Error sending documents');
+      console.error('Send documents error:', error);
     } finally {
       setSendingDocuments(false);
     }
@@ -266,6 +291,71 @@ const AdminOrderDetails = () => {
 
   const removeDocument = (index) => {
     setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDocumentTypeSelect = (docType) => {
+    setCurrentDocumentType(docType);
+    setCurrentDocumentFile(null);
+    // Reset the file input by clearing its value
+    const fileInput = document.getElementById('document-upload');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleFileSelect = (file) => {
+    setCurrentDocumentFile(file);
+  };
+
+  const handleUploadCurrentDocument = async () => {
+    if (!currentDocumentType || !currentDocumentFile) return;
+
+    const loadingToast = toast.loading('Uploading document...');
+    
+    try {
+      const token = localStorage.getItem('adminToken');
+      const formData = new FormData();
+      formData.append('documents[0][document_type]', currentDocumentType);
+      formData.append('documents[0][file]', currentDocumentFile);
+
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/documents`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (data.status) {
+        toast.dismiss(loadingToast);
+        toast.success('Document uploaded successfully');
+        
+        // Add to uploaded document types
+        setUploadedDocumentTypes(prev => [...prev, currentDocumentType]);
+        
+        // Reset current selection
+        setCurrentDocumentType('');
+        setCurrentDocumentFile(null);
+        
+        // Refresh documents list
+        fetchOrderDocuments();
+      } else {
+        toast.dismiss(loadingToast);
+        toast.error(data.message || 'Failed to upload document');
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error('Error uploading document');
+      console.error('Upload error:', error);
+    }
+  };
+
+  const getRemainingDocumentTypes = () => {
+    return documentTypes.filter(docType => 
+      !uploadedDocumentTypes.includes(docType.document_name)
+    );
   };
 
   const formatDate = (dateString) => {
@@ -410,119 +500,6 @@ const AdminOrderDetails = () => {
             </div>
           </div>
 
-          {/* Document Upload Section - Only show for in_progress orders */}
-          {order.status === 'in_progress' && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Document Upload</h3>
-              
-              {/* Document Types */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Required Documents for {order.order_type?.replace('_', ' ').toUpperCase()}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {documentTypes.map((docType) => (
-                    <div key={docType.id} className="flex items-center p-2 bg-gray-50 rounded-lg">
-                      <DocumentArrowUpIcon className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-700">{docType.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* File Upload */}
-              <div className="space-y-4">
-                {documentTypes.map((docType) => (
-                  <div key={docType.id} className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    <div className="text-center">
-                      <DocumentArrowUpIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-gray-900">{docType.name}</p>
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => {
-                          if (e.target.files[0]) {
-                            addDocument(docType.name, e.target.files[0]);
-                          }
-                        }}
-                        className="hidden"
-                        id={`upload-${docType.id}`}
-                      />
-                      <label htmlFor={`upload-${docType.id}`} className="cursor-pointer">
-                        <span className="text-xs text-blue-600 hover:text-blue-800">Click to upload</span>
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Uploaded Documents Preview */}
-              {uploadedDocuments.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Documents to Upload:</h4>
-                  <div className="space-y-2">
-                    {uploadedDocuments.map((doc, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                        <div className="flex items-center">
-                          <DocumentArrowUpIcon className="h-4 w-4 text-blue-600 mr-2" />
-                          <span className="text-sm text-blue-900">
-                            {doc.documentType} - {doc.file.name}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => removeDocument(index)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <XCircleIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={handleDocumentUpload}
-                    disabled={uploading}
-                    className="w-full mt-3 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {uploading ? 'Uploading...' : 'Upload Documents'}
-                  </button>
-                </div>
-              )}
-
-              {/* Send Documents Button */}
-              {documents.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={handleSendDocuments}
-                    disabled={sendingDocuments}
-                    className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  >
-                    <PaperAirplaneIcon className="h-4 w-4 mr-2" />
-                    {sendingDocuments ? 'Sending...' : 'Send Documents to User'}
-                  </button>
-                </div>
-              )}
-
-              {/* Uploaded Documents List */}
-              {documents.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents:</h4>
-                  <div className="space-y-2">
-                    {documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                        <div className="flex items-center">
-                          <DocumentArrowUpIcon className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-900">{doc.document_type}</span>
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(doc.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Sidebar */}
@@ -560,29 +537,115 @@ const AdminOrderDetails = () => {
               </div>
             )}
 
-            {order.status === 'in_progress' && documents.length > 0 && (
-              <div className="space-y-3">
-                <div className="text-sm text-gray-600 mb-2">
-                  Documents have been uploaded. You can now complete or decline this order.
+            {order.status === 'in_progress' && (
+              <div className="space-y-4">
+                {/* Document Upload Section */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Upload Documents</h4>
+                  
+                  {/* Document Type Selection */}
+                  <div className="mb-3">
+                    <label className="block text-xs text-gray-500 mb-1">Select Document Type</label>
+                    <select
+                      value={currentDocumentType}
+                      onChange={(e) => handleDocumentTypeSelect(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Choose document type...</option>
+                      {getRemainingDocumentTypes().map((docType) => (
+                        <option key={docType.id} value={docType.document_name}>
+                          {docType.document_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* File Upload */}
+                  {currentDocumentType && (
+                    <div className="mb-3">
+                      <label className="block text-xs text-gray-500 mb-1">Upload File</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <input
+                          key={currentDocumentType} // Force reset when document type changes
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => handleFileSelect(e.target.files[0])}
+                          className="hidden"
+                          id="document-upload"
+                        />
+                        <label htmlFor="document-upload" className="cursor-pointer">
+                          <DocumentArrowUpIcon className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600">
+                            {currentDocumentFile ? currentDocumentFile.name : 'Click to select file'}
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Upload Button */}
+                  {currentDocumentType && currentDocumentFile && (
+                    <button
+                      onClick={handleUploadCurrentDocument}
+                      disabled={uploading}
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    >
+                      {uploading ? 'Uploading...' : 'Upload Document'}
+                    </button>
+                  )}
+
+                  {/* Uploaded Documents List */}
+                  {uploadedDocumentTypes.length > 0 && (
+                    <div className="mt-4">
+                      <h5 className="text-xs font-medium text-gray-600 mb-2">Uploaded Documents:</h5>
+                      <div className="space-y-1">
+                        {uploadedDocumentTypes.map((docType, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-green-50 rounded text-xs">
+                            <span className="text-green-800">{docType}</span>
+                            <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Send Documents Button */}
+                  {documents.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <button
+                        onClick={handleSendDocuments}
+                        disabled={sendingDocuments}
+                        className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center"
+                      >
+                        <PaperAirplaneIcon className="h-4 w-4 mr-2" />
+                        {sendingDocuments ? 'Sending...' : 'Send to User'}
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                {/* Order Completion Buttons */}
+                {documents.length > 0 && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <div className="text-sm text-gray-600 mb-3">
+                      Documents uploaded. You can now complete or decline this order.
+                    </div>
+                    <div className="space-y-2">
                 <button
                   onClick={() => handleStatusUpdate('completed')}
-                  className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
+                        className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-sm"
                 >
                   Mark as Completed
                 </button>
                 <button
                   onClick={() => handleStatusUpdate('declined')}
-                  className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+                        className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 text-sm"
                 >
                   Mark as Declined
                 </button>
-              </div>
-            )}
-
-            {order.status === 'in_progress' && documents.length === 0 && (
-              <div className="text-sm text-gray-500 text-center py-4">
-                Upload documents first to enable order completion
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -616,6 +679,68 @@ const AdminOrderDetails = () => {
               </div>
             </div>
           </div>
+
+          {/* Documents Sent - Only show for completed orders with documents */}
+          {order.status === 'completed' && documents.length > 0 && (
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <DocumentArrowUpIcon className="h-5 w-5 mr-2 text-green-600" />
+                Documents Sent to Customer
+              </h3>
+              <div className="space-y-3">
+                <div className="text-sm text-gray-600 mb-4">
+                  <p className="flex items-center">
+                    <CheckCircleIcon className="h-4 w-4 mr-2 text-green-600" />
+                    {documents.length} document{documents.length > 1 ? 's' : ''} sent to {order.user?.email}
+                  </p>
+                </div>
+                
+                <div className="grid gap-3">
+                  {documents.map((document, index) => {
+                    console.log('Document file path:', document.file_path); // Debug log
+                    return (
+                      <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <DocumentArrowUpIcon className="h-4 w-4 text-gray-500 mr-2" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {document.document_type?.replace('_', ' ').toUpperCase() || 'Document'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Uploaded: {new Date(document.created_at).toLocaleDateString('en-GB')} at {new Date(document.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <CheckCircleIcon className="h-3 w-3 mr-1" />
+                            Sent
+                          </span>
+                          <a
+                            href={`${window.location.protocol}//${window.location.hostname}:8000/${document.file_path}?v=${Date.now()}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                          >
+                            View
+                          </a>
+                        </div>
+                      </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> All documents have been sent to the customer's email address. 
+                    The customer can download these documents from their email.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

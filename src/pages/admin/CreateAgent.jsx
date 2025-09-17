@@ -139,12 +139,21 @@ const CreateAgent = () => {
           },
         });
         
+        console.log('Token validation response status:', testResponse.status);
+        console.log('Token validation response headers:', [...testResponse.headers.entries()]);
+        
         if (testResponse.status === 401) {
           toast.dismiss(loadingToast);
           toast.error('Session expired. Please log in again.');
           localStorage.removeItem('adminToken');
           window.location.href = '/admin/login';
           return;
+        }
+        
+        if (!testResponse.ok) {
+          console.error('Token validation failed with status:', testResponse.status);
+          const errorText = await testResponse.text();
+          console.error('Token validation error response:', errorText);
         }
       } catch (error) {
         console.error('Token validation error:', error);
