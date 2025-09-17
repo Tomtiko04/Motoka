@@ -34,7 +34,7 @@ const AdminAgents = () => {
         setAgents(data.data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching agents:', error);
+      toast.error('Failed to fetch agents');
     } finally {
       setLoading(false);
     }
@@ -51,13 +51,10 @@ const AdminAgents = () => {
       });
 
       const data = await response.json();
-      console.log('Agent payments API response:', data);
       if (data.status) {
         // Group payments by agent_id and calculate totals
         const paymentsByAgent = {};
-        console.log('Processing payments:', data.data.data);
         data.data.data.forEach(payment => {
-          console.log('Processing payment for agent:', payment.agent_id, 'amount:', payment.amount);
           if (!paymentsByAgent[payment.agent_id]) {
             paymentsByAgent[payment.agent_id] = {
               totalAmount: 0,
@@ -75,18 +72,16 @@ const AdminAgents = () => {
             paymentsByAgent[payment.agent_id].paidAmount += parseFloat(payment.amount);
           }
         });
-        console.log('Final paymentsByAgent:', paymentsByAgent);
         setAgentPayments(paymentsByAgent);
       }
     } catch (error) {
-      console.error('Error fetching agent payments:', error);
+      toast.error('Failed to fetch agent payments');
     }
   };
 
   // Transform agents data to match display format
   const displayAgents = agents.map(agent => {
     const payments = agentPayments[agent.id] || { totalAmount: 0, pendingAmount: 0, paidAmount: 0 };
-    console.log(`Agent ${agent.id} (${agent.first_name} ${agent.last_name}):`, payments);
     return {
       id: agent.id,
       name: `${agent.first_name} ${agent.last_name}`,

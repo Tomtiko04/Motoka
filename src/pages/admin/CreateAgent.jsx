@@ -40,9 +40,8 @@ const CreateAgent = () => {
     try {
       const response = await fetch(`${config.getApiBaseUrl()}/test-cors`);
       const data = await response.json();
-      console.log('API Test Response:', data);
     } catch (error) {
-      console.error('API Test Error:', error);
+      toast.error('API connection test failed');
     }
   };
 
@@ -88,7 +87,7 @@ const CreateAgent = () => {
         setFilteredStates(data.data);
       }
     } catch (error) {
-      console.error('Error fetching states:', error);
+      toast.error('Failed to fetch states');
     }
   };
 
@@ -139,9 +138,6 @@ const CreateAgent = () => {
           },
         });
         
-        console.log('Token validation response status:', testResponse.status);
-        console.log('Token validation response headers:', [...testResponse.headers.entries()]);
-        
         if (testResponse.status === 401) {
           toast.dismiss(loadingToast);
           toast.error('Session expired. Please log in again.');
@@ -151,12 +147,9 @@ const CreateAgent = () => {
         }
         
         if (!testResponse.ok) {
-          console.error('Token validation failed with status:', testResponse.status);
           const errorText = await testResponse.text();
-          console.error('Token validation error response:', errorText);
         }
       } catch (error) {
-        console.error('Token validation error:', error);
       }
 
       // Validate required fields
@@ -205,11 +198,6 @@ const CreateAgent = () => {
       });
 
       const apiUrl = `${config.getApiBaseUrl()}/admin/agents`;
-      console.log('API URL:', apiUrl);
-      console.log('Environment:', import.meta.env.VITE_ENV);
-      console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
-      console.log('Admin Token:', token ? 'Present' : 'Missing');
-      console.log('Token length:', token ? token.length : 0);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -219,9 +207,6 @@ const CreateAgent = () => {
         body: formDataToSend
       });
       
-      console.log('Response status:', response.status);
-      console.log('Response headers:', [...response.headers.entries()]);
-
       const data = await response.json();
       
       if (data.status) {
@@ -260,7 +245,6 @@ const CreateAgent = () => {
         }
       }
     } catch (error) {
-      console.error('Error creating agent:', error);
       toast.dismiss(loadingToast);
       toast.error('Failed to create agent. Please try again.');
     }

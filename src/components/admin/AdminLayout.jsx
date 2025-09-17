@@ -43,7 +43,6 @@ const AdminLayout = () => {
         });
       }
     } catch (error) {
-      console.error('Logout API call failed:', error);
       // Continue with logout even if API call fails
     } finally {
       // Always clear local storage and redirect

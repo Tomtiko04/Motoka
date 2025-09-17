@@ -52,7 +52,7 @@ const AdminCars = () => {
         setTotalPages(data.data.last_page);
       }
     } catch (error) {
-      console.error('Error fetching cars:', error);
+      toast.error('Failed to fetch cars');
     } finally {
       setLoading(false);
     }

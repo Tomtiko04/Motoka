@@ -40,9 +40,7 @@ const AdminOrderDetails = () => {
   }, [slug]);
 
   useEffect(() => {
-    console.log('useEffect triggered, order?.order_type:', order?.order_type);
     if (order?.order_type) {
-      console.log('Fetching document types and order documents');
       fetchDocumentTypes();
       fetchOrderDocuments();
     }
@@ -63,7 +61,7 @@ const AdminOrderDetails = () => {
         setOrder(data.data);
       }
     } catch (error) {
-      console.error('Error fetching order details:', error);
+      toast.error('Failed to fetch order details');
     } finally {
       setLoading(false);
     }
@@ -84,7 +82,7 @@ const AdminOrderDetails = () => {
         setAgents(data.data.data);
       }
     } catch (error) {
-      console.error('Error fetching agents:', error);
+      toast.error('Failed to fetch agents');
     }
   };
 
@@ -111,7 +109,6 @@ const AdminOrderDetails = () => {
         toast.error(data.message || 'Failed to process order');
       }
     } catch (error) {
-      console.error('Error processing order:', error);
       toast.error('Failed to process order');
     } finally {
       setProcessing(false);
@@ -141,7 +138,6 @@ const AdminOrderDetails = () => {
         toast.error(data.message || 'Failed to update status');
       }
     } catch (error) {
-      console.error('Error updating status:', error);
       toast.error('Failed to update status');
     }
   };
@@ -168,16 +164,12 @@ const AdminOrderDetails = () => {
   const fetchDocumentTypes = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      console.log('Fetching document types for order_type:', order?.order_type);
-      console.log('Full order object:', order);
       
       if (!order?.order_type) {
-        console.error('No order type available');
         return;
       }
 
       const apiUrl = `${config.getApiBaseUrl()}/admin/document-types?order_type=${order.order_type}`;
-      console.log('API URL:', apiUrl);
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -186,25 +178,19 @@ const AdminOrderDetails = () => {
         },
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Document types response:', data);
       
       if (data.status && data.data) {
         setDocumentTypes(data.data);
-        console.log('Document types set:', data.data);
       } else {
-        console.error('No document types found or invalid response:', data);
         setDocumentTypes([]);
       }
     } catch (error) {
-      console.error('Error fetching document types:', error);
+      toast.error('Failed to fetch document types');
       setDocumentTypes([]);
     }
   };
@@ -227,7 +213,7 @@ const AdminOrderDetails = () => {
         setUploadedDocumentTypes(uploadedTypes);
       }
     } catch (error) {
-      console.error('Error fetching order documents:', error);
+      toast.error('Failed to fetch order documents');
     }
   };
 
@@ -264,7 +250,6 @@ const AdminOrderDetails = () => {
         toast.error(data.message || 'Failed to upload documents');
       }
     } catch (error) {
-      console.error('Error uploading documents:', error);
       toast.error('Failed to upload documents');
     } finally {
       setUploading(false);
@@ -308,7 +293,6 @@ const AdminOrderDetails = () => {
     } catch (error) {
       toast.dismiss(loadingToast);
       toast.error('Error sending documents');
-      console.error('Send documents error:', error);
     } finally {
       setSendingDocuments(false);
     }
@@ -377,18 +361,13 @@ const AdminOrderDetails = () => {
     } catch (error) {
       toast.dismiss(loadingToast);
       toast.error('Error uploading document');
-      console.error('Upload error:', error);
     }
   };
 
   const getRemainingDocumentTypes = () => {
-    console.log('getRemainingDocumentTypes called');
-    console.log('documentTypes:', documentTypes);
-    console.log('uploadedDocumentTypes:', uploadedDocumentTypes);
     const remaining = documentTypes.filter(docType => 
       !uploadedDocumentTypes.includes(docType.document_name)
     );
-    console.log('remaining document types:', remaining);
     return remaining;
   };
 
@@ -749,7 +728,6 @@ const AdminOrderDetails = () => {
                 
                 <div className="grid gap-3">
                   {documents.map((document, index) => {
-                    console.log('Document file path:', document.file_path); // Debug log
                     return (
                       <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                       <div className="flex items-center justify-between">
