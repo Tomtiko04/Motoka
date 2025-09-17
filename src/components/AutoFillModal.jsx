@@ -38,31 +38,62 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
 
     setIsProcessing(true);
     setError(null);
-    setProcessingStep('Initializing OCR...');
+    setProcessingStep('Checking Document AI configuration...');
 
     try {
-      // Step 1: Extract text using OCR
-      const fileType = selectedFile.type.startsWith('image/') ? 'image' : 'PDF';
-      setProcessingStep(`Extracting text from ${fileType}...`);
-      const rawText = await ocrService.extractText(selectedFile);
-      setExtractedText(rawText);
-      
-      if (!rawText || rawText.trim().length === 0) {
-        throw new Error('No text could be extracted from the document. Please ensure the document is clear and readable.');
+      const projectId = import.meta.env.VITE_DOC_AI_PROJECT_ID;
+      const location = import.meta.env.VITE_DOC_AI_LOCATION;
+      const processorId = import.meta.env.VITE_DOC_AI_FORM_PROCESSOR_ID;
+
+      let parsedData = null;
+
+      if (projectId && location && processorId) {
+        // Try Google Document AI via backend
+        setProcessingStep('Sending to Google Document AI...');
+        try {
+          const cleaned = await ocrService.extractWithDocumentAI(selectedFile);
+          // Map cleaned keys to form keys
+          parsedData = {
+            ownerName: cleaned.ownerName || '',
+            address: cleaned.address || '',
+            vehicleMake: cleaned.vehicleMake || '',
+            vehicleModel: cleaned.vehicleModel || '',
+            registrationNo: cleaned.registrationNumber || '',
+            chassisNo: cleaned.chassisNumber || '',
+            engineNo: cleaned.engineNumber || '',
+            vehicleColor: cleaned.color || '',
+            dateIssued: cleaned.issuedDate || '',
+            expiryDate: cleaned.expiryDate || '',
+          };
+        } catch (e) {
+          // Fall back to local OCR + parser
+          console.warn('Document AI failed, falling back to OCR:', e);
+        }
       }
 
-      // Step 2: Parse the extracted text
-      setProcessingStep('Parsing extracted information...');
-      const parsedData = textParserService.parseText(rawText);
-      
-      // Step 3: Determine car type if not found
-      if (!parsedData.carType && parsedData.vehicleMake) {
-        parsedData.carType = textParserService.determineCarType(parsedData);
+      if (!parsedData) {
+        // Step 1: Extract text using OCR
+        const fileType = selectedFile.type.startsWith('image/') ? 'image' : 'PDF';
+        setProcessingStep(`Extracting text from ${fileType}...`);
+        const rawText = await ocrService.extractText(selectedFile);
+        setExtractedText(rawText);
+        
+        if (!rawText || rawText.trim().length === 0) {
+          throw new Error('No text could be extracted from the document. Please ensure the document is clear and readable.');
+        }
+
+        // Step 2: Parse the extracted text
+        setProcessingStep('Parsing extracted information...');
+        parsedData = textParserService.parseText(rawText);
+        
+        // Step 3: Determine car type if not found
+        if (!parsedData.carType && parsedData.vehicleMake) {
+          parsedData.carType = textParserService.determineCarType(parsedData);
+        }
       }
 
       setExtractedData(parsedData);
       setProcessingStep('Processing complete!');
-      
       toast.success('Document processed successfully!');
 
       // Auto-apply to the form immediately so the user sees the fields filled
@@ -70,8 +101,8 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
         const mergedData = { ...formData, ...parsedData };
         onAutoFill(mergedData);
         setHasAutoApplied(true);
-      } catch {
-        // non-fatal; user can still click the button to apply
+      } catch (err) {
+        console.warn('Auto-apply failed', err);
       }
     } catch (err) {
       console.error('OCR processing error:', err);
