@@ -53,6 +53,14 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
         try {
           const cleaned = await ocrService.extractWithDocumentAI(selectedFile);
           // Map cleaned keys to form keys
+          const toIso = (v) => {
+            if (!v) return '';
+            // If value is already YYYY-MM-DD, keep it; else try to parse
+            if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+            const d = new Date(v);
+            if (isNaN(d)) return '';
+            return d.toISOString().split('T')[0];
+          };
           parsedData = {
             ownerName: cleaned.ownerName || '',
             address: cleaned.address || '',
@@ -62,8 +70,8 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
             chassisNo: cleaned.chassisNumber || '',
             engineNo: cleaned.engineNumber || '',
             vehicleColor: cleaned.color || '',
-            dateIssued: cleaned.issuedDate || '',
-            expiryDate: cleaned.expiryDate || '',
+            dateIssued: toIso(cleaned.issuedDate || ''),
+            expiryDate: toIso(cleaned.expiryDate || ''),
           };
         } catch (e) {
           // Fall back to local OCR + parser

@@ -404,7 +404,11 @@ export default function AddCar() {
           <DatePicker
             id={name}
             name={name}
-            selected={formData[name] ? new Date(formData[name]) : null}
+            selected={(function () {
+              if (!formData[name]) return null;
+              const d = new Date(formData[name]);
+              return isNaN(d) ? null : d;
+            })()}
             onChange={(date) => {
               const formattedDate = date.toISOString().split("T")[0];
               handleChange({

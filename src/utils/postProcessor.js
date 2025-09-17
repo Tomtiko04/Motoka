@@ -25,14 +25,61 @@ function cleanVehicleDoc(document) {
     return (best && typeof best.value === 'string') ? best.value.trim() : null;
   }
 
-  // Collect entities from DocAI response (Form Parser schema)
+  // Collect candidates by field label/type
   const fields = {};
+
+  // 1) Entities (if present)
   const entities = (document && document.entities) || [];
   for (const entity of entities) {
     const key = entity.type || '';
     const value = (entity.mentionText || '').trim();
+    if (!value) continue;
     if (!fields[key]) fields[key] = [];
     fields[key].push({ value, confidence: entity.confidence || 0 });
+  }
+
+  // 2) Pages.formFields (generic KV from Form Parser)
+  const pages = (document && document.pages) || [];
+  const pushField = (label, value, confidence = 0) => {
+    if (!label || !value) return;
+    if (!fields[label]) fields[label] = [];
+    fields[label].push({ value: value.trim(), confidence });
+  };
+
+  const labelMap = [
+    // [normalizedKey, array of possible labels]
+    ['OwnerName', ['owner', "owner's name", 'owners name', 'owner name', 'name of owner']],
+    ['Address', ['address', 'residence', 'location']],
+    ['RegistrationNumber', ['registration number', 'reg. number', 'reg number', 'plate', 'plate number']],
+    ['ChassisNumber', ['chassis number', 'vin', 'frame']],
+    ['EngineNumber', ['engine number', 'engine']],
+    ['VehicleMake', ['vehicle make', 'make', 'manufacturer', 'brand']],
+    ['VehicleModel', ['vehicle model', 'model', 'type']],
+    ['ColourName', ['colour name', 'color', 'colour']],
+    ['ExpiryDate', ['expiry date', 'expiry', 'expire', 'expiration', 'valid until']],
+    ['IssuedDate', ['date issued', 'issued', 'issue date']],
+  ];
+
+  const normalizeLabel = (text) => (text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const resolveNormalizedKey = (label) => {
+    const n = normalizeLabel(label);
+    for (const [key, labels] of labelMap) {
+      if (labels.some((l) => n.includes(l))) return key;
+    }
+    return null;
+  };
+
+  for (const page of pages) {
+    const formFields = page.formFields || [];
+    for (const field of formFields) {
+      const nameText = field.fieldName?.textAnchor?.content || '';
+      const valueText = field.fieldValue?.textAnchor?.content || '';
+      const conf = typeof field.fieldValue?.confidence === 'number' ? field.fieldValue.confidence : (typeof field.confidence === 'number' ? field.confidence : 0);
+      const normKey = resolveNormalizedKey(nameText);
+      if (normKey && valueText) {
+        pushField(normKey, valueText, conf);
+      }
+    }
   }
 
   const result = {
