@@ -128,7 +128,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Amount */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
@@ -143,7 +143,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Completed Amount */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Completed Amount</p>
@@ -155,10 +155,10 @@ const AdminDashboard = () => {
               <span className="text-green-600 text-sm font-bold">✓</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Pending Amount */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending Amount</p>
@@ -170,10 +170,10 @@ const AdminDashboard = () => {
               <span className="text-orange-600 text-sm font-bold">⏳</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Declined Amount */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Declined Amount</p>
@@ -185,7 +185,7 @@ const AdminDashboard = () => {
               <span className="text-red-600 text-sm font-bold">✗</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Total Orders */}
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -235,7 +235,7 @@ const AdminDashboard = () => {
       {/* Order Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Pending Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending Orders</p>
@@ -247,10 +247,10 @@ const AdminDashboard = () => {
               <span className="text-yellow-600 text-sm font-bold">!</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* In Progress Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">In Progress</p>
@@ -262,10 +262,10 @@ const AdminDashboard = () => {
               <span className="text-blue-600 text-sm font-bold">→</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Completed Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Completed</p>
@@ -277,10 +277,10 @@ const AdminDashboard = () => {
               <span className="text-green-600 text-sm font-bold">✓</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Declined Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Declined</p>
@@ -292,7 +292,7 @@ const AdminDashboard = () => {
               <span className="text-red-600 text-sm font-bold">✗</span>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Chart and Lists */}
@@ -329,7 +329,11 @@ const AdminDashboard = () => {
           <div className="space-y-3">
             {recentOrders.length > 0 ? (
               recentOrders.slice(0, 5).map((order, index) => (
-                <div key={index} className="flex items-center justify-between py-2">
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => window.location.href = `/admin/orders/${order.slug}`}
+                >
                   <div>
                     <p className="text-sm font-medium text-gray-900">
                       #{order.id} {formatOrderType(order.order_type)}

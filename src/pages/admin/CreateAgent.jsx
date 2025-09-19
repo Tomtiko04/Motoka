@@ -236,17 +236,13 @@ const CreateAgent = () => {
         }, 1500);
       } else {
         toast.dismiss(loadingToast);
-        // Handle validation errors
-        if (data.errors) {
-          const errorMessages = Object.values(data.errors).flat();
-          toast.error(errorMessages.join(', '));
-        } else {
-          toast.error(data.message || 'Failed to create agent');
-        }
+        // Display backend error message
+        toast.error(data.message || 'Failed to create agent. Please try again.');
       }
     } catch (error) {
       toast.dismiss(loadingToast);
-      toast.error('Failed to create agent. Please try again.');
+      console.error('Agent creation error:', error);
+      toast.error('Network error. Please check your connection and try again.');
     }
   };
 
