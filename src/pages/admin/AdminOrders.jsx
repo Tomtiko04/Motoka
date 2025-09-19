@@ -17,7 +17,6 @@ const AdminOrders = () => {
     // Check if admin is authenticated
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      console.error('No admin token found. Redirecting to login.');
       window.location.href = '/admin/login';
       return;
     }
@@ -28,14 +27,12 @@ const AdminOrders = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      console.log('Admin token:', token ? 'Present' : 'Missing');
       
       const params = new URLSearchParams({
         status: activeFilter === 'All' ? 'all' : activeFilter.toLowerCase().replace(' ', '_'),
       });
 
       const url = `${config.getApiBaseUrl()}/admin/orders?${params}`;
-      console.log('Fetching orders from:', url);
 
       const response = await fetch(url, {
         headers: {
@@ -44,18 +41,15 @@ const AdminOrders = () => {
         },
       });
 
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
       
       if (data.status) {
         setOrders(data.data.data || []);
-        console.log('Orders set:', data.data.data?.length || 0, 'orders');
       } else {
-        console.error('API returned error:', data.message);
+        toast.error('Failed to fetch orders');
       }
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      toast.error('Failed to fetch orders');
     } finally {
       setLoading(false);
     }
@@ -112,7 +106,6 @@ const AdminOrders = () => {
         toast.error(data.message || 'Failed to process order');
       }
     } catch (error) {
-      console.error('Error processing order:', error);
       toast.error('Failed to process order. Please try again.');
     }
   };

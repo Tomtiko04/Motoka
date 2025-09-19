@@ -64,7 +64,7 @@ const AdminDashboard = () => {
         setRecentTransactions(transactionsData.data);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      toast.error('Failed to fetch dashboard data');
     } finally {
       setLoading(false);
     }
