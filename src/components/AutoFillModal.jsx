@@ -55,11 +55,25 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
           // Map cleaned keys to form keys
           const toIso = (v) => {
             if (!v) return '';
-            // If value is already YYYY-MM-DD, keep it; else try to parse
             if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-            const d = new Date(v);
-            if (isNaN(d)) return '';
-            return d.toISOString().split('T')[0];
+            try {
+              const parsed = textParserService.parseDate(v);
+              if (/^\d{4}-\d{2}-\d{2}$/.test(parsed)) return parsed;
+              const d = new Date(parsed);
+              if (!isNaN(d)) return d.toISOString().split('T')[0];
+            } catch {
+              // ignore parse error
+            }
+            // Fallback for common dd/mm/yyyy and dd-mm-yyyy
+            const m1 = v.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
+            if (m1) {
+              let [ , dd, mm, yy ] = m1;
+              if (yy.length === 2) yy = parseInt(yy) > 50 ? `19${yy}` : `20${yy}`;
+              dd = dd.padStart(2, '0');
+              mm = mm.padStart(2, '0');
+              return `${yy}-${mm}-${dd}`;
+            }
+            return '';
           };
           parsedData = {
             ownerName: cleaned.ownerName || '',
@@ -70,7 +84,7 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
             chassisNo: cleaned.chassisNumber || '',
             engineNo: cleaned.engineNumber || '',
             vehicleColor: cleaned.color || '',
-            dateIssued: toIso(cleaned.issuedDate || ''),
+            dateIssued: toIso(cleaned.issuedDate || cleaned.issueDate || ''),
             expiryDate: toIso(cleaned.expiryDate || ''),
           };
         } catch (e) {

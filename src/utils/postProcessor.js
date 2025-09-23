@@ -8,7 +8,8 @@ function cleanVehicleDoc(document) {
     engine: (v) => /^[A-Z0-9]{6,12}$/.test(v),
   };
 
-  function pickBest(candidates, validator) {
+  function pickBest(candidates, validator, options = {}) {
+    const { preferShortest = false } = options;
     if (!Array.isArray(candidates) || candidates.length === 0) return null;
     let valid = validator ? candidates.filter((c) => validator((c.value || '').toString().trim().toUpperCase())) : candidates;
     if (!valid.length) valid = candidates;
@@ -19,7 +20,7 @@ function cleanVehicleDoc(document) {
       if (bc !== ac) return bc - ac;
       const al = (a.value || '').length;
       const bl = (b.value || '').length;
-      return bl - al;
+      return preferShortest ? (al - bl) : (bl - al);
     });
     const best = valid[0];
     return (best && typeof best.value === 'string') ? best.value.trim() : null;
@@ -40,6 +41,21 @@ function cleanVehicleDoc(document) {
 
   // 2) Pages.formFields (generic KV from Form Parser)
   const pages = (document && document.pages) || [];
+  const fullText = document?.text || '';
+  const readTextAnchor = (anchor) => {
+    if (!anchor) return '';
+    if (anchor.content && anchor.content.trim()) return anchor.content;
+    const segments = anchor.textSegments || [];
+    let out = '';
+    for (const seg of segments) {
+      const start = parseInt(seg.startIndex || '0', 10) || 0;
+      const end = parseInt(seg.endIndex || '0', 10) || 0;
+      if (end > start && fullText) {
+        out += fullText.substring(start, end);
+      }
+    }
+    return out.trim();
+  };
   const pushField = (label, value, confidence = 0) => {
     if (!label || !value) return;
     if (!fields[label]) fields[label] = [];
@@ -72,8 +88,8 @@ function cleanVehicleDoc(document) {
   for (const page of pages) {
     const formFields = page.formFields || [];
     for (const field of formFields) {
-      const nameText = field.fieldName?.textAnchor?.content || '';
-      const valueText = field.fieldValue?.textAnchor?.content || '';
+      const nameText = readTextAnchor(field.fieldName?.textAnchor) || '';
+      const valueText = readTextAnchor(field.fieldValue?.textAnchor) || '';
       const conf = typeof field.fieldValue?.confidence === 'number' ? field.fieldValue.confidence : (typeof field.confidence === 'number' ? field.confidence : 0);
       const normKey = resolveNormalizedKey(nameText);
       if (normKey && valueText) {
@@ -87,13 +103,57 @@ function cleanVehicleDoc(document) {
     address: pickBest(fields['Address'] || [], null),
     registrationNumber: pickBest(fields['RegistrationNumber'] || [], validators.plate),
     chassisNumber: pickBest(fields['ChassisNumber'] || [], validators.chassis),
-    engineNumber: pickBest(fields['EngineNumber'] || [], validators.engine),
+    engineNumber: pickBest(fields['EngineNumber'] || [], validators.engine, { preferShortest: true }),
     vehicleMake: pickBest(fields['VehicleMake'] || [], null),
     vehicleModel: pickBest(fields['VehicleModel'] || [], null),
     color: pickBest(fields['ColourName'] || fields['ColorName'] || [], null),
     expiryDate: pickBest(fields['ExpiryDate'] || [], null),
     issuedDate: pickBest(fields['IssuedDate'] || fields['IssueDate'] || [], null),
   };
+
+  // Fallbacks using full text if critical fields are missing
+  const tryPush = (key, value, confidence = 0.51) => {
+    if (!value) return;
+    if (!fields[key]) fields[key] = [];
+    fields[key].push({ value: value.trim(), confidence });
+  };
+
+  if (!result.ownerName && fullText) {
+    const m = fullText.match(/owner'?s?\s+name[:\s]*([A-Za-z .]+?)(?:\n|address|file|$)/i);
+    if (m && m[1]) {
+      tryPush('OwnerName', m[1]);
+      result.ownerName = pickBest(fields['OwnerName'], null);
+    }
+  }
+
+  const dateToken = (s) => {
+    if (!s) return '';
+    const a = s.match(/(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/);
+    if (a) return a[1];
+    const b = s.match(/(\d{1,2}\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{2,4})/i);
+    if (b) return b[1];
+    const c = s.match(/((jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{4})/i);
+    if (c) return c[1];
+    return '';
+  };
+
+  if (!result.issuedDate && fullText) {
+    const mi = fullText.match(/(date\s+issued|issued|issue\s+date)[^\dA-Za-z]*(.+?)(?:\n|\r|$)/i);
+    const token = dateToken(mi && mi[2]);
+    if (token) {
+      tryPush('IssuedDate', token);
+      result.issuedDate = pickBest(fields['IssuedDate'], null);
+    }
+  }
+
+  if (!result.expiryDate && fullText) {
+    const me = fullText.match(/(expiry\s+date|expiry|expire|expiration|valid\s+until)[^\dA-Za-z]*(.+?)(?:\n|\r|$)/i);
+    const token = dateToken(me && me[2]);
+    if (token) {
+      tryPush('ExpiryDate', token);
+      result.expiryDate = pickBest(fields['ExpiryDate'], null);
+    }
+  }
 
   // Normalize some fields
   if (result.registrationNumber) result.registrationNumber = result.registrationNumber.replace(/[-\s]/g, '').toUpperCase();
