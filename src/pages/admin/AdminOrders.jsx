@@ -46,10 +46,10 @@ const AdminOrders = () => {
       if (data.status) {
         setOrders(data.data.data || []);
       } else {
-        toast.error('Failed to fetch orders');
+        // toast.error('Failed to fetch orders');
       }
     } catch (error) {
-      toast.error('Failed to fetch orders');
+      // toast.error('Failed to fetch orders');
     } finally {
       setLoading(false);
     }
@@ -242,14 +242,20 @@ const AdminOrders = () => {
               {filteredOrders.map((order, index) => {
                 const actionButton = getActionButton(order.status);
                 return (
-                  <tr key={index} className="hover:bg-gray-50">
+                  <tr 
+                    key={index} 
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={(e) => {
+                      // Don't navigate if clicking on the action button
+                      if (!e.target.closest('button')) {
+                        window.location.href = `/admin/orders/${order.originalOrder.slug}`;
+                      }
+                    }}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <button
-                        onClick={() => window.location.href = `/admin/orders/${order.originalOrder.slug}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                      >
+                      <span className="text-blue-600 hover:text-blue-800 hover:underline">
                         {order.id}
-                      </button>
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.name}
@@ -270,7 +276,10 @@ const AdminOrders = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => handleProcessOrder(order)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                          handleProcessOrder(order);
+                        }}
                         className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${actionButton.color}`}
                         disabled={order.status === 'Completed'}
                       >
