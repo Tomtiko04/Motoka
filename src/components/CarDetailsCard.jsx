@@ -16,24 +16,30 @@ const formatDate = (dateString) => {
 
 // Helper function to determine status based on reminder message
 const getReminderStatus = (message) => {
-  if (!message) return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
-  
+  if (!message)
+    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
+
   const lowerMessage = message.toLowerCase();
-  
-  if (lowerMessage.includes('expired') || lowerMessage.includes('expiered') || lowerMessage.includes('0 day') || lowerMessage.includes('overdue')) {
-    return { type: 'danger', bgColor: '#FFE8E8', dotColor: '#DB8888' };
-  } else if (lowerMessage.includes('1 day') || lowerMessage.includes('2 day') || lowerMessage.includes('3 day')) {
-    return { type: 'warning', bgColor: '#FFEFCE', dotColor: '#FDB022' };
+
+  if (
+    lowerMessage.includes("expired") ||
+    lowerMessage.includes("expiered") ||
+    lowerMessage.includes("0 day") ||
+    lowerMessage.includes("overdue")
+  ) {
+    return { type: "danger", bgColor: "#FFE8E8", dotColor: "#DB8888" };
+  } else if (
+    lowerMessage.includes("1 day") ||
+    lowerMessage.includes("2 day") ||
+    lowerMessage.includes("3 day")
+  ) {
+    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
   } else {
     return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
   }
 };
 
-export default function CarDetailsCard({ 
-  onRenewClick, 
-  carDetail, 
-  isRenew
-}) {
+export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
 
@@ -63,7 +69,8 @@ export default function CarDetailsCard({
   }, [carDetail?.vehicle_make]);
 
   // Use reminder data directly from carDetail (already embedded by backend)
-  const reminderMessage = carDetail?.reminder?.message || "No reminder available";
+  const reminderMessage =
+    carDetail?.reminder?.message || "No reminder available";
   const reminderStatus = getReminderStatus(reminderMessage);
 
   // Get additional reminder properties from backend
@@ -89,7 +96,7 @@ export default function CarDetailsCard({
               />
             </div>
             <h3
-              className="text-xl font-semibold text-[#05243F] cursor-pointer"
+              className="cursor-pointer text-xl font-semibold text-[#05243F]"
               role="button"
               onClick={() => showModal(true, carDetail)}
             >
