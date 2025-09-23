@@ -11,15 +11,14 @@ import config from '../../config/config';
 
 const CreateAgent = () => {
   const [formData, setFormData] = useState({
-    firstName: 'Ali',
-    surname: 'Johnson',
-    address: 'Jd Street, Off motoko road.',
-    location: 'Jigawa',
-    accountNumber: '4567890',
+    firstName: '',
+    surname: '',
+    address: '',
+    location: '',
+    accountNumber: '',
     stateOfOrigin: '',
     phoneNumber: '',
     email: '',
-    amountToPay: '',
     agentProfile: null,
     ninFront: null,
     ninBack: null,
@@ -34,7 +33,17 @@ const CreateAgent = () => {
   // Fetch states on component mount
   useEffect(() => {
     fetchStates();
+    testApiConnection();
   }, []);
+
+  const testApiConnection = async () => {
+    try {
+      const response = await fetch(`${config.getApiBaseUrl()}/test-cors`);
+      const data = await response.json();
+    } catch (error) {
+      toast.error('API connection test failed');
+    }
+  };
 
   // Filter states based on search term
   useEffect(() => {
@@ -78,7 +87,7 @@ const CreateAgent = () => {
         setFilteredStates(data.data);
       }
     } catch (error) {
-      console.error('Error fetching states:', error);
+      toast.error('Failed to fetch states');
     }
   };
 
@@ -120,6 +129,28 @@ const CreateAgent = () => {
         toast.error('Please log in as admin');
         return;
       }
+      
+      // Check if token is valid by making a test request
+      try {
+        const testResponse = await fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (testResponse.status === 401) {
+          toast.dismiss(loadingToast);
+          toast.error('Session expired. Please log in again.');
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin/login';
+          return;
+        }
+        
+        if (!testResponse.ok) {
+          const errorText = await testResponse.text();
+        }
+      } catch (error) {
+      }
 
       // Validate required fields
       if (!selectedState) {
@@ -136,7 +167,6 @@ const CreateAgent = () => {
         'surname': 'last_name',
         'phoneNumber': 'phone',
         'accountNumber': 'account_number',
-        'amountToPay': 'amount_to_pay'
       };
 
       // Add all form fields with proper mapping
@@ -167,14 +197,16 @@ const CreateAgent = () => {
         }
       });
 
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/agents`, {
+      const apiUrl = `${config.getApiBaseUrl()}/admin/agents`;
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
         body: formDataToSend
       });
-
+      
       const data = await response.json();
       
       if (data.status) {
@@ -191,7 +223,6 @@ const CreateAgent = () => {
           stateOfOrigin: '',
           phoneNumber: '',
           email: '',
-          amountToPay: '',
           agentProfile: null,
           ninFront: null,
           ninBack: null,
@@ -205,18 +236,13 @@ const CreateAgent = () => {
         }, 1500);
       } else {
         toast.dismiss(loadingToast);
-        // Handle validation errors
-        if (data.errors) {
-          const errorMessages = Object.values(data.errors).flat();
-          toast.error(errorMessages.join(', '));
-        } else {
-          toast.error(data.message || 'Failed to create agent');
-        }
+        // Display backend error message
+        toast.error(data.message || 'Failed to create agent. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating agent:', error);
       toast.dismiss(loadingToast);
-      toast.error('Failed to create agent. Please try again.');
+      console.error('Agent creation error:', error);
+      toast.error('Network error. Please check your connection and try again.');
     }
   };
 
@@ -292,6 +318,7 @@ const CreateAgent = () => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
+                  placeholder="Enter first name"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -307,6 +334,7 @@ const CreateAgent = () => {
                   name="surname"
                   value={formData.surname}
                   onChange={handleInputChange}
+                  placeholder="Enter surname"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -322,6 +350,7 @@ const CreateAgent = () => {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
+                  placeholder="Enter address"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -337,6 +366,7 @@ const CreateAgent = () => {
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
+                  placeholder="Enter location"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -352,6 +382,7 @@ const CreateAgent = () => {
                   name="accountNumber"
                   value={formData.accountNumber}
                   onChange={handleInputChange}
+                  placeholder="Enter account number"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -417,6 +448,7 @@ const CreateAgent = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
+                  placeholder="Enter phone number"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -432,25 +464,11 @@ const CreateAgent = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  placeholder="Enter email address"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
 
-              {/* Amount to Pay */}
-              <div>
-                <label htmlFor="amountToPay" className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount to Pay (N)
-                </label>
-                <input
-                  type="number"
-                  id="amountToPay"
-                  name="amountToPay"
-                  value={formData.amountToPay}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  placeholder="Enter amount to pay agent"
-                />
-              </div>
 
               {/* Agent Profile Upload */}
               <div>

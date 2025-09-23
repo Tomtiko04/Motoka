@@ -7,6 +7,7 @@ import AdminOrders from '../pages/admin/AdminOrders';
 import AdminOrderDetails from '../pages/admin/AdminOrderDetails';
 import AdminAgents from '../pages/admin/AdminAgents';
 import CreateAgent from '../pages/admin/CreateAgent';
+import AgentView from '../pages/admin/AgentView';
 import AdminCars from '../pages/admin/AdminCars';
 
 const AdminRoutes = () => {
@@ -73,6 +74,7 @@ const AdminRoutes = () => {
                 <Route path="orders/:slug" element={<AdminOrderDetails />} />
                 <Route path="agents" element={<AdminAgents />} />
                 <Route path="agents/create" element={<CreateAgent />} />
+                <Route path="agents/:uuid" element={<AgentView />} />
                 <Route path="cars" element={<AdminCars />} />
       </Route>
     </Routes>
