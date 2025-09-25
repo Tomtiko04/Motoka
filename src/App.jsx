@@ -43,6 +43,9 @@ import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
+import Notification from "./pages/notification.jsx";
+import SuccessPage from "./pages/SuccessPage.jsx";
+import CarDocuments from "./pages/CarDocuments.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -119,7 +122,10 @@ export default function App() {
 
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
+          <Route path="successful" element={<SuccessPage/>}/>
+            <Route path="documents" element={<CarDocuments />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="notification" element={<Notification />} />
             <Route path="licenses">
               <Route index element={<Licenses />} />
               <Route path="renew" element={<RenewLicense />} />
@@ -156,7 +162,6 @@ export default function App() {
               <Route path=":slug" element={<ProductModal />} />
               <Route path="cart-page" element={<CartPage />} />
             </Route>
-            <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
           </Route>
 
           {/* Admin Routes */}

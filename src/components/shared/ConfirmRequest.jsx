@@ -6,7 +6,6 @@ import OrderList from "./OrderList";
 export default function ConfirmRequest() {
   const location = useLocation();
   const { items, type } = location.state || {};
-
   // Define configurations for different request types
   const requestConfigs = {
     license: {
