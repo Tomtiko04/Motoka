@@ -1,5 +1,7 @@
 import Tesseract from 'tesseract.js';
 import pdfService from './pdfService';
+import cleanVehicleDoc from '../utils/postProcessor';
+import documentAiClient from './documentAiClient';
 
 class OCRService {
   constructor() {
@@ -93,7 +95,7 @@ class OCRService {
         }
         // short-circuit if very high confidence
         if (best.confidence >= 85) break;
-      } catch (e) {
+      } catch {
         // ignore rotation failure and continue
       }
     }
@@ -141,6 +143,19 @@ class OCRService {
       this.worker = null;
       this.isInitialized = false;
     }
+  }
+
+  // Send file to Google Document AI Form Parser via backend endpoint, then clean
+  async extractWithDocumentAI(file) {
+    const projectId = import.meta.env.VITE_DOC_AI_PROJECT_ID;
+    const location = import.meta.env.VITE_DOC_AI_LOCATION;
+    const processorId = import.meta.env.VITE_DOC_AI_FORM_PROCESSOR_ID;
+    if (!projectId || !location || !processorId) {
+      throw new Error('Document AI is not configured');
+    }
+
+    const rawDoc = await documentAiClient.processWithDocumentAI({ file, projectId, location, processorId });
+    return cleanVehicleDoc(rawDoc.document || rawDoc);
   }
 }
 

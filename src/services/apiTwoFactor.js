@@ -12,6 +12,8 @@ export async function verifyLoginTwoFactor(twoFactorToken, code) {
    
     if (data?.authorization?.token) {
       authStorage.setToken(data.authorization.token);
+      // Clear any registration token after full login via 2FA
+      authStorage.removeRegistrationToken();
     }
     
     return data;

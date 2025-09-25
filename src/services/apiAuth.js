@@ -16,6 +16,8 @@ export async function login({ email, password }) {
 
     // Stores token securely
     authStorage.setToken(token);
+    // Clear any registration token after full login
+    authStorage.removeRegistrationToken();
 
     return data;
   } catch (error) {
@@ -181,7 +183,11 @@ export async function verifyLoginOtp({ email, otp }) {
     const { data } = await api.post("/verify-login-otp", { email, otp });
 
     const token = data?.authorization?.token;
-    if (token) authStorage.setToken(token);
+    if (token) {
+      authStorage.setToken(token);
+      // Clear any registration token after full login via OTP
+      authStorage.removeRegistrationToken();
+    }
 
     return data;
   } catch (error) {

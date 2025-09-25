@@ -270,27 +270,7 @@ export default function Signin() {
                     : ""
                 }`}
               >
-                {isLoggingIn ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    <span>Logging in...</span>
-                  </div>
-                ) : (
-                  "Login"
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSendOtp}
-                disabled={isSendingLoginOtp || isLoggingIn}
-                className={`flex-1 rounded-3xl border border-[#2389E3] px-3 py-1.5 text-sm font-semibold text-[#2389E3] transition-all duration-300 hover:bg-[#f0f9ff] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:w-48 sm:py-2 ${
-                  isSendingLoginOtp || isLoggingIn
-                    ? "cursor-not-allowed opacity-50"
-                    : ""
-                }`}
-              >
-                {isSendingLoginOtp ? "Sending OTP..." : "Login with OTP"}
+                {isLoggingIn ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>
@@ -300,9 +280,9 @@ export default function Signin() {
             <div className="mt-4 text-center">
               <Link
                 to="/auth/otp-login"
-                className="text-sm text-[#2389E3] hover:text-[#A73957] transition-colors duration-300"
+                className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
               >
-                Login with OTP instead
+                Login using OTP instead
               </Link>
             </div>
 
