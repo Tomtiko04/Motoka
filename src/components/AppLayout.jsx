@@ -90,7 +90,7 @@ export default function AppLayout({ onNavigate }) {
 
               {/* Mobile menu button and notifications */}
               <div className="flex items-center gap-4 md:hidden">
-                <div className="relative">
+                <div className="relative" onClick={()=>navigate("/notification")}>
                   <Icon
                     icon="ri:notification-4-fill"
                     fontSize={20}
@@ -131,7 +131,7 @@ export default function AppLayout({ onNavigate }) {
 
               {/* User Actions */}
               <div className="hidden items-center gap-4 md:flex">
-                <div className="relative">
+                <div className="relative" onClick={()=>navigate("/notification")}>
                   <Icon
                     icon="ri:notification-4-fill"
                     fontSize={20}
