@@ -46,6 +46,7 @@ import AdminRoutes from "./routes/AdminRoutes.jsx";
 import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
+import ForgotPassword from "./features/auth/forgotPassword.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -108,6 +109,7 @@ export default function App() {
               path="verification-success"
               element={<VerificationSuccess />}
             />
+            <Route path="forgot-password" element={<ForgotPassword/>}/>
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}

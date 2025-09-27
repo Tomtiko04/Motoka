@@ -125,7 +125,7 @@ export default function Signin() {
   };
 
   return (
-    <div className="flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 py-3">
+    <div className="flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 flex-1">
       <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between gap-4 overflow-hidden rounded-[20px] bg-white p-3 shadow-lg sm:p-4 md:flex-row md:p-5">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />
@@ -248,7 +248,7 @@ export default function Signin() {
 
               <div className="text-xs">
                 <Link
-                  to="/forgot-password"
+                  to="/auth/forgot-password"
                   className={`text-[#A73957] opacity-70 transition-opacity duration-300 ${
                     isLoggingIn
                       ? "pointer-events-none cursor-not-allowed opacity-30"

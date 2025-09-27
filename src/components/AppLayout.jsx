@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import { authStorage } from "../utils/authStorage";
 
 import Avarta from "../assets/images/avarta.png";
 import Logo from "../assets/images/Logo.png";
+import Logo2 from "../assets/images/Logo.svg";
 
 export default function AppLayout({ onNavigate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,11 +39,11 @@ export default function AppLayout({ onNavigate }) {
         navigate("/auth/login", { state: { from: location }, replace: true });
       }
     };
-    
+
     // Check immediately and also after a short delay
     checkAuth();
     const timeoutId = setTimeout(checkAuth, 100);
-    
+
     return () => clearTimeout(timeoutId);
   }, [navigate, location]);
 
@@ -59,7 +60,7 @@ export default function AppLayout({ onNavigate }) {
     } catch (error) {
       toast.error(error.response?.data?.message || error.message, {
         duration: 5000,
-        id: 'logout-error'
+        id: "logout-error",
       });
     } finally {
       setIsLoggingOut(false);
@@ -76,9 +77,9 @@ export default function AppLayout({ onNavigate }) {
       <div className="mt-4 w-full max-w-4xl">
         {/* Header Navigation */}
         <header className="sticky top-0 z-50 rounded-full bg-white shadow-sm">
-          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-0 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
-              <div
+              {/* <div
                 onClick={handleHome}
                 className="flex cursor-pointer items-center gap-2"
               >
@@ -86,11 +87,18 @@ export default function AppLayout({ onNavigate }) {
                 <span className="text-lg font-semibold text-[#05243F]">
                   Motoka
                 </span>
+              </div> */}
+
+              <div onClick={handleHome} className="cursor-pointer">
+                <img src={Logo2} alt="Motoka" className="h-18" />
               </div>
 
               {/* Mobile menu button and notifications */}
               <div className="flex items-center gap-4 md:hidden">
-                <div className="relative" onClick={()=>navigate("/notification")}>
+                <div
+                  className="relative"
+                  onClick={() => navigate("/notification")}
+                >
                   <Icon
                     icon="ri:notification-4-fill"
                     fontSize={20}
@@ -131,7 +139,10 @@ export default function AppLayout({ onNavigate }) {
 
               {/* User Actions */}
               <div className="hidden items-center gap-4 md:flex">
-                <div className="relative" onClick={()=>navigate("/notification")}>
+                <div
+                  className="relative"
+                  onClick={() => navigate("/notification")}
+                >
                   <Icon
                     icon="ri:notification-4-fill"
                     fontSize={20}
@@ -212,7 +223,6 @@ export default function AppLayout({ onNavigate }) {
               </nav>
             </div>
 
-           
             {/* Mobile User Actions */}
             <div className="border-t border-[#F4F5FC] p-4">
               <div className="flex items-center justify-between">
@@ -234,54 +244,55 @@ export default function AppLayout({ onNavigate }) {
           </div>
         </div>
 
-         {/* Logout Modal */}
-         {isModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="bg-red-100 p-3 rounded-full">
-                    <LogOut className="h-6 w-6 text-red-500" />
-                  </div>
-                </div>
-                
-                <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">
-                  Confirm Logout
-                </h2>
-                
-                <p className="text-gray-600 text-center mb-6 text-sm">
-                  Are you sure you want to log out? You will need to log in again to access your account.
-                </p>
-
-                <div className="flex flex-col space-y-3">
-                  <button
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                    className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2"
-                  >
-                    {isLoggingOut ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Logging out...</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogOut className="h-5 w-5" />
-                        <span>Yes, Logout</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={isLoggingOut}
-                    className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                  >
-                    Cancel
-                  </button>
+        {/* Logout Modal */}
+        {isModalOpen && (
+          <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+            <div className="w-[90%] max-w-md transform rounded-xl bg-white p-6 shadow-lg transition-all">
+              <div className="mb-4 flex items-center justify-center">
+                <div className="rounded-full bg-red-100 p-3">
+                  <LogOut className="h-6 w-6 text-red-500" />
                 </div>
               </div>
+
+              <h2 className="mb-2 text-center text-xl font-semibold text-gray-800">
+                Confirm Logout
+              </h2>
+
+              <p className="mb-6 text-center text-sm text-gray-600">
+                Are you sure you want to log out? You will need to log in again
+                to access your account.
+              </p>
+
+              <div className="flex flex-col space-y-3">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="flex w-full items-center justify-center space-x-2 rounded-lg bg-red-500 px-4 py-2.5 text-white transition-colors duration-200 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      <span>Logging out...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="h-5 w-5" />
+                      <span>Yes, Logout</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={isLoggingOut}
+                  className="w-full rounded-lg bg-gray-100 px-4 py-2.5 text-gray-700 transition-colors duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-          )}
+          </div>
+        )}
 
         {/* Main Content */}
         <main className="mx-auto max-w-7xl py-6">
