@@ -41,9 +41,14 @@ export default function PaystackCallback() {
             setIsProcessing(false);
             toast.success('Payment verified successfully!');
             
-            // Send success message to parent window
+            // Send success message to parent window with more details
             if (window.opener) {
-              window.opener.postMessage({ type: 'PAYMENT_SUCCESS', reference }, '*');
+              window.opener.postMessage({ 
+                type: 'PAYMENT_SUCCESS', 
+                reference,
+                paymentData: data,
+                ordersCreated: true
+              }, '*');
             }
             
             // Close the window after a short delay

@@ -183,38 +183,22 @@ export default function RenewLicense() {
       return;
     }
 
-    // Create payload for each selected schedule
-    const paymentPayloads = selectedSchedules.map((schedule) => ({
+    // Create payload for bulk payment (supports multiple schedules)
+    const paymentPayload = {
       car_slug: carDetail?.slug,
-      payment_schedule_id: schedule.id,
+      payment_schedule_id: selectedSchedules.map((schedule) => schedule.id), // Array for bulk payments
       meta_data: {
         delivery_address: deliveryDetails.address,
         delivery_contact: deliveryDetails.contact,
         state_id: stateId,
         lga_id: lgaId,
       },
-    }));
+    };
 
-    // Initialize payment for the first schedule (you might want to handle multiple payments differently)
-    if (paymentPayloads.length > 0) {
-      startPayment(paymentPayloads[0]);
+    // Initialize payment for all selected schedules
+    if (paymentPayload.payment_schedule_id.length > 0) {
+      startPayment(paymentPayload);
     }
-
-    // TODO works for multiple
-    // const paymentPayload = {
-    //   car_id: carDetail?.id,
-    //   payment_schedule_id: selectedSchedules.map((schedule) => schedule.id),
-    //   meta_data: {
-    //     delivery_address: deliveryDetails.address,
-    //     delivery_contact: deliveryDetails.contact,
-    //     state_id: stateId,
-    //     lga_id: lgaId,
-    //   },
-    // };
-
-    // if (paymentPayload.payment_schedule_id.length > 0) {
-    //   startPayment(paymentPayload);
-    // }
   };
 
   // Navigate to payment page after successful payment initialization

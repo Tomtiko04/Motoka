@@ -6,9 +6,7 @@ import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { logout } from "../../services/apiAuth";
-
-import { authStorage } from "../../utils/authStorage";
+import config from "../../config/config";
 
 import Avarta from "../../assets/images/avarta.png";
 import Logo from "../../assets/images/Logo.png";
@@ -30,8 +28,9 @@ export default function AdminLayout({ onNavigate }) {
   ];
 
   useEffect(() => {
-    if (!authStorage.isAuthenticated()) {
-      navigate("/auth/login", { state: { from: location }, replace: true });
+    const adminToken = localStorage.getItem('adminToken');
+    if (!adminToken) {
+      navigate("/admin/login", { state: { from: location }, replace: true });
     }
   }, [navigate, location]);
 
@@ -40,20 +39,82 @@ export default function AdminLayout({ onNavigate }) {
     document.body.style.overflow = !isMenuOpen ? "hidden" : "";
   };
 
+  const handleLogoutClick = () => {
+    setIsModalOpen(true);
+    // Close mobile menu if open
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+      document.body.style.overflow = "";
+    }
+  };
+
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      const response = await logout();
-      navigate("/auth/login");
+      
+      // Get admin token
+      const adminToken = localStorage.getItem('adminToken');
+      
+      // Call the admin logout API (if it exists)
+      if (adminToken) {
+        try {
+          await fetch(`${config.getApiBaseUrl()}/admin/logout`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${adminToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+        } catch (apiError) {
+          // Continue with logout even if API call fails
+          console.log('Admin logout API call failed, continuing with local logout');
+        }
+      }
+      
+      // Clear admin authentication data
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      
+      // Show success message
+      toast.success("Logged out successfully!", {
+        duration: 2000,
+        id: "logout-success"
+      });
+      
+      // Close modal first
+      setIsModalOpen(false);
+      
+      // Add a small delay before redirecting to allow the toast to show
+      setTimeout(() => {
+        navigate("/admin/login", { replace: true });
+      }, 500);
+      
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message, {
-        duration: 5000,
+      console.error('Logout error:', error);
+      
+      // Even if everything fails, still clear local storage and redirect
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      
+      toast.error("Logged out with errors", {
+        duration: 2000,
         id: "logout-error",
       });
+      
+      // Close modal first
+      setIsModalOpen(false);
+      
+      // Add a small delay before redirecting
+      setTimeout(() => {
+        navigate("/admin/login", { replace: true });
+      }, 500);
     } finally {
       setIsLoggingOut(false);
-      setIsModalOpen(false);
     }
+  };
+
+  const handleCancelLogout = () => {
+    setIsModalOpen(false);
   };
 
   function handleHome() {
@@ -89,6 +150,16 @@ export default function AdminLayout({ onNavigate }) {
                     3
                   </span>
                 </div>
+                
+                {/* Info Icon */}
+                <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 cursor-pointer hover:bg-gray-200 transition-colors">
+                  <Icon
+                    icon="ri:information-line"
+                    fontSize={16}
+                    className="text-[#05243F]/60"
+                  />
+                </div>
+                
                 <button
                   onClick={toggleMenu}
                   className="z-50 rounded-lg p-2 text-[#05243F] hover:bg-[#F4F5FC]"
@@ -130,7 +201,26 @@ export default function AdminLayout({ onNavigate }) {
                     3
                   </span>
                 </div>
-                {/* When you click it will show a drop down */}
+                
+                {/* Info Icon */}
+                <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 cursor-pointer hover:bg-gray-200 transition-colors">
+                  <Icon
+                    icon="ri:information-line"
+                    fontSize={16}
+                    className="text-[#05243F]/60"
+                  />
+                </div>
+                
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogoutClick}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#A73957] hover:bg-red-50 rounded-lg transition-colors duration-200"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+                
+                {/* User Avatar */}
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img
                     src={Avarta}
@@ -189,11 +279,7 @@ export default function AdminLayout({ onNavigate }) {
                 {/* Logout Button */}
                 <button
                   className="mt-4 flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-[#A73957] hover:bg-[#F4F5FC]"
-                  onClick={() => {
-                    setIsModalOpen(true);
-                    setIsMenuOpen(false);
-                    document.body.style.overflow = "";
-                  }}
+                  onClick={handleLogoutClick}
                 >
                   <FaSignOutAlt className="h-4 w-4" />
                   <span>Logout</span>
@@ -224,7 +310,7 @@ export default function AdminLayout({ onNavigate }) {
 
         {/* Logout Modal */}
         {isModalOpen && (
-          <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
             <div className="w-[90%] max-w-md transform rounded-xl bg-white p-6 shadow-lg transition-all">
               <div className="mb-4 flex items-center justify-center">
                 <div className="rounded-full bg-red-100 p-3">
@@ -261,7 +347,7 @@ export default function AdminLayout({ onNavigate }) {
                 </button>
 
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleCancelLogout}
                   disabled={isLoggingOut}
                   className="w-full rounded-lg bg-gray-100 px-4 py-2.5 text-gray-700 transition-colors duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >

@@ -327,9 +327,9 @@ const AgentView = () => {
           
           <button
             onClick={() => setShowEditModal(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
           >
-            <PencilIcon className="h-4 w-4 mr-2" />
+            <PencilIcon className="h-3 w-3 mr-1.5" />
             Edit
           </button>
           
@@ -338,14 +338,14 @@ const AgentView = () => {
             <select
               value={agent.status}
               onChange={(e) => handleStatusUpdate(e.target.value)}
-              className="appearance-none bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="appearance-none bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 pr-6 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
             >
               <option value="active" className="bg-white text-gray-900">Active</option>
               <option value="suspended" className="bg-white text-gray-900">Suspended</option>
               <option value="deleted" className="bg-white text-gray-900">Deleted</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <ExclamationTriangleIcon className="h-4 w-4 text-white" />
+              <ExclamationTriangleIcon className="h-3 w-3 text-white" />
             </div>
           </div>
         </div>
@@ -918,13 +918,13 @@ const AgentView = () => {
                   <button
                     type="button"
                     onClick={() => setShowEditModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 mr-3"
+                    className="px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 mr-3 text-sm"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium transition-colors text-sm"
                   >
                     Update Agent
                   </button>

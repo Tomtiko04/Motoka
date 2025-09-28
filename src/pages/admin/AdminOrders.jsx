@@ -261,7 +261,14 @@ const AdminOrders = () => {
                       {order.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.purpose}
+                      <div className="flex items-center gap-2">
+                        <span>{order.purpose}</span>
+                        {order.originalOrder?.notes?.includes('Bulk payment') && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Bulk
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.amount}

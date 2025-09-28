@@ -37,6 +37,23 @@ export function usePaystackPayment() {
           }
         });
         
+        // Store payment info for auto-verification
+        const paymentInfo = {
+          reference: data.data.reference,
+          gateway: 'paystack',
+          timestamp: Date.now(),
+          amount: data.data.amount
+        };
+        
+        // Store in localStorage for auto-verification
+        const recentPayments = JSON.parse(localStorage.getItem('recentPayments') || '[]');
+        recentPayments.push(paymentInfo);
+        // Keep only last 5 payments
+        if (recentPayments.length > 5) {
+          recentPayments.splice(0, recentPayments.length - 5);
+        }
+        localStorage.setItem('recentPayments', JSON.stringify(recentPayments));
+
         // Focus the new window
         if (paystackWindow) {
           paystackWindow.focus();
