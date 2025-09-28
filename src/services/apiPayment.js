@@ -57,6 +57,18 @@ export async function getPaystackReference(transactionId) {
   }
 }
 
+export async function checkExistingPayments(carSlug, paymentScheduleIds) {
+  try {
+    const { data } = await api.post('/payment/check-existing', {
+      car_slug: carSlug,
+      payment_schedule_ids: paymentScheduleIds
+    });
+    return data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || "Failed to check existing payments");
+  }
+}
+
 export async function verifyPaystackPayment(reference) {
   try {
     const { data } = await api.post(`/payment/paystack/verify/${reference}`);
