@@ -19,16 +19,17 @@ export default ForgotPassword;
 
 const StepOne = ({ nextStep }) => {
   return (
-    <div className="w-full max-w-md space-y-8">
-      <div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+    <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
+      <div className="text-center">
+        <h2 className="my-2 text-lg font-medium text-[#05243F] sm:text-xl">
           Forgot your password?
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="text-sm text-[#05243F]/40 sm:text-base">
           Please enter your email address to receive a verification code.
         </p>
       </div>
-      <form className="mt-8 space-y-6" action="#" method="POST">
+      <form className="mt-6 sm:mt-8 md:mt-9" action="#" method="POST">
         <input type="hidden" name="remember" defaultValue="true" />
         <div className="-space-y-px rounded-md shadow-sm">
           <div>
@@ -41,7 +42,8 @@ const StepOne = ({ nextStep }) => {
               type="email"
               autoComplete="email"
               required
-              className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                // className="relative block  rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+               className="relative block w-full appearance-none rounded-lg px-3 py-2 text-gray-900 focus:z-10 text-sm font-medium placeholder-[#05243F]/40 transition-colors duration-300 focus:outline-none h-12 sm:text-base bg-[#FFF4DD]"
               placeholder="Email address"
             />
           </div>
@@ -51,24 +53,26 @@ const StepOne = ({ nextStep }) => {
           <button
             type="submit"
             onClick={nextStep}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-fit sm:px-10 sm:py-3 sm:text-base md:mt-10"
           >
             Send Verification Code
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 };
 
 const StepTwo = ({ nextStep, prevStep }) => {
   return (
-    <div className="w-full max-w-md space-y-8">
-      <div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+        <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
+ <div className="text-center">
+        <h2 className="my-2 text-lg font-medium text-[#05243F] sm:text-xl">
           Enter Verification Code
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="text-sm text-[#05243F]/40 sm:text-base">
           We have sent a verification code to your email address. Please enter
           it below.
         </p>
@@ -86,7 +90,9 @@ const StepTwo = ({ nextStep, prevStep }) => {
               type="text"
                           autoComplete="one-time-code"
                           required
-                          className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"  
+                          // className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"  
+                           className="relative block w-full appearance-none rounded-lg px-3 py-2 text-gray-900 focus:z-10 text-sm font-medium placeholder-[#05243F]/40 transition-colors duration-300 focus:outline-none h-12 sm:text-base bg-[#FFF4DD]"
+              
                           placeholder="Verification Code"
             />
           </div>
@@ -96,7 +102,7 @@ const StepTwo = ({ nextStep, prevStep }) => {
           <div className="text-sm">
             <button
               onClick={prevStep}
-                          className="font-medium text-indigo-600 hover:text-indigo-500"
+                          className="font-medium text-[#2389E3]  hover:text-[#05243F]"
                           
                           type="button"
             >
@@ -109,12 +115,12 @@ const StepTwo = ({ nextStep, prevStep }) => {
           <button
             type="submit"
             onClick={nextStep}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-fit sm:px-10 sm:py-3 sm:text-base md:mt-10"
           >
             Verify Code
           </button>
         </div>
-      </form>
+      </form></div>
     </div>
   );
 };
