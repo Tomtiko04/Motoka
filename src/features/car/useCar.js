@@ -70,7 +70,7 @@ export function useGetCars() {
     queryFn: getCarsApi,
     onError: (error) => {
       console.error('Error fetching cars:', error);
-      toast.error(error.message || "Failed to fetch cars");
+      toast.error(error.response.data.message || "Failed to fetch cars");
     },
   });
 

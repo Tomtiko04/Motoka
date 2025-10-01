@@ -100,7 +100,7 @@ export default function Signin() {
       },
       onError: (err) => {
         toast.dismiss(loadingToast);
-        toast.error(err.message || "Failed to send OTP");
+        toast.error(err.response.data.message || "Failed to send OTP");
       },
     });
   };
