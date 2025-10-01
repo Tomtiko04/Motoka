@@ -50,7 +50,7 @@ export async function refreshToken() {
     return newToken;
   } catch (error) {
     authStorage.removeToken();
-    throw new Error("Failed to refresh token");
+    // throw new Error("Failed to refresh token");
   }
 }
 

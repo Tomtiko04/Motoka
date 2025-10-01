@@ -5,10 +5,10 @@ function DocumentsNav({
   docType,
 }) {
   return (
-    <div className="mb-5 flex flex-wrap gap-4">
+    <div className="mb-4 flex flex-wrap gap-4">
       <button
         onClick={onMyCarClick}
-        className={`rounded-full py-2 text-sm font-semibold transition-all ${
+        className={`rounded-full text-sm font-semibold transition-all ${
           docType === "MyCar"
             ? "bg-transparent text-[#2389E3] hover:text-[#000000]"
             : "bg-transparent text-[#697C8C] hover:text-[#2389E3]"
@@ -17,16 +17,16 @@ function DocumentsNav({
         My Cars
       </button>
 
-      <button
+      {/* <button
         onClick={onDriverLicenseClick}
-        className={`rounded-full py-2 text-sm font-semibold transition-all ${
+        className={`rounded-full text-sm font-semibold transition-all ${
           docType === "DriversLicense"
             ? "bg-transparent text-[#2389E3] hover:text-[#000000]"
             : "bg-transparent text-[#697C8C] hover:text-[#2389E3]"
         }`}
       >
         My Driver's License
-      </button>
+      </button> */}
     </div>
   );
 }
