@@ -9,6 +9,7 @@ import AdminAgents from '../pages/admin/AdminAgents';
 import CreateAgent from '../pages/admin/CreateAgent';
 import AgentView from '../pages/admin/AgentView';
 import AdminCars from '../pages/admin/AdminCars';
+import AdminPayments from '../pages/admin/AdminPayments';
 
 const AdminRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -76,6 +77,7 @@ const AdminRoutes = () => {
                 <Route path="agents/create" element={<CreateAgent />} />
                 <Route path="agents/:uuid" element={<AgentView />} />
                 <Route path="cars" element={<AdminCars />} />
+                <Route path="payments" element={<AdminPayments />} />
       </Route>
     </Routes>
   );
