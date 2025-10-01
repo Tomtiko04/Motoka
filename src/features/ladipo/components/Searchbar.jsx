@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Icon } from "@iconify/react";
-export default function SearchBar({ onSearch, searchTerm, setSearchTerm,handleSearch }) {
-  // const handleChange = (e) => {
-  //   const value = e.target.value;
-  //   setSearchTerm(value);
-  //   onSearch(value);
-  // };
-
+export default function SearchBar({ onSearch, searchTerm, setSearchTerm, handleSearch}) {
   return (
     <div className="flex items-center gap-2 w-full overflow-hidden">
       <div className="flex w-full items-center gap-2 rounded-full bg-[#E9EDF6] p-1 ps-4 text-[13px] flex-1">

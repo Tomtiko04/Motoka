@@ -39,9 +39,13 @@ const getReminderStatus = (message) => {
   }
 };
 
-export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
+export default function CarDetailsCard({ onRenewClick, carDetail, isRenew, onSelect }) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
+
+  const handleSelect = () => {
+    if (onSelect) onSelect(carDetail);
+  };
 
   const handleRenewClick = () => {
     onRenewClick(carDetail);
@@ -81,7 +85,8 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
   const expiresToday = carDetail?.reminder?.expires_today;
 
   return (
-    <div className="rounded-2xl bg-white px-4 py-5">
+    <div className="rounded-2xl cursor-pointer bg-white px-4 py-5" onClick={handleSelect}
+      role="button">
       <div className="mb-6">
         <div className="text-sm font-light text-[#05243F]/60">Car Model</div>
         <div className="flex items-center justify-between py-2">
@@ -150,6 +155,8 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew }) {
             onClick={handleRenewClick}
             className="cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
             style={{ pointerEvents: "auto" }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClickCapture={(e) => { e.stopPropagation(); handleRenewClick(); }}
           >
             Renew Now
           </button>
