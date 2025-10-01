@@ -122,7 +122,7 @@ export default function Signup() {
                 type="text"
                 {...register("name")}
                 placeholder="Tomtiko"
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
               />
               {errors.name && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
@@ -143,7 +143,7 @@ export default function Signup() {
                 type="email"
                 {...register("email")}
                 placeholder="sample@gmail.com"
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
               />
               {errors.email && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
@@ -164,7 +164,7 @@ export default function Signup() {
                 type="tel"
                 {...register("phone")}
                 placeholder="08012345678"
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
               />
               {errors.phone && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
@@ -185,7 +185,7 @@ export default function Signup() {
                 type="number"
                 {...register("nin")}
                 placeholder=""
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
               />
               {errors.nin && (
                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
@@ -206,7 +206,7 @@ export default function Signup() {
                   id="password"
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
-                  className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                  className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                 />
                 <div
                   className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
@@ -238,7 +238,7 @@ export default function Signup() {
                   id="confirmPassword"
                   {...register("confirmPassword")}
                   type={showConfirmPassword ? "text" : "password"}
-                  className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                  className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                 />
                 <div
                   className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"

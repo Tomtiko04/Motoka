@@ -47,6 +47,9 @@ import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import ForgotPassword from "./features/auth/forgotPassword.jsx";
+import NotFound404 from "./components/NotFound404.jsx";
+
+
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -109,7 +112,7 @@ export default function App() {
               path="verification-success"
               element={<VerificationSuccess />}
             />
-            <Route path="forgot-password" element={<ForgotPassword/>}/>
+            <Route path="forgot-password" element={<ForgotPassword />} />
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}
@@ -124,7 +127,7 @@ export default function App() {
 
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
-          <Route path="successful" element={<SuccessPage/>}/>
+            <Route path="successful" element={<SuccessPage />} />
             <Route path="documents" element={<CarDocuments />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="notification" element={<Notification />} />
@@ -147,7 +150,7 @@ export default function App() {
               <Route path="confirm-request" element={<ConfirmRequest />} />
             </Route>
             <Route path="documents" element={<CarDocuments />} />
-            <Route path="notification" element={<Notification/>} />
+            <Route path="notification" element={<Notification />} />
             <Route path="garage" element={<Garage />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
             <Route
@@ -157,7 +160,10 @@ export default function App() {
               }
             />
             <Route path="payment/paystack" element={<PaystackPayment />} />
-            <Route path="payment/paystack/callback" element={<PaystackCallback />} />
+            <Route
+              path="payment/paystack/callback"
+              element={<PaystackCallback />}
+            />
             <Route path="settings">
               <Route index element={<Settings />} />
             </Route>
@@ -166,12 +172,14 @@ export default function App() {
               <Route path=":slug" element={<ProductModal />} />
               <Route path="cart-page" element={<CartPage />} />
             </Route>
-            <Route path="payment-success" element={<SuccessPage/>} />
+            <Route path="payment-success" element={<SuccessPage />} />
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
           </Route>
 
           {/* Admin Routes */}
           <Route path="admin/*" element={<AdminRoutes />} />
+          {/* Not Found */}
+          <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>
       <Toaster
