@@ -14,8 +14,7 @@ export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  const getCarReminder = (carId) =>
-    carDetail?.reminder || null;
+  const getCarReminder = (carId) => carDetail?.reminder || null;
 
   // Payment data
   const [paymentHeads, setPaymentHeads] = useState([]);
@@ -54,6 +53,7 @@ export default function RenewLicense() {
   const isState = state?.data;
 
   // Fetch payment heads and schedules on mount
+  // Fetch payment heads and schedules on mount
   useEffect(() => {
     async function fetchData() {
       setLoadingPayments(true);
@@ -62,8 +62,24 @@ export default function RenewLicense() {
           fetchPaymentHeads(),
           fetchPaymentSchedules(),
         ]);
-        setPaymentHeads(heads);
-        setPaymentSchedules(schedules);
+
+        const filteredHeads =
+          carDetail?.car_type === "private" ||
+          carDetail?.car_type === "government"
+            ? heads.filter((h) => h.payment_head_name !== "Hackney Permit")
+            : heads;
+
+        setPaymentHeads(filteredHeads);
+
+        const filteredSchedules =
+          carDetail?.car_type === "private" ||
+          carDetail?.car_type === "government"
+            ? schedules.filter(
+                (s) => s.payment_head?.payment_head_name !== "Hackney Permit",
+              )
+            : schedules;
+
+        setPaymentSchedules(filteredSchedules);
       } catch (error) {
         console.error("Error fetching payment data:", error);
         setPaymentHeads([]);
@@ -73,14 +89,22 @@ export default function RenewLicense() {
       }
     }
     fetchData();
-  }, []);
+  }, [carDetail?.car_type]);
 
   // Default-select all document types when payment heads load
   useEffect(() => {
     if (paymentHeads?.length && selectedDocs.length === 0) {
-      setSelectedDocs(paymentHeads.map((h) => h.payment_head_name));
+      const validDocs = paymentHeads.map((h) => h.payment_head_name);
+
+      const filteredDocs =
+        carDetail?.car_type === "private" ||
+        carDetail?.car_type === "government"
+          ? validDocs.filter((d) => d !== "Hackney Permit")
+          : validDocs;
+
+      setSelectedDocs(filteredDocs);
     }
-  }, [paymentHeads, selectedDocs.length]);
+  }, [paymentHeads, selectedDocs.length, carDetail?.car_type]);
 
   // When selectedDocs changes, update selectedSchedules and amount
   useEffect(() => {
@@ -96,13 +120,21 @@ export default function RenewLicense() {
     // Calculate available schedules (excluding already paid ones)
     let availableSchedules = selectedSchedules;
     if (existingPayments.length > 0) {
-      const existingPaymentHeadNames = existingPayments.map(p => p.payment_head_name);
-      availableSchedules = selectedSchedules.filter(schedule =>
-        !existingPaymentHeadNames.includes(schedule.payment_head?.payment_head_name)
+      const existingPaymentHeadNames = existingPayments.map(
+        (p) => p.payment_head_name,
+      );
+      availableSchedules = selectedSchedules.filter(
+        (schedule) =>
+          !existingPaymentHeadNames.includes(
+            schedule.payment_head?.payment_head_name,
+          ),
       );
     }
 
-    const total = availableSchedules.reduce((sum, sch) => sum + Number(sch.amount), 0);
+    const total = availableSchedules.reduce(
+      (sum, sch) => sum + Number(sch.amount),
+      0,
+    );
     setDeliveryDetails((prev) => ({ ...prev, amount: total }));
   }, [selectedSchedules, existingPayments]);
 
@@ -116,32 +148,43 @@ export default function RenewLicense() {
   const checkForExistingPayments = async () => {
     if (selectedSchedules.length === 0) return;
 
-    console.log('🔍 Checking existing payments...', {
-      selectedSchedules: selectedSchedules.map(s => ({ id: s.id, name: s.payment_head?.payment_head_name })),
-      carSlug: carDetail?.slug
+    console.log("🔍 Checking existing payments...", {
+      selectedSchedules: selectedSchedules.map((s) => ({
+        id: s.id,
+        name: s.payment_head?.payment_head_name,
+      })),
+      carSlug: carDetail?.slug,
     });
 
     setDuplicateCheckLoading(true);
     try {
-      const paymentScheduleIds = selectedSchedules.map(schedule => schedule.id);
+      const paymentScheduleIds = selectedSchedules.map(
+        (schedule) => schedule.id,
+      );
 
-      console.log('📡 Calling checkExistingPayments API with:', {
+      console.log("📡 Calling checkExistingPayments API with:", {
         car_slug: carDetail.slug,
-        payment_schedule_ids: paymentScheduleIds
+        payment_schedule_ids: paymentScheduleIds,
       });
 
-      const result = await checkExistingPayments(carDetail.slug, paymentScheduleIds);
+      const result = await checkExistingPayments(
+        carDetail.slug,
+        paymentScheduleIds,
+      );
 
-      console.log('✅ API Response:', result);
+      console.log("✅ API Response:", result);
 
       if (result.status) {
         setExistingPayments(result.data.existing_payments || []);
-        console.log('📋 Existing payments set:', result.data.existing_payments || []);
+        console.log(
+          "📋 Existing payments set:",
+          result.data.existing_payments || [],
+        );
       } else {
-        console.error('❌ API returned false status:', result);
+        console.error("❌ API returned false status:", result);
       }
     } catch (error) {
-      console.error('❌ Error checking existing payments:', error);
+      console.error("❌ Error checking existing payments:", error);
     } finally {
       setDuplicateCheckLoading(false);
     }
@@ -179,9 +222,14 @@ export default function RenewLicense() {
   const getAvailableSchedules = () => {
     if (existingPayments.length === 0) return selectedSchedules;
 
-    const existingPaymentHeadNames = existingPayments.map(p => p.payment_head_name);
-    return selectedSchedules.filter(schedule =>
-      !existingPaymentHeadNames.includes(schedule.payment_head?.payment_head_name)
+    const existingPaymentHeadNames = existingPayments.map(
+      (p) => p.payment_head_name,
+    );
+    return selectedSchedules.filter(
+      (schedule) =>
+        !existingPaymentHeadNames.includes(
+          schedule.payment_head?.payment_head_name,
+        ),
     );
   };
 
@@ -259,7 +307,9 @@ export default function RenewLicense() {
     const availableSchedules = getAvailableSchedules();
 
     if (availableSchedules.length === 0) {
-      alert("All selected document types have already been paid for. Please select different documents.");
+      alert(
+        "All selected document types have already been paid for. Please select different documents.",
+      );
       return;
     }
 
@@ -283,11 +333,7 @@ export default function RenewLicense() {
 
   // Navigate to payment page after successful payment initialization
   React.useEffect(() => {
-    if (
-      paymentInitData &&
-      paymentInitData.data &&
-      paymentInitData.data.data
-    ) {
+    if (paymentInitData && paymentInitData.data && paymentInitData.data.data) {
       // Create a complete payment data object that includes all necessary information
       const completePaymentData = {
         ...paymentInitData.data.data,
@@ -305,12 +351,18 @@ export default function RenewLicense() {
           delivery_contact: deliveryDetails.contact,
           state_id: getStateId(),
           lga_id: getLgaId(),
-        }
+        },
       };
 
       navigate("/payment", { state: { paymentData: completePaymentData } });
     }
-  }, [paymentInitData, navigate, carDetail, selectedSchedules, deliveryDetails]);
+  }, [
+    paymentInitData,
+    navigate,
+    carDetail,
+    selectedSchedules,
+    deliveryDetails,
+  ]);
 
   return (
     <>

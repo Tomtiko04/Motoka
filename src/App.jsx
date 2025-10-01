@@ -130,7 +130,7 @@ export default function App() {
             <Route path="successful" element={<SuccessPage />} />
             <Route path="documents" element={<CarDocuments />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="notification" element={<Notification />} />
+            <Route path="notifications" element={<Notification />} />
             <Route path="licenses">
               <Route index element={<Licenses />} />
               <Route path="renew" element={<RenewLicense />} />
