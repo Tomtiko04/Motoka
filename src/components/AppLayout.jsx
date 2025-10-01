@@ -76,9 +76,9 @@ export default function AppLayout({ onNavigate }) {
     <div className="flex items-center justify-center bg-[#F4F5FC]">
       <div className="w-full max-w-4xl sm:mt-4">
         {/* Header Navigation */}
-        <header className="sticky top-0 z-10 bg-white shadow-sm sm:rounded-full">
-          <div className="mx-auto max-w-7xl px-4 py-0 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
+        <header className="sticky top-0 z-10 h-16 bg-white shadow-sm sm:rounded-full">
+          <div className="mx-auto flex h-full max-w-7xl items-center px-4 py-0 sm:px-6 lg:px-8">
+            <div className="flex w-full items-center justify-between">
               {/* <div
                 onClick={handleHome}
                 className="flex cursor-pointer items-center gap-2"
@@ -89,8 +89,15 @@ export default function AppLayout({ onNavigate }) {
                 </span>
               </div> */}
 
-              <div onClick={handleHome} className="cursor-pointer">
-                <img src={Logo2} alt="Motoka" className="h-18" />
+              <div
+                onClick={handleHome}
+                className="flex cursor-pointer items-center"
+              >
+                <img
+                  src={Logo2}
+                  alt="Motoka"
+                  className="h-8 w-auto object-contain"
+                />
               </div>
 
               {/* Mobile menu button and notifications */}
@@ -130,7 +137,7 @@ export default function AppLayout({ onNavigate }) {
                       to={link.path}
                       className={`relative text-sm font-medium transition-colors ${
                         isActive
-                          ? "text-[#2389E3] after:absolute after:bottom-[-27px] after:left-0 after:h-1 after:w-full after:rounded-t-md after:bg-[#2389E3]"
+                          ? "text-[#2389E3] after:absolute after:bottom-[-24px] after:left-0 after:h-1 after:w-full after:rounded-t-md after:bg-[#2389E3]"
                           : "text-[#05243F]/60 hover:text-[#05243F]"
                       }`}
                     >
@@ -182,12 +189,11 @@ export default function AppLayout({ onNavigate }) {
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-[#F4F5FC] p-4">
-              <div className="flex items-center gap-2">
-                <img src={Logo} alt="Motoka" className="h-8 w-8" />
-                <span className="text-lg font-semibold text-[#05243F]">
-                  Motoka
-                </span>
-              </div>
+              <img
+                src={Logo2}
+                alt="Motoka"
+                className="h-8 w-auto object-contain"
+              />
               <button
                 onClick={toggleMenu}
                 className="rounded-lg p-2 text-[#05243F] hover:bg-[#F4F5FC]"
