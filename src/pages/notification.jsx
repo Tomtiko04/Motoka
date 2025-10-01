@@ -47,7 +47,7 @@ export default function Notification() {
         <div>
           <ul className="items-center gap-3 hidden sm:flex">
             {["All", "Warning", "Payments", "Licenses Added"].map((category, index) => (
-              <li key={index} className={`rounded-full transition-[.5s] px-6 py-1.5 text-[16px]  ${notificationsCategory===category?"bg-[#2389E3] text-white hover:bg-[#1b6dbb]":"bg-[#F0F2F4] text-[#697C8C] hover:bg-[#dcddde]"}`} onClick={()=>setNotificationsCategory(category)}>
+              <li key={index} className={`rounded-full transition-[.5s] px-6 py-1.5 text-[16px] cursor-pointer ${notificationsCategory===category?"bg-[#2389E3] text-white hover:bg-[#1b6dbb]":"bg-[#F0F2F4] text-[#697C8C] hover:bg-[#dcddde]"}`} onClick={()=>setNotificationsCategory(category)}>
                 {category}
               </li>
             ))}

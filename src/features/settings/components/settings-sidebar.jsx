@@ -397,7 +397,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
       {/* Logout Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/75 bg-opacity-50 z-50">
           <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-red-100 p-3 rounded-full">
@@ -422,12 +422,12 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
                 {isLoggingOut ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Logging out...</span>
+                    <span role="button" className="text-sm font-semibold">Logging out...</span>
                   </>
                 ) : (
                   <>
                     <LogOut className="h-5 w-5" />
-                    <span>Yes, Logout</span>
+                    <span role="button" className="text-sm font-semibold">Yes, Logout</span>
                   </>
                 )}
               </button>
@@ -435,7 +435,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               <button
                 onClick={() => setIsModalOpen(false)}
                 disabled={isLoggingOut}
-                className="w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                className="text-sm w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 Cancel
               </button>

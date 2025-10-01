@@ -60,10 +60,10 @@ export default function ProfileInformation({ onNavigate }) {
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 items-center justify-between mb-8">
-        <div className="relative">
+      <div className="flex flex-col md:flex-row  md:items-start gap-6 items-center justify-end mb-8">
+        {/* <div className="relative">
           <Avatar src={profileData?.image} alt={profileData?.name} />
-        </div>
+        </div> */}
         <div className="text-right">
           <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">{profileData?.name || "User"}</h2>
           <p className="text-base font-normal text-[#05243F]/40 sm:text-lg">
