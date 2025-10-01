@@ -67,7 +67,6 @@
 // export default NotificationList;
 import { Icon } from "@iconify/react";
 import NotificationCard from "./notificationCard";
-
 export default function NotificationList({ notificationsCategory, notificationData }) {
   const groups = ["Today", "Yesterday", "Last week", "Others"];
 
