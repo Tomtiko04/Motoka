@@ -39,7 +39,12 @@ const getReminderStatus = (message) => {
   }
 };
 
-export default function CarDetailsCard({ onRenewClick, carDetail, isRenew, onSelect }) {
+export default function CarDetailsCard({
+  onRenewClick,
+  carDetail,
+  isRenew,
+  onSelect,
+}) {
   const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
 
@@ -85,20 +90,17 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew, onSel
   const expiresToday = carDetail?.reminder?.expires_today;
 
   return (
-    <div className="rounded-2xl cursor-pointer bg-white px-4 py-5" onClick={handleSelect}
-      role="button">
+    <div
+      className="cursor-pointer rounded-2xl bg-white px-4 py-5"
+      onClick={handleSelect}
+      role="button"
+    >
       <div className="mb-6">
         <div className="text-sm font-light text-[#05243F]/60">Car Model</div>
         <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-2">
-            <div className="">
-              <img
-                src={carLogo}
-                loading="lazy"
-                alt={carDetail?.vehicle_make || "Car"}
-                className="h-6 w-6 object-contain"
-                onError={() => setCarLogo(MercedesLogo)}
-              />
+            <div>
+              <Icon icon="ion:car-sport-sharp" fontSize={30} color="#2389E3" />
             </div>
             <h3
               className="cursor-pointer text-xl font-semibold text-[#05243F]"
@@ -109,29 +111,36 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew, onSel
             </h3>
           </div>
           <div>
-            <Icon icon="ion:car-sport-sharp" fontSize={30} color="#2389E3" />
+            {/* <Icon icon="ion:car-sport-sharp" fontSize={30} color="#2389E3" /> */}
+            {/* <img
+              src={carLogo}
+              loading="lazy"
+              alt={carDetail?.vehicle_make || "Car"}
+              className="h-6 w-6 object-contain"
+              onError={() => setCarLogo(MercedesLogo)}
+            /> */}
           </div>
         </div>
       </div>
 
       <div className="mb-6 flex items-center">
         <div>
-          <div className="text-sm text-[#05243F]/60 text-nowrap">Plate No:</div>
+          <div className="text-sm text-nowrap text-[#05243F]/60">Plate No:</div>
           <div className="text-base font-semibold text-[#05243F]">
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
         <div>
-          <div className="text-sm text-[#05243F]/60 text-nowrap">Exp. Date</div>
-          <div className="text-base font-semibold text-[#05243F] text-nowrap">
+          <div className="text-sm text-nowrap text-[#05243F]/60">Exp. Date</div>
+          <div className="text-base font-semibold text-nowrap text-[#05243F]">
             {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
         <div>
-          <div className="text-sm text-[#05243F]/60 text-nowrap">Car Type</div>
-          <div className="text-base font-semibold text-[#05243F] text-nowrap">
+          <div className="text-sm text-nowrap text-[#05243F]/60">Car Type</div>
+          <div className="text-base font-semibold text-nowrap text-[#05243F]">
             {carDetail?.vehicle_make || "-"}
           </div>
         </div>
@@ -152,11 +161,11 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew, onSel
         </div>
         {isRenew && (
           <button
-            onClick={handleRenewClick}
             className="cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
-            style={{ pointerEvents: "auto" }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClickCapture={(e) => { e.stopPropagation(); handleRenewClick(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRenewClick();
+            }}
           >
             Renew Now
           </button>

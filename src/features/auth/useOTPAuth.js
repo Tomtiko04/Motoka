@@ -32,7 +32,7 @@ export function useOTPLogin() {
   const { mutate: sendOTP, isPending: isSendingOTP, error: sendError } = useMutation({
     mutationFn: (email) => sendLoginOTP(email),
     onSuccess: (data) => {
-      toast.success(data.message || "OTP sent to your email! Please check your inbox.");
+      toast.success("OTP sent to your email! Please check your inbox." || data.message);
       setStep("otp");
       startTimer();
     },
