@@ -42,7 +42,7 @@
 
 import { Icon } from "@iconify/react";
 
-function NotificationCard({ notification }) {
+export default function NotificationCard({ notification }) {
   const { category, message, time } = notification;
 
   const renderIcon = () => {
@@ -104,5 +104,3 @@ function NotificationCard({ notification }) {
     </div>
   );
 }
-
-export default NotificationCard;
