@@ -104,7 +104,7 @@ export default function AppLayout({ onNavigate }) {
               <div className="flex items-center gap-4 md:hidden">
                 <div
                   className="relative"
-                  // onClick={() => navigate("/notification")}
+                  onClick={() => navigate("/notifications")}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -151,7 +151,7 @@ export default function AppLayout({ onNavigate }) {
               <div className="hidden items-center gap-4 md:flex">
                 <div
                   className="relative"
-                  // onClick={() => navigate("/notification")}
+                  onClick={() => navigate("/notifications")}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
