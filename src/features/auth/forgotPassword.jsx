@@ -43,7 +43,7 @@ const StepOne = ({ nextStep }) => {
               autoComplete="email"
               required
                 // className="relative block  rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-               className="relative block w-full appearance-none rounded-lg px-3 py-2 text-gray-900 focus:z-10 text-sm font-medium placeholder-[#05243F]/40 transition-colors duration-300 focus:outline-none h-12 sm:text-base bg-[#FFF4DD]"
+               className="relative block w-full appearance-none rounded-lg px-3 py-2 text-gray-900 focus:z-10 text-sm font-medium placeholder`-[#05243F]/40 transition-colors duration-300 focus:outline-none h-12 sm:text-base bg-[#FFF4DD]"
               placeholder="Email address"
             />
           </div>
