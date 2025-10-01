@@ -43,9 +43,10 @@ import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
+import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
-import CarDocuments from "./pages/CarDocuments.jsx";
+import ForgotPassword from "./features/auth/forgotPassword.jsx";
 export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -108,6 +109,7 @@ export default function App() {
               path="verification-success"
               element={<VerificationSuccess />}
             />
+            <Route path="forgot-password" element={<ForgotPassword/>}/>
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}
@@ -144,6 +146,8 @@ export default function App() {
               />
               <Route path="confirm-request" element={<ConfirmRequest />} />
             </Route>
+            <Route path="documents" element={<CarDocuments />} />
+            <Route path="notification" element={<Notification/>} />
             <Route path="garage" element={<Garage />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
             <Route
@@ -162,6 +166,8 @@ export default function App() {
               <Route path=":slug" element={<ProductModal />} />
               <Route path="cart-page" element={<CartPage />} />
             </Route>
+            <Route path="payment-success" element={<SuccessPage/>} />
+            <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
           </Route>
 
           {/* Admin Routes */}

@@ -1,10 +1,7 @@
 import { useState } from "react";
 import PageLayout from "./components/PageLayout";
 import NotificationList from "./components/notificationList";
-
-function Notification() {
-  const [notificationsCategory, setNotificationsCategory] = useState("All");
-  const notificationData=[
+const notificationData=[
     {
         category:"Warning",
         message: "Your car license is about to expire!",
@@ -42,6 +39,8 @@ function Notification() {
         time: "21:38"
     }
   ]
+export default function Notification() {
+  const [notificationsCategory, setNotificationsCategory] = useState("All");
   return (
     <PageLayout title={"Notifications"}>
       <div className="px-5 py-5 pt-8">
@@ -62,5 +61,3 @@ function Notification() {
     </PageLayout>
   );
 }
-
-export default Notification;

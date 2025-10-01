@@ -44,7 +44,7 @@ export default function LicenseLayout({
       </div>
 
       {/* Main Content */}
-      <div className="mx-4 max-w-4xl rounded-[20px] bg-[#F9FAFC] px-4 pt-6 pb-10 shadow-sm sm:mx-auto sm:px-8">
+      <div className="mx-4 max-w-4xl rounded-[20px] bg-[#F9FAFC] px-4 pt-6 pb-8 shadow-sm sm:mx-auto sm:px-8">
         <h2 className="mb-5 text-center text-[15px] font-normal text-[#05243F]/71">
           {mainContentTitle}
         </h2>

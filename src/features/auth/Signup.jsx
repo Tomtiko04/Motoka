@@ -82,7 +82,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8 flex-1 py-6">
       <div className="animate-fadeIn flex w-full max-w-4xl flex-col-reverse justify-between gap-8 rounded-[20px] bg-white p-4 shadow-lg sm:p-6 md:flex-row md:p-6">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />

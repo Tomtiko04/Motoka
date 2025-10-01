@@ -116,22 +116,22 @@ export default function CarDetailsCard({ onRenewClick, carDetail, isRenew, onSel
 
       <div className="mb-6 flex items-center">
         <div>
-          <div className="text-sm text-[#05243F]/60">Plate No:</div>
+          <div className="text-sm text-[#05243F]/60 text-nowrap">Plate No:</div>
           <div className="text-base font-semibold text-[#05243F]">
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
         <div>
-          <div className="text-sm text-[#05243F]/60">Exp. Date</div>
-          <div className="text-base font-semibold text-[#05243F]">
+          <div className="text-sm text-[#05243F]/60 text-nowrap">Exp. Date</div>
+          <div className="text-base font-semibold text-[#05243F] text-nowrap">
             {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
         <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
         <div>
-          <div className="text-sm text-[#05243F]/60">Car Type</div>
-          <div className="text-base font-semibold text-[#05243F]">
+          <div className="text-sm text-[#05243F]/60 text-nowrap">Car Type</div>
+          <div className="text-base font-semibold text-[#05243F] text-nowrap">
             {carDetail?.vehicle_make || "-"}
           </div>
         </div>
