@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
@@ -21,14 +22,14 @@ const schema = yup.object().shape({
       /^(0\d{10}|(\+234|234)\d{10})$/,
       "Enter a valid Nigerian phone number",
     ),
-  nin: yup.string().required("NIN is required"),
+  // nin: yup.string().required("NIN is required"),
   password: yup
     .string()
     .min(8, "Password must be at least 8 characters")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
     .matches(/[0-9]/, "Password must contain at least one number")
     .matches(
-      /[@$!%*?&]/,
+      /[^A-Za-z0-9]/,
       "Password must contain at least one special character",
     )
     .required("Password is required"),
@@ -63,7 +64,7 @@ export default function Signup() {
           phone_number: data.phone,
           password: data.password.trim(),
           password_confirmation: data.confirmPassword.trim(),
-          nin: data.nin,
+          // nin: data.nin,
         },
         {
           onSuccess: () => {
@@ -81,7 +82,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8 flex-1 py-6">
       <div className="animate-fadeIn flex w-full max-w-4xl flex-col-reverse justify-between gap-8 rounded-[20px] bg-white p-4 shadow-lg sm:p-6 md:flex-row md:p-6">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />
@@ -172,7 +173,7 @@ export default function Signup() {
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label
                 htmlFor="nin"
                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
@@ -191,7 +192,7 @@ export default function Signup() {
                   {errors.nin.message}
                 </p>
               )}
-            </div>
+            </div> */}
 
             <div>
               <label

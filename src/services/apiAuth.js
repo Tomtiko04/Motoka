@@ -16,6 +16,8 @@ export async function login({ email, password }) {
 
     // Stores token securely
     authStorage.setToken(token);
+    // Clear any registration token after full login
+    authStorage.removeRegistrationToken();
 
     return data;
   } catch (error) {
@@ -48,13 +50,13 @@ export async function refreshToken() {
     return newToken;
   } catch (error) {
     authStorage.removeToken();
-    throw new Error("Failed to refresh token");
+    // throw new Error("Failed to refresh token");
   }
 }
 
 export async function logout() {
   try {
-    const { data } = await api.post("/logout2");
+    const { data } = await api.post("/logout");
 
     authStorage.removeToken();
     localStorage.removeItem("userInfo");
@@ -154,5 +156,50 @@ export async function resendVerificationCode(email) {
     throw new Error(
       error.response?.data?.message || "Failed to resend verification code",
     );
+  }
+}
+
+// Send OTP for passwordless login
+export async function sendLoginOtp(email) {
+  try {
+    const { data } = await api.post("/send-login-otp", { email });
+    return data;
+  } catch (error) {
+    if (error.response) {
+      const errorMessage =
+        error.response.data?.email?.[0] ||
+        error.response.data?.message ||
+        "Failed to send login OTP";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error(error.message || "Failed to send login OTP");
+    }
+  }
+}
+
+// Verify OTP for passwordless login
+export async function verifyLoginOtp({ email, otp }) {
+  try {
+    const { data } = await api.post("/verify-login-otp", { email, otp });
+
+    const token = data?.authorization?.token;
+    if (token) {
+      authStorage.setToken(token);
+      // Clear any registration token after full login via OTP
+      authStorage.removeRegistrationToken();
+    }
+
+    return data;
+  } catch (error) {
+    if (error.response) {
+      const errorMessage =
+        error.response.data?.otp?.[0] ||
+        error.response.data?.email?.[0] ||
+        error.response.data?.message ||
+        "Failed to verify login OTP";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error(error.message || "Failed to verify login OTP");
+    }
   }
 }

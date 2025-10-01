@@ -112,9 +112,8 @@ export default function RenewLicense() {
   };
 
   const getCarReminder = (carId) => {
-    // If you have reminders context, use it here
-    // Example: return reminders.find(r => String(r.car_id) === String(carId));
-    return null; // fallback if reminders are not available
+    // Use reminder data directly from carDetail if available
+    return carDetail?.reminder || null;
   };
 
   return (

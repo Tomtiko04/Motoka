@@ -13,7 +13,7 @@ export default function Categories({ selectedCategory, setSelectedCategory }) {
   return (
     <div className="pt-7">
       <h4 className="mb-4 text-sm font-medium text-[#05243F]/44">Categories</h4>
-      <div className="scrollbar-thin scrollbar-track-[#F5F6FA] scrollbar-thumb-[#2389E3] flex h-[200px] w-full flex-row gap-2 overflow-y-auto md:flex-col">
+      <div className="scrollbar-thin scrollbar-track-[#F5F6FA] scrollbar-thumb-[#2389E3] flex h-[fit] w-full flex-row gap-2 overflow-y-auto md:flex-col">
         {categories.map((cat) => (
           <button
             key={cat.key}

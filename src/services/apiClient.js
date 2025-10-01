@@ -1,38 +1,37 @@
 import axios from "axios"
 import { refreshToken } from "./apiAuth"
 import { authStorage } from "../utils/authStorage"
+import config from "../config/config"
 
 // Create a request cache to prevent duplicate requests
 const requestCache = new Map()
 
 const api = axios.create({
-  baseURL: "https://api.motoka.ng/api",
+  baseURL: config.getApiBaseUrl(),
 });
 
 // Add security headers to all requests
 api.interceptors.request.use((config) => {
-  // Use registrationToken for /add-car, otherwise use authToken
+  // Use registrationToken only for specific registration-related endpoints
   const registrationToken = authStorage.getRegistrationToken()
   const authToken = authStorage.getToken()
 
-  // For car-related endpoints, try registration token first
-  if (
+  // Prefer auth token whenever it's available
+  if (authToken) {
+    config.headers.Authorization = `Bearer ${authToken}`
+  } else if (
     config.url &&
-    (config.url.includes("add-car") ||
+    (
+      config.url.includes("add-car") ||
       config.url.includes("car/reg") ||
-      config.url.includes("car-types") ||
-      config.url.includes("cars"))
+      config.url.includes("car-types")
+    )
   ) {
+    // Fall back to registration token only if no auth token exists
     if (registrationToken) {
       console.log(`Using registration token for ${config.url}`)
       config.headers.Authorization = `Bearer ${registrationToken}`
-    } else if (authToken) {
-      console.log(`Using auth token for ${config.url}`)
-      config.headers.Authorization = `Bearer ${authToken}`
     }
-  } else if (authToken) {
-    // For all other endpoints, use auth token
-    config.headers.Authorization = `Bearer ${authToken}`
   }
 
   // Add security headers

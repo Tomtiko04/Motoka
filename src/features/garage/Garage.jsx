@@ -8,11 +8,9 @@ import AddCarCard from "../../components/AddCarCard";
 import { useGetCars } from "../car/useCar";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import CarDetailsCard from "../../components/CarDetailsCard";
-import { useReminders } from '../../context/ReminderContext';
 
 export default function Garage() {
   const { cars, isLoading } = useGetCars();
-  const { reminders } = useReminders();
 
   const navigate = useNavigate();
   function handleLicence() {
@@ -30,8 +28,6 @@ export default function Garage() {
   const userName = localStorage.getItem("userInfo")
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
-
-  const getCarReminder = (carId) => reminders.find(r => String(r.car_id) === String(carId));
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -55,7 +51,6 @@ export default function Garage() {
                 isRenew={true}
                 carDetail={car}
                 onRenewClick={handleRenewLicense}
-                reminderObj={getCarReminder(car.id)}
               />
             ))
           ) : (
