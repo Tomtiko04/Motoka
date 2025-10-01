@@ -81,7 +81,7 @@ export function useLogin() {
         toast.error(err.message);
         navigate("/auth/verify-account");
       } else {
-        toast.error(err.message || "An error occurred while logging in.");
+        toast.error(err.response.data.message || "An error occurred while logging in.");
       }
     },
     onSettled: () => {},
@@ -95,7 +95,7 @@ export function useLogin() {
       toast.success(data.message || "OTP sent to your email");
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to send OTP");
+      toast.error(err.response.data.message || "Failed to send OTP");
     },
     retry: false,
   });
@@ -120,7 +120,7 @@ export function useLogin() {
       navigate("/");
     },
     onError: (err) => {
-      toast.error(err.message || "Invalid OTP");
+      toast.error(err.response.data.message || "Invalid OTP");
     },
     retry: false,
   });

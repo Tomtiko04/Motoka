@@ -42,7 +42,7 @@ export function useInitializePayment() {
     },
     onError: (error) => {
       console.error("Payment initialization failed:", error);
-      toast.error(error?.message || "Payment initialization failed. Please try again.");
+      toast.error(error.response.data.message || "Payment initialization failed. Please try again.");
     }
   });
 
@@ -58,7 +58,7 @@ export function useVerifyPayment() {
   const { mutate: verifyPayment, isPending: isVerifying, error, data } = useMutation({
     mutationFn: verifyPaymentApi,
     onError: (error) => {
-      console.error("Payment verification failed:", error);
+      // console.error("Payment verification failed:", error);
     }
   });
 

@@ -22,7 +22,6 @@ export function useCreateDriverLicense() {
     onError: (error) => {
       toast.error(
         error.response?.data?.message ||
-          error.message ||
           "Failed to create driver license",
       );
     },
@@ -68,7 +67,7 @@ export function useUpdateDriverLicense() {
     },
     onError: (error) => {
       console.error("License update failed:", error);
-      toast.error(error?.message || "Failed to update driver license");
+      toast.error(error.response.data.message || "Failed to update driver license");
     },
   });
 
@@ -94,7 +93,9 @@ export function useDeleteDriverLicense() {
     },
     onError: (error) => {
       console.error("License deletion failed:", error);
-      toast.error(error?.message || "Failed to delete driver license");
+      toast.error(
+        error.response.data.message || "Failed to delete driver license",
+      );
     },
   });
 
