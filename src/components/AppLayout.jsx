@@ -38,7 +38,7 @@ export default function AppLayout() {
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
     // { name: "Ladipo", path: "/ladipo" },
-    { name: "Traffic Rules", path: "/traffic-rules" },
+    // { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Settings", path: "/settings" },
   ];
 

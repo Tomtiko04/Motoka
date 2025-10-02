@@ -11,7 +11,8 @@ const quickActions = [
   {
     icon: <Icon icon="solar:document-bold" fontSize={30} color="#2389E3" />,
     title: "Change of\nOwnership",
-    link: "/ownership",
+    // link: "/ownership",
+    comingSoon: true,
   },
   {
     icon: (
@@ -22,7 +23,8 @@ const quickActions = [
       />
     ),
     title: "Traffic\nRules",
-    link: "/traffic-rules",
+    // link: "/traffic-rules",
+    comingSoon: true,
   },
   {
     icon: (
@@ -33,7 +35,8 @@ const quickActions = [
       />
     ),
     title: "How can\nwe Help?",
-    link: "/help",
+    // link: "/help",
+    comingSoon: true,
   },
   {
     icon: <Icon icon="mdi:car-pickup" fontSize={30} color="#2389E3" />,
@@ -45,7 +48,8 @@ const quickActions = [
       <Icon icon="mingcute:steering-wheel-fill" fontSize={30} color="#2389E3" />
     ),
     title: "New/Renew\nDriver's License",
-    link: "/licenses/drivers-license",
+    // link: "/licenses/drivers-license",
+    comingSoon: true,
   },
   {
     icon: (
@@ -56,12 +60,14 @@ const quickActions = [
       />
     ),
     title: "Request\nPlate Number",
-    link: "/licenses/plate-number",
+    // link: "/licenses/plate-number",
+    comingSoon: true,
   },
   {
     icon: <Icon icon="jam:plane-f" fontSize={30} color="#2389E3" />,
     title: "International\nDriver's License",
-    link: "/licenses/international-driver's-license",
+    // link: "/licenses/international-driver's-license",
+    comingSoon: true,
   },
 ];
 
@@ -76,9 +82,15 @@ export default function QuickActions() {
           <Link
             key={index}
             to={action.link}
-            className="group relative flex h-[161px] flex-col justify-between rounded-3xl bg-white px-2 sm:px-4 py-6 will-change-transform hover:border-2 hover:border-[#45A1F2] hover:shadow-lg border-2 border-transparent"
+            className="group relative flex h-[161px] flex-col justify-between rounded-3xl border-2 border-transparent bg-white px-2 py-6 will-change-transform hover:border-2 hover:border-[#45A1F2] hover:shadow-lg sm:px-4"
             style={{ transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
+            {/* Coming Soon Badge */}
+            {action.comingSoon && (
+              <span className="absolute -top-2 -right-2 flex h-[17px] items-center justify-center rounded-full bg-[#FFEFCE] px-2.5 text-[8px] whitespace-nowrap text-[#BA8823]">
+                Coming Soon
+              </span>
+            )}
             <div className="flex flex-col items-start gap-y-10">
               <div
                 className="will-change-transform"
