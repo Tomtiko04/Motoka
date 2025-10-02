@@ -28,7 +28,7 @@ export async function initializePaystackPayment(paymentData) {
  */
 export async function verifyPaystackPayment(reference) {
   try {
-    const { data } = await api.post(`/paystack/verify/${reference}`);
+    const { data } = await api.post(`/payment/paystack/verify/${reference}`);
     return data;
   } catch (error) {
     if (error.response) {

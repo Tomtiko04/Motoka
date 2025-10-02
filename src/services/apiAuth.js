@@ -50,7 +50,7 @@ export async function refreshToken() {
     return newToken;
   } catch (error) {
     authStorage.removeToken();
-    throw new Error("Failed to refresh token");
+    // throw new Error("Failed to refresh token");
   }
 }
 
@@ -200,6 +200,38 @@ export async function verifyLoginOtp({ email, otp }) {
       throw new Error(errorMessage);
     } else {
       throw new Error(error.message || "Failed to verify login OTP");
+    }
+  }
+}
+
+// Forgotten password implementatiom
+export async function ForgotPassword(email){
+  const { data } = await api.post("/send-otp", { email });
+
+  return data;
+}
+
+export async function verifyRestPass({email, otp}){
+  const {data} = await api.post("/verify-otp", {email, otp});
+
+  return data;
+}
+
+export async function ResetPassword({ email, password, password_confirmation, token }){
+  try {
+    const { data } = await api.post("/reset-password", { email, password, password_confirmation, token });
+    return data;
+  } catch (error) {
+    if (error.response) {
+      const errorMessage =
+        error.response.data?.otp?.[0] ||
+        error.response.data?.email?.[0] ||
+        error.response.data?.password?.[0] ||
+        error.response.data?.message ||
+        "Failed to reset password";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error(error.message || "Failed to reset password");
     }
   }
 }

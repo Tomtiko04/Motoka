@@ -1,6 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { login as loginApi } from "../../services/apiAuth";
+import {
+  ForgotPassword as ForgotPasswordApi,
+  login as loginApi,
+  ResetPassword as ResetPasswordApi,
+  verifyRestPass as verifyRestPassApi,
+} from "../../services/apiAuth";
 import { verifyLoginTwoFactor } from "../../services/apiTwoFactor";
 import { signupRequest as signupApi } from "../../services/apiAuth";
 import { verifyAccount as verifyApi } from "../../services/apiAuth";
@@ -42,7 +47,7 @@ export function useLogin() {
       },
       onError: (err) => {
         toast.dismiss();
-        toast.error(err.message || "Failed to verify 2FA code");
+        toast.error(err.response.data.message || "Failed to verify 2FA code");
       },
       retry: false,
     });
@@ -76,7 +81,7 @@ export function useLogin() {
         toast.error(err.message);
         navigate("/auth/verify-account");
       } else {
-        toast.error(err.message || "An error occurred while logging in.");
+        toast.error(err.response.data.message || "An error occurred while logging in.");
       }
     },
     onSettled: () => {},
@@ -90,7 +95,7 @@ export function useLogin() {
       toast.success(data.message || "OTP sent to your email");
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to send OTP");
+      toast.error(err.response.data.message || "Failed to send OTP");
     },
     retry: false,
   });
@@ -115,7 +120,7 @@ export function useLogin() {
       navigate("/");
     },
     onError: (err) => {
-      toast.error(err.message || "Invalid OTP");
+      toast.error(err.response.data.message || "Invalid OTP");
     },
     retry: false,
   });
@@ -155,7 +160,9 @@ export function useSignup() {
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message || "An error occurred during signup.");
+      toast.error(
+        err.response.data.message || "An error occurred during signup.",
+      );
     },
     retry: false,
   });
@@ -176,7 +183,9 @@ export function useVerifyAccount() {
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message || "Verification failed. Please try again.");
+      toast.error(
+        err.response.data.message || "Verification failed. Please try again.",
+      );
     },
     retry: false,
   });
@@ -190,9 +199,54 @@ export function useResendVerification() {
       toast.success(data.message || "Verification code resent!");
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to resend code.");
+      toast.error(err.response.data.message || "Failed to resend code.");
     },
     retry: false,
   });
   return { resendCode, isResending };
+}
+
+export function useForgotPassword(){
+  const { mutate: isforgotPassword, mutateAsync: forgotPasswordAsync, isPending: isForgotPasswordLoading } = useMutation({
+    mutationFn: ForgotPasswordApi,
+    onSuccess: (data) => {
+      toast.success(data.message || "OTP sent to your email.");
+    },
+    onError: (err) => {
+      toast.error(err.response.data.message || "Failed to send OTP.");
+    },
+  });
+
+  return { isforgotPassword, forgotPasswordAsync, isForgotPasswordLoading}
+}
+
+export function useVerifyResetPassword(){
+  const {mutate: isVerifyReset, mutateAsync: verifyResetAsync, isPending: isVerifyingReset} = useMutation({
+    mutationFn: verifyRestPassApi,
+    onSuccess: (data) => {
+      toast.success(data.message || "OTP verified");
+    },
+    onError: (err) => {
+      toast.error(err.response.data.message || "Failed to verify OTP.");
+    },
+  })
+  
+  return { isVerifyReset, verifyResetAsync, isVerifyingReset}
+}
+
+export function useResetPassword(){
+  const {mutate: isResetPassword, mutateAsync: resetPasswordAsync, isPending: isResetingPassword} = useMutation({
+    mutationFn: ResetPasswordApi,
+    onSuccess: (data) => {
+      toast.success(data.message || "Password reset successful! You can now log in with your new password.");
+    },
+    onError: (err) => {
+      toast.error(
+        err.response.data.message ||
+          "Failed to reset password. Please try again.",
+      );
+    },
+  })
+
+  return { isResetPassword, resetPasswordAsync, isResetingPassword}
 }

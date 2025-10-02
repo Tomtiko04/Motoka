@@ -36,8 +36,9 @@ export default function Dashboard() {
     : "";
 
   const sortedCars = React.useMemo(() => {
-    if (!Array.isArray(cars?.cars)) return [];
-    return [...cars.cars].sort((a, b) => {
+    if (!cars?.cars) return [];
+    const carArray = Object.values(cars.cars);
+    return carArray.sort((a, b) => {
       const dateA = new Date(a.expiryDate || a.expiry_date);
       const dateB = new Date(b.expiryDate || b.expiry_date);
       return dateA - dateB;
@@ -51,11 +52,11 @@ export default function Dashboard() {
 
       <div className="mb-8">
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center ">
+          <div className="flex h-64 items-center justify-center">
             <LoadingSpinner />
           </div>
-        ) : Array.isArray(cars?.cars) && cars.cars.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
+        ) : sortedCars.length > 0 ? (
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
               <Swiper
                 modules={[Pagination, Autoplay]}
@@ -68,7 +69,7 @@ export default function Dashboard() {
                 }}
                 // className="!pb-12 h-full"
               >
-                {sortedCars.map((car, index) => (
+                {sortedCars?.map((car, index) => (
                   <SwiperSlide key={car.id || index}>
                     <div>
                       <CarDetailsCard
@@ -89,9 +90,12 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="col-span-2 flex flex-col items-center justify-center rounded-2xl bg-white p-8 text-center">
               <FaCarAlt className="mb-4 text-5xl text-[#2389E3]/20" />
-              <h3 className="mb-2 text-xl font-semibold text-[#05243F]">No Cars Found</h3>
+              <h3 className="mb-2 text-xl font-semibold text-[#05243F]">
+                No Cars Found
+              </h3>
               <p className="mb-6 text-sm text-[#05243F]/60">
-                You haven't added any cars to your garage yet. Add your first car to get started!
+                You haven't added any cars to your garage yet. Add your first
+                car to get started!
               </p>
               <button
                 onClick={handleAddCar}

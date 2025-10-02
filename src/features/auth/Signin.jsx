@@ -100,7 +100,7 @@ export default function Signin() {
       },
       onError: (err) => {
         toast.dismiss(loadingToast);
-        toast.error(err.message || "Failed to send OTP");
+        toast.error(err.response.data.message || "Failed to send OTP");
       },
     });
   };
@@ -125,7 +125,7 @@ export default function Signin() {
   };
 
   return (
-    <div className="flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 flex-1">
+    <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
       <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between gap-4 overflow-hidden rounded-[20px] bg-white p-3 shadow-lg sm:p-4 md:flex-row md:p-5">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />
@@ -160,14 +160,14 @@ export default function Signin() {
                 htmlFor="email"
                 className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2"
               >
-                Email/Phone no.
+                Email
               </label>
               <input
                 id="email"
                 {...register("email")}
                 placeholder="sample@gmail.com"
                 disabled={isLoggingIn || isSendingLoginOtp}
-                className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
+                className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                   isLoggingIn || isSendingLoginOtp
                     ? "cursor-not-allowed opacity-50"
                     : ""
@@ -193,7 +193,7 @@ export default function Signin() {
                   {...register("password")}
                   type={!showPassword ? "password" : "text"}
                   disabled={isLoggingIn}
-                  className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm font-semibold text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
+                  className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                     isLoggingIn ? "cursor-not-allowed opacity-50" : ""
                   }`}
                 />
@@ -280,7 +280,7 @@ export default function Signin() {
             <div className="mt-4 text-center">
               <Link
                 to="/auth/otp-login"
-                className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
+                className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#2389E3]/70"
               >
                 Login using OTP instead
               </Link>

@@ -76,7 +76,7 @@ export default function WelcomeSection({ userName }) {
     const savedState = localStorage.getItem("showBalance");
     return savedState !== null ? JSON.parse(savedState) : true;
   });
-  const balance = 234098;
+  const balance = 0;
 
   useEffect(() => {
     localStorage.setItem("showBalance", JSON.stringify(showBalance));

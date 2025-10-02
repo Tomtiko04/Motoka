@@ -29,4 +29,6 @@ dist-ssr
 
 # Documentation Files (exclude from repository)
 README.md
-*.md
+ENVIRONMENT_SETUP.md
+src/components/README_AutoFill.md
+src/docs/AutoFillFlow.md

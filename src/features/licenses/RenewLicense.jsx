@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useGetState, useGetLocalGovernment } from "./useRenew";
 import { useInitializePayment } from "./usePayment";
 import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
-import { Icon } from "@iconify/react";
+import { checkExistingPayments } from "../../services/apiPayment";
 import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
@@ -14,8 +14,7 @@ export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
   const carDetail = location?.state?.carDetail;
-  const getCarReminder = (carId) =>
-    carDetail?.reminder || null;
+  const getCarReminder = (carId) => carDetail?.reminder || null;
 
   // Payment data
   const [paymentHeads, setPaymentHeads] = useState([]);
@@ -23,6 +22,8 @@ export default function RenewLicense() {
   const [loadingPayments, setLoadingPayments] = useState(true);
   const [selectedDocs, setSelectedDocs] = useState([]);
   const [selectedSchedules, setSelectedSchedules] = useState([]); // array of payment schedule objects
+  const [existingPayments, setExistingPayments] = useState([]);
+  const [duplicateCheckLoading, setDuplicateCheckLoading] = useState(false);
 
   // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
@@ -52,6 +53,7 @@ export default function RenewLicense() {
   const isState = state?.data;
 
   // Fetch payment heads and schedules on mount
+  // Fetch payment heads and schedules on mount
   useEffect(() => {
     async function fetchData() {
       setLoadingPayments(true);
@@ -60,8 +62,24 @@ export default function RenewLicense() {
           fetchPaymentHeads(),
           fetchPaymentSchedules(),
         ]);
-        setPaymentHeads(heads);
-        setPaymentSchedules(schedules);
+
+        const filteredHeads =
+          carDetail?.car_type === "private" ||
+          carDetail?.car_type === "government"
+            ? heads.filter((h) => h.payment_head_name !== "Hackney Permit")
+            : heads;
+
+        setPaymentHeads(filteredHeads);
+
+        const filteredSchedules =
+          carDetail?.car_type === "private" ||
+          carDetail?.car_type === "government"
+            ? schedules.filter(
+                (s) => s.payment_head?.payment_head_name !== "Hackney Permit",
+              )
+            : schedules;
+
+        setPaymentSchedules(filteredSchedules);
       } catch (error) {
         console.error("Error fetching payment data:", error);
         setPaymentHeads([]);
@@ -71,7 +89,22 @@ export default function RenewLicense() {
       }
     }
     fetchData();
-  }, []);
+  }, [carDetail?.car_type]);
+
+  // Default-select all document types when payment heads load
+  useEffect(() => {
+    if (paymentHeads?.length && selectedDocs.length === 0) {
+      const validDocs = paymentHeads.map((h) => h.payment_head_name);
+
+      const filteredDocs =
+        carDetail?.car_type === "private" ||
+        carDetail?.car_type === "government"
+          ? validDocs.filter((d) => d !== "Hackney Permit")
+          : validDocs;
+
+      setSelectedDocs(filteredDocs);
+    }
+  }, [paymentHeads, selectedDocs.length, carDetail?.car_type]);
 
   // When selectedDocs changes, update selectedSchedules and amount
   useEffect(() => {
@@ -80,10 +113,82 @@ export default function RenewLicense() {
       selectedDocs.includes(sch.payment_head?.payment_head_name),
     );
     setSelectedSchedules(selected);
-    // Sum the amounts for all selected (unit_cost)
-    const total = selected.reduce((sum, sch) => sum + Number(sch.amount), 0);
-    setDeliveryDetails((prev) => ({ ...prev, amount: total })); // store as number
   }, [selectedDocs, paymentSchedules]);
+
+  // Update amount based on available schedules (excluding already paid ones)
+  useEffect(() => {
+    // Calculate available schedules (excluding already paid ones)
+    let availableSchedules = selectedSchedules;
+    if (existingPayments.length > 0) {
+      const existingPaymentHeadNames = existingPayments.map(
+        (p) => p.payment_head_name,
+      );
+      availableSchedules = selectedSchedules.filter(
+        (schedule) =>
+          !existingPaymentHeadNames.includes(
+            schedule.payment_head?.payment_head_name,
+          ),
+      );
+    }
+
+    const total = availableSchedules.reduce(
+      (sum, sch) => sum + Number(sch.amount),
+      0,
+    );
+    setDeliveryDetails((prev) => ({ ...prev, amount: total }));
+  }, [selectedSchedules, existingPayments]);
+
+  // Check for existing payments when selectedSchedules changes
+  useEffect(() => {
+    if (selectedSchedules.length > 0 && carDetail?.slug) {
+      checkForExistingPayments();
+    }
+  }, [selectedSchedules, carDetail?.slug]);
+
+  const checkForExistingPayments = async () => {
+    if (selectedSchedules.length === 0) return;
+
+    console.log("🔍 Checking existing payments...", {
+      selectedSchedules: selectedSchedules.map((s) => ({
+        id: s.id,
+        name: s.payment_head?.payment_head_name,
+      })),
+      carSlug: carDetail?.slug,
+    });
+
+    setDuplicateCheckLoading(true);
+    try {
+      const paymentScheduleIds = selectedSchedules.map(
+        (schedule) => schedule.id,
+      );
+
+      console.log("📡 Calling checkExistingPayments API with:", {
+        car_slug: carDetail.slug,
+        payment_schedule_ids: paymentScheduleIds,
+      });
+
+      const result = await checkExistingPayments(
+        carDetail.slug,
+        paymentScheduleIds,
+      );
+
+      console.log("✅ API Response:", result);
+
+      if (result.status) {
+        setExistingPayments(result.data.existing_payments || []);
+        console.log(
+          "📋 Existing payments set:",
+          result.data.existing_payments || [],
+        );
+      } else {
+        console.error("❌ API returned false status:", result);
+      }
+    } catch (error) {
+      console.error("❌ Error checking existing payments:", error);
+    } finally {
+      setDuplicateCheckLoading(false);
+    }
+  };
 
   // Update lgaOptions when lgaData changes
   useEffect(() => {
@@ -109,7 +214,22 @@ export default function RenewLicense() {
       deliveryDetails.lg.trim() !== "" &&
       deliveryDetails.state.trim() !== "" &&
       deliveryDetails.contact.trim() !== "" &&
-      selectedSchedules.length > 0
+      selectedSchedules.length > 0 &&
+      getAvailableSchedules().length > 0 // Has available (unpaid) schedules
+    );
+  };
+
+  const getAvailableSchedules = () => {
+    if (existingPayments.length === 0) return selectedSchedules;
+
+    const existingPaymentHeadNames = existingPayments.map(
+      (p) => p.payment_head_name,
+    );
+    return selectedSchedules.filter(
+      (schedule) =>
+        !existingPaymentHeadNames.includes(
+          schedule.payment_head?.payment_head_name,
+        ),
     );
   };
 
@@ -183,52 +303,42 @@ export default function RenewLicense() {
       return;
     }
 
-    // Create payload for each selected schedule
-    const paymentPayloads = selectedSchedules.map((schedule) => ({
+    // Get only available schedules (no duplicates)
+    const availableSchedules = getAvailableSchedules();
+
+    if (availableSchedules.length === 0) {
+      alert(
+        "All selected document types have already been paid for. Please select different documents.",
+      );
+      return;
+    }
+
+    // Create payload for bulk payment (supports multiple schedules)
+    const paymentPayload = {
       car_slug: carDetail?.slug,
-      payment_schedule_id: schedule.id,
+      payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
       meta_data: {
         delivery_address: deliveryDetails.address,
         delivery_contact: deliveryDetails.contact,
         state_id: stateId,
         lga_id: lgaId,
       },
-    }));
+    };
 
-    // Initialize payment for the first schedule (you might want to handle multiple payments differently)
-    if (paymentPayloads.length > 0) {
-      startPayment(paymentPayloads[0]);
+    // Initialize payment for all selected schedules
+    if (paymentPayload.payment_schedule_id.length > 0) {
+      startPayment(paymentPayload);
     }
-
-    // TODO works for multiple
-    // const paymentPayload = {
-    //   car_id: carDetail?.id,
-    //   payment_schedule_id: selectedSchedules.map((schedule) => schedule.id),
-    //   meta_data: {
-    //     delivery_address: deliveryDetails.address,
-    //     delivery_contact: deliveryDetails.contact,
-    //     state_id: stateId,
-    //     lga_id: lgaId,
-    //   },
-    // };
-
-    // if (paymentPayload.payment_schedule_id.length > 0) {
-    //   startPayment(paymentPayload);
-    // }
   };
 
   // Navigate to payment page after successful payment initialization
   React.useEffect(() => {
-    if (
-      paymentInitData &&
-      paymentInitData.data &&
-      paymentInitData.data.data
-    ) {
+    if (paymentInitData && paymentInitData.data && paymentInitData.data.data) {
       // Create a complete payment data object that includes all necessary information
       const completePaymentData = {
         ...paymentInitData.data.data,
         car_slug: carDetail?.slug,
-        selectedSchedules: selectedSchedules,
+        selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
         deliveryDetails: {
           address: deliveryDetails.address,
           contact: deliveryDetails.contact,
@@ -241,12 +351,18 @@ export default function RenewLicense() {
           delivery_contact: deliveryDetails.contact,
           state_id: getStateId(),
           lga_id: getLgaId(),
-        }
+        },
       };
-      
+
       navigate("/payment", { state: { paymentData: completePaymentData } });
     }
-  }, [paymentInitData, navigate, carDetail, selectedSchedules, deliveryDetails]);
+  }, [
+    paymentInitData,
+    navigate,
+    carDetail,
+    selectedSchedules,
+    deliveryDetails,
+  ]);
 
   return (
     <>
@@ -276,8 +392,44 @@ export default function RenewLicense() {
             />
 
             {/* Document Details */}
-            <div className="mt-8">
+            <div className="mt-6">
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
+
+              {/* Duplicate Payment Warning */}
+              {existingPayments.length > 0 && (
+                <div className="mb-4 rounded-lg border border-[#FDB022] bg-[#FFFCF5] p-4">
+                  <div className="flex items-start">
+                    <div className="mr-3 text-[#FDB022]">
+                      <svg
+                        className="h-5 w-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-[#FDB022]">
+                        Already Paid Documents
+                      </h4>
+                      <p className="mt-1 text-sm text-[#5C3D0B]">
+                        You have already paid for:{" "}
+                        {existingPayments
+                          .map((p) => p.payment_head_name)
+                          .join(", ")}
+                      </p>
+                      <p className="mt-1 text-xs text-[#5C3D0B]">
+                        These documents will be excluded from your payment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-3">
                 {loadingPayments ? (
                   <div className="mx-auto my-10 flex items-center justify-center">
@@ -286,20 +438,30 @@ export default function RenewLicense() {
                     </div>
                   </div>
                 ) : (
-                  docOptions.map((doc) => (
-                    <button
-                      key={doc}
-                      type="button"
-                      onClick={() => handleToggleDoc(doc)}
-                      className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
-                        selectedDocs.includes(doc)
-                          ? "bg-[#2284DB] text-white"
-                          : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"
-                      } `}
-                    >
-                      {doc}
-                    </button>
-                  ))
+                  docOptions.map((doc) => {
+                    const isAlreadyPaid = existingPayments.some(
+                      (p) => p.payment_head_name === doc,
+                    );
+                    const isSelected = selectedDocs.includes(doc);
+
+                    return (
+                      <button
+                        key={doc}
+                        type="button"
+                        onClick={() => !isAlreadyPaid && handleToggleDoc(doc)}
+                        disabled={isAlreadyPaid}
+                        className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
+                          isAlreadyPaid
+                            ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                            : isSelected
+                              ? "bg-[#2284DB] text-white"
+                              : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"
+                        } `}
+                      >
+                        {doc}
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -426,16 +588,38 @@ export default function RenewLicense() {
               {/* Pay Now Button */}
               <button
                 onClick={handlePayNow}
-                disabled={isPaymentInitializing || !isFormValid()}
+                disabled={
+                  isPaymentInitializing ||
+                  !isFormValid() ||
+                  duplicateCheckLoading
+                }
                 className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
-                ₦
-                {(
-                  Number(deliveryDetails.amount) + Number(deliveryDetails.fee)
-                ).toLocaleString()}{" "}
-                Pay Now
-                {isPaymentInitializing && "..."}
+                {duplicateCheckLoading ? (
+                  "Checking for existing payments..."
+                ) : existingPayments.length > 0 &&
+                  getAvailableSchedules().length === 0 ? (
+                  "All documents already paid"
+                ) : (
+                  <>
+                    ₦
+                    {(
+                      Number(deliveryDetails.amount) +
+                      Number(deliveryDetails.fee)
+                    ).toLocaleString()}{" "}
+                    Pay Now
+                    {isPaymentInitializing && "..."}
+                  </>
+                )}
               </button>
+
+              {/* Additional info for duplicate payments */}
+              {existingPayments.length > 0 &&
+                getAvailableSchedules().length > 0 && (
+                  <p className="mt-2 text-center text-xs text-gray-600">
+                    Only unpaid documents will be processed
+                  </p>
+                )}
             </div>
           </div>
         </div>

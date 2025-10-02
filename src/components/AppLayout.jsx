@@ -11,13 +11,24 @@ import { logout } from "../services/apiAuth";
 import { authStorage } from "../utils/authStorage";
 
 import Avarta from "../assets/images/avarta.png";
-import Logo from "../assets/images/Logo.png";
 import Logo2 from "../assets/images/Logo.svg";
+import { useNotifications } from "../features/notifications/useNotification";
 
-export default function AppLayout({ onNavigate }) {
+export default function AppLayout() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { data: notifications } = useNotifications();
 
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
+  const totalLength = notifications?.data
+    ? Object.values(notifications.data).reduce(
+        (sum, arr) => sum + arr.length,
+        0,
+      )
+    : 0;
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -26,8 +37,8 @@ export default function AppLayout({ onNavigate }) {
     { name: "Dashboard", path: "/dashboard" },
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
-    { name: "Ladipo", path: "/ladipo" },
-    { name: "Traffic Rules", path: "/traffic-rules" },
+    // { name: "Ladipo", path: "/ladipo" },
+    // { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Settings", path: "/settings" },
   ];
 
@@ -74,11 +85,11 @@ export default function AppLayout({ onNavigate }) {
 
   return (
     <div className="flex items-center justify-center bg-[#F4F5FC]">
-      <div className="mt-4 w-full max-w-4xl">
+      <div className="w-full max-w-4xl sm:mt-4">
         {/* Header Navigation */}
-        <header className="sticky top-0 z-50 rounded-full bg-white shadow-sm">
-          <div className="mx-auto max-w-7xl px-4 py-0 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
+        <header className="sticky top-0 z-10 h-16 bg-white shadow-sm sm:rounded-full">
+          <div className="mx-auto flex h-full max-w-7xl items-center px-4 py-0 sm:px-6 lg:px-8">
+            <div className="flex w-full items-center justify-between">
               {/* <div
                 onClick={handleHome}
                 className="flex cursor-pointer items-center gap-2"
@@ -89,15 +100,22 @@ export default function AppLayout({ onNavigate }) {
                 </span>
               </div> */}
 
-              <div onClick={handleHome} className="cursor-pointer">
-                <img src={Logo2} alt="Motoka" className="h-18" />
+              <div
+                onClick={handleHome}
+                className="flex cursor-pointer items-center"
+              >
+                <img
+                  src={Logo2}
+                  alt="Motoka"
+                  className="h-8 w-8 object-contain block"
+                />
               </div>
 
               {/* Mobile menu button and notifications */}
               <div className="flex items-center gap-4 md:hidden">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notification")}
+                  onClick={() => navigate("/notifications")}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -105,7 +123,7 @@ export default function AppLayout({ onNavigate }) {
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    3
+                    {totalLength}
                   </span>
                 </div>
                 <button
@@ -122,26 +140,29 @@ export default function AppLayout({ onNavigate }) {
 
               {/* Desktop Navigation */}
               <nav className="hidden space-x-6 md:flex">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`relative text-sm font-medium transition-colors ${
-                      location.pathname === link.path
-                        ? "text-[#2389E3] after:absolute after:bottom-[-27px] after:left-0 after:h-1 after:w-full after:rounded-t-md after:bg-[#2389E3]"
-                        : "text-[#05243F]/60 hover:text-[#05243F]"
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = location.pathname.startsWith(link.path);
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`relative text-sm font-medium transition-colors ${
+                        isActive
+                          ? "text-[#2389E3] after:absolute after:bottom-[-24px] after:left-0 after:h-1 after:w-full after:rounded-t-md after:bg-[#2389E3]"
+                          : "text-[#05243F]/60 hover:text-[#05243F]"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
               </nav>
 
               {/* User Actions */}
               <div className="hidden items-center gap-4 md:flex">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notification")}
+                  onClick={() => navigate("/notifications")}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -149,10 +170,9 @@ export default function AppLayout({ onNavigate }) {
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    3
+                    {totalLength}
                   </span>
                 </div>
-                {/* When you click it will show a drop down */}
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img
                     src={Avarta}
@@ -179,11 +199,12 @@ export default function AppLayout({ onNavigate }) {
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-[#F4F5FC] p-4">
-              <div className="flex items-center gap-2">
-                <img src={Logo} alt="Motoka" className="h-8 w-8" />
-                <span className="text-lg font-semibold text-[#05243F]">
-                  Motoka
-                </span>
+              <div>
+                <img
+                  src={Logo2}
+                  alt="Motoka"
+                  className="block h-8 w-8 object-contain "
+                />
               </div>
               <button
                 onClick={toggleMenu}
@@ -194,20 +215,23 @@ export default function AppLayout({ onNavigate }) {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-6">
               <nav className="flex flex-col space-y-2">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                      location.pathname === link.path
-                        ? "bg-[#F4F5FC] font-semibold text-[#2389E3]"
-                        : "text-[#05243F]/60 hover:bg-[#F4F5FC] hover:text-[#05243F]"
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = location.pathname.startsWith(link.path);
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-[#F4F5FC] font-semibold text-[#2389E3]"
+                          : "text-[#05243F]/60 hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
                 {/* Logout Button */}
                 <button
                   className="mt-4 flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-[#A73957] hover:bg-[#F4F5FC]"
@@ -227,16 +251,16 @@ export default function AppLayout({ onNavigate }) {
             <div className="border-t border-[#F4F5FC] p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                  {/* <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                     <img
                       src={Avarta}
                       lazyloading="lazy"
                       alt="User"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover block"
                     />
-                  </div>
+                  </div> */}
                   <span className="text-sm font-medium text-[#05243F]">
-                    Anjola
+                    {userName}
                   </span>
                 </div>
               </div>

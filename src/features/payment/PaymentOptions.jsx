@@ -6,14 +6,54 @@ import { toast } from "react-hot-toast";
 import {
   initiateMonicreditPayment,
 } from "../../services/apiMonicredit";
-import { verifyPayment as verifyPaymentApi } from "../../services/apiPayment";
+import { verifyPayment as verifyPaymentApi, verifyPaystackPayment, getPaystackReference } from "../../services/apiPayment";
+import { initializePaystackPayment } from "../../services/apiPaystack";
 import { usePaystackPayment } from "./usePaystackPayment";
 
 export default function PaymentOptions() {
   const navigate = useNavigate();
   const location = useLocation();
   const paymentData = location.state?.paymentData;
-  const [selectedPayment, setSelectedPayment] = useState("transfer");
+  
+  // Check if this is a fallback from Monicredit or return from Paystack
+  const urlParams = new URLSearchParams(location.search);
+  const isFallback = urlParams.get('fallback') === 'true';
+  const fallbackData = urlParams.get('data');
+  const paystackReturn = urlParams.get('paystack') === 'true';
+  const paystackRef = urlParams.get('ref');
+  
+  const [selectedPayment, setSelectedPayment] = useState(isFallback || paystackReturn ? "paystack" : "transfer");
+
+  // Handle fallback from Monicredit
+  useEffect(() => {
+    if (isFallback && fallbackData) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(fallbackData));
+        console.log("Fallback data received:", parsedData);
+        
+        // Show notification about fallback
+        toast.info("Monicredit payment failed, using Paystack instead", {
+          duration: 5000,
+        });
+      } catch (error) {
+        console.error("Error parsing fallback data:", error);
+      }
+    }
+  }, [isFallback, fallbackData]);
+
+  // Handle return from Paystack
+  useEffect(() => {
+    if (paystackReturn && paystackRef) {
+      console.log("Returned from Paystack with reference:", paystackRef);
+      setPaystackReference(paystackRef);
+      setSelectedPayment("paystack");
+      
+      // Show notification
+      toast.info("Welcome back! Please verify your payment below.", {
+        duration: 5000,
+      });
+    }
+  }, [paystackReturn, paystackRef]);
 
   // Monicredit payment state
   const [monicreditAuthUrl, setMonicreditAuthUrl] = useState("");
@@ -28,6 +68,10 @@ export default function PaymentOptions() {
     isInitializing: isPaystackInitializing,
     error: paystackError,
   } = usePaystackPayment();
+
+  // Paystack verification state
+  const [paystackReference, setPaystackReference] = useState("");
+  const [paystackAuthUrl, setPaystackAuthUrl] = useState("");
 
   const paymentMethods = [
     // { id: "wallet", label: "Wallet Balance: N30,876" },
@@ -164,9 +208,18 @@ export default function PaymentOptions() {
         // Expecting { authorization_url, reference } or similar
         const authUrl = res.authorization_url || res.data?.authorization_url || res.url;
         const reference = res.reference || res.data?.reference || res.data?.reference_code;
+        console.log('Paystack init response:', res);
+        console.log('Extracted authUrl:', authUrl);
+        console.log('Extracted reference:', reference);
+        
         if (!authUrl) throw new Error("Missing authorization URL from Paystack init");
         setPaystackAuthUrl(authUrl);
-        if (reference) setPaystackReference(reference);
+        if (reference) {
+          console.log('Setting Paystack reference:', reference);
+          setPaystackReference(reference);
+        } else {
+          console.warn('No reference found in Paystack response');
+        }
       } catch (err) {
         setPaystackError(err.message || "Failed to initialize Paystack");
       } finally {
@@ -187,6 +240,15 @@ export default function PaymentOptions() {
       return;
     }
 
+    // Clear any previous payment state
+    setPaystackReference("");
+    setVerifyError("");
+    setVerifyResult(null);
+    setVerifying(false);
+    
+    // Clear old payment data from localStorage
+    localStorage.removeItem('recentPayments');
+
     try {
       // Debug: Log the payment data to see what we have
       console.log("Payment Data:", paymentData);
@@ -194,7 +256,17 @@ export default function PaymentOptions() {
       // Extract the necessary data from paymentData
       // The paymentData might have different structures depending on how it was passed
       const car_slug = paymentData.car_slug || paymentData.car?.slug;
-      const payment_schedule_id = paymentData.payment_schedule_id || paymentData.selectedSchedules?.[0]?.id;
+      
+      // Handle both single and bulk payments
+      let payment_schedule_id = paymentData.payment_schedule_id;
+      if (paymentData.selectedSchedules && Array.isArray(paymentData.selectedSchedules)) {
+        // If we have selectedSchedules array, use those IDs
+        payment_schedule_id = paymentData.selectedSchedules.map(schedule => schedule.id);
+      } else if (paymentData.payment_schedule_id && !Array.isArray(paymentData.payment_schedule_id)) {
+        // If it's a single ID, ensure it's in array format for consistency
+        payment_schedule_id = [paymentData.payment_schedule_id];
+      }
+      
       const delivery_address = paymentData.delivery_address || paymentData.deliveryDetails?.address || paymentData.meta_data?.delivery_address;
       const delivery_contact = paymentData.delivery_contact || paymentData.deliveryDetails?.contact || paymentData.meta_data?.delivery_contact;
       const state_id = paymentData.state_id || paymentData.deliveryDetails?.state_id || paymentData.meta_data?.state_id;
@@ -206,7 +278,7 @@ export default function PaymentOptions() {
         return;
       }
       
-      if (!payment_schedule_id) {
+      if (!payment_schedule_id || (Array.isArray(payment_schedule_id) && payment_schedule_id.length === 0)) {
         toast.error("Payment schedule information is missing");
         return;
       }
@@ -214,7 +286,7 @@ export default function PaymentOptions() {
       // Prepare data in the format expected by the backend
       const paystackData = {
         car_slug: car_slug,
-        payment_schedule_id: payment_schedule_id,
+        payment_schedule_id: payment_schedule_id, // Can be single ID or array
         meta_data: {
           delivery_address: delivery_address || "",
           delivery_contact: delivery_contact || "",
@@ -225,19 +297,38 @@ export default function PaymentOptions() {
 
       console.log("Paystack Data:", paystackData);
 
-      const result = await initializePaystack(paystackData);
+      const result = await initializePaystackPayment(paystackData);
+      console.log('Paystack init result:', result);
       
       if (result?.data?.authorization_url) {
-        // Navigate to Paystack payment page
-        navigate("/payment/paystack", { 
-          state: { 
-            paymentData: {
-              ...paymentData,
-              authorization_url: result.data.authorization_url,
-              reference: result.data.reference
-            }
-          } 
-        });
+        // Store the Paystack reference for verification
+        if (result.data.reference) {
+          setPaystackReference(result.data.reference);
+          console.log('Stored Paystack reference:', result.data.reference);
+          
+          // Store in localStorage for auto-verification
+          const recentPayments = JSON.parse(localStorage.getItem('recentPayments') || '[]');
+          recentPayments.unshift({
+            reference: result.data.reference,
+            gateway: 'paystack',
+            timestamp: Date.now(),
+            amount: result.data.amount || paymentData.amount
+          });
+          // Keep only last 5 payments
+          localStorage.setItem('recentPayments', JSON.stringify(recentPayments.slice(0, 5)));
+          
+          // Auto-verification will be handled by useEffect when paystackReference changes
+        }
+        
+        // Open Paystack payment page in new window
+        window.open(result.data.authorization_url, '_blank');
+        
+        // Show success message
+        toast.success('Redirecting to Paystack payment page...');
+        
+        // Show verification button after payment initiation
+        console.log('Payment initiated. User can now verify after completing payment.');
+        
       } else {
         toast.error("Failed to initialize Paystack payment");
       }
@@ -261,7 +352,8 @@ export default function PaymentOptions() {
       console.log("result", result);
       setVerifyResult(result);
     } catch (err) {
-      setVerifyError(err.message || "Failed to verify payment. Please try again.");
+      console.error('Bank transfer verification error:', err);
+      setVerifyError(err?.message || err?.toString() || "Failed to verify payment. Please try again.");
     } finally {
       setVerifying(false);
     }
@@ -290,16 +382,86 @@ export default function PaymentOptions() {
     setVerifyError("");
     setVerifyResult(null);
     try {
-      const ref = paystackReference || paymentData?.transid;
-      if (!ref) throw new Error("No Paystack reference found.");
-      const result = await verifyPaystackPayment(ref);
+      console.log('=== VERIFYING PAYSTACK PAYMENT ===');
+      console.log('paystackReference state:', paystackReference);
+      
+      if (!paystackReference) {
+        throw new Error("No Paystack reference found. Please initialize a Paystack payment first.");
+      }
+      
+      console.log('Calling POST /api/payment/paystack/verify/' + paystackReference);
+      const result = await verifyPaystackPayment(paystackReference);
+      console.log('Verification successful:', result);
       setVerifyResult(result);
+      
+      // Show success message
+      toast.success('Payment verified successfully! Orders are being created...');
+      
+      // Clear the reference after successful verification
+      setPaystackReference("");
+      
     } catch (err) {
-      setVerifyError(err.message || "Failed to verify Paystack payment.");
+      console.error('Verification failed:', err);
+      setVerifyError(err?.message || err?.toString() || "Failed to verify Paystack payment.");
+      toast.error('Verification failed: ' + (err?.message || err?.toString() || 'Unknown error'));
     } finally {
       setVerifying(false);
     }
   };
+
+  // Clear payment state when component mounts with new payment data
+  React.useEffect(() => {
+    if (paymentData) {
+      setPaystackReference("");
+      setVerifyError("");
+      setVerifyResult(null);
+      setVerifying(false);
+    }
+  }, [paymentData]);
+
+  // Auto-verify when paystackReference changes
+  React.useEffect(() => {
+    if (paystackReference) {
+      console.log('Paystack reference changed, auto-verifying:', paystackReference);
+      setTimeout(() => {
+        handleVerifyPaystack();
+      }, 60000); // 1 minute delay
+    }
+  }, [paystackReference]);
+
+  // Auto-verify payments on page load (only if returning from Paystack)
+  React.useEffect(() => {
+    // Only auto-verify if we have a reference from URL params (returning from Paystack)
+    if (paystackRef) {
+      console.log('Setting Paystack reference from URL:', paystackRef);
+      setPaystackReference(paystackRef);
+      // Auto-verification will be handled by useEffect when paystackReference changes
+    }
+  }, [paystackRef]);
+
+  // Listen for payment success messages from callback window
+  React.useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data.type === 'PAYMENT_SUCCESS') {
+        console.log('Payment success message received:', event.data);
+        toast.success('Payment completed successfully! Orders are being created...');
+        
+        // Set the reference for verification
+        if (event.data && event.data.reference) {
+          console.log('Setting Paystack reference from callback:', event.data.reference);
+          setPaystackReference(event.data.reference);
+        } else {
+          console.log('No reference found in payment success message');
+        }
+      } else if (event.data.type === 'PAYMENT_ERROR') {
+        // console.log('Payment error message received');
+        // toast.error('Payment failed. Please try again.');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   React.useEffect(() => {
     if (verifyResult && verifyResult.data.status && paymentData?.car_slug) {
@@ -327,6 +489,35 @@ export default function PaymentOptions() {
         </div>
       </div>
 
+      {/* Fallback Notification */}
+      {isFallback && (
+        <div className="mx-auto mb-4 max-w-4xl">
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-orange-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-orange-800">
+                  <strong>Payment Method Changed:</strong> Monicredit payment
+                  failed, so we've automatically selected Paystack for you.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="mx-auto max-w-4xl rounded-[20px] bg-[#F9FAFC] p-8 shadow-sm">
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[1fr_auto_1fr]">
@@ -340,10 +531,11 @@ export default function PaymentOptions() {
                 <button
                   key={method.id}
                   onClick={() => setSelectedPayment(method.id)}
-                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${selectedPayment === method.id
+                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${
+                    selectedPayment === method.id
                       ? "shadow-sm ring-1 ring-[#2389E3]"
                       : "hover:bg-[#FDF6E8] hover:shadow-sm"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <span
@@ -415,7 +607,7 @@ export default function PaymentOptions() {
                       Transfer
                     </h3>
                     <p className="mt-2 text-4xl font-semibold text-[#2284DB]">
-                      ₦{paymentData.total_amount}
+                      ₦{paymentData.total_amount || paymentData.amount}
                     </p>
                     <p className="mt-3 text-[15px] text-[#05243F]/40">
                       Account No. Expires in
@@ -455,7 +647,7 @@ export default function PaymentOptions() {
                         Amount:
                       </span>
                       <span className="text-base font-semibold text-[#05243F]">
-                        ₦{paymentData.total_amount}
+                        ₦{paymentData.total_amount || paymentData.amount}
                       </span>
                     </div>
                   </div>
@@ -479,12 +671,22 @@ export default function PaymentOptions() {
                     {verifying ? "Verifying..." : "I've Made Payment"}
                   </button>
                   {verifyResult && (
-                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
-                      {verifyResult.data?.message || verifyResult.message}
+                    <div
+                      className={`mt-4 text-center text-sm font-semibold ${(verifyResult.data?.status ?? verifyResult.status) ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {typeof verifyResult === "object" && verifyResult !== null
+                        ? verifyResult.data?.message ||
+                          verifyResult.message ||
+                          "Verification completed"
+                        : String(verifyResult)}
                     </div>
                   )}
                   {verifyError && (
-                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">{verifyError}</div>
+                    <div className="mt-4 text-center text-sm font-semibold text-red-600">
+                      {typeof verifyError === "string"
+                        ? verifyError
+                        : String(verifyError)}
+                    </div>
                   )}
                 </div>
               ) : (
@@ -559,10 +761,11 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setMonth(e.target.value)}
-                      className={`w-full rounded-[10px] border ${touched.month && !isMonthValid
+                      className={`w-full rounded-[10px] border ${
+                        touched.month && !isMonthValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     <input
@@ -580,10 +783,11 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setYear(e.target.value)}
-                      className={`w-full rounded-[10px] border ${touched.year && !isYearValid
+                      className={`w-full rounded-[10px] border ${
+                        touched.year && !isYearValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     <input
@@ -599,10 +803,11 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setCvv(e.target.value)}
-                      className={`w-full rounded-[10px] border ${touched.cvv && !isCvvValid
+                      className={`w-full rounded-[10px] border ${
+                        touched.cvv && !isCvvValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     {/* Auto Renew */}
@@ -628,7 +833,7 @@ export default function PaymentOptions() {
                         Note:
                       </span>
                       <p className="text-sm text-[#05243F]/60">
-                        Activate Auto renewal to enjoy {" "}
+                        Activate Auto renewal to enjoy{" "}
                         <span className="font-semibold text-[#F26060]">
                           10%
                         </span>{" "}
@@ -680,7 +885,9 @@ export default function PaymentOptions() {
                 <>
                   {monicreditError && (
                     <div className="mb-4 text-center text-red-500">
-                      {monicreditError}
+                      {typeof monicreditError === "string"
+                        ? monicreditError
+                        : String(monicreditError)}
                     </div>
                   )}
                   <div className="mb-6 text-center">
@@ -689,7 +896,7 @@ export default function PaymentOptions() {
                     </h3>
                     <ol className="list-inside list-decimal space-y-1 text-base text-[#697C8C]">
                       <li>
-                        Click the {" "}
+                        Click the{" "}
                         <span className="font-semibold text-[#2284DB]">
                           Proceed to Monicredit Payment
                         </span>{" "}
@@ -716,15 +923,23 @@ export default function PaymentOptions() {
 
           {selectedPayment === "Paystack" && (
             <div>
-              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">Paystack</h2>
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
+                Paystack
+              </h2>
               {paystackLoading ? (
                 <div className="flex min-h-[200px] flex-col items-center justify-center">
-                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">Loading...</span>
+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">
+                    Loading...
+                  </span>
                 </div>
               ) : (
                 <>
                   {paystackError && (
-                    <div className="mb-4 text-center text-red-500">{paystackError}</div>
+                    <div className="mb-4 text-center text-red-500">
+                      {typeof paystackError === "string"
+                        ? paystackError
+                        : String(paystackError)}
+                    </div>
                   )}
                   {paystackAuthUrl && (
                     <button
@@ -736,9 +951,12 @@ export default function PaymentOptions() {
                   )}
                   <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
                     <div className="flex gap-3">
-                      <span className="text-base font-medium text-[#05243F]">Note:</span>
+                      <span className="text-base font-medium text-[#05243F]">
+                        Note:
+                      </span>
                       <p className="text-sm font-normal text-[#05243F]/60">
-                        After completing Paystack payment, click verify to confirm your payment.
+                        After completing Paystack payment, click verify to
+                        confirm your payment.
                       </p>
                     </div>
                   </div>
@@ -750,12 +968,22 @@ export default function PaymentOptions() {
                     {verifying ? "Verifying..." : "Verify Paystack Payment"}
                   </button>
                   {verifyResult && (
-                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
-                      {verifyResult.data?.message || verifyResult.message}
+                    <div
+                      className={`mt-4 text-center text-sm font-semibold ${(verifyResult.data?.status ?? verifyResult.status) ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {typeof verifyResult === "object" && verifyResult !== null
+                        ? verifyResult.data?.message ||
+                          verifyResult.message ||
+                          "Verification completed"
+                        : String(verifyResult)}
                     </div>
                   )}
                   {verifyError && (
-                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">{verifyError}</div>
+                    <div className="mt-4 text-center text-sm font-semibold text-red-600">
+                      {typeof verifyError === "string"
+                        ? verifyError
+                        : String(verifyError)}
+                    </div>
                   )}
                 </>
               )}
@@ -772,56 +1000,163 @@ export default function PaymentOptions() {
                   <div className="flex items-center space-x-3">
                     <div className="text-2xl">💳</div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Secure Payment</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Secure Payment
+                      </h3>
                       <p className="text-sm text-gray-600">
-                        Pay securely with your card, bank transfer, or mobile money
+                        Pay securely with your card, bank transfer, or mobile
+                        money
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {paymentData && (
-                  <div className="rounded-lg bg-gray-50 p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Payment Summary</h4>
-                    <div className="space-y-1 text-sm text-gray-600">
+                  <div className="rounded-lg bg-gray-50 p-1">
+                    <h4 className="mb-2 text-sm font-medium text-gray-900">
+                      Payment Summary
+                    </h4>
+                    <div className="space-y-1 text-xs text-[#697C8C]">
                       <div className="flex justify-between">
                         <span>Amount:</span>
                         <span className="font-semibold">
-                          ₦{parseFloat(paymentData.amount).toLocaleString()}
+                          ₦
+                          {parseFloat(
+                            paymentData.amount || paymentData.total_amount || 0,
+                          ).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Paystack Reference:</span>
+                        <span className="font-mono text-xs">
+                          {paystackReference || "Not initialized"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Payment Method:</span>
                         <span>Paystack</span>
                       </div>
+                      {paymentData.selectedSchedules &&
+                        paymentData.selectedSchedules.length > 1 && (
+                          <div className="flex justify-between">
+                            <span>Documents:</span>
+                            <span className="font-semibold text-blue-600">
+                              {paymentData.selectedSchedules.length} items
+                            </span>
+                          </div>
+                        )}
                     </div>
+
+                    {/* Verification Button - Always show when reference exists */}
+                    {/* {paystackReference && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center">
+                            <div className="text-yellow-600 mr-3">
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-yellow-800">Payment Initiated</h4>
+                              <p className="text-sm text-yellow-600">Reference: {paystackReference}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={handleVerifyPaystack}
+                          disabled={verifying}
+                          className="w-full rounded-lg bg-green-600 py-3 px-4 text-white font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        >
+                          {verifying ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Verifying Payment...
+                            </>
+                          ) : (
+                            "Yes, I've made payment"
+                          )}
+                        </button>
+                        
+                        <div className="text-xs text-gray-500 text-center mt-2">
+                          Click to verify your payment and create orders, or wait 1 minute for auto-verification
+                        </div>
+                        
+                        {verifyResult && (
+                          <div className={`mt-2 text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
+                            {typeof verifyResult === 'object' && verifyResult !== null 
+                              ? (verifyResult.data?.message || verifyResult.message || 'Verification completed')
+                              : String(verifyResult)
+                            }
+                          </div>
+                        )}
+                        {verifyError && (
+                          <div className="mt-2 text-sm text-red-600 font-semibold">
+                            {typeof verifyError === 'string' ? verifyError : String(verifyError)}
+                          </div>
+                        )}
+                      </div>
+                    )} */}
                   </div>
                 )}
 
                 {paystackError && (
-                  <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-                    <p className="text-sm text-red-600">{paystackError}</p>
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <p className="text-sm text-red-600">
+                      {typeof paystackError === "string"
+                        ? paystackError
+                        : String(paystackError)}
+                    </p>
                   </div>
                 )}
 
-                <button
-                  onClick={handlePaystackPayment}
-                  disabled={isPaystackInitializing}
-                  className="w-full rounded-lg bg-blue-600 py-3 px-4 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {isPaystackInitializing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Initializing Payment...
-                    </>
-                  ) : (
-                    "Pay with Paystack"
-                  )}
-                </button>
+                {!paystackReference ? (
+                  <>
+                    <button
+                      onClick={handlePaystackPayment}
+                      disabled={isPaystackInitializing}
+                      className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isPaystackInitializing ? (
+                        <>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                          Initializing Payment...
+                        </>
+                      ) : (
+                        "Pay with Paystack"
+                      )}
+                    </button>
 
-                <div className="text-xs text-gray-500 text-center">
-                  You will be redirected to Paystack's secure payment page
-                </div>
+                    <div className="text-center text-xs text-gray-500">
+                      You will be redirected to Paystack's secure payment page
+                    </div>
+                  </>
+                ) : (
+                  <div className="py-8 text-center">
+                    <div className="text-gray-500">
+                      <svg
+                        className="mx-auto mb-4 h-12 w-12 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p className="text-base font-medium text-gray-900">
+                        Payment Processing
+                      </p>
+                      <p className="mt-2 text-sm text-[#697C8C]">
+                        Please wait while we process your payment...
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

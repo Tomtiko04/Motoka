@@ -1,21 +1,54 @@
 import AuthLayout from "./AuthLayout";
+import {
+  useForgotPassword,
+  useResetPassword,
+  useVerifyResetPassword,
+} from "./useAuth";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function ForgotPassword() {
   const [stepcount, setStepcount] = useState(1);
   const nextStep = () => setStepcount((prev) => prev + 1);
   const prevStep = () => setStepcount((prev) => prev - 1);
+  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   return (
     <>
-      {stepcount === 1 && <StepOne nextStep={nextStep} />}
-      {stepcount === 2 && <StepTwo nextStep={nextStep} prevStep={prevStep} />}
-      {stepcount === 3 && <StepThree prevStep={prevStep} />}
+      {stepcount === 1 && (
+        <StepOne nextStep={nextStep} email={email} setEmail={setEmail} />
+      )}
+      {stepcount === 2 && (
+        <StepTwo
+          email={email}
+          setToken={setToken}
+          nextStep={nextStep}
+          prevStep={prevStep}
+        />
+      )}
+      {stepcount === 3 && (
+        <StepThree email={email} token={token} prevStep={prevStep} />
+      )}
     </>
   );
 }
 
 export default ForgotPassword;
 
-const StepOne = ({ nextStep }) => {
+const StepOne = ({ nextStep, email, setEmail }) => {
+  const { forgotPasswordAsync, isForgotPasswordLoading } = useForgotPassword();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    try {
+      await forgotPasswordAsync(email);
+      nextStep();
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
@@ -37,11 +70,13 @@ const StepOne = ({ nextStep }) => {
               <input
                 id="email-address"
                 name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 autoComplete="email"
                 required
                 // className="relative block  rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                className="placeholder`-[#05243F]/40 relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
+                className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="Email address"
               />
             </div>
@@ -50,10 +85,13 @@ const StepOne = ({ nextStep }) => {
           <div>
             <button
               type="submit"
-              onClick={nextStep}
-              className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-fit sm:px-10 sm:py-3 sm:text-base md:mt-10"
+              disabled={isForgotPasswordLoading}
+              onClick={handleSubmit}
+              className={`mx-auto mt-6 flex w-full justify-center rounded-3xl px-4 py-2 text-sm font-semibold text-white ${isForgotPasswordLoading ? "cursor-not-allowed bg-[#2389E3]/70" : "bg-[#2389E3] hover:bg-[#1c6fb8]"}`}
             >
-              Send Verification Code
+              {isForgotPasswordLoading
+                ? "Sending..."
+                : "Send Verification Code"}
             </button>
           </div>
         </form>
@@ -62,7 +100,23 @@ const StepOne = ({ nextStep }) => {
   );
 };
 
-const StepTwo = ({ nextStep, prevStep }) => {
+const StepTwo = ({ nextStep, prevStep, email, setToken }) => {
+  const { verifyResetAsync, isVerifyingReset } = useVerifyResetPassword();
+  const [otp, setOtp] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !otp) return;
+
+    try {
+      const data = await verifyResetAsync({ email, otp });
+      const t = data?.token || data?.authorization?.token || data?.reset_token;
+      if (t) setToken(t);
+      nextStep();
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
@@ -75,7 +129,7 @@ const StepTwo = ({ nextStep, prevStep }) => {
             it below.
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" action="#" onSubmit={handleSubmit}>
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
@@ -86,6 +140,8 @@ const StepTwo = ({ nextStep, prevStep }) => {
                 id="verification-code"
                 name="code"
                 type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
                 autoComplete="one-time-code"
                 required
                 // className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
@@ -99,7 +155,8 @@ const StepTwo = ({ nextStep, prevStep }) => {
             <div className="text-sm">
               <button
                 onClick={prevStep}
-                className="font-medium text-[#2389E3] hover:text-[#05243F]"
+                disabled={isVerifyingReset}
+                className="disable:cursor-not-allowed font-medium text-[#2389E3] hover:text-[#05243F]"
                 type="button"
               >
                 Back
@@ -110,10 +167,10 @@ const StepTwo = ({ nextStep, prevStep }) => {
           <div>
             <button
               type="submit"
-              onClick={nextStep}
-              className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-fit sm:px-10 sm:py-3 sm:text-base md:mt-10"
+              disabled={isVerifyingReset}
+              className={`mx-auto mt-6 flex w-full justify-center rounded-3xl px-4 py-2 text-sm font-semibold text-white ${isVerifyingReset ? "cursor-not-allowed bg-[#2389E3]/70" : "bg-[#2389E3] hover:bg-[#1c6fb8]"}`}
             >
-              Verify Code
+              {isVerifyingReset ? "Verifying..." : "Verify Code"}
             </button>
           </div>
         </form>
@@ -122,7 +179,29 @@ const StepTwo = ({ nextStep, prevStep }) => {
   );
 };
 
-const StepThree = ({ prevStep }) => {
+const StepThree = ({ prevStep, email, token }) => {
+  const navigate = useNavigate();
+  const { resetPasswordAsync, isResetingPassword } = useResetPassword();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !token) return;
+    if (!password || password !== confirmPassword) return;
+
+    try {
+      await resetPasswordAsync({
+        email,
+        password,
+        password_confirmation: confirmPassword,
+        token,
+      });
+      navigate("/auth/login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
@@ -134,7 +213,7 @@ const StepThree = ({ prevStep }) => {
             Please enter your new password below.
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" action="#" onSubmit={handleSubmit}>
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="-space-y-px rounded-md shadow-sm">
             <div className="mb-3">
@@ -145,7 +224,9 @@ const StepThree = ({ prevStep }) => {
                 id="new-password"
                 name="new-password"
                 type="password"
-                autoComplete="new-password"
+                value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
                 required
                 className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="New Password"
@@ -159,7 +240,9 @@ const StepThree = ({ prevStep }) => {
                 id="confirm-password"
                 name="confirm-password"
                 type="password"
-                autoComplete="new-password"
+                value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
                 required
                 className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="Confirm Password"
@@ -170,7 +253,7 @@ const StepThree = ({ prevStep }) => {
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <button
-                onClick={prevStep}
+                disabled={isResetingPassword}
                 className="font-medium text-[#2389E3] hover:text-[#05243F]"
                 type="button"
               >
@@ -182,6 +265,7 @@ const StepThree = ({ prevStep }) => {
           <div>
             <button
               type="submit"
+              disabled={isResetingPassword}
               className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-fit sm:px-10 sm:py-3 sm:text-base md:mt-10"
             >
               Reset Password
