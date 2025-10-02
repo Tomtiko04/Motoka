@@ -11,13 +11,24 @@ import { logout } from "../services/apiAuth";
 import { authStorage } from "../utils/authStorage";
 
 import Avarta from "../assets/images/avarta.png";
-import Logo from "../assets/images/Logo.png";
 import Logo2 from "../assets/images/Logo.svg";
+import { useNotifications } from "../features/notifications/useNotification";
 
-export default function AppLayout({ onNavigate }) {
+export default function AppLayout() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { data: notifications } = useNotifications();
 
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
+  const totalLength = notifications?.data
+    ? Object.values(notifications.data).reduce(
+        (sum, arr) => sum + arr.length,
+        0,
+      )
+    : 0;
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -96,7 +107,7 @@ export default function AppLayout({ onNavigate }) {
                 <img
                   src={Logo2}
                   alt="Motoka"
-                  className="h-8 w-auto object-contain"
+                  className="h-8 w-8 object-contain block"
                 />
               </div>
 
@@ -112,7 +123,7 @@ export default function AppLayout({ onNavigate }) {
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    0
+                    {totalLength}
                   </span>
                 </div>
                 <button
@@ -159,10 +170,9 @@ export default function AppLayout({ onNavigate }) {
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    0
+                    {totalLength}
                   </span>
                 </div>
-                {/* When you click it will show a drop down */}
                 <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img
                     src={Avarta}
@@ -189,11 +199,13 @@ export default function AppLayout({ onNavigate }) {
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-[#F4F5FC] p-4">
-              <img
-                src={Logo2}
-                alt="Motoka"
-                className="h-8 w-auto object-contain"
-              />
+              <div>
+                <img
+                  src={Logo2}
+                  alt="Motoka"
+                  className="block h-8 w-8 object-contain "
+                />
+              </div>
               <button
                 onClick={toggleMenu}
                 className="rounded-lg p-2 text-[#05243F] hover:bg-[#F4F5FC]"
@@ -239,16 +251,16 @@ export default function AppLayout({ onNavigate }) {
             <div className="border-t border-[#F4F5FC] p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                  {/* <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                     <img
                       src={Avarta}
                       lazyloading="lazy"
                       alt="User"
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover block"
                     />
-                  </div>
+                  </div> */}
                   <span className="text-sm font-medium text-[#05243F]">
-                    Anjola
+                    {userName}
                   </span>
                 </div>
               </div>
