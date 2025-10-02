@@ -491,17 +491,26 @@ export default function PaymentOptions() {
 
       {/* Fallback Notification */}
       {isFallback && (
-        <div className="mx-auto max-w-4xl mb-4">
-          <div className="rounded-lg bg-orange-50 border border-orange-200 p-4">
+        <div className="mx-auto mb-4 max-w-4xl">
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5 text-orange-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
                 <p className="text-sm text-orange-800">
-                  <strong>Payment Method Changed:</strong> Monicredit payment failed, so we've automatically selected Paystack for you.
+                  <strong>Payment Method Changed:</strong> Monicredit payment
+                  failed, so we've automatically selected Paystack for you.
                 </p>
               </div>
             </div>
@@ -522,10 +531,11 @@ export default function PaymentOptions() {
                 <button
                   key={method.id}
                   onClick={() => setSelectedPayment(method.id)}
-                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${selectedPayment === method.id
+                  className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${
+                    selectedPayment === method.id
                       ? "shadow-sm ring-1 ring-[#2389E3]"
                       : "hover:bg-[#FDF6E8] hover:shadow-sm"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <span
@@ -661,16 +671,21 @@ export default function PaymentOptions() {
                     {verifying ? "Verifying..." : "I've Made Payment"}
                   </button>
                   {verifyResult && (
-                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
-                      {typeof verifyResult === 'object' && verifyResult !== null 
-                        ? (verifyResult.data?.message || verifyResult.message || 'Verification completed')
-                        : String(verifyResult)
-                      }
+                    <div
+                      className={`mt-4 text-center text-sm font-semibold ${(verifyResult.data?.status ?? verifyResult.status) ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {typeof verifyResult === "object" && verifyResult !== null
+                        ? verifyResult.data?.message ||
+                          verifyResult.message ||
+                          "Verification completed"
+                        : String(verifyResult)}
                     </div>
                   )}
                   {verifyError && (
-                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">
-                      {typeof verifyError === 'string' ? verifyError : String(verifyError)}
+                    <div className="mt-4 text-center text-sm font-semibold text-red-600">
+                      {typeof verifyError === "string"
+                        ? verifyError
+                        : String(verifyError)}
                     </div>
                   )}
                 </div>
@@ -746,10 +761,11 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setMonth(e.target.value)}
-                      className={`w-full rounded-[10px] border ${touched.month && !isMonthValid
+                      className={`w-full rounded-[10px] border ${
+                        touched.month && !isMonthValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     <input
@@ -767,10 +783,11 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setYear(e.target.value)}
-                      className={`w-full rounded-[10px] border ${touched.year && !isYearValid
+                      className={`w-full rounded-[10px] border ${
+                        touched.year && !isYearValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     <input
@@ -786,10 +803,11 @@ export default function PaymentOptions() {
                         }
                       }}
                       onChange={(e) => setCvv(e.target.value)}
-                      className={`w-full rounded-[10px] border ${touched.cvv && !isCvvValid
+                      className={`w-full rounded-[10px] border ${
+                        touched.cvv && !isCvvValid
                           ? "border-red-500"
                           : "border-[#E1E6F4]"
-                        } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
+                      } bg-[#F8F8F8] px-4 py-3 text-sm text-[#05243F] placeholder-[#05243F]/40 focus:border-[#2389E3] focus:ring-1 focus:ring-[#2389E3] focus:outline-none`}
                     />
 
                     {/* Auto Renew */}
@@ -815,7 +833,7 @@ export default function PaymentOptions() {
                         Note:
                       </span>
                       <p className="text-sm text-[#05243F]/60">
-                        Activate Auto renewal to enjoy {" "}
+                        Activate Auto renewal to enjoy{" "}
                         <span className="font-semibold text-[#F26060]">
                           10%
                         </span>{" "}
@@ -867,7 +885,9 @@ export default function PaymentOptions() {
                 <>
                   {monicreditError && (
                     <div className="mb-4 text-center text-red-500">
-                      {typeof monicreditError === 'string' ? monicreditError : String(monicreditError)}
+                      {typeof monicreditError === "string"
+                        ? monicreditError
+                        : String(monicreditError)}
                     </div>
                   )}
                   <div className="mb-6 text-center">
@@ -876,7 +896,7 @@ export default function PaymentOptions() {
                     </h3>
                     <ol className="list-inside list-decimal space-y-1 text-base text-[#697C8C]">
                       <li>
-                        Click the {" "}
+                        Click the{" "}
                         <span className="font-semibold text-[#2284DB]">
                           Proceed to Monicredit Payment
                         </span>{" "}
@@ -903,16 +923,22 @@ export default function PaymentOptions() {
 
           {selectedPayment === "Paystack" && (
             <div>
-              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">Paystack</h2>
+              <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
+                Paystack
+              </h2>
               {paystackLoading ? (
                 <div className="flex min-h-[200px] flex-col items-center justify-center">
-                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">Loading...</span>
+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">
+                    Loading...
+                  </span>
                 </div>
               ) : (
                 <>
                   {paystackError && (
                     <div className="mb-4 text-center text-red-500">
-                      {typeof paystackError === 'string' ? paystackError : String(paystackError)}
+                      {typeof paystackError === "string"
+                        ? paystackError
+                        : String(paystackError)}
                     </div>
                   )}
                   {paystackAuthUrl && (
@@ -925,9 +951,12 @@ export default function PaymentOptions() {
                   )}
                   <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
                     <div className="flex gap-3">
-                      <span className="text-base font-medium text-[#05243F]">Note:</span>
+                      <span className="text-base font-medium text-[#05243F]">
+                        Note:
+                      </span>
                       <p className="text-sm font-normal text-[#05243F]/60">
-                        After completing Paystack payment, click verify to confirm your payment.
+                        After completing Paystack payment, click verify to
+                        confirm your payment.
                       </p>
                     </div>
                   </div>
@@ -939,16 +968,21 @@ export default function PaymentOptions() {
                     {verifying ? "Verifying..." : "Verify Paystack Payment"}
                   </button>
                   {verifyResult && (
-                    <div className={`mt-4 text-center text-sm font-semibold ${verifyResult.data?.status ?? verifyResult.status ? "text-green-600" : "text-red-600"}`}>
-                      {typeof verifyResult === 'object' && verifyResult !== null 
-                        ? (verifyResult.data?.message || verifyResult.message || 'Verification completed')
-                        : String(verifyResult)
-                      }
+                    <div
+                      className={`mt-4 text-center text-sm font-semibold ${(verifyResult.data?.status ?? verifyResult.status) ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {typeof verifyResult === "object" && verifyResult !== null
+                        ? verifyResult.data?.message ||
+                          verifyResult.message ||
+                          "Verification completed"
+                        : String(verifyResult)}
                     </div>
                   )}
                   {verifyError && (
-                    <div className="mt-4 text-center text-sm text-red-600 font-semibold">
-                      {typeof verifyError === 'string' ? verifyError : String(verifyError)}
+                    <div className="mt-4 text-center text-sm font-semibold text-red-600">
+                      {typeof verifyError === "string"
+                        ? verifyError
+                        : String(verifyError)}
                     </div>
                   )}
                 </>
@@ -966,44 +1000,53 @@ export default function PaymentOptions() {
                   <div className="flex items-center space-x-3">
                     <div className="text-2xl">💳</div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Secure Payment</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Secure Payment
+                      </h3>
                       <p className="text-sm text-gray-600">
-                        Pay securely with your card, bank transfer, or mobile money
+                        Pay securely with your card, bank transfer, or mobile
+                        money
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {paymentData && (
-                  <div className="rounded-lg bg-gray-50 p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Payment Summary</h4>
-                    <div className="space-y-1 text-sm text-gray-600">
+                  <div className="rounded-lg bg-gray-50 p-1">
+                    <h4 className="mb-2 text-sm font-medium text-gray-900">
+                      Payment Summary
+                    </h4>
+                    <div className="space-y-1 text-xs text-[#697C8C]">
                       <div className="flex justify-between">
                         <span>Amount:</span>
                         <span className="font-semibold">
-                          ₦{parseFloat(paymentData.amount || paymentData.total_amount || 0).toLocaleString()}
+                          ₦
+                          {parseFloat(
+                            paymentData.amount || paymentData.total_amount || 0,
+                          ).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Paystack Reference:</span>
                         <span className="font-mono text-xs">
-                          {paystackReference || 'Not initialized'}
+                          {paystackReference || "Not initialized"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Payment Method:</span>
                         <span>Paystack</span>
                       </div>
-                      {paymentData.selectedSchedules && paymentData.selectedSchedules.length > 1 && (
-                        <div className="flex justify-between">
-                          <span>Documents:</span>
-                          <span className="font-semibold text-blue-600">
-                            {paymentData.selectedSchedules.length} items
-                          </span>
-                        </div>
-                      )}
+                      {paymentData.selectedSchedules &&
+                        paymentData.selectedSchedules.length > 1 && (
+                          <div className="flex justify-between">
+                            <span>Documents:</span>
+                            <span className="font-semibold text-blue-600">
+                              {paymentData.selectedSchedules.length} items
+                            </span>
+                          </div>
+                        )}
                     </div>
-                    
+
                     {/* Verification Button - Always show when reference exists */}
                     {/* {paystackReference && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
@@ -1059,9 +1102,11 @@ export default function PaymentOptions() {
                 )}
 
                 {paystackError && (
-                  <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                     <p className="text-sm text-red-600">
-                      {typeof paystackError === 'string' ? paystackError : String(paystackError)}
+                      {typeof paystackError === "string"
+                        ? paystackError
+                        : String(paystackError)}
                     </p>
                   </div>
                 )}
@@ -1071,11 +1116,11 @@ export default function PaymentOptions() {
                     <button
                       onClick={handlePaystackPayment}
                       disabled={isPaystackInitializing}
-                      className="w-full rounded-lg bg-blue-600 py-3 px-4 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                      className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPaystackInitializing ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                           Initializing Payment...
                         </>
                       ) : (
@@ -1083,18 +1128,32 @@ export default function PaymentOptions() {
                       )}
                     </button>
 
-                    <div className="text-xs text-gray-500 text-center">
+                    <div className="text-center text-xs text-gray-500">
                       You will be redirected to Paystack's secure payment page
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-8">
+                  <div className="py-8 text-center">
                     <div className="text-gray-500">
-                      <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="mx-auto mb-4 h-12 w-12 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
-                      <p className="text-lg font-medium text-gray-900">Payment Processing</p>
-                      <p className="text-sm text-gray-500 mt-2">Please wait while we process your payment...</p>
+                      <p className="text-base font-medium text-gray-900">
+                        Payment Processing
+                      </p>
+                      <p className="mt-2 text-sm text-[#697C8C]">
+                        Please wait while we process your payment...
+                      </p>
                     </div>
                   </div>
                 )}

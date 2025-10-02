@@ -1,74 +1,74 @@
 import React from "react";
 
 import { IoIosArrowBack } from "react-icons/io";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 
 import LicenseLayout from "./components/LicenseLayout";
 
- const documentTypes = [
-   {
-     icons: [
-       <Icon
-         key="umbrella"
-         icon="mdi:umbrella"
-         fontSize={24}
-         color="#2389E3"
-       />,
-       <Icon
-         key="check"
-         icon="ic:round-gpp-good"
-         fontSize={24}
-         color="#2389E3"
-       />,
-       <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
-       <Icon
-         icon="iconamoon:profile-fill"
-         fontSize={24}
-         color="#2389E3"
-         key="person"
-       />,
-     ],
-     title: "Private",
-     link: "/licenses/drivers-license",
-     description:
-       "Vehicle License, Road Worthiness, Insurance, Proof of ownership",
-   },
-   {
-     icons: [
-       <Icon
-         key="umbrella"
-         icon="mdi:umbrella"
-         fontSize={24}
-         color="#2389E3"
-       />,
-       <Icon
-         key="check"
-         icon="ic:round-gpp-good"
-         fontSize={24}
-         color="#2389E3"
-       />,
-       <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
-       <Icon
-         icon="iconamoon:profile-fill"
-         fontSize={24}
-         color="#2389E3"
-         key="person"
-       />,
-       <Icon
-         icon="solar:bus-bold"
-         fontSize={24}
-         color="#2389E3"
-         key="car"
-       />,
-     ],
-     title: "Commercial",
-     link: "commercial",
-     description:
-       "Vehicle License, Road Worthiness, Insurance, Proof of ownership, Commercial permit",
-   },
- ];
+const documentTypes = [
+  {
+    icons: [
+      <Icon
+        key="umbrella"
+        icon="mdi:umbrella"
+        fontSize={24}
+        color="#2389E3"
+      />,
+      <Icon
+        key="check"
+        icon="ic:round-gpp-good"
+        fontSize={24}
+        color="#2389E3"
+      />,
+      <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
+      <Icon
+        icon="iconamoon:profile-fill"
+        fontSize={24}
+        color="#2389E3"
+        key="person"
+      />,
+    ],
+    title: "Private",
+    link: "/licenses/drivers-license",
+    description:
+      "Vehicle License, Road Worthiness, Insurance, Proof of ownership",
+  },
+  {
+    icons: [
+      <Icon
+        key="umbrella"
+        icon="mdi:umbrella"
+        fontSize={24}
+        color="#2389E3"
+      />,
+      <Icon
+        key="check"
+        icon="ic:round-gpp-good"
+        fontSize={24}
+        color="#2389E3"
+      />,
+      <Icon icon="mdi:car-pickup" key="car" fontSize={24} color="#2389E3" />,
+      <Icon
+        icon="iconamoon:profile-fill"
+        fontSize={24}
+        color="#2389E3"
+        key="person"
+      />,
+      <Icon
+        icon="solar:bus-bold"
+        fontSize={24}
+        color="#2389E3"
+        key="car"
+      />,
+    ],
+    title: "Commercial",
+    link: "commercial",
+    description:
+      "Vehicle License, Road Worthiness, Insurance, Proof of ownership, Commercial permit",
+  },
+];
 
 export default function VehiclePaper() {
   const navigate = useNavigate();
@@ -103,14 +103,32 @@ export default function VehiclePaper() {
 
     totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
 
-    navigate("/licenses/confirm-request", {
+    // I'm changing the flow here to: Selecte a car type => add a car => order list => confirm request => payment => success
+    // navigate("/licenses/confirm-request", {
+    //   state: {
+    //     type: "vehicle_paper",
+    //     amount: totalAmount,
+    //     details: {
+    //       paperType: type.title,
+    //       items,
+    //       description: type.description,
+    //     },
+    //   },
+    // });
+    navigate("/add-car", {
       state: {
-        type: "vehicle_paper",
-        amount: totalAmount,
-        details: {
-          paperType: type.title,
-          items,
-          description: type.description,
+        next: {
+          path: "/licenses/confirm-request",
+          state: {
+            type: "vehicle_paper",
+            amount: totalAmount,
+            details: {
+              paperType: type.title,
+              items,
+              description: type.description,
+            },
+            items
+          }
         },
       },
     });
@@ -139,12 +157,11 @@ export default function VehiclePaper() {
                 {type.icons.map((icon, iconIndex) => (
                   <div
                     key={iconIndex}
-                    className={`flex h-12 w-12 items-center justify-center rounded-full bg-[#2389E3]/11 ${
-                      type.title === "Commercial" &&
+                    className={`flex h-12 w-12 items-center justify-center rounded-full bg-[#2389E3]/11 ${type.title === "Commercial" &&
                       iconIndex === type.icons.length - 1
-                        ? "col-span-2"
-                        : ""
-                    }`}
+                      ? "col-span-2"
+                      : ""
+                      }`}
                   >
                     {React.cloneElement(icon, {
                       className: "h-6 w-6 text-[#2284DB]",

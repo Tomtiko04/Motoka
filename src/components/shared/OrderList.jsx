@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function OrderList({ 
-  items, 
+export default function OrderList({
+  items,
   onPaymentError,
   buttonText = "Pay Now",
   currency = "₦"
@@ -14,9 +14,28 @@ export default function OrderList({
   const total = items?.reduce((sum, item) => sum + item.amount, 0);
 
   const handlePayment = async () => {
+    const carDetail = orderDetails?.carDetail;
+    if (!carDetail) {
+      console.error("Missing carDetail in OrderList navigation state");
+      navigate("/add-car", { state: { next: { path: "/licenses/renew", state: { type: orderDetails?.type || "vehicle_paper", amount: total, details: orderDetails?.details } } } });
+      return;
+    }
+    // try {
+    //Old format
+    //   navigate("/payment", {
+    //     state: {
+    //       type: orderDetails?.type || "vehicle_paper",
+    //       amount: total,
+    //       details: orderDetails?.details
+    //     }
+    //   });
+    // } catch (error) {
+    //   onPaymentError?.(error);
+    // }
     try {
-      navigate("/payment", {
+      navigate("/licenses/renew", {
         state: {
+          carDetail,
           type: orderDetails?.type || "vehicle_paper",
           amount: total,
           details: orderDetails?.details
@@ -25,7 +44,7 @@ export default function OrderList({
     } catch (error) {
       onPaymentError?.(error);
     }
-  };
+  }
 
   return (
     <div className="mx-auto w-full max-w-md">
