@@ -36,7 +36,7 @@ export default function OrderList({
         </div>
       )}
       <div className="space-y-2">
-        {items.map((item) => (
+        {items?.map((item) => (
           <div
             key={item.name}
             className="flex items-center justify-between rounded-[12px] bg-[#F4F5FC] p-3 shadow-xs"
