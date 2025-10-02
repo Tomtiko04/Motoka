@@ -121,7 +121,7 @@ export default function CarReceipt() {
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-gray-600">Status:</span>
-                <span className="text-sm font-medium text-green-600 capitalize">{payment.status}</span>
+                <span className={`text-sm font-medium ${payment.status === "success" ? "text-green-600" : "text-red-600"} capitalize`}>{payment.status}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-gray-600">Payment Purpose:</span>

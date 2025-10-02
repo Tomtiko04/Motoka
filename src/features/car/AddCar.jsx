@@ -3,7 +3,7 @@ import { BsStars } from "react-icons/bs";
 import Header from "../../components/Header";
 import AutoFillModal from "../../components/AutoFillModal";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAddCar } from "./useCar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -80,13 +80,12 @@ const SearchableSelect = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
-            error
-              ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
-              : value
-                ? "border-2 border-green-500"
-                : ""
-          }`}
+          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${error
+            ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+            : value
+              ? "border-2 border-green-500"
+              : ""
+            }`}
         />
         {isLoading && (
           <div className="absolute top-1/2 right-3 -translate-y-1/2">
@@ -174,6 +173,7 @@ export default function AddCar() {
   const [isAutoFillModalOpen, setIsAutoFillModalOpen] = useState(false);
   const { addCar, isAdding } = useAddCar();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchCarTypes = async () => {
@@ -352,9 +352,24 @@ export default function AddCar() {
     try {
       const loadingToast = toast.loading("Registering car...");
       addCar(formData, {
-        onSuccess: () => {
+        onSuccess: (data) => {
           toast.dismiss(loadingToast);
-          navigate("/");
+          const createdCar =
+            data?.data?.car ||
+            data?.car ||
+            data?.data ||
+            null;
+
+          if (location.state?.next?.path) {
+            navigate(location.state.next.path, {
+              state: {
+                ...(location.state.next.state || {}),
+                carDetail: createdCar,
+              },
+            });
+          } else {
+            navigate("/");
+          }
         },
         onError: () => {
           toast.dismiss(loadingToast);
@@ -419,13 +434,12 @@ export default function AddCar() {
               });
             }}
             dateFormat="dd/MM/yyyy"
-            className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
-              errors[name]
-                ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
-                : formData[name]
-                  ? "border-2 border-green-500"
-                  : ""
-            }`}
+            className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${errors[name]
+              ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+              : formData[name]
+                ? "border-2 border-green-500"
+                : ""
+              }`}
             placeholderText={`Select ${label.toLowerCase()}`}
             maxDate={name === "dateIssued" ? new Date() : undefined}
             minDate={
@@ -479,13 +493,12 @@ export default function AddCar() {
           value={formData[name]}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${
-            errors[name]
-              ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
-              : formData[name]?.trim()
-                ? "border-2 border-green-500"
-                : ""
-          }`}
+          className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${errors[name]
+            ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
+            : formData[name]?.trim()
+              ? "border-2 border-green-500"
+              : ""
+            }`}
         />
         {errors[name] && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -529,7 +542,7 @@ export default function AddCar() {
   return (
     <>
       <Header />
-      <br />
+      {/* <br /> */}
       <div className="flex min-h-[calc(100vh-80px)] items-start justify-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="relative w-full max-w-[476px] rounded-[20px] bg-white shadow-lg">
           {/* Fixed Header Section */}
@@ -556,22 +569,20 @@ export default function AddCar() {
               <button
                 type="button"
                 onClick={() => handleRegistrationTypeChange(true)}
-                className={`rounded-[26px] border px-4 py-2 text-sm font-medium transition-colors ${
-                  formData.isRegistered
-                    ? "border-[#2389E3] text-[#05243F]"
-                    : "border-[#F4F5FC] text-[#697C8C]"
-                }`}
+                className={`rounded-[26px] border px-4 py-2 text-sm font-medium transition-colors ${formData.isRegistered
+                  ? "border-[#2389E3] text-[#05243F]"
+                  : "border-[#F4F5FC] text-[#697C8C]"
+                  }`}
               >
                 Registered Car
               </button>
               <button
                 type="button"
                 onClick={() => handleRegistrationTypeChange(false)}
-                className={`rounded-[26px] border px-4 py-2 text-sm font-medium transition-colors ${
-                  !formData.isRegistered
-                    ? "border-[#2389E3] text-[#05243F]"
-                    : "border-[#F4F5FC] text-[#697C8C]"
-                }`}
+                className={`rounded-[26px] border px-4 py-2 text-sm font-medium transition-colors ${!formData.isRegistered
+                  ? "border-[#2389E3] text-[#05243F]"
+                  : "border-[#F4F5FC] text-[#697C8C]"
+                  }`}
               >
                 Unregistered Car
               </button>
@@ -673,9 +684,8 @@ export default function AddCar() {
               type="submit"
               onClick={handleSubmit}
               disabled={isAdding}
-              className={`rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] active:scale-95 ${
-                isAdding ? "cursor-not-allowed opacity-70" : ""
-              }`}
+              className={`rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] active:scale-95 ${isAdding ? "cursor-not-allowed opacity-70" : ""
+                }`}
             >
               {isAdding ? "Processing..." : "Confirm and Proceed"}
             </button>

@@ -26,36 +26,42 @@ const licensesTypes = [
       <Icon icon="mingcute:steering-wheel-fill" fontSize={24} color="#2389E3" />
     ),
     title: "Driver’s license",
-    link: "drivers-license",
+    // link: "drivers-license",
+    comingSoon: true,
   },
   {
     icon: (
       <Icon icon="stash:data-numbers-duotone" fontSize={24} color="#2389E3" />
     ),
     title: "Plate Number",
-    link: "plate-number",
+    // link: "plate-number",
+    comingSoon: true,
   },
   {
     icon: <Icon icon="mingcute:car-fill" fontSize={24} color="#2389E3" />,
     title: "Int’l Driver’s\nLicense",
-    link: "international-driver's-license",
+    // link: "international-driver's-license",
+    comingSoon: true,
   },
   {
     icon: (
       <Icon icon="mage:bookmark-check-fill" fontSize={24} color="#2389E3" />
     ),
     title: "Road Tax",
-    link: "/vehicle-license",
+    // link: "/vehicle-license",
+    comingSoon: true,
   },
   {
     icon: <Icon icon="mdi:car-door" fontSize={24} color="#2389E3" />,
     title: "Tint Permit",
-    link: "tint-permit",
+    // link: "tint-permit",
+    comingSoon: true,
   },
   {
     icon: <Icon icon="solar:bus-bold" fontSize={24} color="#2389E3" />,
     title: "Local Gov.\nPapers",
-    link: "local-government-papers",
+    // link: "local-government-papers",
+    comingSoon: true,
   },
 ];
 
@@ -74,6 +80,11 @@ export default function Licenses() {
             to={action.link}
             className="group relative flex h-[161px] flex-col justify-between rounded-[20px] border border-[#05243F]/10 px-4 py-5 hover:border-0 hover:bg-[#FDF6E8]"
           >
+            {action.comingSoon && (
+              <span className="absolute -top-2 -right-2 flex h-[17px] items-center justify-center rounded-full bg-[#FFEFCE] px-2.5 text-[8px] whitespace-nowrap text-[#BA8823]">
+                Coming Soon
+              </span>
+            )}
             <div className="flex flex-col items-start gap-y-10">
               <div>
                 {Array.isArray(action.icons) ? (

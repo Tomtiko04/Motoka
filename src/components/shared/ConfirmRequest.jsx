@@ -59,7 +59,7 @@ export default function ConfirmRequest() {
       mainContentTitle={config.mainContentTitle}
     >
       <OrderList
-        items={items}
+        items={items || []}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentError={handlePaymentError}
       />
