@@ -29,7 +29,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
   };
 
   return (
-    <div className="pb-4 flex">
+    <div className="pb-4">
       <div className="space-y-1">
         {/* Account Settings */}
         <div

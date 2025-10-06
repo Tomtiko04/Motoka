@@ -84,7 +84,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex items-center justify-center bg-[#F4F5FC] flex-col min-h-screen" >
+    <div className="flex items-center justify-center  flex-col min-h-screen" >{/* removed the background to allow the gradient to show  bg-[#F4F5FC]*/}
       <div className="w-full max-w-4xl sm:mt-4 flex flex-col flex-1">
         {/* Header Navigation */}
         <header className="sticky top-0 z-10 h-16 bg-white shadow-sm sm:rounded-full">
