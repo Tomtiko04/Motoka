@@ -63,7 +63,7 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
 
   return (
     <>
-      <div className="container mx-auto px-4 py-5 md:py-8">
+      <div className="container mx-auto px-4 py-5 md:py-8  h-full flex-1 flex flex-col">
         <header className="relative mb-6 flex items-center justify-center">
           {isMobile && (
             <button
@@ -104,8 +104,8 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
           </div>
         </header>
 
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
-          <div className="grid md:grid-cols-2 lg:grid-cols-5">
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm flex-1 flex flex-col min-h-0">
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 flex-1">
             {/* Mobile sidebar overlay */}
             {isMobile && isMobileMenuOpen && (
               <div
@@ -133,11 +133,11 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
             )}
 
             {/* Desktop sidebar */}
-            <div className="hidden border-r border-gray-100 md:block lg:col-span-2">
+            <div className="hidden border-r border-gray-100 md:flex lg:col-span-2 flex-1 md:flex-col min-h-0">
               <div className="p-4">
                 <SearchBar />
               </div>
-              <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-4">
+              <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750]  overflow-y-auto px-6 sm:px-4 h-full">{/* max-h-[calc(100vh-380px)] removed this and added flex-1 */}
                 <SettingsSidebar
                   activePage={activePage}
                   expandedSection={expandedSection}

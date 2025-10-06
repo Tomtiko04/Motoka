@@ -62,7 +62,7 @@ export default function MainSettings({ onNavigate }) {
       <div>
         <div>
           <div className="flex items-center justify-center">
-            <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
+            <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl capitalize">
               Hello, {profileData?.name || "User"}
             </h2>
             <span
@@ -81,7 +81,7 @@ export default function MainSettings({ onNavigate }) {
       <div>
         <button
           type="button"
-          className="mt-5 rounded-[26px] bg-[#FFF] px-4 py-3 text-sm font-medium text-[#05243F] shadow-sm transition-colors"
+          className="mt-5 rounded-[26px] bg-[#FFF] px-8 py-3 text-base font-medium text-[#05243F] shadow-sm transition-colors"
         >
           Thank you for trusting in us.
         </button>
