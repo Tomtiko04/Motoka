@@ -48,8 +48,8 @@ const quickActions = [
       <Icon icon="mingcute:steering-wheel-fill" fontSize={30} color="#2389E3" />
     ),
     title: "New/Renew\nDriver's License",
-    link: "/licenses/drivers-license",
-    comingSoon: false,
+    // link: "/licenses/drivers-license",
+    comingSoon: true,
   },
   {
     icon: (
