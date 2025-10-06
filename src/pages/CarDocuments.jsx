@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import PagesLayout from "./components/PageLayout";
 import DocumentsNav from "../components/DocumentsNav";
-import DocumentPage from "./components/DocumentPage";
-import DocPreview from "./components/Docpreview";
+// import DocumentPage from "./components/DocumentPage";
+// import DocPreview from "./components/Docpreview";
 import CarDetailsCard from "../components/CarDetailsCard";
 import { useGetCars } from "../features/car/useCar";
-import config from "../config/config";
+// import config from "../config/config";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 function CarDocuments() {
@@ -15,7 +15,7 @@ function CarDocuments() {
   const [previewDoc, setPreviewDoc] = useState(null);
 
   const { cars: carsResp, isLoading: loadingCars, error: carsError } = useGetCars();
-  const cars = useMemo(() => carsResp?.cars || [], [carsResp]);
+  const cars = useMemo(() => Object.values(carsResp?.cars || {}), [carsResp]);
   const [selectedCarId, setSelectedCarId] = useState(null);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ function CarDocuments() {
   }, [cars, selectedCarId]);
 
   const selectedCar = useMemo(
-    () => cars.find((c) => c.id === selectedCarId) || null,
+    () => cars?.find((c) => c.id === selectedCarId) || null,
     [cars, selectedCarId],
   );
 
