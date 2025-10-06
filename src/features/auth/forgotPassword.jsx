@@ -203,74 +203,76 @@ const StepThree = ({ prevStep, email, token }) => {
     }
   };
   return (
-    <div className="w-full max-w-md space-y-8">
-      <div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          Reset Your Password
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Please enter your new password below.
-        </p>
-      </div>
-      <form className="mt-8 space-y-6" action="#" onSubmit={handleSubmit}>
-        <input type="hidden" name="remember" defaultValue="true" />
-        <div className="-space-y-px rounded-md shadow-sm">
-          <div>
-            <label htmlFor="new-password" className="sr-only">
-              New Password
-            </label>
-            <input
-              id="new-password"
-              name="new-password"
-              type="password"
-              value={password}
+    <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
+        <div className="text-center">
+          <h2 className="my-2 text-lg font-medium text-[#05243F] sm:text-xl">
+            Reset Your Password
+          </h2>
+          <p className="text-sm text-[#05243F]/40 sm:text-base">
+            Please enter your new password below.
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" action="#" onSubmit={handleSubmit}>
+          <input type="hidden" name="remember" defaultValue="true" />
+          <div className="-space-y-px rounded-md shadow-sm">
+            <div className="mb-3">
+              <label htmlFor="new-password" className="sr-only">
+                New Password
+              </label>
+              <input
+                id="new-password"
+                name="new-password"
+                type="password"
+                value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
-              required
-              className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm"
-              placeholder="New Password"
-            />
-          </div>
-          <div>
-            <label htmlFor="confirm-password" className="sr-only">
-              Confirm Password
-            </label>
-            <input
-              id="confirm-password"
-              name="confirm-password"
-              type="password"
-              value={confirmPassword}
+                required
+                className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
+                placeholder="New Password"
+              />
+            </div>
+            <div>
+              <label htmlFor="confirm-password" className="sr-only">
+                Confirm Password
+              </label>
+              <input
+                id="confirm-password"
+                name="confirm-password"
+                type="password"
+                value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
-              required
-              className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm"
-              placeholder="Confirm Password"
-            />
+                required
+                className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
+                placeholder="Confirm Password"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center justify-between">
-          <div className="text-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <button
+                disabled={isResetingPassword}
+                className="font-medium text-[#2389E3] hover:text-[#05243F]"
+                type="button"
+              >
+                Back
+              </button>
+            </div>
+          </div>
+
+          <div>
             <button
+              type="submit"
               disabled={isResetingPassword}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-              type="button"
+              className="mx-auto mt-6 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-8 sm:w-fit sm:px-10 sm:py-3 sm:text-base md:mt-10"
             >
-              Back
+              Reset Password
             </button>
           </div>
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            disabled={isResetingPassword}
-            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
-          >
-            Reset Password
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

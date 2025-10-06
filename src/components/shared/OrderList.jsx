@@ -63,10 +63,10 @@ export default function OrderList({
             <span className="text-sm font-normal text-[#05243F]/60">
               {item.name}
             </span>
-            <span className="text-sm font-semibold text-[#05243F]/95">
+            {/* <span className="text-sm font-semibold text-[#05243F]/95">
               {currency}
               {item.amount.toLocaleString()}
-            </span>
+            </span> */}
           </div>
         ))}
         <div className="flex items-center justify-between rounded-[12px] bg-[#FFF4DD] p-3 shadow-xs">
