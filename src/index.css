@@ -51,7 +51,7 @@ body {
   height: 100vh;
   width: 100vw;
 }
-.background-gradient::after{
+ /* .background-gradient::after{
   content: "";
   position: absolute;
   height: 100vh;
@@ -74,7 +74,7 @@ body {
   background-image: url("./assets/images/Ellipse35.png");
   background-size: cover;
   background-repeat: no-repeat;
-}
+}  */
 .customScroll::-webkit-scrollbar {
   width: 6px;
 
