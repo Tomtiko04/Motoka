@@ -6,12 +6,18 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import PaymentModal from '../../components/admin/PaymentModal';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [paymentModal, setPaymentModal] = useState({
+    isOpen: false,
+    order: null,
+    agent: null
+  });
 
   useEffect(() => {
     // Check if admin is authenticated
@@ -99,15 +105,36 @@ const AdminOrders = () => {
 
       const data = await response.json();
       if (data.status) {
-        // Refresh orders after processing
-        fetchOrders();
-        toast.success('Order processed successfully! Agent has been notified.');
+        // Show payment modal with order and agent details
+        setPaymentModal({
+          isOpen: true,
+          order: data.data.order,
+          agent: data.data.agent
+        });
       } else {
         toast.error(data.message || 'Failed to process order');
       }
     } catch (error) {
       toast.error('Failed to process order. Please try again.');
     }
+  };
+
+  const handlePaymentInitiated = (paymentData) => {
+    // Refresh orders after payment is initiated
+    fetchOrders();
+    setPaymentModal({
+      isOpen: false,
+      order: null,
+      agent: null
+    });
+  };
+
+  const handleClosePaymentModal = () => {
+    setPaymentModal({
+      isOpen: false,
+      order: null,
+      agent: null
+    });
   };
 
   const getActionButton = (status) => {
@@ -313,6 +340,15 @@ const AdminOrders = () => {
           </p>
         </div>
       )}
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={paymentModal.isOpen}
+        onClose={handleClosePaymentModal}
+        order={paymentModal.order}
+        agent={paymentModal.agent}
+        onPaymentInitiated={handlePaymentInitiated}
+      />
     </div>
   );
 };

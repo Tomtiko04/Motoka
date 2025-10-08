@@ -16,6 +16,9 @@ const CreateAgent = () => {
     address: '',
     location: '',
     accountNumber: '',
+    bankName: '',
+    bankCode: '',
+    accountName: '',
     stateOfOrigin: '',
     phoneNumber: '',
     email: '',
@@ -30,9 +33,19 @@ const CreateAgent = () => {
   const [stateSearchTerm, setStateSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState(null);
 
-  // Fetch states on component mount
+  // Bank-related state
+  const [banks, setBanks] = useState([]);
+  const [filteredBanks, setFilteredBanks] = useState([]);
+  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+  const [bankSearchTerm, setBankSearchTerm] = useState('');
+  const [selectedBank, setSelectedBank] = useState(null);
+  const [isVerifyingAccount, setIsVerifyingAccount] = useState(false);
+  const [accountVerified, setAccountVerified] = useState(false);
+
+  // Fetch states and banks on component mount
   useEffect(() => {
     fetchStates();
+    fetchBanks();
     testApiConnection();
   }, []);
 
@@ -57,11 +70,26 @@ const CreateAgent = () => {
     }
   }, [stateSearchTerm, states]);
 
+  // Filter banks based on search term
+  useEffect(() => {
+    if (bankSearchTerm) {
+      const filtered = banks.filter(bank =>
+        bank.name.toLowerCase().includes(bankSearchTerm.toLowerCase())
+      );
+      setFilteredBanks(filtered);
+    } else {
+      setFilteredBanks(banks);
+    }
+  }, [bankSearchTerm, banks]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.state-dropdown')) {
         setIsStateDropdownOpen(false);
+      }
+      if (!event.target.closest('.bank-dropdown')) {
+        setIsBankDropdownOpen(false);
       }
     };
 
@@ -88,6 +116,94 @@ const CreateAgent = () => {
       }
     } catch (error) {
       toast.error('Failed to fetch states');
+    }
+  };
+
+  const fetchBanks = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/banks`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setBanks(data.data);
+        setFilteredBanks(data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch banks');
+    }
+  };
+
+  const handleBankSelect = (bank) => {
+    setSelectedBank(bank);
+    setFormData(prev => ({
+      ...prev,
+      bankName: bank.name,
+      bankCode: bank.code
+    }));
+    setIsBankDropdownOpen(false);
+    setBankSearchTerm('');
+    // Reset account verification when bank changes
+    setAccountVerified(false);
+    setFormData(prev => ({
+      ...prev,
+      accountName: ''
+    }));
+  };
+
+  const verifyAccount = async () => {
+    if (!selectedBank || !formData.accountNumber) {
+      toast.error('Please select a bank and enter account number');
+      return;
+    }
+
+    setIsVerifyingAccount(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/banks/verify-account`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          account_number: formData.accountNumber,
+          bank_code: selectedBank.code
+        })
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setFormData(prev => ({
+          ...prev,
+          accountName: data.data.account_name
+        }));
+        setAccountVerified(true);
+        toast.success('Account verified successfully!');
+      } else {
+        toast.error(data.message || 'Account verification failed');
+        setAccountVerified(false);
+        // Show info that bank details are still saved
+        toast('Bank details have been saved. You can still create the agent.', {
+          icon: 'ℹ️',
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to verify account');
+      setAccountVerified(false);
+      // Show info that bank details are still saved
+      toast('Bank details have been saved. You can still create the agent.', {
+        icon: 'ℹ️',
+        duration: 4000,
+      });
+    } finally {
+      setIsVerifyingAccount(false);
     }
   };
 
@@ -159,6 +275,30 @@ const CreateAgent = () => {
         return;
       }
 
+      // Check if agent already exists for this state
+      try {
+        const checkResponse = await fetch(`${config.getApiBaseUrl()}/admin/agents/check-state`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            state: selectedState.name
+          })
+        });
+
+        const checkData = await checkResponse.json();
+        if (!checkData.status && checkData.message.includes('already exists')) {
+          toast.dismiss(loadingToast);
+          toast.error(`An agent already exists for ${selectedState.name} state. Please select a different state.`);
+          return;
+        }
+      } catch (error) {
+        // Continue with creation if check fails (backend will handle validation)
+        console.log('State check failed, continuing with backend validation');
+      }
+
       const formDataToSend = new FormData();
       
       // Map frontend field names to backend field names
@@ -167,6 +307,9 @@ const CreateAgent = () => {
         'surname': 'last_name',
         'phoneNumber': 'phone',
         'accountNumber': 'account_number',
+        'bankName': 'bank_name',
+        'bankCode': 'bank_code',
+        'accountName': 'account_name',
       };
 
       // Add all form fields with proper mapping
@@ -220,6 +363,9 @@ const CreateAgent = () => {
           address: '',
           location: '',
           accountNumber: '',
+          bankName: '',
+          bankCode: '',
+          accountName: '',
           stateOfOrigin: '',
           phoneNumber: '',
           email: '',
@@ -229,6 +375,9 @@ const CreateAgent = () => {
         });
         setSelectedState(null);
         setStateSearchTerm('');
+        setSelectedBank(null);
+        setBankSearchTerm('');
+        setAccountVerified(false);
         
         // Redirect to agents list after a short delay
         setTimeout(() => {
@@ -386,6 +535,79 @@ const CreateAgent = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
+
+              {/* Bank Name */}
+              <div className="bank-dropdown">
+                <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Bank Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="bankName"
+                    name="bankName"
+                    value={bankSearchTerm}
+                    onChange={(e) => setBankSearchTerm(e.target.value)}
+                    onFocus={() => setIsBankDropdownOpen(true)}
+                    placeholder="Search and select bank..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                    <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 ml-1" />
+                  </div>
+                  
+                  {isBankDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                      {filteredBanks.length > 0 ? (
+                        filteredBanks.map((bank) => (
+                          <div
+                            key={bank.code}
+                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                            onClick={() => handleBankSelect(bank)}
+                          >
+                            {bank.name}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-3 py-2 text-sm text-gray-500">No banks found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {selectedBank && (
+                  <p className="text-xs text-green-600 mt-1">Selected: {selectedBank.name}</p>
+                )}
+              </div>
+
+              {/* Account Verification */}
+              {selectedBank && formData.accountNumber && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={verifyAccount}
+                    disabled={isVerifyingAccount}
+                    className={`w-full px-4 py-2 rounded-md text-sm font-medium ${
+                      accountVerified
+                        ? 'bg-green-100 text-green-800 border border-green-300'
+                        : isVerifyingAccount
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200'
+                    }`}
+                  >
+                    {isVerifyingAccount
+                      ? 'Verifying...'
+                      : accountVerified
+                      ? '✓ Account Verified'
+                      : 'Verify Account'}
+                  </button>
+                  {accountVerified && formData.accountName && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Account Name: {formData.accountName}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* State of Origin */}
               <div className="relative state-dropdown">
