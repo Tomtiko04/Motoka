@@ -8,61 +8,61 @@
 //     <div></div>
 //   )
 // }
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { ChevronLeft, Pencil } from "lucide-react"
-import { useProfile } from "../hooks/useProfile"
-import Avatar from "./ui/avatar"
-import { Icon } from "@iconify/react"
-
+import { useState, useEffect } from "react";
+import { ChevronLeft, Pencil } from "lucide-react";
+import { useProfile } from "../hooks/useProfile";
+import Avatar from "./ui/avatar";
+import { Icon } from "@iconify/react";
+import love from "../../../assets/images/setting/love-icon.png";
 export default function MainSettings({ onNavigate }) {
-  const { loading, error, profileData, fetchProfile } = useProfile()
+  const { loading, error, profileData, fetchProfile } = useProfile();
 
-  
-  const [fetchInitiated, setFetchInitiated] = useState(false)
+  const [fetchInitiated, setFetchInitiated] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
       if (!fetchInitiated) {
-        setFetchInitiated(true)
-        await fetchProfile(true) 
+        setFetchInitiated(true);
+        await fetchProfile(true);
       }
-    }
+    };
 
-    loadProfile()
-  }, [fetchProfile, fetchInitiated])
+    loadProfile();
+  }, [fetchProfile, fetchInitiated]);
 
   // Add this effect to refresh data when component mounts
   useEffect(() => {
     const refreshData = async () => {
-      await fetchProfile(true) 
-    }
-    refreshData()
-  }, [])
+      await fetchProfile(true);
+    };
+    refreshData();
+  }, []);
 
   const handleEditClick = () => {
-    onNavigate("edit-profile")
-  }
+    onNavigate("edit-profile");
+  };
 
   if (loading && !profileData) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-sky-500"></div>
       </div>
-    )
+    );
   }
 
   if (error && !profileData) {
-    return <div className="text-red-500 text-center p-4">{error}</div>
+    return <div className="p-4 text-center text-red-500">{error}</div>;
   }
 
   return (
-    <div className="flex flex-col h-50 items-center justify-center">
+    <div className="flex flex-col items-center justify-center h-full">
+    {/* // <div> */}
       <div>
         <div>
           <div className="flex items-center justify-center">
-            <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
+            <h2 className="text-2xl font-medium text-[#05243F] capitalize sm:text-2xl">
               Hello, {profileData?.name || "User"}
             </h2>
             <span
@@ -79,17 +79,26 @@ export default function MainSettings({ onNavigate }) {
         </div>
       </div>
       <div>
-        <button
-          type="button"
-          className="mt-5 rounded-[26px] bg-[#FFF] px-4 py-3 text-sm font-medium text-[#05243F] shadow-sm transition-colors"
-        >
-          Thank you for trusting in us.
-        </button>
+        <div className="relative mt-16 flex flex-col items-center justify-start">
+          
+          <button
+            type="button"
+            className="relative z-10 rounded-[26px] bg-[#FFF] px-8 py-3 text-base font-medium text-[#05243F] shadow-sm transition-colors"
+          >
+            Thank you for trusting in us.
+          </button>
+         <div className="absolute -top-10 -left-6 h-18 w-18 -z-0 inset-0">
+          <img
+            src={love}
+            alt="love_icon"
+            className=""
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
 
 //  <div className="mt-10 flex flex-col items-center justify-start">
 //    <div className="relative mb-4">
@@ -114,12 +123,12 @@ export default function MainSettings({ onNavigate }) {
 //       </div> */}
 
 //    {/* <p className="text-gray-600 text-center">Thank you for trusting in us.</p> */}
-  //  <div className="mt-5">
-  //    <button
-  //      type="button"
-  //      className="mt-5 rounded-[26px] bg-[#FFF] px-4 py-3 text-sm font-medium text-[#05243F] shadow-sm transition-colors"
-  //    >
-  //      Thank you for trusting in us.
-  //    </button>
-  //  </div>
+//  <div className="mt-5">
+//    <button
+//      type="button"
+//      className="mt-5 rounded-[26px] bg-[#FFF] px-4 py-3 text-sm font-medium text-[#05243F] shadow-sm transition-colors"
+//    >
+//      Thank you for trusting in us.
+//    </button>
+//  </div>
 //  </div>;
