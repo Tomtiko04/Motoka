@@ -75,62 +75,35 @@ export default function VehiclePaper() {
   const [hoveredType, setHoveredType] = React.useState(null);
 
   const handleLicenseSelect = (type) => {
-    let items = [];
-    let totalAmount = 0;
+    const items = type.title === "Private"
+      ? [
+        { name: "Proof of Ownership" },
+        { name: "Vehicle License"},
+        { name: "Insurance"},
+        { name: "Road Worthiness" },
+      ]
+      : [
+        { name: "Proof of Ownership" },
+        { name: "Vehicle License"},
+        { name: "Insurance"},
+        { name: "Road Worthiness" },
+        { name: "Commercial License"},
+      ];
 
-    switch (type.title) {
-      case "Private":
-        items = [
-          { name: "Proof of Ownership", amount: 45000 },
-          { name: "Vehicle License", amount: 5876 },
-          { name: "Insurance", amount: 15000 },
-          { name: "Road Worthiness", amount: 45000 },
-        ];
-        break;
-      case "Commercial":
-        items = [
-          { name: "Proof of Ownership", amount: 45000 },
-          { name: "Vehicle License", amount: 5876 },
-          { name: "Insurance", amount: 15000 },
-          { name: "Road Worthiness", amount: 45000 },
-          { name: "Commercial License", amount: 8500 },
-        ];
-        break;
-      default:
-        toast.error("Invalid license type");
-        return;
-    }
-
-    totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
-
-    // I'm changing the flow here to: Selecte a car type => add a car => order list => confirm request => payment => success
-    // navigate("/licenses/confirm-request", {
-    //   state: {
-    //     type: "vehicle_paper",
-    //     amount: totalAmount,
-    //     details: {
-    //       paperType: type.title,
-    //       items,
-    //       description: type.description,
-    //     },
-    //   },
-    // });
     navigate("/add-car", {
       state: {
         next: {
           path: "/licenses/confirm-request",
           state: {
             type: "vehicle_paper",
-            amount: totalAmount,
             details: {
               paperType: type.title,
-              items,
               description: type.description,
             },
             items
           }
-        },
-      },
+        }
+      }
     });
   };
 

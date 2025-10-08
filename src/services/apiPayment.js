@@ -44,28 +44,42 @@ export async function initializePaystackPayment(payload) {
     });
     return data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || error.message || "Failed to initialize Paystack");
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to initialize Paystack",
+    );
   }
 }
 
 export async function getPaystackReference(transactionId) {
   try {
-    const { data } = await api.get(`/payment/paystack/reference/${transactionId}`);
+    const { data } = await api.get(
+      `/payment/paystack/reference/${transactionId}`,
+    );
     return data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || error.message || "Failed to get Paystack reference");
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to get Paystack reference",
+    );
   }
 }
 
 export async function checkExistingPayments(carSlug, paymentScheduleIds) {
   try {
-    const { data } = await api.post('/payment/check-existing', {
+    const { data } = await api.post("/payment/check-existing", {
       car_slug: carSlug,
-      payment_schedule_ids: paymentScheduleIds
+      payment_schedule_ids: paymentScheduleIds,
     });
     return data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || error.message || "Failed to check existing payments");
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to check existing payments",
+    );
   }
 }
 
@@ -74,6 +88,23 @@ export async function verifyPaystackPayment(reference) {
     const { data } = await api.post(`/payment/paystack/verify/${reference}`);
     return data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || error.message || "Failed to verify Paystack payment");
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to verify Paystack payment",
+    );
+  }
+}
+
+export async function initiateDriversLicensePayment(slug) {
+  try {
+    const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
+    return data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to initiate driver's license payment",
+    );
   }
 }

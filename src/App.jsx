@@ -128,7 +128,7 @@ export default function App() {
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="successful" element={<SuccessPage />} />
-            <Route path="documents" element={<CarDocuments />} />
+            {/* <Route path="documents" element={<CarDocuments />} /> */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="notifications" element={<Notification />} />
             <Route path="licenses">
