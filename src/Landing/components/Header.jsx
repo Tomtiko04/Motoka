@@ -1,10 +1,10 @@
-import logo from "../../assets/images/landing/Group 209.png"
+import logo from "../../assets/images/landing/Group 209.svg"
 import { Link } from "react-router-dom";
 function Header() {
     return ( 
         <div className="w-full bg-[#F2ECE2]">
-              <div className="mx-auto px-9">
-                <header className="flex flex-wrap items-center justify-between py-4">
+              <div className="mx-auto px-10">
+                <header className="flex flex-wrap items-center justify-between py-2">
                   <div
                     // onClick={handleHome}
                     className="flex cursor-pointer items-center"
@@ -28,7 +28,7 @@ function Header() {
                         ))                  
                         }
                     </div>
-                  <button className="bg-[#EBB850] mt-2 rounded-[10px] px-4 py-2 text-xl font-semibold text-[#05243F] sm:mt-0 ">
+                  <button className="bg-[#EBB850] mt-2 rounded-[10px] px-6 py-3 text-xl font-semibold text-[#05243F] sm:mt-0 ">
                     Register
                   </button>
                 </header>
