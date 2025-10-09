@@ -133,9 +133,9 @@ export default function Signin() {
 
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
-        <div className="w-full overflow-hidden md:w-1/2">
-          <div className="animate-slideDown mb-4 flex flex-col items-center justify-between space-y-1 sm:mb-6 sm:flex-row sm:space-y-0 md:mt-3">
-            <h2 className="text-2xl font-bold text-[#05243F] sm:text-xl">
+        <div className="w-full overflow-hidden md:w-1/2 p-0 sm:p-4 h-fit self-center">
+          <div className="animate-slideDown mb-4 flex flex-col items-center justify-between space-y-1 sm:mb-6 sm:flex-row sm:space-y-0 md:mt-6">
+            <h2 className="text-2xl font-medium text-[#05243F] sm:text-xl">
               Login
             </h2>
             <div className="flex items-center">
@@ -158,7 +158,7 @@ export default function Signin() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2"
+                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2 mt-6"
               >
                 Email
               </label>
@@ -183,7 +183,7 @@ export default function Signin() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2"
+                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2 mt-6"
               >
                 Password
               </label>
