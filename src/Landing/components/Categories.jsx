@@ -97,19 +97,19 @@ function Categories() {
 
   return (
     <div>
-        <h1 className="mt-10 text-[56px] max-w-[1003px] font-bold text-[#05243F] px-10 ">We ensure you <span className="text-[#2389E3]">Drive Assured</span> through our Services</h1>
+        <h1 className="mt-10 text-[56px] max-w-[1003px] font-bold text-[#05243F] px-6 sm:px-10 ">We ensure you <span className="text-[#2389E3]">Drive Assured</span> through our Services</h1>
       <div
-        className=" w-full overflow-hidden select-none"
+        className=" w-full overflow-x-hidden select-none "
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
         {/* Header navigation */}
-        <div className="max-w-8xl mt-8 flex w-full flex-wrap justify-between px-10">
+        <div className="max-w-8xl mt-8 flex w-full flex-wrap justify-between px-6 sm:px-10">
           {CategoryData.map((item, index) => (
             <button
               key={item.id}
               onClick={() => setActiveIndex(index)}
-              className={`m-2 rounded-[17px] px-6 py-4 text-base font-bold text-[#05243F] transition-all ${
+              className={`me-2 rounded-[17px] px-6 py-4 text-base font-bold text-[#05243F] transition-all ${
                 index === activeIndex ? "bg-[#F2F2F2]" : ""
               }`}
             >
@@ -119,7 +119,7 @@ function Categories() {
         </div>
 
         {/* Slider container */}
-        <div className="relative mt-10 hidden sm:block">
+        <div className="relative mt-10 hidden sm:block mb-20">
           <motion.div
             ref={sliderRef}
             className="flex cursor-grab px-10 active:cursor-grabbing"

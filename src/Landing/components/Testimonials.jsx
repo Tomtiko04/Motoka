@@ -33,7 +33,7 @@ export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(1);
 
   return (
-    <div className="flex flex-col overflow-hidden bg-[#FFF4DE] px-10 py-20">
+    <div className="flex flex-col overflow-hidden bg-[#FFF4DE] px-10 py-20 mt-40">
       <h2 className="mb-10 text-center text-[56px] font-bold text-[#05243F]">
         What Client Says
       </h2>

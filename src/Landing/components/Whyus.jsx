@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 function Whyus() {
   return (
     <div className="mt-18">
-      <div className="mt-10 max-w-[1003px] px-10">
+      <div className="mt-10 max-w-[1003px] px-6">
         <h1 className="text-[56px] font-bold text-[#05243F]">
           Stop Worrying. <span className="text-[#2389E3]">Start Driving.</span>
         </h1>
@@ -13,7 +13,7 @@ function Whyus() {
           service network.
         </p>
       </div>
-      <div className="w-full px-10">
+      <div className="w-full px-6">
         <div className="mt-18 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="text-[#05243F]">
             <h2 className="text-[32px] font-bold">End the Document Stress:</h2>

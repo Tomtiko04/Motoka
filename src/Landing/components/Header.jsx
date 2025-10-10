@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 function Header() {
     return ( 
         <div className="w-full bg-[#F2ECE2]">
-              <div className="mx-auto px-10">
+              <div className="mx-auto px-6 sm:px-10">
                 <header className="flex flex-wrap items-center justify-between py-2">
                   <div
                     // onClick={handleHome}
