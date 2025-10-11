@@ -35,6 +35,7 @@ const AgentView = () => {
   const [showNINImages, setShowNINImages] = useState({ front: false, back: false });
   const [currentPage, setCurrentPage] = useState({ payments: 1, orders: 1 });
   const [activeTab, setActiveTab] = useState('overview');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -61,10 +62,25 @@ const AgentView = () => {
   const [stateSearchTerm, setStateSearchTerm] = useState('');
   const [selectedState, setSelectedState] = useState(null);
 
+  // Bank verification states
+  const [banks, setBanks] = useState([]);
+  const [filteredBanks, setFilteredBanks] = useState([]);
+  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+  const [bankSearchTerm, setBankSearchTerm] = useState('');
+  const [selectedBank, setSelectedBank] = useState(null);
+  const [isVerifyingAccount, setIsVerifyingAccount] = useState(false);
+  const [accountVerified, setAccountVerified] = useState(false);
+
   useEffect(() => {
     fetchAgentDetails();
     fetchStates();
+    fetchBanks();
   }, [uuid]);
+
+  // Debug: Log form state changes
+  useEffect(() => {
+    console.log('Edit form state changed:', editForm);
+  }, [editForm]);
 
   // Filter states based on search term
   useEffect(() => {
@@ -78,11 +94,26 @@ const AgentView = () => {
     }
   }, [stateSearchTerm, states]);
 
+  // Filter banks based on search term
+  useEffect(() => {
+    if (bankSearchTerm) {
+      const filtered = banks.filter(bank =>
+        bank.name.toLowerCase().includes(bankSearchTerm.toLowerCase())
+      );
+      setFilteredBanks(filtered);
+    } else {
+      setFilteredBanks(banks);
+    }
+  }, [bankSearchTerm, banks]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.state-dropdown')) {
         setIsStateDropdownOpen(false);
+      }
+      if (!event.target.closest('.bank-dropdown')) {
+        setIsBankDropdownOpen(false);
       }
     };
 
@@ -112,6 +143,26 @@ const AgentView = () => {
     }
   };
 
+  const fetchBanks = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/banks`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setBanks(data.data);
+        setFilteredBanks(data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch banks');
+    }
+  };
+
   const handleStateSelect = (state) => {
     setSelectedState(state);
     setEditForm(prev => ({
@@ -121,11 +172,121 @@ const AgentView = () => {
     setIsStateDropdownOpen(false);
   };
 
+  const handleBankSelect = (bank) => {
+    setSelectedBank(bank);
+    setEditForm(prev => ({
+      ...prev,
+      bank_name: bank.name,
+      bank_code: bank.code
+    }));
+    setIsBankDropdownOpen(false);
+    setBankSearchTerm(bank.name);
+    setAccountVerified(false); // Reset verification when bank changes
+  };
+
+  const verifyAccount = async () => {
+    if (!editForm.account_number || !selectedBank) {
+      toast.error('Please select a bank and enter account number');
+      return;
+    }
+
+    setIsVerifyingAccount(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/banks/verify-account`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          account_number: editForm.account_number,
+          bank_code: selectedBank.code
+        })
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setEditForm(prev => ({
+          ...prev,
+          account_name: data.data.account_name
+        }));
+        setAccountVerified(true);
+        toast.success('Account verified successfully!');
+      } else {
+        toast.error(data.message || 'Account verification failed');
+        setAccountVerified(false);
+        // Show info that bank details are still saved
+        toast('Bank details have been saved. You can still update the agent.', {
+          icon: 'ℹ️',
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to verify account');
+      setAccountVerified(false);
+    } finally {
+      setIsVerifyingAccount(false);
+    }
+  };
+
   const handleFileUpload = (field, file) => {
     setEditForm(prev => ({
       ...prev,
       [field]: file
     }));
+  };
+
+  const handleOpenEditModal = () => {
+    // Check if agent data is loaded
+    if (!agent) {
+      toast.error('Agent data not loaded. Please wait and try again.');
+      return;
+    }
+    
+    // Reset form with current agent data
+    console.log('Opening edit modal with agent data:', agent);
+    
+    const formData = {
+      first_name: agent.first_name || '',
+      last_name: agent.last_name || '',
+      email: agent.email || '',
+      phone: agent.phone || '',
+      address: agent.address || '',
+      state: agent.state || '',
+      lga: agent.lga || '',
+      account_number: agent.account_number || '',
+      bank_name: agent.bank_name || '',
+      account_name: agent.account_name || '',
+      notes: agent.notes || '',
+      agentProfile: null,
+      ninFront: null,
+      ninBack: null,
+    };
+    
+    console.log('Setting form data:', formData);
+    setEditForm(formData);
+
+    // Set selected state if exists
+    if (agent.state) {
+      const stateObj = states.find(s => s.name === agent.state);
+      if (stateObj) {
+        setSelectedState(stateObj);
+        console.log('Setting selected state:', stateObj);
+      }
+    }
+
+    // Set selected bank if exists
+    if (agent.bank_name) {
+      const bankObj = banks.find(b => b.name === agent.bank_name);
+      if (bankObj) {
+        setSelectedBank(bankObj);
+        setBankSearchTerm(bankObj.name);
+        console.log('Setting selected bank:', bankObj);
+      }
+    }
+    
+    setShowEditModal(true);
   };
 
   const fetchAgentDetails = async () => {
@@ -209,41 +370,129 @@ const AgentView = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    
+    if (isSubmitting) {
+      return; // Prevent double submission
+    }
+    
+    setIsSubmitting(true);
+    
+    // Debug: Log current form state
+    console.log('Current form state:', editForm);
+    console.log('Selected state:', selectedState);
+    
+    // Check if form has any data at all
+    if (!editForm.first_name && !editForm.last_name && !editForm.email) {
+      toast.error('Form data not loaded. Please try again.');
+      console.error('Form is empty, agent data might not be loaded');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Validate required fields
+    if (!editForm.first_name?.trim()) {
+      toast.error('First name is required');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!editForm.last_name?.trim()) {
+      toast.error('Last name is required');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!editForm.email?.trim()) {
+      toast.error('Email is required');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!editForm.address?.trim()) {
+      toast.error('Address is required');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!selectedState && !editForm.state?.trim()) {
+      toast.error('State is required');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!editForm.lga?.trim()) {
+      toast.error('LGA is required');
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
       const token = localStorage.getItem('adminToken');
-      const formData = new FormData();
       
-      // Add text fields
-      formData.append('first_name', editForm.first_name);
-      formData.append('last_name', editForm.last_name);
-      formData.append('email', editForm.email);
-      formData.append('phone', editForm.phone);
-      formData.append('address', editForm.address);
-      formData.append('state', editForm.state);
-      formData.append('lga', editForm.lga);
-      formData.append('account_number', editForm.account_number);
-      formData.append('bank_name', editForm.bank_name);
-      formData.append('account_name', editForm.account_name);
-      formData.append('notes', editForm.notes);
-
-      // Add files if they exist
-      if (editForm.agentProfile) {
-        formData.append('profile_image', editForm.agentProfile);
-      }
-      if (editForm.ninFront) {
-        formData.append('nin_front_image', editForm.ninFront);
-      }
-      if (editForm.ninBack) {
-        formData.append('nin_back_image', editForm.ninBack);
-      }
-
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/agents/uuid/${uuid}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
+      // Debug: Log form data before sending
+      console.log('Form data being sent:', {
+        first_name: editForm.first_name,
+        last_name: editForm.last_name,
+        email: editForm.email,
+        address: editForm.address,
+        state: selectedState ? selectedState.name : editForm.state,
+        lga: editForm.lga
       });
+      
+      // Prepare data for sending
+      const updateData = {
+        first_name: editForm.first_name.trim(),
+        last_name: editForm.last_name.trim(),
+        email: editForm.email.trim(),
+        phone: editForm.phone || '',
+        address: editForm.address.trim(),
+        state: selectedState ? selectedState.name : editForm.state.trim(),
+        lga: editForm.lga.trim(),
+        account_number: editForm.account_number || '',
+        bank_name: editForm.bank_name || '',
+        bank_code: selectedBank ? selectedBank.code : editForm.bank_code || '',
+        account_name: editForm.account_name || '',
+        notes: editForm.notes || '',
+      };
+
+      // Check if we have files to upload
+      const hasFiles = editForm.agentProfile || editForm.ninFront || editForm.ninBack;
+      
+      let response;
+      
+      if (hasFiles) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        
+        // Add text fields
+        Object.keys(updateData).forEach(key => {
+          formData.append(key, updateData[key]);
+        });
+        
+        // Add files if they exist
+        if (editForm.agentProfile) {
+          formData.append('profile_image', editForm.agentProfile);
+        }
+        if (editForm.ninFront) {
+          formData.append('nin_front_image', editForm.ninFront);
+        }
+        if (editForm.ninBack) {
+          formData.append('nin_back_image', editForm.ninBack);
+        }
+        
+        response = await fetch(`${config.getApiBaseUrl()}/admin/agents/uuid/${uuid}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+      } else {
+        // Use JSON for text-only updates
+        response = await fetch(`${config.getApiBaseUrl()}/admin/agents/uuid/${uuid}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        });
+      }
 
       const data = await response.json();
       if (data.status) {
@@ -257,6 +506,8 @@ const AgentView = () => {
       }
     } catch (error) {
       toast.error('Failed to update agent');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -326,7 +577,7 @@ const AgentView = () => {
           </span>
           
           <button
-            onClick={() => setShowEditModal(true)}
+            onClick={handleOpenEditModal}
             className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
           >
             <PencilIcon className="h-3 w-3 mr-1.5" />
@@ -620,7 +871,7 @@ const AgentView = () => {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white">
+          <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
@@ -751,14 +1002,31 @@ const AgentView = () => {
                       <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-700 mb-1">
                         Account Number
                       </label>
-                      <input
-                        type="text"
-                        id="accountNumber"
-                        value={editForm.account_number}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, account_number: e.target.value }))}
-                        placeholder="Enter account number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          id="accountNumber"
+                          value={editForm.account_number}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, account_number: e.target.value }))}
+                          placeholder="Enter account number"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={verifyAccount}
+                          disabled={isVerifyingAccount || !editForm.account_number || !selectedBank}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                        >
+                          {isVerifyingAccount ? 'Verifying...' : 'Verify'}
+                        </button>
+                      </div>
+                      {accountVerified && editForm.account_name && (
+                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                          <p className="text-sm text-green-800">
+                            ✓ Verified: {editForm.account_name}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* State of Origin */}
@@ -843,18 +1111,53 @@ const AgentView = () => {
                     </div>
 
                     {/* Bank Name */}
-                    <div>
-                      <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <div className="relative bank-dropdown">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Bank Name
                       </label>
-                      <input
-                        type="text"
-                        id="bankName"
-                        value={editForm.bank_name}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, bank_name: e.target.value }))}
-                        placeholder="Enter bank name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={bankSearchTerm || selectedBank?.name || editForm.bank_name || ''}
+                          onChange={(e) => {
+                            setBankSearchTerm(e.target.value);
+                            setIsBankDropdownOpen(true);
+                          }}
+                          onFocus={() => setIsBankDropdownOpen(true)}
+                          placeholder="Search and select bank..."
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        />
+                        <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <button
+                          type="button"
+                          onClick={() => setIsBankDropdownOpen(!isBankDropdownOpen)}
+                          className="absolute right-8 top-1/2 transform -translate-y-1/2"
+                        >
+                          <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                        </button>
+                      </div>
+                      
+                      {/* Bank Dropdown */}
+                      {isBankDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredBanks.length > 0 ? (
+                            filteredBanks.map((bank) => (
+                              <button
+                                key={bank.id}
+                                type="button"
+                                onClick={() => handleBankSelect(bank)}
+                                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                              >
+                                {bank.name}
+                              </button>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-gray-500">
+                              No banks found
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Account Name */}
@@ -924,9 +1227,10 @@ const AgentView = () => {
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium transition-colors text-sm"
+                    disabled={isSubmitting}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded-md font-medium transition-colors text-sm"
                   >
-                    Update Agent
+                    {isSubmitting ? 'Updating...' : 'Update Agent'}
                   </button>
                 </div>
               </form>
