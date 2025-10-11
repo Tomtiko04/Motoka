@@ -26,10 +26,10 @@ export default function Header() {
             />
           </div>
 
-          <button className="ai-button mt-2 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white sm:mt-0">
+          {/* <button className="ai-button mt-2 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white sm:mt-0">
             <BsStars />
             <span className="whitespace-nowrap">MO'</span>
-          </button>
+          </button> */}
         </header>
       </div>
     </div>

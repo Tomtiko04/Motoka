@@ -17,7 +17,7 @@ const ImageSlider = () => {
       loop
       spaceBetween={10}
       slidesPerView={1}
-      className="mb-6 w-full max-w-md text-[#2389E3]"
+      className="mb-3 w-full max-w-md text-[#2389E3]"
     >
       {[Slider1, Slider2, Slider3, Slider4].map((image, index) => {
         const content = [
@@ -51,7 +51,7 @@ const ImageSlider = () => {
                 <h2 className="text-lg font-semibold text-[#05243F]">
                   {content[index].title}
                 </h2>
-                <p className="text-sm text-[#05243F]/60">
+                <p className="text-sm text-[#05243F]/60 mb-3">
                   {content[index].desc}
                 </p>
               </div>

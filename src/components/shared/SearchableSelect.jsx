@@ -71,7 +71,8 @@ const SearchableSelect = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className={`block w-full rounded-md border px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 ${
+                            // className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+          className={`block w-full rounded-md border px-3 py-2 text-sm bg-[#F4F5FC] focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] ${
             error ? "border-red-500" : "border-gray-300"
           }`}
         />

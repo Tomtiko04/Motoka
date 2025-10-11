@@ -126,16 +126,16 @@ export default function Signin() {
 
   return (
     <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between gap-4 overflow-hidden rounded-[20px] bg-white p-3 shadow-lg sm:p-4 md:flex-row md:p-5">
+      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between gap-4 overflow-hidden rounded-[20px] bg-white p-3 py-6 px-5 sm:px-3 pt-10 sm:pt-3 sm:py-3 shadow-lg sm:p-4 md:flex-row md:p-5">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />
         </div>
 
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
-        <div className="w-full overflow-hidden md:w-1/2">
-          <div className="animate-slideDown mb-4 flex flex-col items-center justify-between space-y-1 sm:mb-6 sm:flex-row sm:space-y-0 md:mt-3">
-            <h2 className="text-lg font-bold text-[#05243F] sm:text-xl">
+        <div className="w-full overflow-hidden md:w-1/2 p-0 sm:p-4 h-fit self-center">
+          <div className="animate-slideDown mb-4 flex flex-col items-center justify-between space-y-1 sm:mb-6 sm:flex-row sm:space-y-0 md:mt-6">
+            <h2 className="text-2xl font-medium text-[#05243F] sm:text-xl">
               Login
             </h2>
             <div className="flex items-center">
@@ -158,7 +158,7 @@ export default function Signin() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2"
+                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2 mt-6"
               >
                 Email
               </label>
@@ -167,7 +167,7 @@ export default function Signin() {
                 {...register("email")}
                 placeholder="sample@gmail.com"
                 disabled={isLoggingIn || isSendingLoginOtp}
-                className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
+                className={`mt-1 block w-full rounded-md sm:rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                   isLoggingIn || isSendingLoginOtp
                     ? "cursor-not-allowed opacity-50"
                     : ""
@@ -183,7 +183,7 @@ export default function Signin() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2"
+                className="mb-1 block text-sm font-medium text-[#05243F] sm:mb-2 mt-6"
               >
                 Password
               </label>
@@ -193,7 +193,7 @@ export default function Signin() {
                   {...register("password")}
                   type={!showPassword ? "password" : "text"}
                   disabled={isLoggingIn}
-                  className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
+                  className={`mt-1 block w-full rounded-md sm:rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                     isLoggingIn ? "cursor-not-allowed opacity-50" : ""
                   }`}
                 />
@@ -275,9 +275,9 @@ export default function Signin() {
             </div>
           </form>
 
-          <div className="mt-3">
+          <div className="mt-0 sm:mt-3">
             {/* OTP Login Link */}
-            <div className="mt-4 text-center">
+            <div className="mt-0 sm:mt-4 text-center">
               <Link
                 to="/auth/otp-login"
                 className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#2389E3]/70"
@@ -286,16 +286,16 @@ export default function Signin() {
               </Link>
             </div>
 
-            <div className="relative">
+            {/* <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#F2F2F2]"></div>
               </div>
               <div className="relative flex justify-center text-xs">
                 <span className="bg-white px-2 text-[#D9D9D9]">or</span>
               </div>
-            </div>
+            </div> */}
 
-            <div className="mt-2 flex flex-col space-y-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            {/* <div className="mt-2 flex flex-col space-y-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <span className="text-center text-xs font-medium text-[#05243F] opacity-40">
                 Login with socials
               </span>
@@ -329,7 +329,7 @@ export default function Signin() {
                   />
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* 2FA Verification Modal */}
