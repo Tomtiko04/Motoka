@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import LicenseLayout from "./components/LicenseLayout";
-import FormInput from "./components/FormInput";
-import ActionButton from "./components/ActionButton";
+import LicenseLayout from "../components/LicenseLayout";
+import FormInput from "../components/FormInput";
+import ActionButton from "../components/ActionButton";
 import { LuUpload } from "react-icons/lu";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import LicenseSample from "../../assets/images/license-sample.png";
-import { useCreateDriverLicense } from "./useLicense";
+import LicenseSample from "../../../assets/images/license-sample.png";
+import { useCreateDriverLicense } from "../useLicense";
 
 export default function DriversLicense() {
   const fileInputRef = useRef(null);

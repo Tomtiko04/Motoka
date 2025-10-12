@@ -23,7 +23,7 @@ import PaystackPayment from "./features/payment/PaystackPayment.jsx";
 import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
-import DriversLicense from "./features/licenses/DriversLicense.jsx";
+import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
 import Settings from "./features/settings/Settings.jsx";
 import PlateNumber from "./features/licenses/PlateNumber.jsx";
 import PlateDetails from "./features/licenses/platenumber/PlateDetails.jsx";
