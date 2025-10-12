@@ -96,15 +96,15 @@ function Categories() {
   // const cardWidth=484; // Adjust based on actual card width including margin
 
   return (
-    <div>
-        <h1 className="mt-10 text-[56px] max-w-[1003px] font-bold text-[#05243F] px-6 sm:px-10 ">We ensure you <span className="text-[#2389E3]">Drive Assured</span> through our Services</h1>
+    <div id="services">
+        <h1 className="mt-10 text-[40px] sm:text-[56px] max-w-[1003px] font-bold text-[#05243F] px-6 sm:px-10 ">We ensure you <span className="text-[#2389E3]">Drive Assured</span> through our Services</h1>
       <div
-        className=" w-full overflow-x-hidden select-none "
+        className=" w-full overflow-hidden select-none "
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
         {/* Header navigation */}
-        <div className="max-w-8xl mt-8 flex w-full flex-wrap justify-between px-6 sm:px-10">
+        <div className="max-w-8xl mt-8 flex w-full text-nowrap  overflow-auto justify-between px-6 sm:px-10 customscroll pb-5">
           {CategoryData.map((item, index) => (
             <button
               key={item.id}
@@ -151,9 +151,7 @@ function Categories() {
                 className="w-[484px] flex-shrink-0 px-4 sm:w-[484px]"
               >
                 <motion.div
-                  className={`relative h-full rounded-[20px] p-10 pt-12 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${
-                    i === activeIndex ? "scale-105" : "scale-95 opacity-80"
-                  }`}
+                  className={`relative h-full rounded-[20px] p-10 pt-12 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"}`}
                   style={{ backgroundColor: item.bgColor }}
                 >
                   <div className="absolute top-8 right-8 flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#45A1F2]">

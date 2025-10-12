@@ -15,12 +15,12 @@ function Header() {
                       className="h-8 w-auto object-contain"
                     />
                   </div>
-                    <div>
+            <div className="hidden md:block">
                         {[
                             { name: 'Home', href: '#' },
-                            { name: 'Services', href: '#' },
-                            { name: 'Testimonials', href: '#' },
-                            { name: 'FAQs', href: '#' },
+                            { name: 'Services', href: '#services' },
+                            { name: 'Testimonials', href: '#testimonials' },
+                            { name: 'FAQs', href: '#faqs' },
                         ].map((item) => (
                             <Link key={item.name} to={item.href} className={`text-base mx-4 font-normal hover:text-[#126cbb] ${item.name==="Home" ? 'text-[#2388E1]' : 'text-[#05243F99]'}`}>
                                 {item.name}
