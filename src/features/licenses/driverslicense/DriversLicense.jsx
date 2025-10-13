@@ -174,7 +174,9 @@ export default function DriversLicense() {
                 years: formData.licenseYear,
                 ...formData,
               },
-              slug: data?.slug || "",
+              orderDetails: {
+                slug: data?.slug || "",
+              },
             },
           });
         },
