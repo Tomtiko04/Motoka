@@ -135,6 +135,14 @@ const PaymentModal = ({ isOpen, onClose, order, agent, onPaymentInitiated }) => 
                     <span className="text-gray-600">Account:</span>
                     <span className="ml-2 font-medium">{agent.account_number}</span>
                   </div>
+                  {agent.account_name && (
+                    <div className="md:col-span-2">
+                      <span className="text-gray-600">Verified Account Name:</span>
+                      <span className="ml-2 font-medium text-green-700 bg-green-100 px-2 py-1 rounded">
+                        ✓ {agent.account_name}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import PaymentModal from '../../components/admin/PaymentModal';
 
 const AdminOrderDetails = () => {
   const { slug } = useParams();
@@ -33,6 +34,10 @@ const AdminOrderDetails = () => {
   const [currentDocumentType, setCurrentDocumentType] = useState('');
   const [currentDocumentFile, setCurrentDocumentFile] = useState(null);
   const [uploadedDocumentTypes, setUploadedDocumentTypes] = useState([]);
+  
+  // Payment modal states
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedAgentForPayment, setSelectedAgentForPayment] = useState(null);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -45,6 +50,37 @@ const AdminOrderDetails = () => {
       fetchOrderDocuments();
     }
   }, [order?.order_type]);
+
+  // Filter agents by order location
+  const getAgentsForOrderLocation = () => {
+    if (!order || !agents.length) return [];
+    
+    // Get the order's state (assuming order has state field)
+    const orderState = order.state_name || order.state;
+    if (!orderState) return [];
+    
+    // Filter agents by state
+    return agents.filter(agent => agent.state === orderState);
+  };
+
+  const availableAgents = getAgentsForOrderLocation();
+
+  // Auto-select agent if only one is available, or reset if not available
+  useEffect(() => {
+    if (availableAgents.length === 1 && !selectedAgent) {
+      // Auto-select the only available agent
+      setSelectedAgent(availableAgents[0].id.toString());
+    } else if (selectedAgent && availableAgents.length > 0) {
+      // Check if currently selected agent is still available
+      const isSelectedAgentAvailable = availableAgents.some(agent => agent.id.toString() === selectedAgent);
+      if (!isSelectedAgentAvailable) {
+        setSelectedAgent('');
+      }
+    } else if (availableAgents.length === 0) {
+      // No agents available, clear selection
+      setSelectedAgent('');
+    }
+  }, [availableAgents, selectedAgent]);
 
   const fetchOrderDetails = async () => {
     try {
@@ -86,33 +122,30 @@ const AdminOrderDetails = () => {
     }
   };
 
-  const handleProcessOrder = async () => {
-    if (!selectedAgent) return;
+  const handleProcessOrder = () => {
+    if (!selectedAgent || availableAgents.length === 0) return;
 
-    try {
-      setProcessing(true);
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/process`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ agent_id: selectedAgent }),
-      });
-
-      const data = await response.json();
-      if (data.status) {
-        setOrder(data.data);
-        toast.success('Order processed successfully! Agent has been notified.');
-      } else {
-        toast.error(data.message || 'Failed to process order');
-      }
-    } catch (error) {
-      toast.error('Failed to process order');
-    } finally {
-      setProcessing(false);
+    // Find the selected agent details from available agents
+    const agent = availableAgents.find(a => a.id.toString() === selectedAgent);
+    if (!agent) {
+      toast.error('Selected agent not found or not available for this location');
+      return;
     }
+
+    // Set the selected agent and show payment modal
+    setSelectedAgentForPayment(agent);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentInitiated = async (paymentData) => {
+    // Close the payment modal
+    setShowPaymentModal(false);
+    setSelectedAgentForPayment(null);
+    
+    // Refresh the order details to get the updated status
+    await fetchOrderDetails();
+    
+    toast.success('Order processed successfully! Agent has been notified.');
   };
 
   const handleStatusUpdate = async (newStatus) => {
@@ -143,6 +176,16 @@ const AdminOrderDetails = () => {
   };
 
   const getStatusBadge = (status) => {
+    // Handle undefined or null status
+    if (!status) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+          <ClockIcon className="w-4 h-4 mr-2" />
+          UNKNOWN
+        </span>
+      );
+    }
+
     const statusConfig = {
       pending: { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon },
       in_progress: { color: 'bg-blue-100 text-blue-800', icon: ClockIcon },
@@ -417,7 +460,7 @@ const AdminOrderDetails = () => {
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          {getStatusBadge(order.status)}
+          {getStatusBadge(order?.status)}
         </div>
       </div>
 
@@ -527,36 +570,52 @@ const AdminOrderDetails = () => {
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Order Actions</h3>
             
-            {order.status === 'pending' && (
+            {order?.status === 'pending' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Assign Agent
                   </label>
-                  <select
-                    value={selectedAgent}
-                    onChange={(e) => setSelectedAgent(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="">Select an agent</option>
-                    {agents.map((agent) => (
-                      <option key={agent.id} value={agent.id}>
-                        {agent.first_name} {agent.last_name} - {agent.state}
-                      </option>
-                    ))}
-                  </select>
+                  {availableAgents.length > 0 ? (
+                    <select
+                      value={selectedAgent}
+                      onChange={(e) => setSelectedAgent(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">Select an agent for {order?.state_name || order?.state}</option>
+                      {availableAgents.map((agent) => (
+                        <option key={agent.id} value={agent.id}>
+                          {agent.first_name} {agent.last_name} - {agent.state}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-sm text-gray-500">
+                      <select disabled className="w-full bg-transparent text-gray-500 cursor-not-allowed">
+                        <option>No agents available for {order?.state_name || order?.state}</option>
+                      </select>
+                    </div>
+                  )}
+                  {availableAgents.length === 0 && (
+                    <p className="mt-2 text-sm text-red-600">
+                      No agents are available for this location ({order?.state_name || order?.state}). 
+                      Please create an agent for this state first.
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={handleProcessOrder}
-                  disabled={!selectedAgent || processing}
+                  disabled={!selectedAgent || processing || availableAgents.length === 0}
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {processing ? 'Processing...' : 'Process Order'}
+                  {processing ? 'Processing...' : 
+                   availableAgents.length === 0 ? 'No Agents Available' : 
+                   'Process Order'}
                 </button>
               </div>
             )}
 
-            {order.status === 'in_progress' && (
+            {order?.status === 'in_progress' && (
               <div className="space-y-4">
                 {/* Document Upload Section */}
                 <div>
@@ -712,7 +771,7 @@ const AdminOrderDetails = () => {
           </div>
 
           {/* Documents Sent - Only show for completed orders with documents */}
-          {order.status === 'completed' && documents.length > 0 && (
+          {order?.status === 'completed' && documents.length > 0 && (
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                 <DocumentArrowUpIcon className="h-5 w-5 mr-2 text-green-600" />
@@ -773,6 +832,18 @@ const AdminOrderDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setSelectedAgentForPayment(null);
+        }}
+        order={order}
+        agent={selectedAgentForPayment}
+        onPaymentInitiated={handlePaymentInitiated}
+      />
     </div>
   );
 };
