@@ -4,7 +4,7 @@ function Whyus() {
   return (
     <div className="mt-18">
       <div className="mt-10 max-w-[1003px] px-6">
-        <h1 className="text-[40px] text-[56px] font-bold text-[#05243F]">
+        <h1 className="text-[40px] sm:text-[56px] font-bold text-[#05243F]">
           Stop Worrying. <span className="text-[#2389E3]">Start Driving.</span>
         </h1>
         <p className="mt-6 text-lg text-[#05203DB2]">
