@@ -1,6 +1,19 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { createDriversLicense as createDriversLicenseApi } from "../../../services/apiDriversLicense";
+import {
+  createDriversLicense as createDriversLicenseApi,
+  getDriversLicensePaymentOptions as getDriversLicensePaymentOptionsApi,
+} from "../../../services/apiDriversLicense";
+
+export function useDriversLicensePaymentOptions(){
+    const {data:isPaymentOptions, isLoading: isPaymentOptionsLoading, error} = useQuery({
+        queryKey: ['drivers-license-payment-options'],
+        queryFn: getDriversLicensePaymentOptionsApi
+    })
+
+    return { isPaymentOptions, isPaymentOptionsLoading, error };
+}
+
 
 export function useCreateDriverLicense() {
     const {

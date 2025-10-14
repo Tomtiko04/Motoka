@@ -37,7 +37,24 @@ export const authStorage = {
   },
 
   isAuthenticated: () => {
-    return !!authStorage.getToken();
+    const token = authStorage.getToken();
+    if (!token) return false;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true; // non-JWT tokens treated as present
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const expSec = payload?.exp;
+      if (!expSec) return true;
+      const isExpired = Date.now() >= expSec * 1000;
+      if (isExpired) {
+        authStorage.removeToken();
+        return false;
+      }
+      return true;
+    } catch (e) {
+      // If parsing fails, fall back to token presence
+      return true;
+    }
   },
 
   isVerified: () => {

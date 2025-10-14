@@ -7,7 +7,7 @@ import ActionButton from "../components/ActionButton";
 import { LuUpload } from "react-icons/lu";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import LicenseSample from "../../../assets/images/license-sample.png";
-import { useCreateDriverLicense } from "./useDriversLicense";
+import { useCreateDriverLicense, useDriversLicensePaymentOptions } from "./useDriversLicense";
 
 export default function DriversLicense() {
   const fileInputRef = useRef(null);
@@ -38,6 +38,7 @@ export default function DriversLicense() {
   });
   const [errors, setErrors] = useState({});
 
+  const {isPaymentOptions} = useDriversLicensePaymentOptions();
   const { createLicense, isCreating } = useCreateDriverLicense();
 
   useEffect(() => {
@@ -185,7 +186,7 @@ export default function DriversLicense() {
       console.error("License creation failed:", error);
     }
   };
-
+console.log(isPaymentOptions);
   return (
     <LicenseLayout
       title="Driver's License"
