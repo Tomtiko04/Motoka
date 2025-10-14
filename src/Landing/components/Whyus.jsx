@@ -3,8 +3,8 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 function Whyus() {
   return (
     <div className="mt-18">
-      <div className="mt-10 max-w-[1003px] px-10">
-        <h1 className="text-[56px] font-bold text-[#05243F]">
+      <div className="mt-10 max-w-[1003px] px-6">
+        <h1 className="text-[40px] font-bold text-[#05243F] sm:text-[56px]">
           Stop Worrying. <span className="text-[#2389E3]">Start Driving.</span>
         </h1>
         <p className="mt-6 text-lg text-[#05203DB2]">
@@ -13,10 +13,10 @@ function Whyus() {
           service network.
         </p>
       </div>
-      <div className="w-full px-10">
+      <div className="w-full px-6">
         <div className="mt-18 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="text-[#05243F]">
-            <h2 className="text-[32px] font-bold">End the Document Stress:</h2>
+            <h2 className="text-[24px] sm:text-[32px] font-bold">End the Document Stress:</h2>
             <p className="text-2xl">Compliance & Security</p>
           </div>
           <div>
@@ -35,9 +35,12 @@ function Whyus() {
               },
             ].map((item, index) => (
               <div key={index} className="mb-6 flex gap-3">
-               <div className="bg-[#2389E31C] rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
-  <Icon icon={item.iconName} className="h-6 w-6 text-[#2388E1]" />
-</div>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2389E31C]">
+                  <Icon
+                    icon={item.iconName}
+                    className="h-6 w-6 text-[#2388E1]"
+                  />
+                </div>
 
                 <div>
                   <p className="text-lg text-[#05203DB2]">
@@ -51,7 +54,7 @@ function Whyus() {
         </div>
         <div className="mt-18 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="text-[#05243F]">
-            <h2 className="text-[32px] font-bold">Never Miss a Renewal:</h2>
+            <h2 className="text-[24px] sm:text-[32px] font-bold">Never Miss a Renewal:</h2>
             <p className="text-2xl">Time & Money Savings</p>
           </div>
           <div>
@@ -70,9 +73,12 @@ function Whyus() {
               },
             ].map((item, index) => (
               <div key={index} className="mb-6 flex gap-3">
-               <div className="bg-[#2389E31C] rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
-  <Icon icon={item.iconName} className="h-6 w-6 text-[#2388E1]" />
-</div>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2389E31C]">
+                  <Icon
+                    icon={item.iconName}
+                    className="h-6 w-6 text-[#2388E1]"
+                  />
+                </div>
 
                 <div>
                   <p className="text-lg text-[#05203DB2]">
@@ -86,7 +92,9 @@ function Whyus() {
         </div>
         <div className="mt-18 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="text-[#05243F]">
-            <h2 className="text-[32px] font-bold">Guranteed Quality Service:</h2>
+            <h2 className="text-[24px] sm:text-[32px] font-bold">
+              Guranteed Quality Service:
+            </h2>
             <p className="text-2xl">Trust & Reliability</p>
           </div>
           <div>
@@ -97,12 +105,14 @@ function Whyus() {
                   " Browse a curated network of mechanics, vulcanizers, and parts dealers who have been thoroughly verified for quality and fair pricing. No more guesswork—book services with confidence.",
                 iconName: "iconoir:shop",
               },
-              
             ].map((item, index) => (
               <div key={index} className="mb-6 flex gap-3">
-               <div className="bg-[#2389E31C] rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
-  <Icon icon={item.iconName} className="h-6 w-6 text-[#2388E1]" />
-</div>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2389E31C]">
+                  <Icon
+                    icon={item.iconName}
+                    className="h-6 w-6 text-[#2388E1]"
+                  />
+                </div>
 
                 <div>
                   <p className="text-lg text-[#05203DB2]">
