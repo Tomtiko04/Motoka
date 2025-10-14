@@ -8,31 +8,31 @@ import {
 } from "../../services/apiLicense";
 import toast from "react-hot-toast";
 
-export function useCreateDriverLicense() {
-  const {
-    mutate: createLicense,
-    isPending: isCreating,
-    error,
-  } = useMutation({
-    mutationFn: createDriverLicenseApi,
-    onSuccess: (data) => {
-      console.log("License creation successful:", data);
-      toast.success(data.message || "Driver license created successfully");
-    },
-    onError: (error) => {
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to create driver license",
-      );
-    },
-  });
+// export function useCreateDriverLicense() {
+//   const {
+//     mutate: createLicense,
+//     isPending: isCreating,
+//     error,
+//   } = useMutation({
+//     mutationFn: createDriverLicenseApi,
+//     onSuccess: (data) => {
+//       console.log("License creation successful:", data);
+//       toast.success(data.message || "Driver license created successfully");
+//     },
+//     onError: (error) => {
+//       toast.error(
+//         error.response?.data?.message ||
+//           "Failed to create driver license",
+//       );
+//     },
+//   });
 
-  return {
-    createLicense,
-    isCreating,
-    error,
-  };
-}
+//   return {
+//     createLicense,
+//     isCreating,
+//     error,
+//   };
+// }
 
 export function useGetDriverLicenses() {
   const { data, isPending, error } = useQuery({

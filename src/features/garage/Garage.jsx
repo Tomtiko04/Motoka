@@ -11,6 +11,7 @@ import CarDetailsCard from "../../components/CarDetailsCard";
 
 export default function Garage() {
   const { cars, isLoading } = useGetCars();
+  const carArray = Object.values(cars.cars) || [];
 
   const navigate = useNavigate();
   function handleLicence() {
@@ -39,13 +40,13 @@ export default function Garage() {
 
       {/* Car Details Card */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-5">
+        <div className="flex items-center justify-center py-5">
           <LoadingSpinner />
         </div>
       ) : (
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {Array.isArray(cars?.cars) && cars?.cars.length > 0 ? (
-            cars.cars.map((car, index) => (
+          {carArray && carArray.length > 0 ? (
+            carArray.map((car, index) => (
               <CarDetailsCard
                 key={index}
                 isRenew={true}
@@ -56,9 +57,12 @@ export default function Garage() {
           ) : (
             <div className="col-span-2 flex flex-col items-center justify-center rounded-2xl bg-white p-8 text-center">
               <FaCarAlt className="mb-4 text-5xl text-[#2389E3]/20" />
-              <h3 className="mb-2 text-xl font-semibold text-[#05243F]">No Cars Found</h3>
+              <h3 className="mb-2 text-xl font-semibold text-[#05243F]">
+                No Cars Found
+              </h3>
               <p className="mb-6 text-sm text-[#05243F]/60">
-                You haven't added any cars to your garage yet. Add your first car to get started!
+                You haven't added any cars to your garage yet. Add your first
+                car to get started!
               </p>
               <button
                 onClick={handleAddCar}

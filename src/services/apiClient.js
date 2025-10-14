@@ -3,6 +3,8 @@ import { refreshToken } from "./apiAuth"
 import { authStorage } from "../utils/authStorage"
 import config from "../config/config"
 
+let isRedirectingToLogin = false
+
 // Create a request cache to prevent duplicate requests
 const requestCache = new Map()
 
@@ -50,20 +52,34 @@ api.interceptors.response.use(
     const registrationToken = authStorage.getRegistrationToken();
     const isRegistrationRequest = originalRequest.url?.includes("add-car") || originalRequest.url?.includes("car/reg");
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
+    if (error.response?.status === 401) {
+      // Prevent infinite retry loops and duplicate redirects
+      if (!originalRequest._retry) {
+        originalRequest._retry = true
 
-      // Only attempt token refresh if not using registration token
-      if (!isRegistrationRequest || !registrationToken) {
-        try {
-          const newToken = await refreshToken()
-          originalRequest.headers.Authorization = `Bearer ${newToken}`
-          return api(originalRequest)
-        } catch (refreshError) {
-          authStorage.removeToken()
-          window.location.href = "/auth/login"
-          return Promise.reject(refreshError)
+        // Only attempt token refresh if not using registration token
+        if (!isRegistrationRequest || !registrationToken) {
+          try {
+            const newToken = await refreshToken()
+            originalRequest.headers.Authorization = `Bearer ${newToken}`
+            return api(originalRequest)
+          } catch (refreshError) {
+            // Clear tokens and redirect to login just once
+            authStorage.clearAll?.() || authStorage.removeToken()
+            if (!isRedirectingToLogin) {
+              isRedirectingToLogin = true
+              window.location.replace("/auth/login")
+            }
+            return Promise.reject(refreshError)
+          }
         }
+      }
+
+      // For registration flows or after retry, ensure we don't spam toasts/redirects
+      if (!isRedirectingToLogin && !isRegistrationRequest) {
+        authStorage.clearAll?.() || authStorage.removeToken()
+        isRedirectingToLogin = true
+        window.location.replace("/auth/login")
       }
     }
 
