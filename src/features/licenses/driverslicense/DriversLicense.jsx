@@ -7,7 +7,7 @@ import ActionButton from "../components/ActionButton";
 import { LuUpload } from "react-icons/lu";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import LicenseSample from "../../../assets/images/license-sample.png";
-import { useCreateDriverLicense } from "../useLicense";
+import { useCreateDriverLicense, useDriversLicensePaymentOptions } from "./useDriversLicense";
 
 export default function DriversLicense() {
   const fileInputRef = useRef(null);
@@ -38,6 +38,7 @@ export default function DriversLicense() {
   });
   const [errors, setErrors] = useState({});
 
+  const {isPaymentOptions} = useDriversLicensePaymentOptions();
   const { createLicense, isCreating } = useCreateDriverLicense();
 
   useEffect(() => {
@@ -125,7 +126,7 @@ export default function DriversLicense() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) {
       toast.error("Please fill all required fields correctly");
@@ -152,12 +153,13 @@ export default function DriversLicense() {
     };
 
     try {
-      await createLicense(payload, {
-        onSuccess: () => {
+      createLicense(payload, {
+        onSuccess: (data) => {
+          console.log("Response data:", data);
           const amount = formData.licenseYear * 30000;
           navigate("/licenses/confirm-request", {
             state: {
-              type: "license",
+              type: "drivers-license",
               items: [
                 {
                   name: `${licenseType} Driver's License${licenseType === "Renew" && renewType ? ` (${renewType})` : ""}`,
@@ -173,6 +175,9 @@ export default function DriversLicense() {
                 years: formData.licenseYear,
                 ...formData,
               },
+              orderDetails: {
+                slug: data?.slug || "",
+              },
             },
           });
         },
@@ -181,7 +186,7 @@ export default function DriversLicense() {
       console.error("License creation failed:", error);
     }
   };
-
+console.log(isPaymentOptions);
   return (
     <LicenseLayout
       title="Driver's License"

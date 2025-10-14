@@ -49,7 +49,7 @@ const quickActions = [
     ),
     title: "New/Renew\nDriver's License",
     link: "/licenses/drivers-license",
-    comingSoon: false,
+    comingSoon: true,
   },
   {
     icon: (
