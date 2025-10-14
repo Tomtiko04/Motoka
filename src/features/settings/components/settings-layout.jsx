@@ -1,31 +1,37 @@
-"use client"
+"use client";
 
 import React from "react";
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Cog, Sparkles, Menu } from "lucide-react"
-import SearchBar from "./search-bar"
-import SettingsSidebar from "./settings-sidebar"
+import { ChevronLeft, Cog, Sparkles, Menu } from "lucide-react";
+import SearchBar from "./search-bar";
+import SettingsSidebar from "./settings-sidebar";
 
-export default function SettingsLayout({ children, activePage, expandedSection, onNavigate, onSectionToggle }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+export default function SettingsLayout({
+  children,
+  activePage,
+  expandedSection,
+  onNavigate,
+  onSectionToggle,
+}) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+      setIsMobile(window.innerWidth < 768);
+    };
 
     // Initial check
-    checkIfMobile()
+    checkIfMobile();
 
     // Add event listener
-    window.addEventListener("resize", checkIfMobile)
+    window.addEventListener("resize", checkIfMobile);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile)
-  }, [])
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
 
   const getTitleParts = () => {
     switch (activePage) {
@@ -58,12 +64,12 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
   };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
     <>
-      <div className="container mx-auto px-4 py-5 md:py-8">
+      <div className="container mx-auto flex h-full flex-1 flex-col px-4 py-5 md:py-8">
         <header className="relative mb-6 flex items-center justify-center">
           {isMobile && (
             <button
@@ -87,16 +93,13 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
               {(() => {
                 const { section, page } = getTitleParts();
                 if (!page) {
-                
-                  return (
-                    <span className="text-[#05243F]">{section}</span>
-                  );
+                  return <span className="text-[#05243F]">{section}</span>;
                 }
-                
+
                 return (
                   <>
-                    <span className="text-[#697B8C4A] ">{section}/</span>
-                    <span className="text-[#05243F] ">{page}</span>
+                    <span className="text-[#697B8C4A]">{section}/</span>
+                    <span className="text-[#05243F]">{page}</span>
                   </>
                 );
               })()}
@@ -104,8 +107,8 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
           </div>
         </header>
 
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
-          <div className="grid md:grid-cols-2 lg:grid-cols-5">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-sm">
+          <div className="grid h-full md:grid-cols-2 lg:grid-cols-5 flex-1">
             {/* Mobile sidebar overlay */}
             {isMobile && isMobileMenuOpen && (
               <div
@@ -133,11 +136,13 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
             )}
 
             {/* Desktop sidebar */}
-            <div className="hidden border-r border-gray-100 md:block lg:col-span-2">
+            <div className="hidden border-r border-gray-100 md:flex md:flex-col  lg:col-span-2 min-h-0">
               <div className="p-4">
                 <SearchBar />
               </div>
-              <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-4">
+              {/* <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] min-h-full overflow-y-auto customScroll px-6 sm:px-4"> */}
+                              <div className="max-h-[calc(100vh-330px)] overflow-y-auto customScroll px-6 sm:px-4">
+                {/* max-h-[calc(100vh-380px)] removed this and added flex-1 */}
                 <SettingsSidebar
                   activePage={activePage}
                   expandedSection={expandedSection}
@@ -164,4 +169,3 @@ export default function SettingsLayout({ children, activePage, expandedSection, 
     </>
   );
 }
-

@@ -174,28 +174,29 @@ export default function OTPLogin() {
 
   try {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
+      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between overflow-hidden rounded-[20px] bg-white shadow-lg">
         {/* Left side - Image Slider */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 relative overflow-hidden">
+        {/* <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 relative overflow-hidden">
           <div className="flex items-center justify-center w-full h-full">
             <div className="text-white text-center">
               <h2 className="text-2xl font-bold mb-4">Welcome to Motoka</h2>
               <p className="text-lg">Your vehicle document management solution</p>
             </div>
           </div>
-        </div>
+        </div> */}
 
       {/* Right side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full flex items-center justify-center lg:px-8 p-3 py-6 pt-10 px-9 sm:px-9 sm:py-8 sm:p-4 sm:pt-12 ">
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
           <div className="text-center">
             <div className="flex items-center justify-center mb-6">
-              <div className="bg-blue-600 p-3 rounded-full">
+              <div className="bg-[#2389E3] p-3 rounded-full">
                 <FaKey className="h-8 w-8 text-white" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-2xl font-medium text-gray-900">
               {step === "email" ? "Login with OTP" : "Enter OTP Code"}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -225,14 +226,20 @@ export default function OTPLogin() {
                   Email Address
                 </label>
                 <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                     <FaEnvelope className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     {...registerEmail("email")}
                     type="email"
                     autoComplete="email"
-                    className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    // className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    className={`appearance-none block w-full relative rounded-md sm:rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none pl-10 pr-3 sm:py-3 -z-0 focus:z-5 ${
+                  isVerifyingOTP || isSendingOTP
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                }`}
+
                     placeholder="Enter your email address"
                   />
                 </div>
@@ -244,7 +251,7 @@ export default function OTPLogin() {
               <button
                 type="submit"
                 disabled={isSendingOTP}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#2389E3] hover:bg-[#3795e7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSendingOTP ? (
                   <div className="flex items-center">
@@ -315,7 +322,7 @@ export default function OTPLogin() {
                   type="button"
                   onClick={handleResendOTP}
                   disabled={!canResend}
-                  className="text-sm text-blue-600 hover:text-blue-500 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  className="text-sm text-[#2389E3] hover:text-[#45a0ee] disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
                   {canResend ? "Resend OTP" : `Resend in ${formatTime(otpTimer)}`}
                 </button>
@@ -346,6 +353,7 @@ export default function OTPLogin() {
             </p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

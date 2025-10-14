@@ -49,7 +49,7 @@ import Notification from "./pages/notification.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
-
+import LandingPage from "./Landing/Landing.jsx";
 
 export default function App() {
   const queryClient = new QueryClient({
@@ -76,7 +76,7 @@ export default function App() {
         {isOpen && <CarDetailsModal />}
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
+          <Route path="landing" element={<LandingPage />} />
           {/* Auth Routes */}
           <Route path="auth" element={<AuthLayout />}>
             <Route
