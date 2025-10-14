@@ -167,7 +167,7 @@ export default function Signin() {
                 {...register("email")}
                 placeholder="sample@gmail.com"
                 disabled={isLoggingIn || isSendingLoginOtp}
-                className={`mt-1 block w-full rounded-md sm:rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
+                className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-base sm:text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                   isLoggingIn || isSendingLoginOtp
                     ? "cursor-not-allowed opacity-50"
                     : ""
@@ -193,7 +193,7 @@ export default function Signin() {
                   {...register("password")}
                   type={!showPassword ? "password" : "text"}
                   disabled={isLoggingIn}
-                  className={`mt-1 block w-full rounded-md sm:rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
+                  className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-base sm:text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                     isLoggingIn ? "cursor-not-allowed opacity-50" : ""
                   }`}
                 />

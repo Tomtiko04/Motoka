@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import toast, { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
@@ -54,7 +55,10 @@ export default function App() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({
       onError: (error) => {
-        toast.error(error.message);
+        const status = error?.response?.status;
+        if (status === 401) return;
+        const message = error?.response?.data?.message || error?.message || "An error occurred";
+        toast.error(message);
       },
     }),
     defaultOptions: {
@@ -126,9 +130,9 @@ export default function App() {
           />
 
           {/* Protected Routes */}
-          <Route element={<AppLayout />}>
+          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="successful" element={<SuccessPage />} />
-            <Route path="documents" element={<CarDocuments />} />
+            {/* <Route path="documents" element={<CarDocuments />} /> */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="notifications" element={<Notification />} />
             <Route path="licenses">
