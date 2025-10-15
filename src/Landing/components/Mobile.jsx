@@ -4,8 +4,8 @@ import AppleName from "../../assets/images/landing/App Store.svg";
 import Playstore from "../../assets/images/landing/Group 1171279821.svg";
 function Mobile() {
   return (
-    <div className="mt-10 grid grid-cols-1 place-items-center gap-10 bg-[#DAECFC] p-20 px-0 sm:px-20 sm:pe-0 pb-0 lg:grid-cols-2 min-h-screen items-end">
-      <div className="flex h-full flex-col justify-between text-[56px] text-[#2389E3] px-10 sm:px-0">
+    <div className="relative  mt-10 grid grid-cols-1 place-items-center gap-10 sm:gap-0 bg-[#DAECFC] p-20 px-0 sm:px-20 sm:pe-0 pb-0 lg:grid-cols-2 min-h-screen items-end">
+      <div className="relatize z-10 flex h-full flex-col justify-between text-[56px] text-[#2389E3] px-10 sm:px-0">
         <div>
           {" "}
           <h3 className="text-[40px] sm:text-[56px] font-bold text-[#2389E3]">
@@ -33,8 +33,8 @@ function Mobile() {
           </div>
         </div>
       </div>
-      <div className="w-full sm:w-fit">
-        <img src={phone} alt="phone mockup" />
+      <div className="lg:absolute pt-20 h-full right-0 block shrink-0">
+        <img src={phone} alt="phone mockup" className="block  h-full"/>
       </div>
     </div>
   );

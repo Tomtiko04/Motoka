@@ -1,5 +1,7 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
-
+import image1 from '../../assets/images/landing/image 1291.svg'
+import image2 from '../../assets/images/landing/image 1292.svg'
+import image3 from '../../assets/images/landing/image 1290 (1).svg'
 function Whyus() {
   return (
     <div className="mt-18">
@@ -18,6 +20,11 @@ function Whyus() {
           <div className="text-[#05243F]">
             <h2 className="text-[24px] sm:text-[32px] font-bold">End the Document Stress:</h2>
             <p className="text-2xl">Compliance & Security</p>
+            <div className="flex w-fit gap-3 py-5">
+              {[image1, image2, image3].map((logo, index) => (
+                <img src={logo} alt="logo" className="h-15 w-15 block" key={index}/>
+              ))}
+            </div>
           </div>
           <div>
             {[
