@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import logo from "../../assets/images/landing/Group 1171279822.svg";
+import sponsors from '../../assets/images/landing/Group 1171279823.svg'
 function Footer() {
   return (
     <div className="flex flex-col items-center bg-[#05243F] px-6 sm:px-30 py-30 sm:py-40">
@@ -28,9 +29,11 @@ function Footer() {
             Get Started
           </button>
         </div>
+        <div className="py-10 w-full flex items-center">
+        <img src={sponsors} alt="sponsors" className="h-8 w-fit" /></div>
       </div>
       <div className="mt-20 sm:mt-40 grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 justify-center justify-items-start">
-        <div className="mt-10 sm:mt-20 flex flex-col items-start gap-6 sm:gap-8 sm:mt-0 col-span">
+        <div className="mt-10 flex flex-col items-start gap-6 sm:gap-8 sm:mt-0 col-span">
           <div>
             <img
               src={logo}

@@ -196,7 +196,7 @@ function Categories() {
           </motion.div>
         </div>
         {/* Mobile View */}
-        <div className="relative mt-10 block sm:hidden">
+        <div className="relative mt-10 block sm:hidden text-left">
           <Swiper
             spaceBetween={16}
             slidesPerView={1}
@@ -213,7 +213,7 @@ function Categories() {
             {CategoryData.map((item, i) => (
               <SwiperSlide key={item.id}>
                 <div
-                  className={`h-full rounded-[20px] p-10 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${
+                  className={`h-full rounded-[20px] p-10 shadow-md text-left transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${
                     i === activeIndex ? "scale-95" : "scale-93 opacity-100"
                   }`}
                   style={{ backgroundColor: item.bgColor }}
