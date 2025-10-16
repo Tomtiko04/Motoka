@@ -108,7 +108,7 @@ export default function Testimonials() {
       >
           {testimonials.map((item, idx) => (
             <SwiperSlide key={item.id}>
-              <div className="flex flex-col items-center justify-center text-center mb-12 w-[500px]" >
+              <div className="flex flex-col items-center justify-center text-center mb-16 w-[500px]" >
                 <div className="aspect-square flex items-center justify-center w-80 h-80 mb-5">
                 <img
                   src={item.img}

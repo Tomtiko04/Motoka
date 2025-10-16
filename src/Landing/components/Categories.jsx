@@ -102,7 +102,7 @@ function Categories() {
         onMouseLeave={() => setPaused(false)}
       >
         {/* Header navigation */}
-        <div className="hidden max-w-8xl customscroll mt-8 sm:flex w-full justify-between overflow-auto px-6 pb-5 text-nowrap sm:px-10">
+        <div className="hidden max-w-8xl customscroll mt-12 sm:flex w-full justify-between overflow-auto px-6 pb-5 text-nowrap sm:px-10">
           {CategoryData.map((item, index) => (
             <button
               key={item.id}
@@ -118,7 +118,7 @@ function Categories() {
 
         {/* Slider container */}
         {/* Desktop & Tablet View */}
-        <div className="relative mt-10 mb-20 hidden sm:block">
+        <div className="relative mt-5 mb-20 hidden sm:block">
           <motion.div
             ref={sliderRef}
             className="flex cursor-grab px-10 active:cursor-grabbing"
@@ -137,7 +137,7 @@ function Categories() {
                 );
               }
             }}
-            animate={{ x: `-${activeIndex * 484}px` }}
+            animate={{ x: `-${activeIndex * 282}px` }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
             style={{
               width: `${CategoryData.length * 484}px`,
