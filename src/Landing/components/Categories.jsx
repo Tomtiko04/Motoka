@@ -12,25 +12,14 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+import { useNavigate } from "react-router-dom";
 // import { Autoplay, Navigation, Pagination, Scrollbar } from "swiper";
 function Categories() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [cardWidth, setCardWidth] = useState(0);
   const sliderRef = useRef(null);
-
-  //   useEffect(() => {
-  //     if (sliderRef.current) {
-  //       const firstCard = sliderRef.current.querySelector("div");
-  //         if (firstCard) {
-  //             const style = window.getComputedStyle(firstCard);
-  //             const width = firstCard.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
-  //             setCardWidth(width);
-  //         }
-  //     }
-  //   }, [sliderRef]);
-
-  // Sample category data
+  const navigate=useNavigate()
   const CategoryData = [
     {
       id: 1,
@@ -239,7 +228,7 @@ function Categories() {
                     className="my-6 mt-12 w-full object-contain"
                   />
                   <div className="text-center">
-                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white">
+                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white" onClick={()=>navigate("/auth/signup")}>
                       Get Started
                     </button>
                   </div>
@@ -249,68 +238,7 @@ function Categories() {
           </Swiper>
         </div>
 
-        {/* Slider container */}
-        {/* <div className="relative mt-10 overflow-hidden">
-  <motion.div
-    ref={sliderRef}
-    className="flex cursor-grab px-10 active:cursor-grabbing"
-    drag="x"
-    dragConstraints={{
-      left: -((CategoryData.length - 1) * 420), // card width (400) + margin
-      right: 0,
-    }}
-    onDragEnd={(e, info) => {
-      const direction = info.offset.x < 0 ? 1 : -1;
-      if (Math.abs(info.offset.x) > 50) {
-        setActiveIndex(
-          (prev) => (prev + direction + CategoryData.length) % CategoryData.length
-        );
-      }
-    }}
-    animate={{ x: `-${activeIndex * 420}px` }} // move by pixel width
-    transition={{ duration: 0.6, ease: "easeInOut" }}
-    style={{
-      width: `${CategoryData.length * 420}px`, // total slider width
-    }}
-  >
-    {CategoryData.map((item, i) => (
-      <motion.div
-        key={item.id}
-        className="flex-shrink-0 w-[400px] px-2"
-      >
-        <motion.div
-          className={`h-full rounded-[20px] p-10 shadow-md transition-transform duration-300 ${
-            item.id === 4 ? "text-white" : "text-[#05243F]"
-          } ${i === activeIndex ? "scale-105" : "scale-95 opacity-80"}`}
-          style={{ backgroundColor: item.bgColor }}
-        >
-          <h2 className="max-w-[334px] text-4xl font-bold">
-            {item.title.split(" ")[0]} <br />
-            {item.title.split(" ").slice(1).join(" ")}
-          </h2>
-          <p
-            className={`mt-4 text-lg ${
-              item.id === 4 ? "text-white" : "text-[#05203DB2]"
-            }`}
-          >
-            {item.description}
-          </p>
-
-          <img
-            src={item.image}
-            alt={item.title}
-            className="my-6 mt-12 w-full object-contain"
-          />
-          <div className="text-center">
-            <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-lg font-bold text-white text-center">
-              Get Started
-            </button>
-          </div>
-        </motion.div>
-      </motion.div>
-    ))}
-  </motion.div>
-</div> */}
+      
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 function FaqsSection() {
   const [expanded, setExpanded] = useState(1);
   return (
-    <div className="py-20 text-center px-6" id="faqs">
+    <div className="py-20 text-center px-6 pt-10" id="faqs">
       <h2 className="text-[56px] font-bold text-[#05243F]">FAQs</h2>
           {[
         {

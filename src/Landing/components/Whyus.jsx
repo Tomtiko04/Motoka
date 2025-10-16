@@ -20,7 +20,7 @@ function Whyus() {
           <div className="text-[#05243F]">
             <h2 className="text-[24px] sm:text-[32px] font-bold">End the Document Stress:</h2>
             <p className="text-2xl">Compliance & Security</p>
-            <div className="flex w-fit gap-3 py-5">
+            <div className="flex w-fit gap-8 py-5">
               {[image1, image2, image3].map((logo, index) => (
                 <img src={logo} alt="logo" className="h-15 w-15 block" key={index}/>
               ))}
@@ -107,7 +107,7 @@ function Whyus() {
           <div>
             {[
               {
-                title: "Vetted Vendor Marketplace:",
+                title: "Vetted Vendor Marketplace",
                 content:
                   " Browse a curated network of mechanics, vulcanizers, and parts dealers who have been thoroughly verified for quality and fair pricing. No more guesswork—book services with confidence.",
                 iconName: "iconoir:shop",

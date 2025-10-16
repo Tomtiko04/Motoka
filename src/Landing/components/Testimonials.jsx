@@ -59,7 +59,7 @@ export default function Testimonials() {
   return (
     <div className="flex flex-col overflow-hidden bg-[#FFF4DE] py-20 mt-40" id="testimonials">
       <h2 className="mb-20 text-center sm:text-left px-[38px] text-[40px] sm:text-[56px] font-bold text-[#05243F]">
-        What Client Says
+        What Client says
       </h2>
       <div className="">
         {/* <Swiper

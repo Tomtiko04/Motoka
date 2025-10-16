@@ -1,7 +1,11 @@
 import { Icon } from "@iconify/react";
 import logo from "../../assets/images/landing/Group 1171279822.svg";
 import sponsors from '../../assets/images/landing/Group 1171279823.svg'
+
 function Footer() {
+    const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   return (
     <div className="flex flex-col items-center bg-[#05243F] px-6 sm:px-30 py-30 sm:py-40">
       <div className="flex max-w-5xl flex-col items-center">
@@ -34,7 +38,7 @@ function Footer() {
       </div>
       <div className="mt-20 sm:mt-40 grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 justify-center justify-items-start">
         <div className="mt-10 flex flex-col items-start gap-6 sm:gap-8 sm:mt-0 col-span">
-          <div>
+          <div onClick={scrollToTop}>
             <img
               src={logo}
               alt="motoka logo"
@@ -71,7 +75,7 @@ function Footer() {
                 {title: 'Company', links: ['About Motoka', 'Our Mission', 'Careers', 'Partners', 'Contact Us']},
             ].map((section) => (
                 <div key={section.title}  className="w-full flex justify-start sm:justify-end">
-                <div className="mt-10 sm:mt-20 flex flex-col items-start gap-6 sm:mt-0 w-fit">
+                <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
                     <h4 className="text-lg font-semibold text-white">{section.title}</h4>
                     <div className="flex flex-col items-start gap-4">
                         {section.links.map((link) => (
