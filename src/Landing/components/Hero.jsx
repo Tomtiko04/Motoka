@@ -19,7 +19,7 @@ function Hero() {
                 <div
                   className="relative text-[21px] mt-10"
                 >
-                  <p className="bg-[#FFFFFF2B] rounded-full py-3 px-8 ">Trusted by <b>10k+ Car Owners</b></p>
+                  <p className="bg-[#FFFFFF2B] rounded-full py-3 px-12 sm:px-8 flex flex-col sm:block ">Trusted by <b>10k+ Car Owners</b></p>
                   <span className="absolute -top-6 -right-2 ">
                     <img
                     src={Checkmark}

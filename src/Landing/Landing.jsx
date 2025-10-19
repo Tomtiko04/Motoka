@@ -8,8 +8,34 @@ import Hero from "./components/Hero";
 import Mobile from "./components/Mobile";
 import Testimonials from "./components/Testimonials";
 import Whyus from "./components/Whyus";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (!visible) return null;
+  return (
+    <button
+      onClick={scrollToTop}
+      className="fixed bottom-8 right-8 z-50 rounded-full bg-[#2388E1] text-white px-4 py-3 shadow-lg hover:bg-[#126cbb] transition"
+      aria-label="Scroll to top"
+    >
+      ↑
+    </button>
+  );
+}
 
 function LandingPage() {
     const location = useLocation();
@@ -33,6 +59,7 @@ function LandingPage() {
             <FaqsSection/>
             <Mobile/>
             <Footer/>
+            <ScrollToTopButton />
         </div>
      );
 }
