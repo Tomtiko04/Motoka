@@ -1,10 +1,11 @@
 import logo from "../../assets/images/landing/Group 209.svg";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-
+const navigate=useNavigate()
   const navLinks = [
     { name: "Home", href: "#" },
     { name: "Services", href: "#services" },
@@ -36,19 +37,19 @@ function Header() {
             ))}
           </div>
           {/* Mobile Nav Toggle */}
-<div className="flex items-center gap-2">
-          <button className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-xl font-semibold text-[#05243F] sm:mt-0">
-            Register
-          </button>
-          <div className="ms-2 flex items-center md:hidden">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className=" focus:outline-none"
-              aria-label="Toggle navigation"
-            >
-              <Icon icon="mingcute:menu-fill" width="28" height="28" />
+          <div className="flex items-center gap-2">
+            <button className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-xl font-semibold text-[#05243F] sm:mt-0" onClick={()=>navigate("/auth/signup")}>
+              Register
             </button>
-          </div>
+            <div className="ms-2 flex items-center md:hidden">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="focus:outline-none"
+                aria-label="Toggle navigation"
+              >
+                <Icon icon="mingcute:menu-fill" width="28" height="28" />
+              </button>
+            </div>
           </div>
         </header>
         {/* Mobile Nav Dropdown */}

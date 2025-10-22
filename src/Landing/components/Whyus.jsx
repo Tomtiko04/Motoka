@@ -1,9 +1,11 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
-
+import image1 from '../../assets/images/landing/image 1291.svg'
+import image2 from '../../assets/images/landing/image 1292.svg'
+import image3 from '../../assets/images/landing/image 1290 (1).svg'
 function Whyus() {
   return (
     <div className="mt-18">
-      <div className="mt-10 max-w-[1003px] px-6">
+      <div className="mt-0 max-w-[1003px] px-6">
         <h1 className="text-[40px] font-bold text-[#05243F] sm:text-[56px]">
           Stop Worrying. <span className="text-[#2389E3]">Start Driving.</span>
         </h1>
@@ -18,6 +20,11 @@ function Whyus() {
           <div className="text-[#05243F]">
             <h2 className="text-[24px] sm:text-[32px] font-bold">End the Document Stress:</h2>
             <p className="text-2xl">Compliance & Security</p>
+            <div className="flex w-fit gap-8 py-5">
+              {[image1, image2, image3].map((logo, index) => (
+                <img src={logo} alt="logo" className="h-15 w-15 block" key={index}/>
+              ))}
+            </div>
           </div>
           <div>
             {[
@@ -44,7 +51,7 @@ function Whyus() {
 
                 <div>
                   <p className="text-lg text-[#05203DB2]">
-                    <b className="text-[#05203D]">{item.title}:</b>
+                    <b className="text-[#05203D]">{item.title}:</b><br />
                     {item.content}
                   </p>
                 </div>
@@ -55,7 +62,7 @@ function Whyus() {
         <div className="mt-18 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="text-[#05243F]">
             <h2 className="text-[24px] sm:text-[32px] font-bold">Never Miss a Renewal:</h2>
-            <p className="text-2xl">Time & Money Savings</p>
+            <p className="text-2xl pb-3">Time & Money Savings</p>
           </div>
           <div>
             {[
@@ -82,7 +89,7 @@ function Whyus() {
 
                 <div>
                   <p className="text-lg text-[#05203DB2]">
-                    <b className="text-[#05203D]">{item.title}:</b>
+                    <b className="text-[#05203D]">{item.title}:</b><br />
                     {item.content}
                   </p>
                 </div>
@@ -95,12 +102,12 @@ function Whyus() {
             <h2 className="text-[24px] sm:text-[32px] font-bold">
               Guranteed Quality Service:
             </h2>
-            <p className="text-2xl">Trust & Reliability</p>
+            <p className="text-2xl pb-3">Trust & Reliability</p>
           </div>
           <div>
             {[
               {
-                title: "Vetted Vendor Marketplace:",
+                title: "Vetted Vendor Marketplace",
                 content:
                   " Browse a curated network of mechanics, vulcanizers, and parts dealers who have been thoroughly verified for quality and fair pricing. No more guesswork—book services with confidence.",
                 iconName: "iconoir:shop",
@@ -116,7 +123,7 @@ function Whyus() {
 
                 <div>
                   <p className="text-lg text-[#05203DB2]">
-                    <b className="text-[#05203D]">{item.title}:</b>
+                    <b className="text-[#05203D]">{item.title}:</b><br />
                     {item.content}
                   </p>
                 </div>
