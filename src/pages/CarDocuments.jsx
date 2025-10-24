@@ -3,7 +3,7 @@ import PagesLayout from "./components/PageLayout";
 import DocumentsNav from "../components/DocumentsNav";
 // import DocumentPage from "./components/DocumentPage";
 // import DocPreview from "./components/Docpreview";
-import CarDetailsCard from "../components/CarDetailsCard";
+import CarDetailsCard from "./components/CarDetailsCard";
 import { useGetCars } from "../features/car/useCar";
 // import config from "../config/config";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -285,6 +285,7 @@ function CarDocuments() {
                       setSelectedCarId(c.id);
                       setShowsidebar(false);
                     }}
+                    selectedCarId={selectedCarId}
                     onRenewClick={() => { }}
                   />
                 </div>
