@@ -57,7 +57,7 @@ export default function Dashboard() {
           </div>
         ) : sortedCars.length > 0 ? (
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div>
+            <div className="">
               <Swiper
                 modules={[Pagination, Autoplay]}
                 spaceBetween={24}
@@ -68,10 +68,11 @@ export default function Dashboard() {
                   disableOnInteraction: false,
                 }}
                 // className="!pb-12 h-full"
+                className=""
               >
                 {sortedCars?.map((car, index) => (
-                  <SwiperSlide key={car.id || index}>
-                    <div>
+                  <SwiperSlide key={car.id || index} className="">
+                    <div className="w-full text-left">
                       <CarDetailsCard
                         carDetail={car}
                         isRenew={true}
