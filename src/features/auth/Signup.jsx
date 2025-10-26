@@ -10,7 +10,13 @@ import * as yup from "yup";
 import ImageSlider from "../../components/ImageSlider";
 
 const schema = yup.object().shape({
-  name: yup.string().required("Username is required"),
+  name: yup
+    .string()
+    .required("Username is required")
+    .matches(
+      /^[A-Za-z\s'-]+$/,
+      "Name can only contain letters, spaces, hyphens, and apostrophes",
+    ),
   email: yup
     .string()
     .email("Invalid email format")

@@ -47,7 +47,7 @@ export function useLogin() {
       },
       onError: (err) => {
         toast.dismiss();
-        toast.error(err.response.data.message || "Failed to verify 2FA code");
+        toast.error(err.message || "Failed to verify 2FA code");
       },
       retry: false,
     });
@@ -161,7 +161,7 @@ export function useSignup() {
     onError: (err) => {
       toast.dismiss();
       toast.error(
-        err.response.data.message || "An error occurred during signup.",
+        err.message || "An error occurred during signup.",
       );
     },
     retry: false,
