@@ -21,7 +21,7 @@ export default function PaystackPayment() {
   useEffect(() => {
     if (!paymentData) {
       toast.error("No payment data found");
-      navigate("/");
+      navigate("/dashboard");
       return;
     }
 

@@ -9,7 +9,7 @@ import { BsStars } from "react-icons/bs";
 export default function Header() {
   const navigate = useNavigate();
   function handleHome() {
-    navigate("/");
+    navigate("/dashboard");
   }
   return (
     <div className="w-full bg-white">

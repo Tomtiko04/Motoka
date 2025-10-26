@@ -75,8 +75,8 @@ export default function App() {
         <ScrollToTop />
         {isOpen && <CarDetailsModal />}
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="landing" element={<LandingPage />} />
+          {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+          <Route path="/" element={<LandingPage />} />
           {/* Auth Routes */}
           <Route path="auth" element={<AuthLayout />}>
             <Route
@@ -130,7 +130,13 @@ export default function App() {
           />
 
           {/* Protected Routes */}
-          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path="successful" element={<SuccessPage />} />
             {/* <Route path="documents" element={<CarDocuments />} /> */}
             <Route path="dashboard" element={<Dashboard />} />

@@ -368,7 +368,7 @@ export default function AddCar() {
               },
             });
           } else {
-            navigate("/");
+            navigate("/dashboard");
           }
         },
         onError: () => {
