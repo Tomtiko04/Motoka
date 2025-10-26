@@ -14,12 +14,16 @@ const testimonials = [
   {
     id: 1,
     name: "David Okoro",
+    text: "DriveAssured made renewing my vehicle papers effortless. Highly recommend!",
+    img: person2,
     text: "DriveAssured made renewing my vehicle papers effortless. The process was quick and easy, and I highly recommend it to anyone looking for convenience.",
     img: person2,
   },
   {
     id: 2,
     name: "Aisha Bello",
+    text: "Renewing my car license used to take days of stress and paperwork. With Motoka, it’s all done online in minutes. Super convenient and reliable.",
+    img: person1,
     text: "Renewing my car license used to take days of stress and paperwork. With Motoka, it’s all done online in minutes. Super convenient and reliable for busy people.",
     img: person1,
   },
@@ -55,7 +59,7 @@ export default function Testimonials() {
   return (
     <div className="flex flex-col overflow-hidden bg-[#FFF4DE] py-20 mt-40" id="testimonials">
       <h2 className="mb-20 text-center sm:text-left px-[38px] text-[40px] sm:text-[56px] font-bold text-[#05243F]">
-        What Client Says
+        What Client says
       </h2>
       <div className="">
         {/* <Swiper
@@ -104,7 +108,7 @@ export default function Testimonials() {
       >
           {testimonials.map((item, idx) => (
             <SwiperSlide key={item.id}>
-              <div className="flex flex-col items-center justify-center text-center mb-12 w-[500px]" >
+              <div className="flex flex-col items-center justify-center text-center mb-16 w-[500px]" >
                 <div className="aspect-square flex items-center justify-center w-80 h-80 mb-5">
                 <img
                   src={item.img}
