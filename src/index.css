@@ -148,6 +148,22 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* Don't REMOVE BY OYINKANSOLA: The bullet dot on the slider*/
+.custom-pagination {
+  position: relative;
+}
+
+.custom-pagination .swiper-pagination-bullet {
+  background: #ccc;
+  opacity: 1;
+  transition: background 0.3s;
+}
+
+.custom-pagination .swiper-pagination-bullet-active {
+  background: #2389E3;
+}
+
+
 @media (max-width: 640px) {
   input, select, textarea, button {
     font-size: 16px;

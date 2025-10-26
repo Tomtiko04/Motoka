@@ -43,7 +43,7 @@ export function useLogin() {
         }
 
         setTwoFactorRequired(false);
-        navigate("/");
+        navigate("/dashboard");
       },
       onError: (err) => {
         toast.dismiss();
@@ -73,7 +73,7 @@ export function useLogin() {
           localStorage.setItem("userInfo", JSON.stringify(userDetails));
         }
 
-        navigate("/");
+        navigate("/dashboard");
       }
     },
     onError: (err) => {
@@ -117,7 +117,7 @@ export function useLogin() {
         localStorage.setItem("userInfo", JSON.stringify(userDetails));
       }
 
-      navigate("/");
+      navigate("/dashboard");
     },
     onError: (err) => {
       toast.error(err.response.data.message || "Invalid OTP");
