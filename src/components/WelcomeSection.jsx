@@ -104,7 +104,7 @@ export default function WelcomeSection({ userName }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      {/* <div className="flex items-center gap-2 sm:gap-4">
         <span className="hidden text-base font-normal text-[#05243F]/44 sm:block sm:text-sm">
           Wallet Balance
         </span>
@@ -132,7 +132,7 @@ export default function WelcomeSection({ userName }) {
             )}
           </span>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
