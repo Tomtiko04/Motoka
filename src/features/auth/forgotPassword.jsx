@@ -256,6 +256,7 @@ const StepThree = ({ prevStep, email, token }) => {
                 disabled={isResetingPassword}
                 className="font-medium text-[#2389E3] hover:text-[#05243F]"
                 type="button"
+                onClick={()=> navigate(-1)}
               >
                 Back
               </button>
