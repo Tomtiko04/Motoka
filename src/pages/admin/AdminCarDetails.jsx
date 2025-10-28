@@ -14,6 +14,7 @@ import {
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import config from '../../config/config';
 
 const AdminCarDetails = () => {
   const { slug } = useParams();
@@ -31,7 +32,7 @@ const AdminCarDetails = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/cars/${slug}`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/cars/${slug}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ const AdminCarDetails = () => {
     try {
       setDeleting(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/cars/${slug}`, {
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/cars/${slug}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -286,7 +287,7 @@ const AdminCarDetails = () => {
             {car.document_images.map((doc, index) => (
               <a
                 key={index}
-                href={`${import.meta.env.VITE_API_BASE_URL}/${doc}`}
+                href={`${config.getApiBaseUrl()}/${doc}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:bg-blue-50 transition-colors text-center"
