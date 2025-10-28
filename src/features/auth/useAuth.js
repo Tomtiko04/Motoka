@@ -43,11 +43,11 @@ export function useLogin() {
         }
 
         setTwoFactorRequired(false);
-        navigate("/");
+        navigate("/dashboard");
       },
       onError: (err) => {
         toast.dismiss();
-        toast.error(err.response.data.message || "Failed to verify 2FA code");
+        toast.error(err.message || "Failed to verify 2FA code");
       },
       retry: false,
     });
@@ -73,7 +73,7 @@ export function useLogin() {
           localStorage.setItem("userInfo", JSON.stringify(userDetails));
         }
 
-        navigate("/");
+        navigate("/dashboard");
       }
     },
     onError: (err) => {
@@ -117,7 +117,7 @@ export function useLogin() {
         localStorage.setItem("userInfo", JSON.stringify(userDetails));
       }
 
-      navigate("/");
+      navigate("/dashboard");
     },
     onError: (err) => {
       toast.error(err.response.data.message || "Invalid OTP");
@@ -161,7 +161,7 @@ export function useSignup() {
     onError: (err) => {
       toast.dismiss();
       toast.error(
-        err.response.data.message || "An error occurred during signup.",
+        err.message || "An error occurred during signup.",
       );
     },
     retry: false,
@@ -184,7 +184,7 @@ export function useVerifyAccount() {
     onError: (err) => {
       toast.dismiss();
       toast.error(
-        err.response.data.message || "Verification failed. Please try again.",
+        err.message || "Verification failed. Please try again.",
       );
     },
     retry: false,
@@ -199,7 +199,7 @@ export function useResendVerification() {
       toast.success(data.message || "Verification code resent!");
     },
     onError: (err) => {
-      toast.error(err.response.data.message || "Failed to resend code.");
+      toast.error(err.message || "Failed to resend code.");
     },
     retry: false,
   });
@@ -213,7 +213,7 @@ export function useForgotPassword(){
       toast.success(data.message || "OTP sent to your email.");
     },
     onError: (err) => {
-      toast.error(err.response.data.message || "Failed to send OTP.");
+      toast.error(err.response.data.message || "Email does not exist. Failed to send OTP.");
     },
   });
 

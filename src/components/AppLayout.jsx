@@ -65,7 +65,7 @@ export default function AppLayout() {
   };
 
   function handleHome() {
-    navigate("/");
+    navigate("/dashboard");
   }
 
   return (
