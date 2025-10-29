@@ -39,12 +39,12 @@ function Header() {
           {/* Mobile Nav Toggle */}
           <div className="flex items-center gap-2">
             <button 
-             className="rounded-[10px] bg-[#2287E0] px-6 py-2 text-lg font-semibold text-[#fff] sm:mt-0 "
+             className="rounded-[10px] bg-[#2287E0] px-6 py-2 text-base font-semibold text-[#fff] sm:mt-0 "
              >
               Login
             </button>
             <button
-              className="hidden sm:block rounded-[10px] bg-[#EBB850] px-4 py-2 text-lg font-semibold text-[#05243F] sm:mt-0"
+              className="hidden sm:block rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
               onClick={() => navigate("/auth/signup")}
             >
               Register
