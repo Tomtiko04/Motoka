@@ -14,8 +14,10 @@ export async function createDriversLicense(payload) {
   try {
     let dataToSend = payload;
     let config = {};
+    
+    const hasFile = payload && Object.values(payload).some((val) => val instanceof File || (typeof Blob !== 'undefined' && val instanceof Blob));
 
-    if (payload && payload.passport_photograph instanceof File) {
+    if (hasFile) {
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
         if (value !== undefined && value !== null) formData.append(key, value);
@@ -32,24 +34,32 @@ export async function createDriversLicense(payload) {
   }
 }
 
-export async function initializeDriversLicensePayment(slug) {
+export async function initializeDriversLicensePaymentPaystack(slug) {
   try {
-    const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
+    const { data } = await api.post(
+      `/driver-license/${slug}/initialize-paystack-payment`,
+    );
     return data;
   } catch (error) {
-    const message = error?.response?.data?.message || error.message || "Failed to initialize payment";
+    const message =
+      error?.response?.data?.message ||
+      error.message ||
+      "Failed to initialize payment";
     throw new Error(message);
   }
 }
 
-export async function verifyDriversLicensePayment(reference, licenseId) {
+export async function initializeDriversLicensePaymentMonicredit(slug) {
   try {
-    const { data } = await api.get(`/driver-license/${licenseId}/verify-payment`, {
-      params: { reference }
-    });
+    const { data } = await api.post(
+      `/driver-license/${slug}/initialize-payment`,
+    );
     return data;
   } catch (error) {
-    const message = error?.response?.data?.message || error.message || "Payment verification failed";
+    const message =
+      error?.response?.data?.message ||
+      error.message ||
+      "Failed to initialize payment";
     throw new Error(message);
   }
 }

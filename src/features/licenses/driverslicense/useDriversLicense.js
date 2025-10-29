@@ -18,14 +18,14 @@ export function useDriversLicensePaymentOptions(){
 export function useCreateDriverLicense() {
     const {
         mutate: createLicense,
-        isPending: isCreating,
+        isLoading: isCreating,
         error,
         data,
     } = useMutation({
         mutationFn: createDriversLicenseApi,
         onSuccess: (data) => {
-            const message = data?.message || (data?.status === "success" ? "Driver's license request created" : "Success");
-            toast.success(message);
+            // const message = data?.message || (data?.status === "success" ? "Driver's license request created" : "Success");
+            toast.success("Complete your licenses payment to proceed");
         },
         onError: (error) => {
             const message = error.response.message || error?.response.data.message || "Failed to create driver's license";

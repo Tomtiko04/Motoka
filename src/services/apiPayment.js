@@ -9,7 +9,7 @@ export async function initializePayment(payload) {
   }
 }
 
-export async function verifyPayment(reference) {
+export async function verifyPaymentMonicredit(reference) {
   try {
     const { data } = await api.post(`/payment/verify-payment/${reference}`);
     return data;
@@ -17,6 +17,20 @@ export async function verifyPayment(reference) {
     throw new Error(error.response?.data?.message || error.message);
   }
 }
+
+export async function verifyPaystackPayment(reference) {
+  try {
+    const { data } = await api.post(`/payment/paystack/verify/${reference}`);
+    return data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to verify Paystack payment",
+    );
+  }
+}
+
 
 export async function getPaymentHistory() {
   try {
@@ -79,32 +93,6 @@ export async function checkExistingPayments(carSlug, paymentScheduleIds) {
       error.response?.data?.message ||
         error.message ||
         "Failed to check existing payments",
-    );
-  }
-}
-
-export async function verifyPaystackPayment(reference) {
-  try {
-    const { data } = await api.post(`/payment/paystack/verify/${reference}`);
-    return data;
-  } catch (error) {
-    throw new Error(
-      error.response?.data?.message ||
-        error.message ||
-        "Failed to verify Paystack payment",
-    );
-  }
-}
-
-export async function initiateDriversLicensePayment(slug) {
-  try {
-    const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
-    return data;
-  } catch (error) {
-    throw new Error(
-      error.response?.data?.message ||
-        error.message ||
-        "Failed to initiate driver's license payment",
     );
   }
 }

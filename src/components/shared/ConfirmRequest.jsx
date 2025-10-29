@@ -2,7 +2,11 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LicenseLayout from "../../features/licenses/components/LicenseLayout";
 import OrderList from "./OrderList";
-import { initializeDriversLicensePayment, verifyDriversLicensePayment } from "../../services/apiDriversLicense";
+import {
+  initializeDriversLicensePaymentPaystack,
+  initializeDriversLicensePaymentMonicredit,
+  verifyDriversLicensePaymentMonicredit,
+} from "../../services/apiDriversLicense";
 import { toast } from "react-hot-toast";
 
 // Configuration for different request types
@@ -38,8 +42,11 @@ export default function ConfirmRequest() {
   const config = { ...requestConfigs[type], ...requestConfigs.default };
   const [isProcessing, setIsProcessing] = React.useState(false);
 
-  const handleProceed = async ({ total, items: orderItems, orderDetails }) => {
+  const handleProceed = async ({ total, items: orderItems }) => {
     setIsProcessing(true);
+
+    // Slug comes from navigation state set by DriversLicense.jsx
+    const resolvedSlug = location?.state?.orderDetails?.slug;
 
     try {
       switch (type) {
@@ -94,55 +101,88 @@ export default function ConfirmRequest() {
         //   }
         //   break;
         case "drivers_license":
-          if (orderDetails.slug) {
+          // if (resolvedSlug) {
+          //   try {
+          //     const initRes = await initializeDriversLicensePaymentPaystack(resolvedSlug);
+          //     const initPayload = initRes?.data?.data || initRes?.data || initRes;
+
+          //     if (initPayload) {
+          //       navigate("/payment", {
+          //         state: {
+          //           paymentData: initPayload,
+          //           type: "drivers_license",
+          //           items: orderItems,
+          //           amount: total,
+          //           ...restState,
+          //         },
+          //       });
+          //     } else {
+          //       throw new Error("Failed to initialize payment: Missing payload");
+          //     }
+          //   } catch (error) {
+          //     console.error("Payment initialization error:", error);
+          //     toast.error(error.message || "Failed to initialize payment");
+          //     setIsProcessing(false);
+          //   }
+          // } else {
+          //   toast.error("Invalid license details");
+          //   setIsProcessing(false);
+          // }
+          if (resolvedSlug) {
             try {
-              const paymentData = await initializeDriversLicensePayment(
-                orderDetails.slug,
-              );
+              const [paystackRes, monicreditRes] = await Promise.allSettled([
+                initializeDriversLicensePaymentPaystack(resolvedSlug),
+                initializeDriversLicensePaymentMonicredit(resolvedSlug)
+              ]);
 
-              if (paymentData?.authorization_url) {
-                // Redirect to payment gateway
-                window.location.href = paymentData.authorization_url;
+              const paystackData = paystackRes.status === 'fulfilled' ?
+                (paystackRes.value?.data?.data || paystackRes.value?.data || paystackRes.value) : null;
 
-                // Set up a listener for when the user returns to the page
-                window.onPaymentReturn = async (reference) => {
-                  try {
-                    // Verify the payment
-                    const verification = await verifyDriversLicensePayment(
-                      reference,
-                      orderDetails.slug,
-                    );
+              const monicreditData = monicreditRes.status === 'fulfilled' ?
+                (monicreditRes.value?.data?.data || monicreditRes.value?.data || monicreditRes.value) : null;
 
-                    if (verification.status === "success") {
-                      // Navigate to success page with verification data
-                      navigate("/payment/success", {
-                        state: {
-                          type: "drivers_license",
-                          reference,
-                          amount: total,
-                          details: verification.data,
-                          items: orderItems,
-                          ...restState,
-                        },
-                      });
-                    } else {
-                      throw new Error("Payment verification failed");
-                    }
-                  } catch (error) {
-                    console.error("Payment verification error:", error);
-                    toast.error(error.message || "Failed to verify payment");
-                    navigate("/payment/failed", {
-                      state: {
-                        error: error.message || "Payment verification failed",
-                        type: "drivers_license",
-                        ...restState,
-                      },
-                    });
-                  }
-                };
-              } else {
-                throw new Error("Failed to initialize payment");
+              if (!paystackData && !monicreditData) {
+                throw new Error("Failed to initialize any payment gateway");
               }
+
+              const paymentData = {
+                type: "drivers_license",
+                items: orderItems,
+                amount: total,
+                paystack: paystackRes.status === 'fulfilled' ? {
+                  authorization_url: paystackRes.value?.data?.authorization_url,
+                  reference: paystackRes.value?.data?.reference
+                } : null,
+                monicredit: monicreditRes.status === 'fulfilled' ? {
+                  // payment_url: monicreditRes.value?.data?.data?.payment_url,
+                  // transid: monicreditRes.value?.data?.data?.transid,
+
+                  data: {
+                    ...monicreditRes.value?.data?.data, // This contains customer, amount, etc.
+                    payment_url: monicreditRes.value?.data?.data?.payment_url,
+                    transid: monicreditRes.value?.data?.data?.transid,
+                    total_amount: monicreditRes.value?.data?.data?.total_amount,
+                    // Make sure customer data is included
+                    customer: monicreditRes.value?.data?.data?.customer || {
+                      account_number: monicreditRes.value?.data?.data?.account_number,
+                      bank_name: monicreditRes.value?.data?.data?.bank_name,
+                      account_name: monicreditRes.value?.data?.data?.account_name
+                    }
+                  }
+
+                } : null,
+                ...restState
+              };
+
+              // Save to session storage
+              sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
+
+              navigate(`/payment?type=drivers_license`, {
+                state: {
+                  paymentData: paymentData
+                }
+              });
+
             } catch (error) {
               console.error("Payment initialization error:", error);
               toast.error(error.message || "Failed to initialize payment");
