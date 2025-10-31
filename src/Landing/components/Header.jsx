@@ -40,6 +40,7 @@ function Header() {
           <div className="flex items-center gap-2">
             <button 
              className="rounded-[10px] bg-[#2287E0] px-6 py-2 text-base font-semibold text-[#fff] sm:mt-0 "
+             onClick={() => navigate("/auth/login")}
              >
               Login
             </button>

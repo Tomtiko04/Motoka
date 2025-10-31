@@ -16,8 +16,7 @@ const testimonials = [
     name: "David Okoro",
     text: "DriveAssured made renewing my vehicle papers effortless. Highly recommend!",
     img: person2,
-    text: "DriveAssured made renewing my vehicle papers effortless. The process was quick and easy, and I highly recommend it to anyone looking for convenience.",
-    img: person2,
+    text: "DriveAssured made renewing my vehicle papers effortless. The process was quick and easy, and I highly recommend it to anyone looking for convenience."
   },
   {
     id: 2,
@@ -25,7 +24,7 @@ const testimonials = [
     text: "Renewing my car license used to take days of stress and paperwork. With Motoka, it’s all done online in minutes. Super convenient and reliable.",
     img: person1,
     text: "Renewing my car license used to take days of stress and paperwork. With Motoka, it’s all done online in minutes. Super convenient and reliable for busy people.",
-    img: person1,
+
   },
   {
     id: 3,
