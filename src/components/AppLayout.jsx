@@ -304,7 +304,7 @@ export default function AppLayout() {
         )}
 
         {/* Main Content */}
-        <main className="mx-auto w-full max-w-7xl py-6 flex-1 flex flex-col">
+        <main className="mx-auto w-full max-w-7xl py-6 flex-1">
           <Outlet />
         </main>
 
