@@ -1,4 +1,4 @@
-import Image1 from "../../assets/images/landing/pngwing.com (2) 1 (1).png"
+import Image1 from "../../assets/images/landing/pngwing.com (2) 1 (1).webp"
 import Checkmark from "../../assets/images/landing/bitcoin-icons_verify-filled.png"
 function Hero() {
     return ( 
@@ -8,7 +8,7 @@ function Hero() {
                 <p className="text-xl max-w-[634px] pt-4 sm:pt-8 text-left sm:text-center">The all-in-one platform for managing your vehicle and vehicle documents, simplifying renewals, and connecting you with trusted services.</p>
                 <div className="bg-white rounded-[10px] text-black flex items-center  mt-10 text-base  sm:text-xl font-semibold w-full max-w-[700px]">
                     {/* <input type="text" placeholder="hello world" /> */}
-                    <input type="text" placeholder="Check your Plate No." className="relative z-10 bg-transparent py-2 px-2 placeholder:text-[#05243F66] w-full ps-4 sm:ps-10 h-full outline-none" />
+                    <input type="text" placeholder="Check your Plate No." className="relative z-10 bg-transparent py-2 px-2 placeholder:text-[#05243F66] w-full ps-4 sm:ps-10 h-full outline-none" name="plateNo"/>
                     <button className="bg-[#EBB850] py-3 px-5 sm:py-4 sm:px-6 rounded-[10px]">Submit</button>
                 </div>
                 {/* <input type="text" placeholder="hello world" /> */}
