@@ -67,6 +67,7 @@
 // export default NotificationList;
 import { Icon } from "@iconify/react";
 import NotificationCard from "./notificationCard";
+import { useState } from "react";
 export default function NotificationList({ notificationsCategory, notificationData }) {
   const groups = ["Today", "Yesterday", "Last week", "Others"];
 
@@ -94,13 +95,16 @@ export default function NotificationList({ notificationsCategory, notificationDa
   };
 
   let hasAnyVisible = false;
-
+ const [expandedGroups, setExpandedGroups] = useState({});
   return (
     <div>
       {groups.map((label) => {
         const items = getItemsFor(label);
         if (!items.length) return null;
         hasAnyVisible = true;
+        const isExpanded = expandedGroups[label];
+        const visibleItems = isExpanded ? items : items.slice(0, 5);
+
         return (
           <div key={label}>
             <div className="flex justify-between py-3 text-[14px] text-[#05243F66]">
@@ -108,10 +112,18 @@ export default function NotificationList({ notificationsCategory, notificationDa
               <p>{formatHeaderDate(label)}</p>
             </div>
             <div className="flex flex-col gap-3">
-              {items.map((n) => (
+              {visibleItems.map((n) => (
                 <NotificationCard key={n.id} notification={n} />
               ))}
             </div>
+            {items.length > 5 && (
+              <button
+                onClick={() => toggleGroup(label)}
+                className="text-blue-500 text-sm mt-2 hover:underline self-start"
+              >
+                {isExpanded ? "See less" : "See more"}
+              </button>
+            )}
           </div>
         );
       })}
