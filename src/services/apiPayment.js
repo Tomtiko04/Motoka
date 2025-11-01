@@ -9,9 +9,9 @@ export async function initializePayment(payload) {
   }
 }
 
-export async function verifyPaymentMonicredit(reference) {
+export async function verifyPaymentMonicredit(orderId) {
   try {
-    const { data } = await api.post(`/payment/verify-payment/${reference}`);
+    const { data } = await api.post(`/payment/verify-payment/${orderId}`);
     return data;
   } catch (error) {
     throw new Error(error.response?.data?.message || error.message);
@@ -30,7 +30,6 @@ export async function verifyPaystackPayment(reference) {
     );
   }
 }
-
 
 export async function getPaymentHistory() {
   try {
@@ -95,4 +94,16 @@ export async function checkExistingPayments(carSlug, paymentScheduleIds) {
         "Failed to check existing payments",
     );
   }
+}
+
+export async function verifyPayment() {
+  console.log("coming soon");
+}
+
+export async function verifyDriversLicensePaymentMonicredit(payload) {
+  console.log("soon");
+}
+
+export async function verifyDriversLicensePaymentPaystack(payload) {
+  console.log("soon"); 
 }

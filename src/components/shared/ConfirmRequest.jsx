@@ -5,7 +5,6 @@ import OrderList from "./OrderList";
 import {
   initializeDriversLicensePaymentPaystack,
   initializeDriversLicensePaymentMonicredit,
-  verifyDriversLicensePaymentMonicredit,
 } from "../../services/apiDriversLicense";
 import { toast } from "react-hot-toast";
 
@@ -149,29 +148,41 @@ export default function ConfirmRequest() {
                 type: "drivers_license",
                 items: orderItems,
                 amount: total,
-                paystack: paystackRes.status === 'fulfilled' ? {
-                  authorization_url: paystackRes.value?.data?.authorization_url,
-                  reference: paystackRes.value?.data?.reference
-                } : null,
-                monicredit: monicreditRes.status === 'fulfilled' ? {
-                  // payment_url: monicreditRes.value?.data?.data?.payment_url,
-                  // transid: monicreditRes.value?.data?.data?.transid,
+                paystack:
+                  paystackRes.status === "fulfilled"
+                    ? {
+                        authorization_url:
+                          paystackRes.value?.data?.authorization_url,
+                        reference: paystackRes.value?.data?.reference,
+                      }
+                    : null,
+                monicredit:
+                  monicreditRes.status === "fulfilled"
+                    ? {
+                        // payment_url: monicreditRes.value?.data?.data?.payment_url,
+                        transid: monicreditRes.value?.data?.data?.transid,
+                        orderid: monicreditRes.value?.data?.data?.order_id,
 
-                  data: {
-                    ...monicreditRes.value?.data?.data, // This contains customer, amount, etc.
-                    payment_url: monicreditRes.value?.data?.data?.payment_url,
-                    transid: monicreditRes.value?.data?.data?.transid,
-                    total_amount: monicreditRes.value?.data?.data?.total_amount,
-                    // Make sure customer data is included
-                    customer: monicreditRes.value?.data?.data?.customer || {
-                      account_number: monicreditRes.value?.data?.data?.account_number,
-                      bank_name: monicreditRes.value?.data?.data?.bank_name,
-                      account_name: monicreditRes.value?.data?.data?.account_name
-                    }
-                  }
-
-                } : null,
-                ...restState
+                        data: {
+                          ...monicreditRes.value?.data?.data, // This contains customer, amount, etc.
+                          payment_url:
+                            monicreditRes.value?.data?.data?.payment_url,
+                          orderid: monicreditRes.value?.data?.data?.order_id,
+                          total_amount:
+                            monicreditRes.value?.data?.data?.total_amount,
+                          customer: monicreditRes.value?.data?.data
+                            ?.customer || {
+                            account_number:
+                              monicreditRes.value?.data?.data?.account_number,
+                            bank_name:
+                              monicreditRes.value?.data?.data?.bank_name,
+                            account_name:
+                              monicreditRes.value?.data?.data?.account_name,
+                          },
+                        },
+                      }
+                    : null,
+                ...restState,
               };
 
               // Save to session storage

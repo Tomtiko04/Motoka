@@ -1,62 +1,99 @@
-import { useState } from 'react';
+// import { useState } from 'react';
+// import { toast } from 'react-hot-toast';
+// import { PAYMENT_TYPES, PAYMENT_METHODS } from '../config/paymentTypes';
+
+// export function usePayment() {
+//   const [isProcessing, setIsProcessing] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [activeMethod, setActiveMethod] = useState(null);
+
+//   const validatePaymentData = (paymentType, paymentData) => {
+//     const config = PAYMENT_CONFIG[paymentType];
+//     if (!config) {
+//       throw new Error(`Invalid payment type: ${paymentType}`);
+//     }
+
+//     const missingFields = config.requiredFields.filter(
+//       field => !paymentData[field]
+//     );
+
+//     if (missingFields.length > 0) {
+//       throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+//     }
+
+//     return true;
+//   };
+
+//   const processPayment = async (paymentType, paymentData, method) => {
+//     try {
+//       setIsProcessing(true);
+//       setError(null);
+//       setActiveMethod(method);
+
+//       validatePaymentData(paymentType, paymentData);
+
+//       const paymentSession = {
+//         type: paymentType,
+//         method,
+//         data: paymentData,
+//         timestamp: Date.now(),
+//       };
+      
+//       sessionStorage.setItem('currentPayment', JSON.stringify(paymentSession));
+
+//       window.location.href = `/payment?type=${paymentType}`;
+      
+//     } catch (err) {
+//       console.error('Payment processing error:', err);
+//       setError(err.message);
+//       toast.error(err.message);
+//       throw err;
+//     } finally {
+//       setIsProcessing(false);
+//     }
+//   };
+
+//   return {
+//     isProcessing,
+//     error,
+//     activeMethod,
+//     processPayment,
+//   };
+// }
+
+import { useMutation } from '@tanstack/react-query';
+import { verifyPaymentMonicredit, verifyPaystackPayment } from '../../../services/apiPayment';
 import { toast } from 'react-hot-toast';
-import { PAYMENT_TYPES, PAYMENT_METHODS } from '../config/paymentTypes';
 
-export function usePayment() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState(null);
-  const [activeMethod, setActiveMethod] = useState(null);
-
-  const validatePaymentData = (paymentType, paymentData) => {
-    const config = PAYMENT_CONFIG[paymentType];
-    if (!config) {
-      throw new Error(`Invalid payment type: ${paymentType}`);
+export function usePaymentVerification() {
+  const verifyMonicredit = useMutation({
+    mutationFn: async (orderId) => {
+      const response = await verifyPaymentMonicredit(orderId);
+      return response;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Payment verified successfully!');
+    },
+    onError: (error) => {
+      toast.error(error.response.data.message ||error.message || 'Failed to verify payment');
     }
+  });
 
-    const missingFields = config.requiredFields.filter(
-      field => !paymentData[field]
-    );
-
-    if (missingFields.length > 0) {
-      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  const verifyPaystack = useMutation({
+    mutationFn: async (reference) => {
+      const response = await verifyPaystackPayment(reference);
+      return response;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Payment verified successfully!');
+    },
+    onError: (error) => {
+      toast.error(error.response.data.message ||error.message || 'Failed to verify payment');
     }
-
-    return true;
-  };
-
-  const processPayment = async (paymentType, paymentData, method) => {
-    try {
-      setIsProcessing(true);
-      setError(null);
-      setActiveMethod(method);
-
-      validatePaymentData(paymentType, paymentData);
-
-      const paymentSession = {
-        type: paymentType,
-        method,
-        data: paymentData,
-        timestamp: Date.now(),
-      };
-      
-      sessionStorage.setItem('currentPayment', JSON.stringify(paymentSession));
-
-      window.location.href = `/payment?type=${paymentType}`;
-      
-    } catch (err) {
-      console.error('Payment processing error:', err);
-      setError(err.message);
-      toast.error(err.message);
-      throw err;
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  });
 
   return {
-    isProcessing,
-    error,
-    activeMethod,
-    processPayment,
+    verifyMonicredit,
+    verifyPaystack
   };
 }
