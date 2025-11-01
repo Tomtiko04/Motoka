@@ -28,6 +28,7 @@ function Footer() {
             type="Email"
             className="w-full bg-transparent ps-4 sm:ps-6 text-base text-white outline-none placeholder:text-[#FFFFFF]"
             placeholder="Your E-mail"
+            name="email"
           />
           <button className="w-fit flex-shrink-0 rounded-[15px] bg-[#2389E3] px-[15px] sm:px-[25px] py-[10px] sm:py-[15px] text-base text-nowrap text-white">
             Get Started

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-const navigate=useNavigate()
+  const navigate = useNavigate();
   const navLinks = [
     { name: "Home", href: "#" },
     { name: "Services", href: "#services" },
@@ -38,7 +38,16 @@ const navigate=useNavigate()
           </div>
           {/* Mobile Nav Toggle */}
           <div className="flex items-center gap-2">
-            <button className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-xl font-semibold text-[#05243F] sm:mt-0" onClick={()=>navigate("/auth/signup")}>
+            <button 
+             className="rounded-[10px] bg-[#2287E0] px-6 py-2 text-base font-semibold text-[#fff] sm:mt-0 "
+             onClick={() => navigate("/auth/login")}
+             >
+              Login
+            </button>
+            <button
+              className="hidden sm:block rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
+              onClick={() => navigate("/auth/signup")}
+            >
               Register
             </button>
             <div className="ms-2 flex items-center md:hidden">
@@ -49,6 +58,7 @@ const navigate=useNavigate()
               >
                 <Icon icon="mingcute:menu-fill" width="28" height="28" />
               </button>
+              
             </div>
           </div>
         </header>
@@ -64,7 +74,14 @@ const navigate=useNavigate()
               >
                 {item.name}
               </Link>
+
             ))}
+            <button
+              className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-lg font-semibold text-[#05243F] sm:mt-0"
+              onClick={() => navigate("/auth/signup")}
+            >
+              Register
+            </button>
           </nav>
         )}
       </div>
