@@ -25,6 +25,7 @@ export default function AdminLayout({ onNavigate }) {
     { name: "Transactions", path: "/admin/transaction" },
     { name: "Agents", path: "/admin/agent" },
     { name: "Cars", path: "/admin/car" },
+    { name: "Users", path: "/admin/users" }, 
   ];
 
   useEffect(() => {
@@ -147,7 +148,7 @@ export default function AdminLayout({ onNavigate }) {
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    3
+                    4
                   </span>
                 </div>
                 
@@ -198,7 +199,7 @@ export default function AdminLayout({ onNavigate }) {
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    3
+                    4
                   </span>
                 </div>
                 
