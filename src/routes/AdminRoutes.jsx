@@ -11,6 +11,8 @@ import AgentView from '../pages/admin/AgentView';
 import AdminCars from '../pages/admin/AdminCars';
 import AdminCarDetails from '../pages/admin/AdminCarDetails';
 import AdminPayments from '../pages/admin/AdminPayments';
+import AdminUsers from '../pages/admin/AdminUsers.jsx';
+import AdminUserDetails from '../pages/admin/AdminUserDetails.jsx';
 
 const AdminRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -80,6 +82,8 @@ const AdminRoutes = () => {
                 <Route path="cars" element={<AdminCars />} />
                 <Route path="cars/:slug" element={<AdminCarDetails />} />
                 <Route path="payments" element={<AdminPayments />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="users/:userId" element={<AdminUserDetails />} />
       </Route>
     </Routes>
   );
