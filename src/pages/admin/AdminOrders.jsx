@@ -3,6 +3,8 @@ import {
   ClipboardDocumentListIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
@@ -13,6 +15,10 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [perPage, setPerPage] = useState(15);
   const [paymentModal, setPaymentModal] = useState({
     isOpen: false,
     order: null,
@@ -27,7 +33,7 @@ const AdminOrders = () => {
       return;
     }
     fetchOrders();
-  }, [activeFilter]);
+  }, [activeFilter, currentPage]);
 
   const fetchOrders = async () => {
     try {
@@ -36,6 +42,8 @@ const AdminOrders = () => {
       
       const params = new URLSearchParams({
         status: activeFilter === 'All' ? 'all' : activeFilter.toLowerCase().replace(' ', '_'),
+        page: currentPage,
+        per_page: perPage,
       });
 
       const url = `${config.getApiBaseUrl()}/admin/orders?${params}`;
@@ -51,11 +59,15 @@ const AdminOrders = () => {
       
       if (data.status) {
         setOrders(data.data.data || []);
+        setCurrentPage(data.data.current_page || 1);
+        setTotalPages(data.data.last_page || 1);
+        setTotalOrders(data.data.total || 0);
+        setPerPage(data.data.per_page || 15);
       } else {
-        // toast.error('Failed to fetch orders');
+        toast.error('Failed to fetch orders');
       }
     } catch (error) {
-      // toast.error('Failed to fetch orders');
+      toast.error('Failed to fetch orders');
     } finally {
       setLoading(false);
     }
@@ -105,7 +117,6 @@ const AdminOrders = () => {
 
       const data = await response.json();
       if (data.status) {
-        // Show payment modal with order and agent details
         setPaymentModal({
           isOpen: true,
           order: data.data.order,
@@ -120,7 +131,6 @@ const AdminOrders = () => {
   };
 
   const handlePaymentInitiated = (paymentData) => {
-    // Refresh orders after payment is initiated
     fetchOrders();
     setPaymentModal({
       isOpen: false,
@@ -153,11 +163,56 @@ const AdminOrders = () => {
   };
 
   const filteredOrders = transformedOrders.filter(order => {
-    const matchesFilter = activeFilter === 'All' || order.status === activeFilter;
     const matchesSearch = order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if total is less than max
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+      
+      if (currentPage > 3) {
+        pages.push('...');
+      }
+      
+      // Show pages around current page
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        pages.push(i);
+      }
+      
+      if (currentPage < totalPages - 2) {
+        pages.push('...');
+      }
+      
+      // Always show last page
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
 
   if (loading) {
     return (
@@ -165,7 +220,6 @@ const AdminOrders = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         <div className="ml-4">
           <p className="text-sm text-gray-600">Loading orders...</p>
-          <p className="text-xs text-gray-500">Check browser console for debug info</p>
         </div>
       </div>
     );
@@ -174,14 +228,14 @@ const AdminOrders = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-center">
-        <div className="flex items-center justify-center">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <ClipboardDocumentListIcon className="h-6 w-6 text-gray-600 mr-2" />
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
         </div>
-        {/* <div className="text-sm text-gray-500">
-          {orders.length} orders found
-        </div> */}
+        <div className="text-sm text-gray-500">
+          {totalOrders} total orders
+        </div>
       </div>
 
       {/* Search and Filter Bar */}
@@ -206,7 +260,7 @@ const AdminOrders = () => {
             <FunnelIcon className="h-5 w-5 text-gray-400" />
             <select
               value={activeFilter}
-              onChange={(e) => setActiveFilter(e.target.value)}
+              onChange={(e) => handleFilterChange(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               {filters.map((filter) => (
@@ -220,12 +274,12 @@ const AdminOrders = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 overflow-x-auto">
         {filters.map((filter) => (
           <button
             key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            onClick={() => handleFilterChange(filter)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
               activeFilter === filter
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -248,7 +302,7 @@ const AdminOrders = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider underline">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Purpose
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -273,7 +327,6 @@ const AdminOrders = () => {
                     key={index} 
                     className="hover:bg-gray-50 cursor-pointer"
                     onClick={(e) => {
-                      // Don't navigate if clicking on the action button
                       if (!e.target.closest('button')) {
                         window.location.href = `/admin/orders/${order.originalOrder.slug}`;
                       }
@@ -290,11 +343,11 @@ const AdminOrders = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center gap-2">
                         <span>{order.purpose}</span>
-                        {order.originalOrder?.notes?.includes('Bulk payment') && (
+                        {/* {order.originalOrder?.notes?.includes('Bulk payment') && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             Bulk
                           </span>
-                        )}
+                        )} */}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -311,7 +364,7 @@ const AdminOrders = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent row click
+                          e.stopPropagation();
                           handleProcessOrder(order);
                         }}
                         className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${actionButton.color}`}
@@ -338,6 +391,74 @@ const AdminOrders = () => {
               : 'No orders have been placed yet.'
             }
           </p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && filteredOrders.length > 0 && totalPages > 1 && (
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Showing X to Y of Z results */}
+            <div className="text-sm text-gray-700">
+              Showing <span className="font-medium">{((currentPage - 1) * perPage) + 1}</span> to{' '}
+              <span className="font-medium">
+                {Math.min(currentPage * perPage, totalOrders)}
+              </span>{' '}
+              of <span className="font-medium">{totalOrders}</span> results
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-2">
+              {/* Previous Button */}
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              <div className="hidden sm:flex items-center gap-1">
+                {getPageNumbers().map((page, index) => (
+                  page === '...' ? (
+                    <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-500">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                ))}
+              </div>
+
+              {/* Mobile: Current Page Indicator */}
+              <div className="sm:hidden text-sm text-gray-700">
+                Page <span className="font-medium">{currentPage}</span> of{' '}
+                <span className="font-medium">{totalPages}</span>
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+                <ChevronRightIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
