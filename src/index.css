@@ -65,6 +65,29 @@ body {
   border-radius: 10px;
 }
 
+
+/* custom scroll  */
+
+
+.customscroll2::-webkit-scrollbar {
+  height: 8px;
+}
+
+.customscroll2::-webkit-scrollbar-track {
+  background: #ddd;
+  border-radius: 20px;
+}
+
+.customscroll2::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 20px;
+}
+
+.customscroll2::-webkit-scrollbar {
+  width: 6px;
+}
+
+
 img {
   display: block;
   width: 100%;
