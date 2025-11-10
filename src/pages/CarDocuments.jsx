@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import PagesLayout from "./components/PageLayout";
 import DocumentsNav from "../components/DocumentsNav";
-// import DocumentPage from "./components/DocumentPage";
+import DocumentPage from "./components/DocumentPage";
 // import DocPreview from "./components/Docpreview";
 import CarDetailsCard from "./components/CarDetailsCard";
 import { useGetCars } from "../features/car/useCar";
@@ -254,43 +254,22 @@ function CarDocuments() {
               onMyCarClick={onMyCarClick}
               onDriverLicenseClick={onDriverLicenseClick}
             />
-            {/* <DocumentPage
+            <DocumentPage
               selectedDocument={selectedDocument}
               setSelectedDocument={setSelectedDocument}
               docType={docType}
               activeTab={docType}
               showsidebar={showsidebar}
               setShowsidebar={setShowsidebar}
-            /> */}
+              loadingCars={loadingCars}
+              carsError={carsError}
+              carsCards={cars}
+              setSelectedCarId={setSelectedCarId}
+              selectedCarId={selectedCarId}
+            />
 
             {/* Cars list rendered via CarDetailsCard */}
-            <div className="space-y-3">
-              {loadingCars && (
-                <div className="text-sm text-[#05243F]/60"><LoadingSpinner /></div>
-              )}
-              {carsError && (
-                <div className="text-sm text-[#A73957]">
-                  {carsError?.message || "Failed to fetch cars"}
-                </div>
-              )}
-              {!loadingCars && !carsError && cars.length === 0 && (
-                <div className="text-sm text-[#05243F]/60">No cars found.</div>
-              )}
-              {cars.map((car) => (
-                <div key={car.id}>
-                  <CarDetailsCard
-                    carDetail={car}
-                    isRenew={false}
-                    onSelect={(c) => {
-                      setSelectedCarId(c.id);
-                      setShowsidebar(false);
-                    }}
-                    selectedCarId={selectedCarId}
-                    onRenewClick={() => { }}
-                  />
-                </div>
-              ))}
-            </div>
+            {/* {cars(loadingCars, carsError, cars, setSelectedCarId, setShowsidebar, selectedCarId)} */}
           </div>
 
           {/* Right: selected car documents */}
@@ -373,3 +352,32 @@ function CarDocuments() {
 }
 
 export default CarDocuments;
+
+function cars(loadingCars, carsError, cars, setSelectedCarId, setShowsidebar, selectedCarId) {
+  return <div className="space-y-3">
+    {loadingCars && (
+      <div className="text-sm text-[#05243F]/60"><LoadingSpinner /></div>
+    )}
+    {carsError && (
+      <div className="text-sm text-[#A73957]">
+        {carsError?.message || "Failed to fetch cars"}
+      </div>
+    )}
+    {!loadingCars && !carsError && cars.length === 0 && (
+      <div className="text-sm text-[#05243F]/60">No cars found.</div>
+    )}
+    {cars.map((car) => (
+      <div key={car.id}>
+        <CarDetailsCard
+          carDetail={car}
+          isRenew={false}
+          onSelect={(c) => {
+            setSelectedCarId(c.id);
+            setShowsidebar(false);
+          } }
+          selectedCarId={selectedCarId}
+          onRenewClick={() => { } } />
+      </div>
+    ))}
+  </div>;
+}

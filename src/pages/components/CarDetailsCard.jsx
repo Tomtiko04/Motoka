@@ -102,7 +102,7 @@ export default function CarDetailsCard({
   console.log(carDetail);
   return (
     <div
-      className={`cursor-pointer rounded-2xl px-4 py-5 ${selectedCarId === carDetail.id ? "bg-[#45A1F2]" : "bg-white"}`}
+      className={`cursor-pointer rounded-[10px] px-5 h-[64px] w-fit ${selectedCarId === carDetail.id ? "bg-[#45A1F2]" : "bg-white"}`}
       onClick={handleSelect}
       role="button"
     >
@@ -133,7 +133,7 @@ export default function CarDetailsCard({
           </div>
         </div>
       </div> */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 h-full min-w-[200px] gap-6">
         <div className="flex items-center gap-2">
           <img
             src={carLogo}
@@ -173,7 +173,7 @@ export default function CarDetailsCard({
         </div>
       </div> */}
 
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div
           className="flex items-center gap-2 rounded-full px-4 py-1.5"
           style={{ backgroundColor: reminderStatus.bgColor }}
@@ -197,7 +197,7 @@ export default function CarDetailsCard({
             Renew Now
           </button>
         )}
-      </div>
+      </div> */}
 
       {/* Enhanced Reminder Display - Using Backend Data */}
       {/* {daysLeft !== null && (
