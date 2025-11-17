@@ -789,24 +789,24 @@ export default function PaymentOptions() {
                           </div>
                         </div>
                         
-                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-4">
+                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-3">
                           <p className="text-xs text-blue-800">
-                            If you've completed the payment, click below to verify and confirm your order.
+                            Waiting for Paystack to confirm your payment automatically. If you weren’t redirected back, you can refresh the status below.
                           </p>
                         </div>
-                        
+
                         <button
                           onClick={handleVerifyPaystack}
                           disabled={verifyPaystack.isPending || isProcessing}
-                          className="w-full rounded-lg bg-green-600 py-3 px-4 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
+                          className="w-full rounded-lg border border-gray-300 bg-white py-2.5 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                         >
                           {verifyPaystack.isPending ? (
                             <>
-                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                              Verifying Payment...
+                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600"></div>
+                              Refreshing status...
                             </>
                           ) : (
-                            "Verify Payment"
+                            "Refresh status"
                           )}
                         </button>
                         
