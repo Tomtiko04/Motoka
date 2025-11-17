@@ -49,6 +49,36 @@ export async function getCarPaymentReceipt(carId) {
   }
 }
 
+/**
+ * Get payment receipt based on payment type
+ * @param {string} paymentType - Payment type (drivers_license, vehicle_paper, etc.)
+ * @param {string} identifier - Identifier for the payment (slug, carId, etc.)
+ * @returns {Promise<Object>} Receipt data
+ */
+export async function getPaymentReceipt(paymentType, identifier) {
+  try {
+    let endpoint;
+    
+    switch (paymentType) {
+      case 'drivers_license':
+        endpoint = `/driver-license/${identifier}/receipt`;
+        break;
+      case 'vehicle_paper':
+      case 'license_renewal':
+        endpoint = `/payment/car-receipt/${identifier}`;
+        break;
+      default:
+        // Fallback to car receipt for unknown types
+        endpoint = `/payment/car-receipt/${identifier}`;
+    }
+    
+    const { data } = await api.get(endpoint);
+    return data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
+
 // Paystack: initialize and verify
 export async function initializePaystackPayment(payload) {
   try {

@@ -43,6 +43,7 @@ import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
+import PaymentReceipt from "./pages/PaymentReceipt.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
 import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
@@ -178,6 +179,7 @@ export default function App() {
             </Route>
             <Route path="payment-success" element={<SuccessPage />} />
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
+            <Route path="payment/receipt/:paymentType/:identifier" element={<PaymentReceipt />} />
           </Route>
 
           {/* Admin Routes */}

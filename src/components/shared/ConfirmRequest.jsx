@@ -148,6 +148,7 @@ export default function ConfirmRequest() {
                 type: "drivers_license",
                 items: orderItems,
                 amount: total,
+                slug: resolvedSlug,
                 paystack:
                   paystackRes.status === "fulfilled"
                     ? {

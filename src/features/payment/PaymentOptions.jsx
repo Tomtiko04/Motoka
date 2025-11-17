@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { IoIosArrowBack } from "react-icons/io";
 import {
   PAYMENT_METHODS,
+  PAYMENT_TYPES,
 } from "./config/paymentTypes";
 import { usePaymentVerification } from "./hooks/usePayment";
 
@@ -66,6 +67,38 @@ export default function PaymentOptions() {
 
   // Note: Monicredit doesn't require a separate payment initiation step
   // Users just see bank details and verify after making the transfer
+
+  // Helper function to get receipt URL based on payment type
+  const getReceiptUrl = useCallback((paymentType, verificationResponse = null) => {
+    // Get payment type from session or URL params
+    const type = paymentType || 
+                 paymentSession?.type || 
+                 new URLSearchParams(location.search).get("type");
+    
+    let identifier = null;
+    
+    // Extract identifier based on payment type
+    if (type === PAYMENT_TYPES.DRIVERS_LICENSE || type === 'drivers_license') {
+      // For driver's license, use slug
+      identifier = paymentSession?.slug || 
+                  paymentSession?.data?.slug ||
+                  verificationResponse?.slug ||
+                  verificationResponse?.data?.slug;
+    } else {
+      // For vehicle paper or license renewal, use car_slug/car_id
+      identifier = verificationResponse?.car_id || 
+                  verificationResponse?.data?.car_id ||
+                  paymentSession?.car_slug || 
+                  paymentSession?.car_id ||
+                  paymentSession?.data?.car_slug;
+    }
+    
+    if (identifier && type) {
+      return `/payment/receipt/${type}/${identifier}`;
+    }
+    
+    return null;
+  }, [paymentSession, location.search]);
 
   // Handle Paystack payment
   const handlePaystackPayment = async () => {
@@ -143,20 +176,15 @@ export default function PaymentOptions() {
                        responseData?.status === 'success';
 
       if (isSuccess) {
-        // Extract car identifier from verification response or payment session
-        const carId = responseData?.car_id || 
-                     responseData?.data?.car_id || 
-                     result?.data?.car_id ||
-                     paymentSession?.car_slug || 
-                     paymentSession?.car_id ||
-                     paymentSession?.data?.car_slug;
+        // Get receipt URL based on payment type
+        const receiptUrl = getReceiptUrl(null, responseData || result);
         
-        if (carId) {
-          // Navigate to car receipt page
-          navigate(`/payment/car-receipt/${carId}`);
+        if (receiptUrl) {
+          // Navigate to general receipt page
+          navigate(receiptUrl);
         } else {
-          // Fallback to success page if car ID not found
-          console.warn('Car ID not found, navigating to success page');
+          // Fallback to success page if identifier not found
+          console.warn('Payment identifier not found, navigating to success page');
           navigate('/payment/success', {
             state: {
               amount: paymentSession.amount,
@@ -190,20 +218,15 @@ export default function PaymentOptions() {
       const result = await verifyMonicredit.mutateAsync(orderId);
       console.log(result);
       if (result.data.status === "APPROVED") {
-        // Extract car identifier from verification response or payment session
-        const carId = result.data?.car_id || 
-                     result.data?.data?.car_id ||
-                     result?.car_id ||
-                     paymentSession?.car_slug || 
-                     paymentSession?.car_id ||
-                     paymentSession?.data?.car_slug;
+        // Get receipt URL based on payment type
+        const receiptUrl = getReceiptUrl(null, result.data || result);
         
-        if (carId) {
-          // Navigate to car receipt page
-          navigate(`/payment/car-receipt/${carId}`);
+        if (receiptUrl) {
+          // Navigate to general receipt page
+          navigate(receiptUrl);
         } else {
-          // Fallback to success page if car ID not found
-          console.warn('Car ID not found, navigating to success page');
+          // Fallback to success page if identifier not found
+          console.warn('Payment identifier not found, navigating to success page');
           navigate("/payment/success", {
             state: {
               amount: paymentSession.amount,
@@ -242,20 +265,15 @@ export default function PaymentOptions() {
                        responseData?.status === 'success';
 
       if (isSuccess) {
-        // Extract car identifier from verification response or payment session
-        const carId = responseData?.car_id || 
-                     responseData?.data?.car_id || 
-                     result?.data?.car_id ||
-                     paymentSession?.car_slug || 
-                     paymentSession?.car_id ||
-                     paymentSession?.data?.car_slug;
+        // Get receipt URL based on payment type
+        const receiptUrl = getReceiptUrl(null, responseData || result);
         
-        if (carId) {
-          // Navigate to car receipt page
-          navigate(`/payment/car-receipt/${carId}`);
+        if (receiptUrl) {
+          // Navigate to general receipt page
+          navigate(receiptUrl);
         } else {
-          // Fallback to success page if car ID not found
-          console.warn('Car ID not found, navigating to success page');
+          // Fallback to success page if identifier not found
+          console.warn('Payment identifier not found, navigating to success page');
           navigate("/payment/success", {
             state: {
               amount: paymentSession.amount,
@@ -283,41 +301,28 @@ export default function PaymentOptions() {
         if (reference) {
           setIsProcessing(true);
           try {
-            // Payment already verified in callback, extract car ID and navigate
-            const carId = paymentData?.car_id || 
-                         paymentData?.data?.car_id ||
-                         event.data?.car_id ||
-                         paymentSession?.car_slug || 
-                         paymentSession?.car_id ||
-                         paymentSession?.data?.car_slug;
+            // Payment already verified in callback, get receipt URL
+            let receiptUrl = getReceiptUrl(null, paymentData || event.data);
             
-            if (carId) {
-              // Navigate directly to car receipt page
-              navigate(`/payment/car-receipt/${carId}`);
-            } else {
-              // If car ID not found, try to verify again to get car ID
+            if (!receiptUrl) {
+              // If receipt URL not found, try to verify again to get identifier
               const result = await verifyPaystack.mutateAsync(reference);
-              const responseData = result?.data || result;
-              const extractedCarId = responseData?.car_id || 
-                                   responseData?.data?.car_id || 
-                                   result?.data?.car_id ||
-                                   paymentSession?.car_slug || 
-                                   paymentSession?.car_id ||
-                                   paymentSession?.data?.car_slug;
-              
-              if (extractedCarId) {
-                navigate(`/payment/car-receipt/${extractedCarId}`);
-              } else {
-                // Fallback to success page
-                console.warn('Car ID not found after verification, navigating to success page');
-                navigate('/payment/success', {
-                  state: {
-                    amount: paymentSession?.amount,
-                    reference,
-                    paymentMethod: 'paystack'
-                  }
-                });
-              }
+              receiptUrl = getReceiptUrl(null, result?.data || result);
+            }
+            
+            if (receiptUrl) {
+              // Navigate to general receipt page
+              navigate(receiptUrl);
+            } else {
+              // Fallback to success page
+              console.warn('Payment identifier not found after verification, navigating to success page');
+              navigate('/payment/success', {
+                state: {
+                  amount: paymentSession?.amount,
+                  reference,
+                  paymentMethod: 'paystack'
+                }
+              });
             }
           } catch (error) {
             console.error('Error processing payment success:', error);
@@ -335,7 +340,7 @@ export default function PaymentOptions() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [navigate, paymentSession, verifyPaystack]);
+  }, [navigate, paymentSession, verifyPaystack, getReceiptUrl]);
 
   if (!paymentSession) {
     return (
