@@ -96,6 +96,13 @@ export default function NotificationList({ notificationsCategory, notificationDa
 
   let hasAnyVisible = false;
  const [expandedGroups, setExpandedGroups] = useState({});
+ const toggleGroup = (label) => {
+  setExpandedGroups((prev) => ({
+    ...prev,
+    [label]: !prev[label],
+  }));
+};
+
   return (
     <div>
       {groups.map((label) => {
@@ -116,7 +123,7 @@ export default function NotificationList({ notificationsCategory, notificationDa
                 <NotificationCard key={n.id} notification={n} />
               ))}
             </div>
-            {items.length > 5 && (
+            {items.length > 5  && (
               <button
                 onClick={() => toggleGroup(label)}
                 className="text-blue-500 text-sm mt-2 hover:underline self-start"
