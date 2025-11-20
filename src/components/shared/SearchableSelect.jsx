@@ -12,7 +12,7 @@ const SearchableSelect = ({
   filterKey,
   allowCustom = true,
   disabled = false,
-  isLoading = false
+  isLoading = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,7 +21,7 @@ const SearchableSelect = ({
   useEffect(() => {
     if (searchTerm) {
       const filtered = options.filter((option) =>
-        option[filterKey].toLowerCase().includes(searchTerm.toLowerCase())
+        option[filterKey].toLowerCase().includes(searchTerm.toLowerCase()),
       );
       setFilteredOptions(filtered);
     } else {
@@ -38,7 +38,10 @@ const SearchableSelect = ({
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    setIsOpen(true);
+    // setIsOpen(true);
+    if (newValue != "") {
+      setIsOpen(true);
+    }
     if (allowCustom) {
       onChange({ target: { name, value: newValue } });
     }
@@ -67,12 +70,12 @@ const SearchableSelect = ({
           name={name}
           value={searchTerm || value}
           onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
+          // onFocus={() => setIsOpen(true)}
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-                            // className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-          className={`block w-full rounded-md border px-3 py-2 text-sm bg-[#F4F5FC] focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] ${
+          // className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+          className={`block w-full rounded-md border bg-[#F4F5FC] px-3 py-2 text-sm hover:bg-[#FFF4DD]/50 focus:border-blue-500 focus:bg-[#FFF4DD] focus:ring-blue-500 disabled:opacity-50 ${
             error ? "border-red-500" : "border-gray-300"
           }`}
         />
@@ -111,7 +114,7 @@ SearchableSelect.propTypes = {
   filterKey: PropTypes.string.isRequired,
   allowCustom: PropTypes.bool,
   disabled: PropTypes.bool,
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
 };
 
-export default SearchableSelect; 
+export default SearchableSelect;

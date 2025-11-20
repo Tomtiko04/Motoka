@@ -33,22 +33,24 @@ const categories=[
 function DocumentList({selectedDocument, setSelectedDocument,showsidebar, setShowsidebar}) {
     return ( 
         <div>
-            <div className="grid grid-cols-2 gap-5 ">
+            <div className="grid grid-cols-2 gap-4">
         {categories.map((doc) => (        
             <div
                 onClick={() => {
                     setSelectedDocument(doc.key)
                     setShowsidebar(false)
                 }}
-                className={` rounded-[17px] relative overflow-hidden h-[111px] flex items-center ${selectedDocument === doc.key? " border-[#EBB850] border-3": ""}`}
+                className={` rounded-[17px] relative overflow-hidden h-[111px] flex items-center ${selectedDocument === doc.key? " sm:border-[#EBB850] sm:border-3": ""}`}
                 key={doc.key}
              >
-                    <img src={doc.image} alt='licence' className="absolute top-0 left-0 object-contain" />
-                    <div className="relative bg-[#05243F]/61 h-full w-full z-10 p-4 flex flex-col justify-between">
+                    {/* <img src={doc.image} alt='licence' className="absolute top-0 left-0 object-contain" /> */}
+                    {/* <div className="relative bg-[#05243F]/61 h-full w-full z-10 p-4 flex flex-col justify-between"> */}
+                      <div className="relative bg-[#05243F]/5 h-full w-full z-10 p-4 flex flex-col justify-between">
+                    
                         <div className="w-[25px]">
                             <img src={doc.status} alt="" className="object-none"/>
                         </div>
-                        <p className="text-white text-[15px]">{doc.title}</p>
+                        <p className="text-black text-[15px] text-nowrap">{doc.title}</p>
                     </div>
                 </div>
         ))}

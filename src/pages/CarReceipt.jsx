@@ -89,7 +89,6 @@ export default function CarReceipt() {
   // Get payment schedules for bulk payments
   const paymentSchedules = metaData.payment_schedules || [];
   const isBulkPayment = metaData.is_bulk_payment || false;
-
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
