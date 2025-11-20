@@ -13,10 +13,14 @@ import { authStorage } from "../utils/authStorage";
 import Avarta from "../assets/images/avarta.png";
 import Logo2 from "../assets/images/Logo.svg";
 import { useNotifications } from "../features/notifications/useNotification";
+import NotificationList from "../pages/components/notificationList";
+import NotificationCard from "../pages/components/notificationCard";
+import RecentNotificationModal from "./RecentNotification";
 
 export default function AppLayout() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notificationsModal, setNotificationsModal] = useState(false);
   const { data: notifications } = useNotifications();
 
   const userName = localStorage.getItem("userInfo")
@@ -100,7 +104,8 @@ export default function AppLayout() {
               <div className="flex items-center gap-4 md:hidden">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notifications")}
+                  // onClick={() => navigate("/notifications")}
+                  onClick={()=>setNotificationsModal(!notificationsModal)}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -147,7 +152,8 @@ export default function AppLayout() {
               <div className="hidden items-center gap-4 md:flex">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notifications")}
+                  // onClick={() => navigate("/notifications")}
+                  onClick={()=>setNotificationsModal(!notificationsModal)}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -169,7 +175,16 @@ export default function AppLayout() {
             </div>
           </div>
         </header>
+        <div className="relative">
+          {notificationsModal && (
+            // <NotificationList
+            //   notificationsCategory={"All"}
+            //   notificationData={notifications ? notifications.data : []}
+            // />
+            <RecentNotificationModal setNotificationsModal={setNotificationsModal}/>
+          )}
 
+        </div>
         {/* Mobile Navigation Overlay */}
         <div
           className={`bg-opacity-50 fixed inset-0 z-[60] bg-black transition-opacity duration-300 md:hidden ${
