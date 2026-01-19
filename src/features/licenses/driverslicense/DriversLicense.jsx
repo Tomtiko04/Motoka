@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import LicenseLayout from "../components/LicenseLayout";
@@ -33,13 +33,33 @@ export default function DriversLicense() {
     nextOfKinPhone: "",
     motherMaidenName: "",
     licenseYear: null,
-    passportPhoto: null,
+    passportPhoto: null, // For New
+    expiredLicenseUpload: null, // For Renew (Expired)
     affidavit: null,
   });
   const [errors, setErrors] = useState({});
 
-  const {isPaymentOptions} = useDriversLicensePaymentOptions();
+  const { isPaymentOptions } = useDriversLicensePaymentOptions();
   const { createLicense, isCreating } = useCreateDriverLicense();
+
+  const selectedOptionType = useMemo(() => {
+    if (licenseType === "New") return "new";
+    if (licenseType === "Renew" && renewType === "Lost/Damaged") return "lost_damaged";
+    return "renew";
+  }, [licenseType, renewType]);
+
+  const selectedPaymentOption = useMemo(() => {
+    const list = isPaymentOptions?.data || [];
+    return list.find((opt) => opt.type === selectedOptionType);
+  }, [isPaymentOptions, selectedOptionType]);
+
+  const computedAmount = useMemo(() => {
+    const base = selectedPaymentOption ? parseFloat(selectedPaymentOption.amount) : 0;
+    if (licenseType === "New" && formData.licenseYear) {
+      return base * Number(formData.licenseYear);
+    }
+    return base;
+  }, [selectedPaymentOption, licenseType, formData.licenseYear]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -62,14 +82,9 @@ export default function DriversLicense() {
 
   const handleFileUpload = (e, type) => {
     e.preventDefault();
-    const input =
-      type === "passportPhoto"
-        ? fileInputRef.current
-        : affidavitInputRef.current;
-
-    if (input) {
-      input.click();
-    }
+   
+    const input = fileInputRef.current;
+    if (input) input.click();
   };
 
   const handleFileChange = (e, type) => {
@@ -89,37 +104,46 @@ export default function DriversLicense() {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.fullName) newErrors.fullName = "Full name is required";
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email address";
-    }
-    if (!formData.phoneNumber) {
-      newErrors.phoneNumber = "Phone number is required";
-    } else if (!/^\d{11}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Invalid phone number";
-    }
-    if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.dateOfBirth)
-      newErrors.dateOfBirth = "Date of birth is required";
-    if (!formData.placeOfBirth)
-      newErrors.placeOfBirth = "Place of birth is required";
-    if (!formData.stateOfOrigin)
-      newErrors.stateOfOrigin = "State of origin is required";
-    if (!formData.localGovernment)
-      newErrors.localGovernment = "Local government is required";
-    if (!formData.height) newErrors.height = "Height is required";
-    if (!formData.occupation) newErrors.occupation = "Occupation is required";
-    if (!formData.nextOfKin) newErrors.nextOfKin = "Next of Kin is required";
-    if (!formData.nextOfKinPhone)
-      newErrors.nextOfKinPhone = "Next of Kin phone number is required";
-    if (!formData.motherMaidenName)
-      newErrors.motherMaidenName = "Mother's maiden name is required";
-    
-    // Check for passport photograph requirement
-    if (!formData.passportPhoto) {
-      newErrors.passportPhoto = "Passport photograph is required";
+
+    if (licenseType === "New") {
+      if (!formData.fullName) newErrors.fullName = "Full name is required";
+      if (!formData.email) {
+        newErrors.email = "Email is required";
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = "Invalid email address";
+      }
+      if (!formData.phoneNumber) {
+        newErrors.phoneNumber = "Phone number is required";
+      } else if (!/^\d{11}$/.test(formData.phoneNumber)) {
+        newErrors.phoneNumber = "Invalid phone number";
+      }
+      if (!formData.address) newErrors.address = "Address is required";
+      if (!formData.dateOfBirth)
+        newErrors.dateOfBirth = "Date of birth is required";
+      if (!formData.placeOfBirth)
+        newErrors.placeOfBirth = "Place of birth is required";
+      if (!formData.stateOfOrigin)
+        newErrors.stateOfOrigin = "State of origin is required";
+      if (!formData.localGovernment)
+        newErrors.localGovernment = "Local government is required";
+      if (!formData.height) newErrors.height = "Height is required";
+      if (!formData.occupation) newErrors.occupation = "Occupation is required";
+      if (!formData.nextOfKin) newErrors.nextOfKin = "Next of Kin is required";
+      if (!formData.nextOfKinPhone)
+        newErrors.nextOfKinPhone = "Next of Kin phone number is required";
+      if (!formData.motherMaidenName)
+        newErrors.motherMaidenName = "Mother's maiden name is required";
+      if (!formData.licenseYear) newErrors.licenseYear = "License years is required";
+      if (!formData.passportPhoto) {
+        newErrors.passportPhoto = "Passport photograph is required";
+      }
+    } else if (licenseType === "Renew" && renewType === "Expired") {
+      // Require only the expired license upload
+      if (!formData.expiredLicenseUpload) newErrors.expiredLicenseUpload = "Expired license upload is required";
+    } else if (licenseType === "Renew" && renewType === "Lost/Damaged") {
+      // Require license number and date of birth
+      if (!formData.licenseNumber) newErrors.licenseNumber = "License number is required";
+      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
     }
 
     setErrors(newErrors);
@@ -133,39 +157,54 @@ export default function DriversLicense() {
       return;
     }
 
-    const payload = {
-      license_type: licenseType.toLowerCase(),
-      full_name: formData.fullName,
-      phone_number: formData.phoneNumber,
-      address: formData.address,
-      date_of_birth: formData.dateOfBirth,
-      place_of_birth: formData.placeOfBirth,
-      state_of_origin: formData.stateOfOrigin,
-      local_government: formData.localGovernment,
-      blood_group: formData.bloodGroup,
-      height: formData.height,
-      occupation: formData.occupation,
-      next_of_kin: formData.nextOfKin,
-      next_of_kin_phone: formData.nextOfKinPhone,
-      mother_maiden_name: formData.motherMaidenName,
-      license_year: formData.licenseYear,
-      passport_photograph: formData.passportPhoto,
-    };
+    // Build payload based on flow
+    let payload = {};
+    if (licenseType === "New") {
+      payload = {
+        license_type: "new",
+        full_name: formData.fullName,
+        phone_number: formData.phoneNumber,
+        address: formData.address,
+        date_of_birth: formData.dateOfBirth,
+        place_of_birth: formData.placeOfBirth,
+        state_of_origin: formData.stateOfOrigin,
+        local_government: formData.localGovernment,
+        blood_group: formData.bloodGroup,
+        height: formData.height,
+        occupation: formData.occupation,
+        next_of_kin: formData.nextOfKin,
+        next_of_kin_phone: formData.nextOfKinPhone,
+        mother_maiden_name: formData.motherMaidenName,
+        license_year: formData.licenseYear,
+        passport_photograph: formData.passportPhoto,
+      };
+    } else if (licenseType === "Renew" && renewType === "Expired") {
+      payload = {
+        license_type: "renew",
+        expired_license_upload: formData.expiredLicenseUpload,
+      };
+    } else if (licenseType === "Renew" && renewType === "Lost/Damaged") {
+      payload = {
+        license_type: "lost_damaged",
+        license_number: formData.licenseNumber,
+        date_of_birth: formData.dateOfBirth,
+      };
+    }
 
     try {
       createLicense(payload, {
         onSuccess: (data) => {
-          console.log("Response data:", data);
-          const amount = formData.licenseYear * 30000;
+          const amount = Number(computedAmount || 0);
           navigate("/licenses/confirm-request", {
             state: {
-              type: "drivers-license",
+              type: "drivers_license",
               items: [
                 {
                   name: `${licenseType} Driver's License${licenseType === "Renew" && renewType ? ` (${renewType})` : ""}`,
                   amount,
                   years: formData.licenseYear,
-                  ...formData,
+                  revenueHeadCode: selectedPaymentOption?.revenue_head_code,
+                  optionType: selectedOptionType,
                 },
               ],
               details: {
@@ -173,10 +212,11 @@ export default function DriversLicense() {
                 renewType: licenseType === "Renew" ? renewType : null,
                 description: "This is for your Driver's License",
                 years: formData.licenseYear,
-                ...formData,
+                revenueHeadCode: selectedPaymentOption?.revenue_head_code,
+                optionType: selectedOptionType,
               },
               orderDetails: {
-                slug: data?.slug || "",
+                slug: data?.license?.slug || "",
               },
             },
           });
@@ -186,13 +226,25 @@ export default function DriversLicense() {
       console.error("License creation failed:", error);
     }
   };
-console.log(isPaymentOptions);
+
   return (
     <LicenseLayout
       title="Driver's License"
       subTitle="All licenses are issued by government, we are only an agent that helps you with the process."
     >
       <div className="mx-auto w-full max-w-3xl px-4 md:px-0">
+        {/* Mobile price block */}
+        <div className="mb-4 md:hidden">
+          <p className="mt-1 text-sm font-normal text-[#05243F]">Price:</p>
+          <p className="text-xl font-semibold text-[#05243F]">
+            {computedAmount > 0 ? `₦${Number(computedAmount).toLocaleString()}` : "—"}
+          </p>
+          {selectedPaymentOption && licenseType === "New" && (
+            <p className="text-xs text-[#05243F]/40">
+              Base price: ₦{Number(parseFloat(selectedPaymentOption.amount) || 0).toLocaleString()} x {Number(formData.licenseYear || 0)} year(s)
+            </p>
+          )}
+        </div>
         <form
           className="grid grid-cols-1 gap-8 md:grid-cols-[170px_1fr_120px]"
           onSubmit={(e) => e.preventDefault()}
@@ -271,17 +323,17 @@ console.log(isPaymentOptions);
               (licenseType === "Renew" && renewType === "Expired")) && (
               <div>
                 <label
-                  htmlFor="passport-upload"
+                  htmlFor={licenseType === "New" ? "passport-upload" : "expired-license-upload"}
                   className="block cursor-pointer"
-                  onClick={(e) => handleFileUpload(e, "passportPhoto")}
+                  onClick={(e) => handleFileUpload(e, licenseType === "New" ? "passportPhoto" : "expiredLicenseUpload")}
                 >
                   <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
                     <input
-                      id="passport-upload"
+                      id={licenseType === "New" ? "passport-upload" : "expired-license-upload"}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                       ref={fileInputRef}
-                      onChange={(e) => handleFileChange(e, "passportPhoto")}
+                      onChange={(e) => handleFileChange(e, licenseType === "New" ? "passportPhoto" : "expiredLicenseUpload")}
                       onClick={(e) => e.stopPropagation()}
                       className="hidden"
                     />
@@ -289,16 +341,17 @@ console.log(isPaymentOptions);
                       <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
                     </span>
                     <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
-                      {formData.passportPhoto
-                        ? formData.passportPhoto.name
-                        : licenseType === "New"
-                          ? "Upload Passport Photograph"
-                          : "Upload Expired Driver's License"}
+                      {licenseType === "New"
+                        ? (formData.passportPhoto ? formData.passportPhoto.name : "Upload Passport Photograph")
+                        : (formData.expiredLicenseUpload ? formData.expiredLicenseUpload.name : "Upload Expired Driver's License")}
                     </p>
                   </div>
                 </label>
-                {errors.passportPhoto && (
+                {licenseType === "New" && errors.passportPhoto && (
                   <p className="mt-1 text-sm text-red-500">{errors.passportPhoto}</p>
+                )}
+                {licenseType === "Renew" && renewType === "Expired" && errors.expiredLicenseUpload && (
+                  <p className="mt-1 text-sm text-red-500">{errors.expiredLicenseUpload}</p>
                 )}
               </div>
             )}
@@ -458,10 +511,11 @@ console.log(isPaymentOptions);
                     onChange={handleInputChange}
                     className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none"
                   >
-                    <option value={1}>1 year</option>
-                    <option value={2}>2 years</option>
+                    <option value="">Select Year</option>
+                    {/* <option value={1}>1 year</option>
+                    <option value={2}>2 years</option> */}
                     <option value={3}>3 years</option>
-                    <option value={4}>4 years</option>
+                    {/* <option value={4}>4 years</option> */}
                     <option value={5}>5 years</option>
                   </select>
                 </div>
@@ -532,9 +586,16 @@ console.log(isPaymentOptions);
           </div>
 
           {/* Grid line 3 */}
-          <div className="flex flex-col">
+          <div className="hidden md:flex flex-col">
             <p className="mt-1 text-sm font-normal text-[#05243F]">Price:</p>
-            <p className="text-xl font-semibold text-[#05243F]">₦30,000</p>
+            <p className="text-xl font-semibold text-[#05243F]">
+              {computedAmount > 0 ? `₦${Number(computedAmount).toLocaleString()}` : "—"}
+            </p>
+            {selectedPaymentOption && licenseType === "New" && (
+              <p className="text-xs text-[#05243F]/40">
+                Base price: ₦{Number(parseFloat(selectedPaymentOption.amount) || 0).toLocaleString()} x {Number(formData.licenseYear || 0)} year(s)
+              </p>
+            )}
           </div>
         </form>
       </div>

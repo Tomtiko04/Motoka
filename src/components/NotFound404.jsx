@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export default function NotFound404() {
   return (
     <div className="flex h-screen justify-center">
-      <div className="flex min-h-[60vh] items-center justify-center bg-[#F4F5FC] px-4">
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="w-full max-w-xl rounded-2xl bg-white p-8 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#E1E6F4] text-[#2389E3]">
             404

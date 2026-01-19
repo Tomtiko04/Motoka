@@ -397,7 +397,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
 
       {/* Logout Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/75 bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50">
           <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-red-100 p-3 rounded-full">
