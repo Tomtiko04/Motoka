@@ -1,4 +1,3 @@
-import userData from "../../data/data";
 import { Icon } from "@iconify/react";
 import DocumentList from "./DocumentList";
 import LicenseDoc from "./drivers license/licenseDoc";
