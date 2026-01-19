@@ -7,6 +7,7 @@ import {
   PAYMENT_TYPES,
 } from "./config/paymentTypes";
 import { usePaymentVerification } from "./hooks/usePayment";
+import { initializePaystackPayment } from "../../services/apiPaystack";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
@@ -48,8 +49,10 @@ export default function PaymentOptions() {
         }
 
         setPaymentSession(sessionData);
-        // Default to Monicredit if no method is specified
-        setSelectedMethod(sessionData.method || PAYMENT_METHODS.MONICREDIT);
+        // Default method selection: prefer provided method, else auto-select Paystack if available, else Monicredit
+        const defaultMethod = sessionData.method 
+          || (sessionData?.paystack?.authorization_url ? PAYMENT_METHODS.PAYSTACK : PAYMENT_METHODS.MONICREDIT);
+        setSelectedMethod(defaultMethod);
       } catch (err) {
         console.error("Payment initialization error:", err);
         toast.error("Failed to initialize payment. Please try again.");
@@ -103,17 +106,63 @@ export default function PaymentOptions() {
   // Handle Paystack payment
   const handlePaystackPayment = async () => {
     try {
-      const paystackUrl = paymentSession?.paystack?.authorization_url;
+      let paystackUrl = paymentSession?.paystack?.authorization_url;
+      let reference = paymentSession?.paystack?.reference;
 
-      if (!paystackUrl) {
-        toast.error('Payment URL not found');
-        return;
+      // If no authorization URL OR reference missing, initialize Paystack now to ensure reference is present
+      if (!paystackUrl || !reference) {
+        const schedules = paymentSession?.selectedSchedules || [];
+        const payment_schedule_id = Array.isArray(schedules) && schedules.length > 0
+          ? schedules.map(s => s.id)
+          : paymentSession?.payment_schedule_id;
+        const delivery = paymentSession?.deliveryDetails || {};
+
+        const payload = {
+          car_slug: paymentSession?.car_slug || paymentSession?.car_id,
+          payment_schedule_id,
+          meta_data: {
+            delivery_address: delivery?.address,
+            delivery_contact: delivery?.contact,
+            state_id: delivery?.state_id,
+            lga_id: delivery?.lga_id,
+          }
+        };
+
+        const initRes = await initializePaystackPayment(payload);
+        const data = initRes?.data || initRes;
+        paystackUrl = data?.data?.authorization_url || data?.authorization_url;
+        reference = data?.data?.reference || data?.reference || data?.transaction_id;
+
+        if (!paystackUrl) {
+          toast.error('Payment URL not found');
+          return;
+        }
+
+        // Update session with paystack details so UI reflects the reference
+        setPaymentSession(prev => {
+          const updated = {
+            ...prev,
+            paystack: {
+              ...(prev?.paystack || {}),
+              authorization_url: paystackUrl,
+              reference,
+            }
+          };
+          // Persist updated session to sessionStorage so refresh keeps the reference
+          try {
+            sessionStorage.setItem("paymentData", JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
       }
 
-      storePaymentReference(
-        paymentSession.paystack.reference,
-        PAYMENT_METHODS.PAYSTACK,
-      );
+      // Store reference for later verification
+      if (reference) {
+        storePaymentReference(
+          reference,
+          PAYMENT_METHODS.PAYSTACK,
+        );
+      }
 
       // Open Paystack in a new tab
       const newWindow = window.open(paystackUrl, '_blank', 'noopener,noreferrer');
@@ -206,7 +255,7 @@ export default function PaymentOptions() {
 
   // Handle Monicredit verification
   const handleVerifyMonicredit = async () => {
-    const orderId = paymentSession?.monicredit?.data?.orderid;
+    const orderId = paymentSession?.monicredit?.data?.orderid || paymentSession?.monicredit?.data?.order_id;
     console.log("orderId", orderId);
     if (!orderId) {
       toast.error("No payment orderId found");
@@ -753,115 +802,89 @@ export default function PaymentOptions() {
 
                 </div>
 
-                {paymentSession?.paystack?.authorization_url ? (
-                  <>
-                    <button
-                      onClick={handlePaystackPayment}
-                      disabled={!paymentSession?.paystack?.authorization_url || isProcessing}
-                      className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                          Processing...
-                        </>
-                      ) : (
-                        "Pay with Paystack"
-                      )}
-                    </button>
-
-                    <div className="text-center text-xs text-gray-500">
-                      You will be redirected to Paystack's secure payment page
-                    </div>
-
-                    {/* Manual Verification Section */}
-                    {paymentSession?.paystack?.reference && (
-                      <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div className="mb-4 flex items-center space-x-3">
-                          <div className="text-yellow-600">
-                            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-800">Payment Reference</h4>
-                            <p className="text-sm font-mono text-gray-600">{paymentSession?.paystack?.reference}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-3">
-                          <p className="text-xs text-blue-800">
-                            Waiting for Paystack to confirm your payment automatically. If you weren’t redirected back, you can refresh the status below.
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={handleVerifyPaystack}
-                          disabled={verifyPaystack.isPending || isProcessing}
-                          className="w-full rounded-lg border border-gray-300 bg-white py-2.5 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
-                        >
-                          {verifyPaystack.isPending ? (
-                            <>
-                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600"></div>
-                              Refreshing status...
-                            </>
-                          ) : (
-                            "Refresh status"
-                          )}
-                        </button>
-                        
-                        {verifyPaystack.data && (
-                          <div className={`mt-3 text-center text-sm font-semibold ${
-                            verifyPaystack.data?.status === 'success' || 
-                            verifyPaystack.data?.data?.status === 'success' ||
-                            verifyPaystack.data?.status === true
-                              ? "text-green-600" 
-                              : "text-red-600"
-                          }`}>
-                            {typeof verifyPaystack.data === "object" && verifyPaystack.data !== null
-                              ? verifyPaystack.data?.message ||
-                                verifyPaystack.data?.data?.message ||
-                                "Verification completed"
-                              : String(verifyPaystack.data)}
-                          </div>
-                        )}
-                        {verifyPaystack.isError && (
-                          <div className="mt-3 text-center text-sm font-semibold text-red-600">
-                            {typeof verifyPaystack.error === "string"
-                              ? verifyPaystack.error
-                              : verifyPaystack.error?.message || 
-                                verifyPaystack.error?.response?.data?.message ||
-                                "Verification failed"}
-                          </div>
-                        )}
-                      </div>
+                <>
+                  <button
+                    onClick={handlePaystackPayment}
+                    disabled={!paymentSession?.selectedSchedules?.length && !paymentSession?.payment_schedule_id || isProcessing}
+                    className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      "Pay with Paystack"
                     )}
-                  </>
-                ) : (
-                  <div className="py-8 text-center">
-                    <div className="text-gray-500">
-                      <svg
-                        className="mx-auto mb-4 h-12 w-12 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <p className="text-base font-medium text-gray-900">
-                        Payment Processing
-                      </p>
-                      <p className="mt-2 text-sm text-[#697C8C]">
-                        Please wait while we process your payment...
-                      </p>
-                    </div>
+                  </button>
+
+                  <div className="text-center text-xs text-gray-500">
+                    You will be redirected to Paystack's secure payment page
                   </div>
-                )}
+
+                  {/* Manual Verification Section */}
+                  {paymentSession?.paystack?.reference && (
+                    <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                      <div className="mb-4 flex items-center space-x-3">
+                        <div className="text-yellow-600">
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800">Payment Reference</h4>
+                          <p className="text-sm font-mono text-gray-600">{paymentSession?.paystack?.reference}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-4">
+                        <p className="text-xs text-blue-800">
+                          If you've completed the payment, click below to verify and confirm your order.
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={handleVerifyPaystack}
+                        disabled={verifyPaystack.isPending || isProcessing}
+                        className="w-full rounded-lg bg-green-600 py-3 px-4 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
+                      >
+                        {verifyPaystack.isPending ? (
+                          <>
+                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                            Verifying Payment...
+                          </>
+                        ) : (
+                          "Verify Payment"
+                        )}
+                      </button>
+                      
+                      {verifyPaystack.data && (
+                        <div className={`mt-3 text-center text-sm font-semibold ${
+                          verifyPaystack.data?.status === 'success' || 
+                          verifyPaystack.data?.data?.status === 'success' ||
+                          verifyPaystack.data?.status === true
+                            ? "text-green-600" 
+                            : "text-red-600"
+                        }`}>
+                          {typeof verifyPaystack.data === "object" && verifyPaystack.data !== null
+                            ? verifyPaystack.data?.message ||
+                              verifyPaystack.data?.data?.message ||
+                              "Verification completed"
+                            : String(verifyPaystack.data)}
+                        </div>
+                      )}
+                      {verifyPaystack.isError && (
+                        <div className="mt-3 text-center text-sm font-semibold text-red-600">
+                          {typeof verifyPaystack.error === "string"
+                            ? verifyPaystack.error
+                            : verifyPaystack.error?.message || 
+                              verifyPaystack.error?.response?.data?.message ||
+                              "Verification failed"}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               </div>
             </div>
           )}

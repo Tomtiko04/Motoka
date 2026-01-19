@@ -39,7 +39,7 @@ export async function refreshToken() {
     const currentToken = authStorage.getToken();
     if (!currentToken) throw new Error("No token available");
 
-    const { data } = await api.post("/auth/refresh-token", {
+    const { data } = await api.post("/refresh", {
       token: currentToken,
     });
     const newToken = data?.authorization?.token;
