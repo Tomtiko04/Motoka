@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import NavigationTabs from "../components/NavigationTabs";
 import PagesLayout from "./components/PageLayout";
 import DocumentsNav from "../components/DocumentsNav";
 import DocumentPage from "./components/DocumentPage";
 import DocumentList from "./components/DocumentList";
 import DocPreview from "./components/Docpreview";
-import userData from "../data/data";
 
 function CarDocuments() {
   const [selectedDocument, setSelectedDocument] = useState("VehicleLicense");
