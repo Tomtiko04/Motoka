@@ -1,37 +1,14 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "../services/apiAuth";
 
-import { authStorage } from "../utils/authStorage";
-
-import Avarta from "../assets/images/avarta.png";
 import Logo2 from "../assets/images/Logo.svg";
 import { useNotifications } from "../features/notifications/useNotification";
-
-export default function AppLayout() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { data: notifications } = useNotifications();
-
-  const userName = localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo")).name
-    : "";
-
-  const totalLength = notifications?.data
-    ? Object.values(notifications.data).reduce(
-        (sum, arr) => sum + arr.length,
-        0,
-      )
-    : 0;
-  const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
@@ -43,6 +20,27 @@ export default function AppLayout() {
   ];
 
 
+export default function AppLayout() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropDownMenuOpen, setIsDropDownMenuOpen] = useState(false);
+  const { data: notifications } = useNotifications();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
+  const totalLength = notifications?.data
+    ? Object.values(notifications.data).reduce(
+        (sum, arr) => sum + arr.length,
+        0,
+      )
+    : 0;
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     document.body.style.overflow = !isMenuOpen ? "hidden" : "";
@@ -51,7 +49,7 @@ export default function AppLayout() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      const response = await logout();
+      await logout();
       navigate("/auth/login");
     } catch (error) {
       toast.error(error.response?.data?.message || error.message, {
@@ -67,6 +65,30 @@ export default function AppLayout() {
   function handleHome() {
     navigate("/");
   }
+
+  const dropdownRef = useRef(null);
+
+  function handleDropDownMenu() {
+    setIsDropDownMenuOpen(!isDropDownMenuOpen);
+  }
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropDownMenuOpen(false);
+      }
+    }
+
+    if (isDropDownMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropDownMenuOpen]);
 
   return (
     <div className="flex items-center justify-center  flex-col min-h-screen" >{/* removed the background to allow the gradient to show  bg-[#F4F5FC]*/}
@@ -158,12 +180,75 @@ export default function AppLayout() {
                     {totalLength}
                   </span>
                 </div>
-                <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                {/* <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img
                     src={Avarta}
                     alt="User"
                     className="h-full w-full object-cover"
                   />
+                </div> */}
+                <div className="relative" ref={dropdownRef}>
+                  <div
+                    onClick={handleDropDownMenu}
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-[#F4F5FC] p-1.5 transition-all hover:bg-[#F4F5FC]"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#05243F]/5 text-[#05243F]">
+                      <Icon icon="si:user-alt-4-fill" width="18" height="18" />
+                    </div>
+                    <Icon
+                      icon="ri:arrow-down-s-line"
+                      className={`text-[#05243F]/60 transition-transform duration-200 ${
+                        isDropDownMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
+
+                  <AnimatePresence>
+                    {isDropDownMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute right-0 top-full mt-2 z-50 w-56 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/5"
+                      >
+                        <div className="bg-[#F4F5FC]/50 px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#05243F]/40">
+                            Signed in as
+                          </p>
+                          <p className="truncate text-sm font-semibold text-[#05243F]">
+                            {userName}
+                          </p>
+                        </div>
+
+                        <div className="p-1.5">
+                          <Link
+                            to="/settings"
+                            onClick={() => setIsDropDownMenuOpen(false)}
+                            className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
+                              <Icon icon="solar:settings-bold-duotone" width="20" />
+                            </div>
+                            <span className="font-medium">Settings</span>
+                          </Link>
+
+                          <button
+                            onClick={() => {
+                              setIsDropDownMenuOpen(false);
+                              setIsModalOpen(true);
+                            }}
+                            className="group mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#A73957]/80 transition-colors hover:bg-red-50 hover:text-[#A73957]"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-[#A73957]/60 transition-colors group-hover:bg-red-100 group-hover:text-[#A73957]">
+                              <Icon icon="solar:logout-3-bold-duotone" width="20" />
+                            </div>
+                            <span className="font-medium">Logout</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
@@ -302,6 +387,7 @@ export default function AppLayout() {
             </div>
           </div>
         )}
+
 
         {/* Main Content */}
         <main className="mx-auto w-full max-w-7xl py-6 flex-1 flex flex-col">
