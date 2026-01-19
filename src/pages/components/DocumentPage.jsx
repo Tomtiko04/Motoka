@@ -2,8 +2,8 @@ import { Icon } from "@iconify/react";
 import DocumentList from "./DocumentList";
 import LicenseDoc from "./drivers license/licenseDoc";
 function DocumentPage({selectedDocument, setSelectedDocument,docType,showsidebar, setShowsidebar}) {
-    const cars = userData[0]?.carDetails[0];
-    const imageUrl=`https://www.carlogos.org/car-logos/${cars?.vehicle_make?.toLowerCase()}-logo.png`
+    // const cars = userData[0]?.carDetails[0];
+    // const imageUrl=`https://www.carlogos.org/car-logos/${cars?.vehicle_make?.toLowerCase()}-logo.png`
     return ( 
         <div className="">
                 
@@ -18,15 +18,15 @@ function DocumentPage({selectedDocument, setSelectedDocument,docType,showsidebar
                           <div className="flex items-center gap-2">
                             <div className="">
                               <img
-                                src={imageUrl}
+                                src={"https://www.carlogos.org/car-logos/mercedes-benz-logo.png"}
                                 lazyloading="lazy"
-                                alt={cars?.vehicle_make || "Car"}
+                                alt={"Car"}
                                 className="h-6 w-6 object-contain"
                                 // onError={() => setCarLogo(MercedesLogo)}
                               />
                             </div>
                             <h3 className="text-xl font-semibold text-white">
-                              {cars?.plate_number || "-"}
+                              {"-"}
                             </h3>
                           </div>
                           <div>
