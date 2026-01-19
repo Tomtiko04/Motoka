@@ -26,7 +26,7 @@ function DocumentPage({selectedDocument, setSelectedDocument,docType,showsidebar
                               />
                             </div>
                             <h3 className="text-xl font-semibold text-white">
-                              {"-"}
+                              {"ABC-123DE"}
                             </h3>
                           </div>
                           <div>
