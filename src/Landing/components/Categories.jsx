@@ -7,24 +7,19 @@ import category5 from "../../assets/images/landing/Group 1171279802 (3).svg";
 import category6 from "../../assets/images/landing/Group 1171279802 (4).svg";
 import category2 from "../../assets/images/landing/Group 1171279802.svg";
 import { Icon } from "@iconify/react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/scrollbar";
+import { useNavigate } from "react-router-dom";
+// import { Autoplay, Navigation, Pagination, Scrollbar } from "swiper";
 function Categories() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [cardWidth, setCardWidth] = useState(0);
   const sliderRef = useRef(null);
-
-  //   useEffect(() => {
-  //     if (sliderRef.current) {
-  //       const firstCard = sliderRef.current.querySelector("div");
-  //         if (firstCard) {
-  //             const style = window.getComputedStyle(firstCard);
-  //             const width = firstCard.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
-  //             setCardWidth(width);
-  //         }
-  //     }
-  //   }, [sliderRef]);
-
-  // Sample category data
+  const navigate=useNavigate()
   const CategoryData = [
     {
       id: 1,
@@ -96,21 +91,24 @@ function Categories() {
   // const cardWidth=484; // Adjust based on actual card width including margin
 
   return (
-    <div>
-        <h1 className="mt-10 text-[56px] max-w-[1003px] font-bold text-[#05243F] px-6 sm:px-10 ">We ensure you <span className="text-[#2389E3]">Drive Assured</span> through our Services</h1>
+    <div id="services">
+      <h1 className="mt-10 max-w-[1003px] px-6 text-[40px] font-bold text-[#05243F] sm:px-10 sm:text-[56px]">
+        We ensure you <span className="text-[#2389E3]">Drive Assured</span>{" "}
+        through our Services
+      </h1>
       <div
-        className=" w-full overflow-x-hidden select-none "
+        className="w-full overflow-hidden select-none"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
         {/* Header navigation */}
-        <div className="max-w-8xl mt-8 flex w-full flex-wrap justify-between px-6 sm:px-10">
+        <div className="hidden max-w-8xl customscroll mt-12 sm:flex w-full justify-between overflow-auto px-6 pb-5 text-nowrap sm:px-10">
           {CategoryData.map((item, index) => (
             <button
               key={item.id}
               onClick={() => setActiveIndex(index)}
-              className={`me-2 rounded-[17px] px-6 py-4 text-base font-bold text-[#05243F] transition-all ${
-                index === activeIndex ? "bg-[#F2F2F2]" : ""
+              className={`me-1 rounded-[17px] px-4 py-4 text-base font-bold text-[#05243F] transition-all ${
+                index === activeIndex ? "bg-[#F2F2F2] font-bold" : "font-medium"
               }`}
             >
               {item.title}
@@ -119,7 +117,8 @@ function Categories() {
         </div>
 
         {/* Slider container */}
-        <div className="relative mt-10 hidden sm:block mb-20">
+        {/* Desktop & Tablet View */}
+        <div className="relative mt-5 mb-20 hidden sm:block">
           <motion.div
             ref={sliderRef}
             className="flex cursor-grab px-10 active:cursor-grabbing"
@@ -138,7 +137,7 @@ function Categories() {
                 );
               }
             }}
-            animate={{ x: `-${activeIndex * 484}px` }}
+            animate={{ x: `-${activeIndex * 282}px` }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
             style={{
               width: `${CategoryData.length * 484}px`,
@@ -148,12 +147,10 @@ function Categories() {
             {CategoryData.map((item, i) => (
               <motion.div
                 key={item.id}
-                className="w-[484px] flex-shrink-0 px-4 sm:w-[484px]"
+                className="w-[484px] flex-shrink-0 px-[10px] sm:w-[484px]"
               >
                 <motion.div
-                  className={`relative h-full rounded-[20px] p-10 pt-12 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${
-                    i === activeIndex ? "scale-105" : "scale-95 opacity-80"
-                  }`}
+                  className={`relative h-full rounded-[20px] p-10 pt-12 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${activeIndex+1===item.id ? "scale-100" : "scale-96 opacity-80"}`}
                   style={{ backgroundColor: item.bgColor }}
                 >
                   <div className="absolute top-8 right-8 flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#45A1F2]">
@@ -187,44 +184,35 @@ function Categories() {
             ))}
           </motion.div>
         </div>
-
-        <div className="relative mt-10 block sm:hidden">
-          <motion.div
-            ref={sliderRef}
-            className="flex cursor-grab px-0 active:cursor-grabbing"
-            drag="x"
-            dragConstraints={{
-              left: -((CategoryData.length - 1) * 384),
-              right: 0,
+        {/* Mobile View */}
+        <div className="relative mt-10 block sm:hidden text-left">
+          <Swiper
+            spaceBetween={16}
+            slidesPerView={1}
+            onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+            onSwiper={(swiper) => setActiveIndex(swiper.activeIndex)}
+            autoplay={{
+              delay: 4000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
             }}
-            onDragEnd={(e, info) => {
-              const direction = info.offset.x < 0 ? 1 : -1;
-              if (Math.abs(info.offset.x) > 50) {
-                setActiveIndex(
-                  (prev) =>
-                    (prev + direction + CategoryData.length) %
-                    CategoryData.length,
-                );
-              }
-            }}
-            animate={{ x: `-${activeIndex * 384}px` }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            style={{
-              width: `${CategoryData.length * 384}px`,
-              // width: "555.146484375",
-            }}
+            loop={true}
+            className="px-4"
           >
             {CategoryData.map((item, i) => (
-              <motion.div
-                key={item.id}
-                className="w-[384px] flex-shrink-0 px-4"
-              >
-                <motion.div
-                  className={`h-full rounded-[20px] p-10 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${
-                    i === activeIndex ? "scale-105" : "scale-95 opacity-80"
+              <SwiperSlide key={item.id}>
+                <div
+                  className={`h-full rounded-[20px] p-10 shadow-md text-left transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${
+                    i === activeIndex ? "scale-95" : "scale-93 opacity-100"
                   }`}
                   style={{ backgroundColor: item.bgColor }}
                 >
+                  <div className="absolute top-4 right-4 flex h-[70px] w-[70px] items-center justify-center rounded-full bg-[#45A1F2]">
+                    <Icon
+                      icon={item.iconName}
+                      className="z-10 h-[36px] w-[36px] text-white"
+                    />
+                  </div>
                   <h2 className="max-w-[334px] text-4xl font-bold">
                     {item.title.split(" ")[0]} <br />
                     {item.title.split(" ").slice(1).join(" ")}
@@ -234,155 +222,23 @@ function Categories() {
                   >
                     {item.description}
                   </p>
-
                   <img
                     src={item.image}
                     alt={item.title}
                     className="my-6 mt-12 w-full object-contain"
                   />
                   <div className="text-center">
-                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white">
+                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white" onClick={()=>navigate("/auth/signup")}>
                       Get Started
                     </button>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </SwiperSlide>
             ))}
-          </motion.div>
+          </Swiper>
         </div>
 
-        {/* <div className="relative mt-10 overflow-hidden">
-  <motion.div
-    ref={sliderRef}
-    className="flex cursor-grab px-6 sm:px-10 active:cursor-grabbing"
-    drag="x"
-    dragConstraints={{
-      left: -((CategoryData.length - 1) * (window.innerWidth < 640 ? 320 : window.innerWidth < 1024 ? 420 : 484)),
-      right: 0,
-    }}
-    onDragEnd={(e, info) => {
-      const direction = info.offset.x < 0 ? 1 : -1;
-      if (Math.abs(info.offset.x) > 50) {
-        setActiveIndex(
-          (prev) => (prev + direction + CategoryData.length) % CategoryData.length
-        );
-      }
-    }}
-    animate={{
-      x: `-${
-        activeIndex *
-        (window.innerWidth < 640 ? 320 : window.innerWidth < 1024 ? 420 : 484)
-      }px`,
-    }}
-    transition={{ duration: 0.6, ease: "easeInOut" }}
-    style={{
-      width: `${
-        CategoryData.length *
-        (window.innerWidth < 640 ? 320 : window.innerWidth < 1024 ? 420 : 484)
-      }px`,
-    }}
-  >
-    {CategoryData.map((item, i) => (
-      <motion.div
-        key={item.id}
-        className="flex-shrink-0 w-[300px] sm:w-[420px] lg:w-[484px] px-3"
-      >
-        <motion.div
-          className={`h-full rounded-[20px] p-6 sm:p-8 lg:p-10 shadow-md transition-transform duration-300 ${
-            item.id === 4 ? "text-white" : "text-[#05243F]"
-          } ${i === activeIndex ? "scale-105" : "scale-95 opacity-80"}`}
-          style={{ backgroundColor: item.bgColor }}
-        >
-          <h2 className="max-w-[334px] text-2xl sm:text-3xl lg:text-4xl font-bold">
-            {item.title.split(" ")[0]} <br />
-            {item.title.split(" ").slice(1).join(" ")}
-          </h2>
-          <p
-            className={`mt-4 text-sm sm:text-base lg:text-lg ${
-              item.id === 4 ? "text-white" : "text-[#05203DB2]"
-            }`}
-          >
-            {item.description}
-          </p>
-
-          <img
-            src={item.image}
-            alt={item.title}
-            className="my-6 mt-10 w-full object-contain"
-          />
-          <div className="text-center">
-            <button className="mt-4 sm:mt-6 rounded-[15px] bg-[#05243F] px-5 sm:px-6 py-2 sm:py-3 text-sm sm:text-lg font-bold text-white text-center">
-              Get Started
-            </button>
-          </div>
-        </motion.div>
-      </motion.div>
-    ))}
-  </motion.div>
-</div> */}
-
-        {/* Slider container */}
-        {/* <div className="relative mt-10 overflow-hidden">
-  <motion.div
-    ref={sliderRef}
-    className="flex cursor-grab px-10 active:cursor-grabbing"
-    drag="x"
-    dragConstraints={{
-      left: -((CategoryData.length - 1) * 420), // card width (400) + margin
-      right: 0,
-    }}
-    onDragEnd={(e, info) => {
-      const direction = info.offset.x < 0 ? 1 : -1;
-      if (Math.abs(info.offset.x) > 50) {
-        setActiveIndex(
-          (prev) => (prev + direction + CategoryData.length) % CategoryData.length
-        );
-      }
-    }}
-    animate={{ x: `-${activeIndex * 420}px` }} // move by pixel width
-    transition={{ duration: 0.6, ease: "easeInOut" }}
-    style={{
-      width: `${CategoryData.length * 420}px`, // total slider width
-    }}
-  >
-    {CategoryData.map((item, i) => (
-      <motion.div
-        key={item.id}
-        className="flex-shrink-0 w-[400px] px-2"
-      >
-        <motion.div
-          className={`h-full rounded-[20px] p-10 shadow-md transition-transform duration-300 ${
-            item.id === 4 ? "text-white" : "text-[#05243F]"
-          } ${i === activeIndex ? "scale-105" : "scale-95 opacity-80"}`}
-          style={{ backgroundColor: item.bgColor }}
-        >
-          <h2 className="max-w-[334px] text-4xl font-bold">
-            {item.title.split(" ")[0]} <br />
-            {item.title.split(" ").slice(1).join(" ")}
-          </h2>
-          <p
-            className={`mt-4 text-lg ${
-              item.id === 4 ? "text-white" : "text-[#05203DB2]"
-            }`}
-          >
-            {item.description}
-          </p>
-
-          <img
-            src={item.image}
-            alt={item.title}
-            className="my-6 mt-12 w-full object-contain"
-          />
-          <div className="text-center">
-            <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-lg font-bold text-white text-center">
-              Get Started
-            </button>
-          </div>
-        </motion.div>
-      </motion.div>
-    ))}
-  </motion.div>
-</div> */}
+      
       </div>
     </div>
   );

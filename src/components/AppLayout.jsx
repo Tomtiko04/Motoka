@@ -9,6 +9,7 @@ import { logout } from "../services/apiAuth";
 
 import Logo2 from "../assets/images/Logo.svg";
 import { useNotifications } from "../features/notifications/useNotification";
+import RecentNotificationModal from "./RecentNotification.jsx";
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
@@ -25,6 +26,7 @@ export default function AppLayout() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
    const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropDownMenuOpen, setIsDropDownMenuOpen] = useState(false);
+  const [notificationsModal, setNotificationsModal] = useState(false);
   const { data: notifications } = useNotifications();
 
   const location = useLocation();
@@ -63,7 +65,7 @@ export default function AppLayout() {
   };
 
   function handleHome() {
-    navigate("/");
+    navigate("/dashboard");
   }
 
   const dropdownRef = useRef(null);
@@ -122,7 +124,8 @@ export default function AppLayout() {
               <div className="flex items-center gap-4 md:hidden">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notifications")}
+                  // onClick={() => navigate("/notifications")}
+                  onClick={()=>setNotificationsModal(!notificationsModal)}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -169,7 +172,8 @@ export default function AppLayout() {
               <div className="hidden items-center gap-4 md:flex">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notifications")}
+                  // onClick={() => navigate("/notifications")}
+                  onClick={()=>setNotificationsModal(!notificationsModal)}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -254,7 +258,16 @@ export default function AppLayout() {
             </div>
           </div>
         </header>
+        <div className="relative">
+          {notificationsModal && (
+            // <NotificationList
+            //   notificationsCategory={"All"}
+            //   notificationData={notifications ? notifications.data : []}
+            // />
+            <RecentNotificationModal setNotificationsModal={setNotificationsModal}/>
+          )}
 
+        </div>
         {/* Mobile Navigation Overlay */}
         <div
           className={`bg-opacity-50 fixed inset-0 z-[60] bg-black transition-opacity duration-300 md:hidden ${
@@ -340,57 +353,55 @@ export default function AppLayout() {
 
         {/* Logout Modal */}
         {isModalOpen && (
-          <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-            <div className="w-[90%] max-w-md transform rounded-xl bg-white p-6 shadow-lg transition-all">
-              <div className="mb-4 flex items-center justify-center">
-                <div className="rounded-full bg-red-100 p-3">
-                  <LogOut className="h-6 w-6 text-red-500" />
-                </div>
-              </div>
-
-              <h2 className="mb-2 text-center text-xl font-semibold text-gray-800">
-                Confirm Logout
-              </h2>
-
-              <p className="mb-6 text-center text-sm text-gray-600">
-                Are you sure you want to log out? You will need to log in again
-                to access your account.
-              </p>
-
-              <div className="flex flex-col space-y-3">
-                <button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="flex w-full items-center justify-center space-x-2 rounded-lg bg-red-500 px-4 py-2.5 text-white transition-colors duration-200 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isLoggingOut ? (
-                    <>
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      <span>Logging out...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogOut className="h-5 w-5" />
-                      <span>Yes, Logout</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isLoggingOut}
-                  className="w-full rounded-lg bg-gray-100 px-4 py-2.5 text-gray-700 transition-colors duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
+               <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50">
+                 <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
+                   <div className="flex items-center justify-center mb-4">
+                     <div className="bg-red-100 p-3 rounded-full">
+                       <LogOut className="h-6 w-6 text-red-500" />
+                     </div>
+                   </div>
+                   
+                   <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">
+                     Confirm Logout
+                   </h2>
+                   
+                   <p className="text-gray-600 text-center mb-6 text-sm">
+                     Are you sure you want to log out? You will need to log in again to access your account.
+                   </p>
+       
+                   <div className="flex flex-col space-y-3">
+                     <button
+                       onClick={handleLogout}
+                       disabled={isLoggingOut}
+                       className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2"
+                     >
+                       {isLoggingOut ? (
+                         <>
+                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                           <span role="button" className="text-sm font-semibold">Logging out...</span>
+                         </>
+                       ) : (
+                         <>
+                           <LogOut className="h-5 w-5" />
+                           <span role="button" className="text-sm font-semibold">Yes, Logout</span>
+                         </>
+                       )}
+                     </button>
+       
+                     <button
+                       onClick={() => setIsModalOpen(false)}
+                       disabled={isLoggingOut}
+                       className="text-sm w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                     >
+                       Cancel
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             )}
 
         {/* Main Content */}
-        <main className="mx-auto w-full max-w-7xl py-6 flex-1 flex flex-col">
+        <main className="mx-auto w-full max-w-7xl py-6 flex-1">
           <Outlet />
         </main>
 

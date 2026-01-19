@@ -15,7 +15,7 @@ export default function Garage() {
 
   const navigate = useNavigate();
   function handleLicence() {
-    navigate("/");
+    navigate("/dashboard");
   }
 
   function handleRenewLicense(carDetail) {

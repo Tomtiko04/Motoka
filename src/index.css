@@ -20,63 +20,36 @@ html {
 }
 
 body {
-  /* min-height: 100vh; */
-  
-  background-color: #fcf4f4;
-  /* background-image: url("./assets/images/Subtract.png"); */
-  /* what samuel commented*/
-  /* font-family: "Lexend", sans-serif; */
-  /* background-size: cover; */
-  /* line-height: 1.5; */
-  /* font-size: 1.6rem; */
-  /* background-position: center; */
-  /* background-repeat: no-repeat; */
-  
-  /* what i added*/
-  
-}
-
-/* body{
-  background-color: #f4f5fc;
- 
-} */
- #root {
   font-family: "Lexend", sans-serif;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   line-height: 1.5;
   font-size: 1.6rem;
-  position: relative;
-}
-.background-gradient {
-  position: fixed;
-  height: 100vh;
-  width: 100vw;
-}
- /* .background-gradient::after{
-  content: "";
-  position: absolute;
-  height: 100vh;
-  width: 100vh;
-  top:0;
-  right: 0;
-  background-image: url("./assets/images/Ellipse34.png");
+  background-color: #f4f5fc;
+  /* background-image: url("./assets/images/Subtract.png"); */
   background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
-  z-index: -10;
 }
-.background-gradient::before {
-  content: "";
-  position: absolute;
-  height: 100vh;
-  width: 100vw;
-  top: 0;
-  left: 0;
-  z-index: -10;
-  background-image: url("./assets/images/Ellipse35.png");
-  background-size: cover;
-  background-repeat: no-repeat;
-}  */
-.customScroll::-webkit-scrollbar {
+
+
+.customscroll::-webkit-scrollbar{
+    height: 8px;
+}
+
+
+.customscroll::-webkit-scrollbar-track {
+  /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.824); */
+  background-color: #F4F5FC;
+}
+ 
+.customscroll::-webkit-scrollbar-thumb {
+  background-color: #EAB750;
+  /* outline: 1px solid rgb(6, 60, 114); */
+  border-radius: 10px;
+}
+
+
+.customscroll::-webkit-scrollbar {
   width: 6px;
 
 }
@@ -174,6 +147,22 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Don't REMOVE BY OYINKANSOLA: The bullet dot on the slider*/
+.custom-pagination {
+  position: relative;
+}
+
+.custom-pagination .swiper-pagination-bullet {
+  background: #ccc;
+  opacity: 1;
+  transition: background 0.3s;
+}
+
+.custom-pagination .swiper-pagination-bullet-active {
+  background: #2389E3;
+}
+
 
 @media (max-width: 640px) {
   input, select, textarea, button {

@@ -1,6 +1,11 @@
 import { Icon } from "@iconify/react";
 import logo from "../../assets/images/landing/Group 1171279822.svg";
+import sponsors from '../../assets/images/landing/Group 1171279823.svg'
+
 function Footer() {
+    const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   return (
     <div className="flex flex-col items-center bg-[#05243F] px-6 sm:px-30 py-30 sm:py-40">
       <div className="flex max-w-5xl flex-col items-center">
@@ -23,15 +28,18 @@ function Footer() {
             type="Email"
             className="w-full bg-transparent ps-4 sm:ps-6 text-base text-white outline-none placeholder:text-[#FFFFFF]"
             placeholder="Your E-mail"
+            name="email"
           />
           <button className="w-fit flex-shrink-0 rounded-[15px] bg-[#2389E3] px-[15px] sm:px-[25px] py-[10px] sm:py-[15px] text-base text-nowrap text-white">
             Get Started
           </button>
         </div>
+        <div className="py-10 w-full flex items-center">
+        <img src={sponsors} alt="sponsors" className="h-8 w-fit" /></div>
       </div>
       <div className="mt-20 sm:mt-40 grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 justify-center justify-items-start">
-        <div className="mt-10 sm:mt-20 flex flex-col items-start gap-6 sm:gap-8 sm:mt-0 col-span">
-          <div>
+        <div className="mt-10 flex flex-col items-start gap-6 sm:gap-8 sm:mt-0 col-span">
+          <div onClick={scrollToTop}>
             <img
               src={logo}
               alt="motoka logo"
@@ -68,7 +76,7 @@ function Footer() {
                 {title: 'Company', links: ['About Motoka', 'Our Mission', 'Careers', 'Partners', 'Contact Us']},
             ].map((section) => (
                 <div key={section.title}  className="w-full flex justify-start sm:justify-end">
-                <div className="mt-10 sm:mt-20 flex flex-col items-start gap-6 sm:mt-0 w-fit">
+                <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
                     <h4 className="text-lg font-semibold text-white">{section.title}</h4>
                     <div className="flex flex-col items-start gap-4">
                         {section.links.map((link) => (

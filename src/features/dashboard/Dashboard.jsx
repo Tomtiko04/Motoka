@@ -57,21 +57,24 @@ export default function Dashboard() {
           </div>
         ) : sortedCars.length > 0 ? (
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div>
+            <div className="">
               <Swiper
                 modules={[Pagination, Autoplay]}
                 spaceBetween={24}
                 slidesPerView={1}
-                pagination={{ clickable: true }}
+                pagination={{
+                  clickable: true,
+                  el: ".custom-pagination",
+                }}
                 autoplay={{
                   delay: 5000,
                   disableOnInteraction: false,
                 }}
-                // className="!pb-12 h-full"
+                className="car-swiper"
               >
                 {sortedCars?.map((car, index) => (
                   <SwiperSlide key={car.id || index}>
-                    <div>
+                    <div className="w-full text-left">
                       <CarDetailsCard
                         carDetail={car}
                         isRenew={true}
@@ -81,6 +84,7 @@ export default function Dashboard() {
                   </SwiperSlide>
                 ))}
               </Swiper>
+              <div className="custom-pagination mt-2 flex justify-center" />
             </div>
             <div>
               <AddCarCard onAddCarClick={handleAddCar} />
