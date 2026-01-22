@@ -22,9 +22,14 @@ export async function login({ email, password }) {
       localStorage.setItem('refresh_token', refreshTokenValue);
     }
     
-    // Store user info
+    // Store user info with constructed name
     if (data?.data?.user) {
-      authStorage.setUserInfo(data.data.user);
+      const user = data.data.user;
+      const userWithName = {
+        ...user,
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
+      };
+      authStorage.setUserInfo(userWithName);
     }
     
     // Clear any registration token after full login
@@ -142,7 +147,13 @@ export async function verifyAccount({ code, email }) {
     const { data } = await api.post("/verify-email", { otp: code, email });
 
     if (data?.data?.user) {
-      authStorage.setUserInfo(data.data.user);
+      const user = data.data.user;
+      // Construct name from first_name + last_name for localStorage
+      const userWithName = {
+        ...user,
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
+      };
+      authStorage.setUserInfo(userWithName);
     }
 
     // Store the auth token if provided after verification
@@ -222,9 +233,14 @@ export async function verifyLoginOtp({ email, otp }) {
       localStorage.setItem('refresh_token', refreshTokenValue);
     }
 
-    // Store user info
+    // Store user info with constructed name
     if (data?.data?.user) {
-      authStorage.setUserInfo(data.data.user);
+      const user = data.data.user;
+      const userWithName = {
+        ...user,
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
+      };
+      authStorage.setUserInfo(userWithName);
     }
 
     return { ...data, authorization: { token }, user: data?.data?.user };

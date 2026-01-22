@@ -9,7 +9,7 @@ export async function getProfile() {
         'Pragma': 'no-cache'
       }
     })
-    return data
+    return data.data // Extract { profile: {...} } from response wrapper
   } catch (error) {
     if (error.response) {
       const errorMessage = error.response.data?.message || "Failed to fetch profile"
@@ -24,7 +24,7 @@ export async function getProfile() {
 export async function updateProfile(profileData) {
   try {
     const { data } = await api.put("/settings/profile", profileData)
-    return data
+    return data.data // Extract { profile: {...} } from response wrapper
   } catch (error) {
     if (error.response) {
       const errorMessage = error.response.data?.message || "Failed to update profile"
