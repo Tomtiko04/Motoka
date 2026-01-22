@@ -14,7 +14,7 @@ export function useOTPLogin() {
   const [error, setError] = useState(null);
 
   const startTimer = () => {
-    setOtpTimer(600); // 10 minutes
+    setOtpTimer(60); // 60 seconds
     setCanResend(false);
     
     const timer = setInterval(() => {
@@ -29,10 +29,10 @@ export function useOTPLogin() {
     }, 1000);
   };
 
-  const { mutate: sendOTP, isPending: isSendingOTP, error: sendError } = useMutation({
+  const { mutate: sendOTP, isPending: isSendingOTP } = useMutation({
     mutationFn: (email) => sendLoginOTP(email),
     onSuccess: (data) => {
-      toast.success("OTP sent to your email! Please check your inbox." || data.message);
+      toast.success(data.message || "OTP sent to your email! Please check your inbox.");
       setStep("otp");
       startTimer();
     },
@@ -43,27 +43,35 @@ export function useOTPLogin() {
     },
   });
 
-  const { mutate: verifyOTP, isPending: isVerifyingOTP, error: verifyError } = useMutation({
+  const { mutate: verifyOTP, isPending: isVerifyingOTP } = useMutation({
     mutationFn: ({ email, otp }) => verifyLoginOTP(email, otp),
     onSuccess: (data) => {
-      // Store token securely
-      if (data.authorization?.token) {
-        authStorage.setToken(data.authorization.token);
-      } else {
+      // Node.js backend returns data.data.session.access_token
+      const token = data?.data?.session?.access_token;
+      const refreshToken = data?.data?.session?.refresh_token;
+      const user = data?.data?.user;
+
+      if (!token) {
         toast.error("No authentication token received. Please try again.");
         return;
       }
 
+      // Store tokens securely
+      authStorage.setToken(token);
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
+
       // Update query cache
-      queryClient.setQueryData(["user"], data.user);
+      queryClient.setQueryData(["user"], user);
       
       // Store user details in localStorage
-      if (data.user) {
+      if (user) {
         const userDetails = {
-          user_type_id: data.user.user_type_id,
-          name: data.user.name,
-          email: data.user.email,
-          phone_number: data.user.phone_number,
+          user_type_id: user.user_type_id,
+          name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+          email: user.email,
+          phone_number: user.phone_number,
         };
         localStorage.setItem("userInfo", JSON.stringify(userDetails));
       }

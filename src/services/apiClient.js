@@ -36,11 +36,6 @@ api.interceptors.request.use((config) => {
     }
   }
 
-  // Add security headers
-  config.headers["X-Content-Type-Options"] = "nosniff"
-  config.headers["X-Frame-Options"] = "DENY"
-  config.headers["X-XSS-Protection"] = "1; mode=block"
-
   return config
 })
 

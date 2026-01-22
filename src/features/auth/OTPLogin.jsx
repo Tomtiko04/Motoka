@@ -16,7 +16,7 @@ const otpSchema = yup.object().shape({
   otp: yup
     .string()
     .required("OTP is required")
-    .matches(/^[A-Z0-9]{4}$/, "OTP must be 4 alphanumeric characters"),
+    .matches(/^[0-9]{6}$/, "OTP must be 6 digits"),
 });
 
 export default function OTPLogin() {
@@ -202,7 +202,7 @@ export default function OTPLogin() {
             <p className="mt-2 text-sm text-gray-600">
               {step === "email"
                 ? "Enter your email to receive a one-time password"
-                : `We've sent a 4-digit code to ${email}`}
+                : `We've sent a 6-digit code to ${email}`}
             </p>
             
           </div>
@@ -276,12 +276,12 @@ export default function OTPLogin() {
                   <input
                     {...registerOTP("otp")}
                     type="text"
-                    maxLength="4"
+                    maxLength="6"
                     autoComplete="one-time-code"
                     className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-2xl font-mono tracking-widest"
-                    placeholder="0000"
+                    placeholder="000000"
                     onChange={(e) => {
-                      const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                      const value = e.target.value.replace(/[^0-9]/g, "");
                       setOtp(value);
                       e.target.value = value;
                     }}
@@ -303,7 +303,7 @@ export default function OTPLogin() {
 
               <button
                 type="submit"
-                disabled={isVerifyingOTP || otp.length !== 4}
+                disabled={isVerifyingOTP || otp.length !== 6}
                 className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isVerifyingOTP ? (
