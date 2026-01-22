@@ -3,7 +3,7 @@ import { api } from "./apiClient";
 export async function getNotifications() {
   try {
     const { data } = await api.get("/notifications");
-    return data;
+    return data.data; // Extract { notifications: [] } from response wrapper
   } catch (error) {
     if (error.response) {
       const errorMessage =
