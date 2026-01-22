@@ -35,7 +35,7 @@ export function useLogin() {
         if (data.user) {
           const userDetails = {
             user_type_id: data.user.user_type_id,
-            name: data.user.name,
+            name: data.user.name || `${data.user.first_name || ''} ${data.user.last_name || ''}`.trim() || data.user.email,
             email: data.user.email,
             phone_number: data.user.phone_number,
           };
@@ -66,7 +66,7 @@ export function useLogin() {
         if (data.user) {
           const userDetails = {
             user_type_id: data.user.user_type_id,
-            name: data.user.name,
+            name: data.user.name || `${data.user.first_name || ''} ${data.user.last_name || ''}`.trim() || data.user.email,
             email: data.user.email,
             phone_number: data.user.phone_number,
           };
@@ -110,7 +110,7 @@ export function useLogin() {
       if (data.user) {
         const userDetails = {
           user_type_id: data.user.user_type_id,
-          name: data.user.name,
+          name: data.user.name || `${data.user.first_name || ''} ${data.user.last_name || ''}`.trim() || data.user.email,
           email: data.user.email,
           phone_number: data.user.phone_number,
         };

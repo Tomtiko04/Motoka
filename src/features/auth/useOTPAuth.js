@@ -69,7 +69,7 @@ export function useOTPLogin() {
       if (user) {
         const userDetails = {
           user_type_id: user.user_type_id,
-          name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+          name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
           email: user.email,
           phone_number: user.phone_number,
         };

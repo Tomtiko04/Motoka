@@ -12,7 +12,7 @@ export async function addCar(formData) {
 export async function getCars() {
   try {
     const { data } = await api.get("/get-cars");
-    return data;
+    return data.data; // Extract { cars: [...], pagination: {...} } from response wrapper
   } catch (error) {
     throw new Error(error.message || "Failed to fetch cars");
   }
