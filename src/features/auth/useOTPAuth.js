@@ -14,7 +14,7 @@ export function useOTPLogin() {
   const [error, setError] = useState(null);
 
   const startTimer = () => {
-    setOtpTimer(600); // 10 minutes
+    setOtpTimer(60); // 60 seconds
     setCanResend(false);
     
     const timer = setInterval(() => {

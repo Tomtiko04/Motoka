@@ -10,7 +10,7 @@ export default function VerifyAccount() {
   const [email, setEmail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown
+  const [timeLeft, setTimeLeft] = useState(60); // 60 second countdown
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function VerifyAccount() {
   const handleResend = () => {
     if (!email) return;
     resendCode(email);
-    setTimeLeft(600); // Reset timer to 10 minutes
+    setTimeLeft(60); // Reset timer to 60 seconds
   };
 
   const handleVerify = (fullCode) => {
