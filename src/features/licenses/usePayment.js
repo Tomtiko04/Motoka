@@ -39,7 +39,7 @@ export function useInitializePayment() {
     },
     onError: (error) => {
       console.error("Payment initialization failed:", error);
-      toast.error(error.response.data.message || "Payment initialization failed. Please try again.");
+      toast.error(error.response?.data?.message || error.message || "Payment initialization failed. Please try again.");
     }
   });
 
