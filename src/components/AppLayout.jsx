@@ -214,13 +214,13 @@ export default function AppLayout() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute right-0 top-full mt-2 z-50 w-56 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/5"
+                        className="absolute right-0 top-full mt-2 z-100 w-56 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/5"
                       >
-                        <div className="bg-[#F4F5FC]/50 px-4 py-3">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#05243F]/40">
+                        <div className="bg-[#2389e3] px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase text-white">
                             Signed in as
                           </p>
-                          <p className="truncate text-sm font-semibold text-[#05243F]">
+                          <p className="truncate text-sm font-semibold text-white">
                             {userName}
                           </p>
                         </div>
@@ -232,7 +232,7 @@ export default function AppLayout() {
                             className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
-                              <Icon icon="solar:settings-bold-duotone" width="20" />
+                              <Icon icon="proicons:settings" width="20" />
                             </div>
                             <span className="font-medium">Settings</span>
                           </Link>
@@ -245,7 +245,7 @@ export default function AppLayout() {
                             className="group mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#A73957]/80 transition-colors hover:bg-red-50 hover:text-[#A73957]"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-[#A73957]/60 transition-colors group-hover:bg-red-100 group-hover:text-[#A73957]">
-                              <Icon icon="solar:logout-3-bold-duotone" width="20" />
+                              <Icon icon="hugeicons:logout-04" width="20" className="rotate-180" />
                             </div>
                             <span className="font-medium">Logout</span>
                           </button>
