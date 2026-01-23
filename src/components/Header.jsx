@@ -12,7 +12,7 @@ export default function Header() {
     navigate("/dashboard");
   }
   return (
-    <div className="w-full bg-white">
+    <div className="w-full">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between py-4">
           <div

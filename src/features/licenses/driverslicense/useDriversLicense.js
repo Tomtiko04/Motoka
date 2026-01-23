@@ -28,7 +28,7 @@ export function useCreateDriverLicense() {
             toast.success(message);
         },
         onError: (error) => {
-            const message = error.response.message || error?.response.data.message || "Failed to create driver's license";
+            const message = error.response?.data?.message || error.message || "Failed to create driver's license";
             toast.error(message);
         },
     });

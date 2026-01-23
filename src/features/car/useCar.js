@@ -43,7 +43,6 @@ export function useAddCar() {
       }
     },
     onError: (error) => {
-      console.error('Error adding car:', error);
       const errorMessage = error.response?.data?.message || error.message || "Failed to add car";
       toast.error(errorMessage);
       
@@ -69,8 +68,7 @@ export function useGetCars() {
     queryKey: ["cars"],
     queryFn: getCarsApi,
     onError: (error) => {
-      console.error('Error fetching cars:', error);
-      toast.error(error.response.data.message || "Failed to fetch cars");
+      toast.error(error.response?.data?.message || error.message || "Failed to fetch cars");
     },
   });
 
