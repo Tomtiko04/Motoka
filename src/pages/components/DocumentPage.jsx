@@ -17,13 +17,13 @@ function DocumentPage({selectedDocument, setSelectedDocument,docType,showsidebar
                           <div className="flex items-center justify-between bg-[#45A1F2] rounded-[10px] w-fit gap-10 px-4 py-2.5 pe-6 hover:bg-[#1b6dbd]">
                           <div className="flex items-center gap-2">
                             <div className="">
-                              <img
+                              {/* <img
                                 src={"https://www.carlogos.org/car-logos/mercedes-benz-logo.png"}
                                 lazyloading="lazy"
                                 alt={"Car"}
                                 className="h-6 w-6 object-contain"
                                 // onError={() => setCarLogo(MercedesLogo)}
-                              />
+                              /> */}
                             </div>
                             <h3 className="text-xl font-semibold text-white">
                               {"ABC-123DE"}
