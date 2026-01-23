@@ -1,37 +1,15 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "../services/apiAuth";
 
-import { authStorage } from "../utils/authStorage";
-
-import Avarta from "../assets/images/avarta.png";
 import Logo2 from "../assets/images/Logo.svg";
 import { useNotifications } from "../features/notifications/useNotification";
-
-export default function AppLayout() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { data: notifications } = useNotifications();
-
-  const userName = localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo")).name
-    : "";
-
-  const totalLength = notifications?.data
-    ? Object.values(notifications.data).reduce(
-        (sum, arr) => sum + arr.length,
-        0,
-      )
-    : 0;
-  const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
+import RecentNotificationModal from "./RecentNotification.jsx";
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
@@ -43,6 +21,28 @@ export default function AppLayout() {
   ];
 
 
+export default function AppLayout() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropDownMenuOpen, setIsDropDownMenuOpen] = useState(false);
+  const [notificationsModal, setNotificationsModal] = useState(false);
+  const { data: notifications } = useNotifications();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const userName = localStorage.getItem("userInfo")
+    ? JSON.parse(localStorage.getItem("userInfo")).name
+    : "";
+
+  const totalLength = notifications?.data
+    ? Object.values(notifications.data).reduce(
+        (sum, arr) => sum + arr.length,
+        0,
+      )
+    : 0;
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     document.body.style.overflow = !isMenuOpen ? "hidden" : "";
@@ -51,7 +51,7 @@ export default function AppLayout() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      const response = await logout();
+      await logout();
       navigate("/auth/login");
     } catch (error) {
       toast.error(error.response?.data?.message || error.message, {
@@ -67,6 +67,30 @@ export default function AppLayout() {
   function handleHome() {
     navigate("/dashboard");
   }
+
+  const dropdownRef = useRef(null);
+
+  function handleDropDownMenu() {
+    setIsDropDownMenuOpen(!isDropDownMenuOpen);
+  }
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropDownMenuOpen(false);
+      }
+    }
+
+    if (isDropDownMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropDownMenuOpen]);
 
   return (
     <div className="flex items-center justify-center  flex-col min-h-screen" >{/* removed the background to allow the gradient to show  bg-[#F4F5FC]*/}
@@ -100,7 +124,8 @@ export default function AppLayout() {
               <div className="flex items-center gap-4 md:hidden">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notifications")}
+                  // onClick={() => navigate("/notifications")}
+                  onClick={()=>setNotificationsModal(!notificationsModal)}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -147,7 +172,8 @@ export default function AppLayout() {
               <div className="hidden items-center gap-4 md:flex">
                 <div
                   className="relative"
-                  onClick={() => navigate("/notifications")}
+                  // onClick={() => navigate("/notifications")}
+                  onClick={()=>setNotificationsModal(!notificationsModal)}
                 >
                   <Icon
                     icon="ri:notification-4-fill"
@@ -158,18 +184,90 @@ export default function AppLayout() {
                     {totalLength}
                   </span>
                 </div>
-                <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
+                {/* <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img
                     src={Avarta}
                     alt="User"
                     className="h-full w-full object-cover"
                   />
+                </div> */}
+                <div className="relative" ref={dropdownRef}>
+                  <div
+                    onClick={handleDropDownMenu}
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-[#F4F5FC] p-1.5 transition-all hover:bg-[#F4F5FC]"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#05243F]/5 text-[#05243F]">
+                      <Icon icon="si:user-alt-4-fill" width="18" height="18" />
+                    </div>
+                    <Icon
+                      icon="ri:arrow-down-s-line"
+                      className={`text-[#05243F]/60 transition-transform duration-200 ${
+                        isDropDownMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
+
+                  <AnimatePresence>
+                    {isDropDownMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute right-0 top-full mt-2 z-50 w-56 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/5"
+                      >
+                        <div className="bg-[#F4F5FC]/50 px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#05243F]/40">
+                            Signed in as
+                          </p>
+                          <p className="truncate text-sm font-semibold text-[#05243F]">
+                            {userName}
+                          </p>
+                        </div>
+
+                        <div className="p-1.5">
+                          <Link
+                            to="/settings"
+                            onClick={() => setIsDropDownMenuOpen(false)}
+                            className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
+                              <Icon icon="solar:settings-bold-duotone" width="20" />
+                            </div>
+                            <span className="font-medium">Settings</span>
+                          </Link>
+
+                          <button
+                            onClick={() => {
+                              setIsDropDownMenuOpen(false);
+                              setIsModalOpen(true);
+                            }}
+                            className="group mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#A73957]/80 transition-colors hover:bg-red-50 hover:text-[#A73957]"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-[#A73957]/60 transition-colors group-hover:bg-red-100 group-hover:text-[#A73957]">
+                              <Icon icon="solar:logout-3-bold-duotone" width="20" />
+                            </div>
+                            <span className="font-medium">Logout</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
           </div>
         </header>
+        <div className="relative">
+          {notificationsModal && (
+            // <NotificationList
+            //   notificationsCategory={"All"}
+            //   notificationData={notifications ? notifications.data : []}
+            // />
+            <RecentNotificationModal setNotificationsModal={setNotificationsModal}/>
+          )}
 
+        </div>
         {/* Mobile Navigation Overlay */}
         <div
           className={`bg-opacity-50 fixed inset-0 z-[60] bg-black transition-opacity duration-300 md:hidden ${
@@ -255,53 +353,52 @@ export default function AppLayout() {
 
         {/* Logout Modal */}
         {isModalOpen && (
-          <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-            <div className="w-[90%] max-w-md transform rounded-xl bg-white p-6 shadow-lg transition-all">
-              <div className="mb-4 flex items-center justify-center">
-                <div className="rounded-full bg-red-100 p-3">
-                  <LogOut className="h-6 w-6 text-red-500" />
-                </div>
-              </div>
-
-              <h2 className="mb-2 text-center text-xl font-semibold text-gray-800">
-                Confirm Logout
-              </h2>
-
-              <p className="mb-6 text-center text-sm text-gray-600">
-                Are you sure you want to log out? You will need to log in again
-                to access your account.
-              </p>
-
-              <div className="flex flex-col space-y-3">
-                <button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="flex w-full items-center justify-center space-x-2 rounded-lg bg-red-500 px-4 py-2.5 text-white transition-colors duration-200 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isLoggingOut ? (
-                    <>
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      <span>Logging out...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogOut className="h-5 w-5" />
-                      <span>Yes, Logout</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isLoggingOut}
-                  className="w-full rounded-lg bg-gray-100 px-4 py-2.5 text-gray-700 transition-colors duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+               <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50">
+                 <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
+                   <div className="flex items-center justify-center mb-4">
+                     <div className="bg-red-100 p-3 rounded-full">
+                       <LogOut className="h-6 w-6 text-red-500" />
+                     </div>
+                   </div>
+                   
+                   <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">
+                     Confirm Logout
+                   </h2>
+                   
+                   <p className="text-gray-600 text-center mb-6 text-sm">
+                     Are you sure you want to log out? You will need to log in again to access your account.
+                   </p>
+       
+                   <div className="flex flex-col space-y-3">
+                     <button
+                       onClick={handleLogout}
+                       disabled={isLoggingOut}
+                       className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2"
+                     >
+                       {isLoggingOut ? (
+                         <>
+                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                           <span role="button" className="text-sm font-semibold">Logging out...</span>
+                         </>
+                       ) : (
+                         <>
+                           <LogOut className="h-5 w-5" />
+                           <span role="button" className="text-sm font-semibold">Yes, Logout</span>
+                         </>
+                       )}
+                     </button>
+       
+                     <button
+                       onClick={() => setIsModalOpen(false)}
+                       disabled={isLoggingOut}
+                       className="text-sm w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                     >
+                       Cancel
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             )}
 
         {/* Main Content */}
         <main className="mx-auto w-full max-w-7xl py-6 flex-1">

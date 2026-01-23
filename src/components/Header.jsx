@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react"
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import Logo from "../assets/images/Logo.svg";
 import { BsStars } from "react-icons/bs";
