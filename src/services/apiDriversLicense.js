@@ -27,6 +27,16 @@ export async function initializeDriversLicensePayment(slug) {
   return data;
 }
 
+export async function initializeDriversLicensePaymentPaystack(slug) {
+  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
+  return data;
+}
+
+export async function initializeDriversLicensePaymentMonicredit(slug) {
+  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
+  return data;
+}
+
 export async function verifyDriversLicensePayment(reference, licenseId) {
   const { data } = await api.get(`/driver-license/${licenseId}/verify-payment`, {
     params: { reference }

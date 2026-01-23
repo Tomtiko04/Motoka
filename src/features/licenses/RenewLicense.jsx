@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetState, useGetLocalGovernment } from "./useRenew";
 import { useInitializePayment } from "./usePayment";
+import { PAYMENT_TYPES } from "../payment/config/paymentTypes";
 import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
 import { checkExistingPayments } from "../../services/apiPayment";
 import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
@@ -333,29 +334,76 @@ export default function RenewLicense() {
 
   // Navigate to payment page after successful payment initialization
   React.useEffect(() => {
-    if (paymentInitData && paymentInitData.data && paymentInitData.data.data) {
-      // Create a complete payment data object that includes all necessary information
-      const completePaymentData = {
-        ...paymentInitData.data.data,
-        car_slug: carDetail?.slug,
-        selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
-        deliveryDetails: {
-          address: deliveryDetails.address,
-          contact: deliveryDetails.contact,
-          state_id: getStateId(),
-          lga_id: getLgaId(),
-        },
-        // Ensure meta_data is available
-        meta_data: {
-          delivery_address: deliveryDetails.address,
-          delivery_contact: deliveryDetails.contact,
-          state_id: getStateId(),
-          lga_id: getLgaId(),
-        },
-      };
+    if (!paymentInitData) return;
 
-      navigate("/payment", { state: { paymentData: completePaymentData } });
+    // Support both Monicredit and Paystack response shapes
+    // Monicredit: { status, data: { data: { ...session } } }
+    // Paystack:   { status, data: { ...session } }
+    const inner = paymentInitData?.data?.data || null;
+    if (!inner) return;
+
+    // Normalize into the structure PaymentOptions expects
+    let normalized = {};
+    // Decide by presence of fields on inner session
+    if (inner?.authorization_url || inner?.reference || inner?.transaction_id) {
+      // Paystack init
+      const authUrl = inner.authorization_url;
+      const reference = inner.reference || inner.transaction_id;
+      normalized = {
+        type: PAYMENT_TYPES.LICENSE_RENEWAL,
+        paystack: {
+          authorization_url: authUrl,
+          reference,
+        },
+        amount: inner.amount,
+        items: inner.items || [],
+      };
+    } else {
+      // Ensure monicredit data is nested under monicredit.data
+      let itemsArray = [];
+      try {
+        const itemsRaw = inner.items;
+        itemsArray = typeof itemsRaw === 'string' ? JSON.parse(itemsRaw) : (Array.isArray(itemsRaw) ? itemsRaw : []);
+      } catch (e) {
+        itemsArray = [];
+      }
+      normalized = {
+        type: PAYMENT_TYPES.LICENSE_RENEWAL,
+        monicredit: { data: inner },
+        amount: inner?.total_amount || inner?.amount,
+        items: itemsArray,
+      };
     }
+
+    // Create a complete payment data object that includes all necessary information
+    const completePaymentData = {
+      ...normalized,
+      car_slug: carDetail?.slug,
+      selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
+      deliveryDetails: {
+        address: deliveryDetails.address,
+        contact: deliveryDetails.contact,
+        state_id: getStateId(),
+        lga_id: getLgaId(),
+      },
+      // Ensure meta_data is available
+      meta_data: {
+        delivery_address: deliveryDetails.address,
+        delivery_contact: deliveryDetails.contact,
+        state_id: getStateId(),
+        lga_id: getLgaId(),
+      },
+    };
+
+    // Persist for PaymentOptions fallback
+    try {
+      sessionStorage.setItem("paymentData", JSON.stringify(completePaymentData));
+    } catch {}
+
+    // Always route payments through the reusable payment page
+    navigate(`/payment?type=${PAYMENT_TYPES.LICENSE_RENEWAL}`, {
+      state: { paymentData: completePaymentData },
+    });
   }, [
     paymentInitData,
     navigate,

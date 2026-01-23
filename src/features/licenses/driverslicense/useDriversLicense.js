@@ -23,9 +23,9 @@ export function useCreateDriverLicense() {
         data,
     } = useMutation({
         mutationFn: createDriversLicenseApi,
-        onSuccess: (data) => {
-            const message = data?.message || (data?.status === "success" ? "Driver's license request created" : "Success");
-            toast.success(message);
+        onSuccess: () => {
+            // const message = data?.message || (data?.status === "success" ? "Driver's license request created" : "Success");
+            toast.success("Complete your licenses payment to proceed");
         },
         onError: (error) => {
             const message = error.response?.data?.message || error.message || "Failed to create driver's license";

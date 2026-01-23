@@ -2,7 +2,7 @@
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "buildCommand": "npm run build:production",
   "env": {
-    "VITE_API_BASE_URL": "https://api.motoka.ng/api",
+    "VITE_API_BASE_URL": "https://motoka-backend.onrender.com/api",
     "VITE_ENV": "production"
   }
 }
