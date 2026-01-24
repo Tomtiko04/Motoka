@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { addCar as addCarApi, getCars as getCarsApi } from "../../services/apiCar";
+import {
+  addCar as addCarApi,
+  getCars as getCarsApi,
+  updateCarDocuments as updateCarDocumentsApi,
+} from "../../services/apiCar";
 import { authStorage } from "../../utils/authStorage";
 
 export function useAddCar() {
@@ -26,32 +30,33 @@ export function useAddCar() {
         expiry_date: formData.expiryDate || null,
         car_type: formData.carType || null,
       };
-      
-      console.log('Adding car with data:', transformedData);
+
+      console.log("Adding car with data:", transformedData);
       return addCarApi(transformedData);
     },
     onSuccess: (data) => {
       toast.dismiss();
       queryClient.invalidateQueries({ queryKey: ["cars"] });
       toast.success(data.message || "Car registered successfully!");
-      
+
       // Only remove registration token if it was used for this operation
       const registrationToken = authStorage.getRegistrationToken();
       if (registrationToken) {
-        console.log('Removing registration token after successful car creation');
+        console.log("Removing registration token after successful car creation");
         authStorage.removeRegistrationToken();
       }
     },
     onError: (error) => {
-      const errorMessage = error.response?.data?.message || error.message || "Failed to add car";
+      const errorMessage =
+        error.response?.data?.message || error.message || "Failed to add car";
       toast.error(errorMessage);
-      
+
       // Only redirect to login if not using registration token
       const registrationToken = authStorage.getRegistrationToken();
       if (error.response?.status === 401 && !registrationToken) {
-        console.log('Token invalid, clearing and redirecting to login');
+        console.log("Token invalid, clearing and redirecting to login");
         authStorage.clearAll();
-        window.location.href = '/auth/login';
+        window.location.href = "/auth/login";
       }
     },
   });
@@ -68,9 +73,32 @@ export function useGetCars() {
     queryKey: ["cars"],
     queryFn: getCarsApi,
     onError: (error) => {
-      toast.error(error.response?.data?.message || error.message || "Failed to fetch cars");
+      toast.error(
+        error.response?.data?.message || error.message || "Failed to fetch cars",
+      );
     },
   });
 
   return { cars, isLoading, error };
+}
+
+export function useUpdateCarDocuments() {
+  const queryClient = useQueryClient();
+  const { mutate: updateCarDocuments, isLoading: isUpdating } = useMutation({
+    mutationFn: ({ carSlug, formData: carData }) =>
+      updateCarDocumentsApi(carSlug, carData),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["cars"] });
+      toast.success(data.message || "Documents updated successfully!");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update documents";
+      toast.error(errorMessage);
+    },
+  });
+
+  return { updateCarDocuments, isUpdating };
 }
