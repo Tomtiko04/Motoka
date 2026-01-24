@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAddCar } from "./useCar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { api } from "../../services/apiClient";
 import PropTypes from "prop-types";
 
 const SearchableSelect = ({
@@ -157,11 +156,8 @@ export default function AddCar() {
     vehicleModel: "",
     carType: "",
     registrationNo: "",
-    chassisNo: "",
-    engineNo: "",
     vehicleYear: "",
     vehicleColor: "",
-    dateIssued: "",
     expiryDate: "",
     isRegistered: true,
     phoneNo: "",
@@ -176,24 +172,24 @@ export default function AddCar() {
   const location = useLocation();
 
   useEffect(() => {
-    const fetchCarTypes = async () => {
-      setIsLoading(true);
-      try {
-        const { data } = await api.get("/car-types");
-        if (data.success) {
-          setCarTypes(data.data);
-        } else {
-          toast.error("Failed to load car data. Please try again.");
-        }
-      } catch (error) {
-        console.error("Error fetching car types:", error);
-        toast.error("Failed to load car data. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // const fetchCarTypes = async () => {
+    //   setIsLoading(true);
+    //   try {
+    //     const { data } = await api.get("/car-types");
+    //     if (data.success) {
+    //       setCarTypes(data.data);
+    //     } else {
+    //       toast.error("Failed to load car data. Please try again.");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching car types:", error);
+    //     toast.error("Failed to load car data. Please try again.");
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
 
-    fetchCarTypes();
+    // fetchCarTypes();
   }, []);
 
   const uniqueMakes = useMemo(
@@ -273,20 +269,21 @@ export default function AddCar() {
       { name: "vehicleMake", label: "Vehicle Make" },
       { name: "vehicleModel", label: "Vehicle Model" },
       { name: "carType", label: "Car Type" },
-      { name: "chassisNo", label: "Chassis Number" },
-      { name: "engineNo", label: "Engine Number" },
       { name: "vehicleYear", label: "Vehicle Year" },
       { name: "vehicleColor", label: "Vehicle Color" },
     ];
 
     if (formData.isRegistered) {
       requiredFields.push(
-        { name: "registrationNo", label: "Registration Number" },
-        { name: "dateIssued", label: "Date Issued" },
+        { name: "registrationNo", label: "Plate Number" },
         { name: "expiryDate", label: "Expiry Date" },
       );
     } else {
-      requiredFields.push({ name: "phoneNo", label: "Phone Number" });
+      requiredFields.push(
+        { name: "phoneNo", label: "Phone Number" },
+        { name: "chassisNo", label: "Chassis Number" },
+        { name: "engineNo", label: "Engine Number" },
+      );
     }
 
     requiredFields.forEach(({ name, label }) => {
@@ -316,15 +313,10 @@ export default function AddCar() {
 
     if (formData.isRegistered) {
       const today = new Date();
-      const dateIssued = new Date(formData.dateIssued);
       const expiryDate = new Date(formData.expiryDate);
 
-      if (dateIssued > today) {
-        newErrors.dateIssued = "Issue date cannot be in the future";
-      }
-
-      if (expiryDate <= dateIssued) {
-        newErrors.expiryDate = "Expiry date must be after issue date";
+      if (expiryDate <= today) {
+        newErrors.expiryDate = "Expiry date must be after today";
       }
 
       if (
@@ -332,7 +324,7 @@ export default function AddCar() {
         !/^[A-Za-z0-9]{3,8}$/.test(formData.registrationNo)
       ) {
         newErrors.registrationNo =
-          "Please enter a valid registration number (3-8 alphanumeric characters)";
+          "Please enter a valid plate number (3-8 alphanumeric characters)";
       }
     }
 
@@ -405,7 +397,7 @@ export default function AddCar() {
     setIsAutoFillModalOpen(false);
   };
 
-  const renderDateField = (name, label) => (
+  const renderDateField = (name, label, minDate) => (
     <div>
       <label
         htmlFor={name}
@@ -434,6 +426,9 @@ export default function AddCar() {
               });
             }}
             dateFormat="dd/MM/yyyy"
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
             className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${errors[name]
               ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
               : formData[name]
@@ -441,14 +436,7 @@ export default function AddCar() {
                 : ""
               }`}
             placeholderText={`Select ${label.toLowerCase()}`}
-            maxDate={name === "dateIssued" ? new Date() : undefined}
-            minDate={
-              name === "expiryDate"
-                ? formData.dateIssued
-                  ? new Date(formData.dateIssued)
-                  : new Date()
-                : undefined
-            }
+            minDate={minDate}
             wrapperClassName="w-full"
           />
         </div>
@@ -655,18 +643,19 @@ export default function AddCar() {
                   error={errors.vehicleColor}
                   filterKey="color"
                 />
-                {renderField("chassisNo", "Chassis Number", "123489645432")}
-                {renderField("engineNo", "Engine Number", "4567890")}
+                {!formData.isRegistered &&
+                  renderField("chassisNo", "Chassis Number", "123489645432")}
+                {!formData.isRegistered &&
+                  renderField("engineNo", "Engine Number", "4567890")}
 
                 {formData.isRegistered && (
                   <>
                     {renderField(
                       "registrationNo",
-                      "Registration Number",
+                      "Plate Number",
                       "LSD2345",
                     )}
-                    {renderDateField("dateIssued", "Date Issued")}
-                    {renderDateField("expiryDate", "Expiry Date")}
+                    {renderDateField("expiryDate", "Expiry Date", new Date())}
                   </>
                 )}
               </form>
