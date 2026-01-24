@@ -1,18 +1,40 @@
 import { useRef, useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import good from "../../../assets/images/good.svg";
+import { docStorage } from "../../../utils/docStorage";
 
 function LicenseDoc() {
   const fileInputRef = useRef(null);
   const [licenseDocs, setLicenseDocs] = useState([]);
 
-  // Load from local storage
+  // Load from IndexedDB
   useEffect(() => {
-    const saved = localStorage.getItem("drivers_license_docs");
-    if (saved) {
-      setLicenseDocs(JSON.parse(saved));
-    }
+    const loadDocs = async () => {
+      try {
+        const saved = await docStorage.get("drivers_license_docs");
+        if (saved) {
+          setLicenseDocs(saved);
+        }
+      } catch (error) {
+        console.error("Failed to load licenses from IndexedDB", error);
+      }
+    };
+    loadDocs();
   }, []);
+
+  // Sync to IndexedDB whenever licenseDocs changes
+  useEffect(() => {
+    const saveDocs = async () => {
+      if (licenseDocs.length > 0) {
+        try {
+          await docStorage.set("drivers_license_docs", licenseDocs);
+        } catch (error) {
+          console.error("Failed to save licenses to IndexedDB", error);
+        }
+      }
+    };
+    saveDocs();
+  }, [licenseDocs]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -28,11 +50,9 @@ function LicenseDoc() {
 
     try {
       const base64File = await toBase64(file);
-      const newDocs = [...licenseDocs, base64File];
-      setLicenseDocs(newDocs);
-      localStorage.setItem("drivers_license_docs", JSON.stringify(newDocs));
+      setLicenseDocs((prev) => [...prev, base64File]);
     } catch (error) {
-      console.error("Error saving drivers license", error);
+      console.error("Error processing license file", error);
     }
   };
 

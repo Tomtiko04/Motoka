@@ -22,7 +22,11 @@ function CarDocuments() {
     setSelectedDocument("");
   };
 
-  const carArray = cars?.cars ? Object.values(cars.cars) : [];
+  const carArray = React.useMemo(() => {
+    if (!cars?.cars) return [];
+    return Array.isArray(cars.cars) ? cars.cars : Object.values(cars.cars);
+  }, [cars?.cars]);
+
   const activeCar = carArray[activeCarIndex];
 
   return (

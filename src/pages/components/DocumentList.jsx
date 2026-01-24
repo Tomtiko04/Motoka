@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import good from "../../assets/images/good.svg";
 import { Icon } from "@iconify/react";
+import { docStorage } from "../../utils/docStorage";
 
 function DocumentList({
   selectedDocument,
@@ -12,17 +13,38 @@ function DocumentList({
   const fileInputRef = useRef(null);
   const [localDocs, setLocalDocs] = useState([]);
 
-  // Load from local storage for current car
+  // Load from IndexedDB for current car
   useEffect(() => {
-    if (car?.slug) {
-      const saved = localStorage.getItem(`docs_${car.slug}`);
-      if (saved) {
-        setLocalDocs(JSON.parse(saved));
-      } else {
-        setLocalDocs([]);
+    const loadDocs = async () => {
+      if (car?.slug) {
+        try {
+          const saved = await docStorage.get(`docs_${car.slug}`);
+          if (saved) {
+            setLocalDocs(saved);
+          } else {
+            setLocalDocs([]);
+          }
+        } catch (error) {
+          console.error("Failed to load from IndexedDB", error);
+        }
       }
-    }
+    };
+    loadDocs();
   }, [car?.slug]);
+
+  // Sync to IndexedDB whenever localDocs changes
+  useEffect(() => {
+    const saveDocs = async () => {
+      if (car?.slug && localDocs.length > 0) {
+        try {
+          await docStorage.set(`docs_${car.slug}`, localDocs);
+        } catch (error) {
+          console.error("Failed to save to IndexedDB", error);
+        }
+      }
+    };
+    saveDocs();
+  }, [localDocs, car?.slug]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -38,11 +60,9 @@ function DocumentList({
 
     try {
       const base64File = await toBase64(file);
-      const newDocs = [...localDocs, base64File];
-      setLocalDocs(newDocs);
-      localStorage.setItem(`docs_${car.slug}`, JSON.stringify(newDocs));
+      setLocalDocs((prev) => [...prev, base64File]);
     } catch (error) {
-      console.error("Error saving to local storage", error);
+      console.error("Error processing file", error);
     }
   };
 

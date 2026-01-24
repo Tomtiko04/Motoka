@@ -1,8 +1,6 @@
 import { Icon } from "@iconify/react";
 import DocumentList from "./DocumentList";
 import LicenseDoc from "./drivers license/licenseDoc";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
 
 function DocumentPage({
   selectedDocument,
@@ -19,34 +17,40 @@ function DocumentPage({
       {docType === "MyCar" ? (
         <div>
           <div className="mb-6">
-            <Swiper
-              spaceBetween={20}
-              slidesPerView={1.2}
-              centeredSlides={false}
-              onSlideChange={(swiper) => onCarChange(swiper.activeIndex)}
-              className="mb-6"
-            >
-              {cars.map((c, idx) => (
-                <SwiperSlide key={c.id || idx}>
-                  <div className={`flex items-center justify-between rounded-[10px] gap-6 px-4 py-2.5 transition-colors ${
-                    car?.id === c.id ? "bg-[#45A1F2]" : "bg-[#F4F5FC]"
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <h3 className={`text-xl font-semibold uppercase whitespace-nowrap ${
-                        car?.id === c.id ? "text-white" : "text-[#05243F]"
-                      }`}>
-                        {c.plate_number || c.registration_no || "N/A"}
-                      </h3>
-                    </div>
-                    <Icon 
-                      icon="ion:car-sport-sharp" 
-                      fontSize={24} 
-                      color={car?.id === c.id ? "#ffffff" : "#05243F"} 
-                    />
+            <div className="relative group w-fit">
+              {/* Invisible select to handle switching functionality */}
+              {cars.length > 1 && (
+                <select
+                  disabled={cars.length <= 1}
+                  onChange={(e) => onCarChange(parseInt(e.target.value))}
+                  value={cars.findIndex((c) => c.id === car?.id)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                >
+                  {cars.map((c, idx) => (
+                    <option key={c.id} value={idx}>
+                      {c.plate_number || c.registration_no || "N/A"} - {c.vehicle_make}
+                    </option>
+                  ))}
+                </select>
+              )}
+              
+              <div className="flex items-center justify-between bg-[#45A1F2] rounded-[10px] w-fit gap-10 px-4 py-2.5 pe-10 hover:bg-[#1b6dbd] transition-all shadow-lg active:scale-95 group">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <p className="text-[9px] text-white/60 font-bold uppercase tracking-widest">{car?.vehicle_make || "VEHICLE"}</p>
+                    <h3 className="text-xl font-bold text-white uppercase whitespace-nowrap leading-tight">
+                      {car?.plate_number || car?.registration_no || "NO PLATE"}
+                    </h3>
                   </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+                  {cars.length > 1 && (
+                    <Icon icon="ri:arrow-down-s-fill" className="text-white mt-3 group-hover:rotate-180 transition-transform" />
+                  )}
+                </div>
+                <div className="absolute right-3">
+                  <Icon icon="ion:car-sport-sharp" fontSize={26} color="#ffffff" />
+                </div>
+              </div>
+            </div>
 
             <div className="w-full flex items-end mt-4">
               <label
