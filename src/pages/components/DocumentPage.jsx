@@ -17,42 +17,38 @@ function DocumentPage({
       {docType === "MyCar" ? (
         <div>
           <div className="mb-6">
-            <div className="relative group w-fit">
-              {/* Invisible select to handle switching functionality */}
-              {cars.length > 1 && (
-                <select
-                  disabled={cars.length <= 1}
-                  onChange={(e) => onCarChange(parseInt(e.target.value))}
-                  value={cars.findIndex((c) => c.id === car?.id)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+            {/* Horizontal List of Selectable Cars */}
+            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+              {cars.map((c, idx) => (
+                <div
+                  key={c.id || idx}
+                  onClick={() => onCarChange(idx)}
+                  className={`flex flex-shrink-0 cursor-pointer items-center justify-between rounded-[10px] min-w-[180px] gap-6 px-4 py-2.5 transition-all shadow-sm ${
+                    car?.id === c.id 
+                      ? "bg-[#45A1F2] text-white scale-[1.02]" 
+                      : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#e8ebf5]"
+                  }`}
                 >
-                  {cars.map((c, idx) => (
-                    <option key={c.id} value={idx}>
-                      {c.plate_number || c.registration_no || "N/A"} - {c.vehicle_make}
-                    </option>
-                  ))}
-                </select>
-              )}
-              
-              <div className="flex items-center justify-between bg-[#45A1F2] rounded-[10px] w-fit gap-10 px-4 py-2.5 pe-10 hover:bg-[#1b6dbd] transition-all shadow-lg active:scale-95 group">
-                <div className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <p className="text-[9px] text-white/60 font-bold uppercase tracking-widest">{car?.vehicle_make || "VEHICLE"}</p>
-                    <h3 className="text-xl font-bold text-white uppercase whitespace-nowrap leading-tight">
-                      {car?.plate_number || car?.registration_no || "NO PLATE"}
+                    <p className={`text-[9px] font-bold uppercase tracking-widest ${
+                      car?.id === c.id ? "text-white/60" : "text-[#05243F]/40"
+                    }`}>
+                      {c.vehicle_make || "Vehicle"}
+                    </p>
+                    <h3 className="text-base font-bold uppercase whitespace-nowrap leading-tight">
+                      {c.plate_number || c.registration_no || "N/A"}
                     </h3>
                   </div>
-                  {cars.length > 1 && (
-                    <Icon icon="ri:arrow-down-s-fill" className="text-white mt-3 group-hover:rotate-180 transition-transform" />
-                  )}
+                  <Icon 
+                    icon="ion:car-sport-sharp" 
+                    fontSize={20} 
+                    color={car?.id === c.id ? "#ffffff" : "#2389E3"} 
+                  />
                 </div>
-                <div className="absolute right-3">
-                  <Icon icon="ion:car-sport-sharp" fontSize={26} color="#ffffff" />
-                </div>
-              </div>
+              ))}
             </div>
 
-            <div className="w-full flex items-end mt-4">
+            <div className="w-full flex items-end mt-2">
               <label
                 htmlFor="year"
                 className="block mb-2 text-sm font-medium text-gray-600 w-full"
