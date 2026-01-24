@@ -62,13 +62,13 @@
 // }
 
 import { useMutation } from '@tanstack/react-query';
-import { verifyPaymentMonicredit, verifyPaystackPayment } from '../../../services/apiPayment';
+import { verifyPayment, verifyPaystackPayment } from '../../../services/apiPayment';
 import { toast } from 'react-hot-toast';
 
 export function usePaymentVerification() {
   const verifyMonicredit = useMutation({
     mutationFn: async (orderId) => {
-      const response = await verifyPaymentMonicredit(orderId);
+      const response = await verifyPayment(orderId);
       return response;
     },
     onSuccess: (data) => {

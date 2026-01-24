@@ -46,7 +46,7 @@ export default function CarDetailsCard({
   onSelect,
   selectedCarId,
 }) {
-  const [carLogo, setCarLogo] = useState(MercedesLogo);
+  // const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
 
   const handleSelect = () => {
@@ -78,15 +78,15 @@ export default function CarDetailsCard({
   //     loadCarLogo();
   //   }, [carDetail?.vehicle_make]);
 
-  useEffect(() => {
-    const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
-    if (carMake) {
-      const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
-      setCarLogo(logoUrl);
-    } else {
-      setCarLogo(defaultLogo);
-    }
-  }, [carDetail?.vehicle_make]);
+  // useEffect(() => {
+  //   const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
+  //   if (carMake) {
+  //     const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
+  //     setCarLogo(logoUrl);
+  //   } else {
+  //     setCarLogo(defaultLogo);
+  //   }
+  // }, [carDetail?.vehicle_make]);
 
   // Use reminder data directly from carDetail (already embedded by backend)
   const reminderMessage =
@@ -135,13 +135,13 @@ export default function CarDetailsCard({
       </div> */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <img
+          {/* <img
             src={carLogo}
             loading="lazy"
             alt={carDetail?.vehicle_make || "Car"}
             className="h-6 w-6 object-contain"
             onError={() => setCarLogo(MercedesLogo)}
-          />
+          /> */}
           <div className={`text-2xl font-semibold ${selectedCarId === carDetail.id ?"text-white":"text-[#05243F]"}`}>
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>

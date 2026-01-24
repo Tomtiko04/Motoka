@@ -126,7 +126,7 @@ export default function Signin() {
 
   return (
     <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between gap-4 overflow-hidden rounded-[20px] bg-white p-3 py-6 px-5 sm:px-3 pt-10 sm:pt-3 sm:py-3 shadow-lg sm:p-4 md:flex-row md:p-5">
+      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between gap-4 overflow-hidden rounded-[20px] bg-white p-3 py-6 px-5 sm:px-3 pt-10 sm:pt-3 sm:py-3 sm:p-4 md:flex-row md:p-5">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />
         </div>
@@ -134,7 +134,7 @@ export default function Signin() {
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
         <div className="w-full overflow-hidden md:w-1/2 p-0 sm:p-4 h-fit self-center">
-          <div className="animate-slideDown mb-4 flex flex-col items-center justify-between space-y-1 sm:mb-6 sm:flex-row sm:space-y-0 md:mt-6">
+          <div className="animate-slideDown mb-4 flex flex-col items-center justify-between space-y-1 sm:mb-8 sm:flex-row sm:space-y-0 md:mt-0">
             <h2 className="text-2xl font-medium text-[#05243F] sm:text-xl">
               Login
             </h2>
@@ -153,7 +153,7 @@ export default function Signin() {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-2 sm:space-y-3"
+            className="space-y-4 sm:space-y-4"
           >
             <div>
               <label
@@ -192,6 +192,7 @@ export default function Signin() {
                   id="password"
                   {...register("password")}
                   type={!showPassword ? "password" : "text"}
+                  placeholder="********"
                   disabled={isLoggingIn}
                   className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-base sm:text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                     isLoggingIn ? "cursor-not-allowed opacity-50" : ""

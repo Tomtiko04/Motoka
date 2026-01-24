@@ -41,8 +41,9 @@ export function useProfile() {
           return null
         }
       } catch (err) {
-        setError(err.message || "An error occurred while fetching profile data", { duration: 3000 })
-        return null
+        const message = err.response?.data?.message || err.message || "An error occurred while fetching profile data";
+        setError(message, { duration: 3000 })
+        return null;
       } finally {
         setLoading(false)
         requestInProgress.current = false
@@ -78,8 +79,9 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while updating profile", { duration: 3000 })
-      setError(err.message || "An error occurred while updating profile", { duration: 3000 })
+      const message = err.response?.data?.message || err.message || "An error occurred while updating profile";
+      toast.error(message, { duration: 3000 })
+      setError(message, { duration: 3000 })
       return null
     } finally {
       setLoading(false)
@@ -110,8 +112,9 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while changing password", { duration: 3000 })
-      setError(err.message || "An error occurred while changing password", { duration: 3000 })
+      const message = err.response?.data?.message || err.message || "An error occurred while changing password";
+      toast.error(message, { duration: 3000 })
+      setError(message, { duration: 3000 })
       return null
     } finally {
       setLoading(false)
@@ -142,8 +145,9 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while deleting account", { duration: 3000 })
-      setError(err.message || "An error occurred while deleting account", { duration: 3000 })
+      const message = err.response?.data?.message || err.message || "An error occurred while deleting account";
+      toast.error(message, { duration: 3000 })
+      setError(message, { duration: 3000 })
       return null
     } finally {
       setLoading(false)

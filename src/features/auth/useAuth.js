@@ -47,7 +47,7 @@ export function useLogin() {
       },
       onError: (err) => {
         toast.dismiss();
-        toast.error(err.message || "Failed to verify 2FA code");
+        toast.error(err.response?.data?.message || err.message || "Failed to verify 2FA code");
       },
       retry: false,
     });
@@ -77,11 +77,11 @@ export function useLogin() {
       }
     },
     onError: (err) => {
-      if (err.message === "Please verify your email before logging in.") {
-        toast.error(err.message);
+      if (err.response?.data?.message === "Please verify your email before logging in.") {
+        toast.error(err.response.data.message);
         navigate("/auth/verify-account");
       } else {
-        toast.error(err.response.data.message || "An error occurred while logging in.");
+        toast.error(err.response?.data?.message || err.message || "An error occurred while logging in.");
       }
     },
     onSettled: () => {},
@@ -95,7 +95,7 @@ export function useLogin() {
       toast.success(data.message || "OTP sent to your email");
     },
     onError: (err) => {
-      toast.error(err.response.data.message || "Failed to send OTP");
+      toast.error(err.response?.data?.message || err.message || "Failed to send OTP");
     },
     retry: false,
   });
@@ -120,7 +120,7 @@ export function useLogin() {
       navigate("/dashboard");
     },
     onError: (err) => {
-      toast.error(err.response.data.message || "Invalid OTP");
+      toast.error(err.response?.data?.message || err.message || "Invalid OTP");
     },
     retry: false,
   });
@@ -161,7 +161,7 @@ export function useSignup() {
     onError: (err) => {
       toast.dismiss();
       toast.error(
-        err.message || "An error occurred during signup.",
+        err.response?.data?.message || err.message || "An error occurred during signup.",
       );
     },
     retry: false,
@@ -184,7 +184,7 @@ export function useVerifyAccount() {
     onError: (err) => {
       toast.dismiss();
       toast.error(
-        err.message || "Verification failed. Please try again.",
+        err.response?.data?.message || err.message || "Verification failed. Please try again.",
       );
     },
     retry: false,
@@ -199,7 +199,7 @@ export function useResendVerification() {
       toast.success(data.message || "Verification code resent!");
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to resend code.");
+      toast.error(err.response?.data?.message || err.message || "Failed to resend code.");
     },
     retry: false,
   });
@@ -213,7 +213,7 @@ export function useForgotPassword(){
       toast.success(data.message || "OTP sent to your email.");
     },
     onError: (err) => {
-      toast.error(err.response.data.message || "Email does not exist. Failed to send OTP.");
+      toast.error(err.response?.data?.message || err.message || "Email does not exist. Failed to send OTP.");
     },
   });
 
@@ -227,7 +227,7 @@ export function useVerifyResetPassword(){
       toast.success(data.message || "OTP verified");
     },
     onError: (err) => {
-      toast.error(err.response.data.message || "Failed to verify OTP.");
+      toast.error(err.response?.data?.message || err.message || "Failed to verify OTP.");
     },
   })
   
@@ -242,7 +242,8 @@ export function useResetPassword(){
     },
     onError: (err) => {
       toast.error(
-        err.response.data.message ||
+        err.response?.data?.message ||
+          err.message ||
           "Failed to reset password. Please try again.",
       );
     },

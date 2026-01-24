@@ -45,7 +45,7 @@ export default function CarDetailsCard({
   isRenew,
   onSelect,
 }) {
-  const [carLogo, setCarLogo] = useState(MercedesLogo);
+  // const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
 
   const handleSelect = () => {
@@ -57,25 +57,25 @@ export default function CarDetailsCard({
   };
 
   // Load car logo
-  useEffect(() => {
-    const loadCarLogo = async () => {
-      try {
-        const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
-        if (carMake) {
-          const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
-          const response = await fetch(logoUrl, { method: "HEAD" });
-          if (response.ok) {
-            setCarLogo(logoUrl);
-          } else {
-            setCarLogo(defaultLogo);
-          }
-        }
-      } catch {
-        setCarLogo(defaultLogo);
-      }
-    };
-    loadCarLogo();
-  }, [carDetail?.vehicle_make]);
+  // useEffect(() => {
+  //   const loadCarLogo = async () => {
+  //     try {
+  //       const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
+  //       if (carMake) {
+  //         const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
+  //         const response = await fetch(logoUrl, { method: "HEAD" });
+  //         if (response.ok) {
+  //           setCarLogo(logoUrl);
+  //         } else {
+  //           setCarLogo(defaultLogo);
+  //         }
+  //       }
+  //     } catch {
+  //       setCarLogo(defaultLogo);
+  //     }
+  //   };
+  //   loadCarLogo();
+  // }, [carDetail?.vehicle_make]);
 
   // Use reminder data directly from carDetail (already embedded by backend)
   const reminderMessage =

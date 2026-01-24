@@ -89,7 +89,7 @@ export default function Signup() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8 flex-1 py-6">
-      <div className="animate-fadeIn flex w-full max-w-4xl flex-col-reverse justify-between gap-8 rounded-[20px] bg-white p-4 shadow-lg sm:p-6 md:flex-row md:p-6">
+      <div className="animate-fadeIn flex w-full max-w-4xl flex-col-reverse justify-between gap-8 rounded-[20px] bg-white p-4 sm:p-6 md:flex-row md:p-6">
         <div className="hidden w-full md:block md:w-1/2">
           <ImageSlider />
         </div>
@@ -212,6 +212,7 @@ export default function Signup() {
                   id="password"
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
+                  placeholder="********"
                   className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                 />
                 <div
@@ -244,6 +245,7 @@ export default function Signup() {
                   id="confirmPassword"
                   {...register("confirmPassword")}
                   type={showConfirmPassword ? "text" : "password"}
+                  placeholder="********"
                   className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                 />
                 <div
