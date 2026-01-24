@@ -315,9 +315,9 @@ export default function AddCar() {
       const today = new Date();
       const expiryDate = new Date(formData.expiryDate);
 
-      if (expiryDate <= today) {
-        newErrors.expiryDate = "Expiry date must be after today";
-      }
+      // if (expiryDate <= today) {
+      //   newErrors.expiryDate = "Expiry date must be after today";
+      // }
 
       if (
         formData.registrationNo &&
@@ -436,7 +436,8 @@ export default function AddCar() {
                 : ""
               }`}
             placeholderText={`Select ${label.toLowerCase()}`}
-            minDate={minDate}
+            minDate={new Date("2020-01-01")}
+maxDate={new Date("2035-12-31")}
             wrapperClassName="w-full"
           />
         </div>
