@@ -192,7 +192,7 @@ export default function Signin() {
                   id="password"
                   {...register("password")}
                   type={!showPassword ? "password" : "text"}
-                  placeholder="********"
+                  placeholder="••••••••••••"
                   disabled={isLoggingIn}
                   className={`mt-1 block w-full rounded-xl bg-[#F4F5FC] px-3 py-2 text-base sm:text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-4 sm:py-3 ${
                     isLoggingIn ? "cursor-not-allowed opacity-50" : ""
