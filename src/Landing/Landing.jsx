@@ -9,6 +9,7 @@ import Mobile from "./components/Mobile";
 import Testimonials from "./components/Testimonials";
 import Whyus from "./components/Whyus";
 import { useEffect, useState } from "react";
+import Action from "./components/Actions";
 
 function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -54,6 +55,7 @@ function LandingPage() {
             <Hero/>
             <Categories/>
             <Whyus/>
+            <Action/>
             <Testimonials/>
             <CtaSection/>
             <FaqsSection/>
