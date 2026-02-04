@@ -1,13 +1,329 @@
+// "use client"
+// import React, { useState } from "react";
+// import { Link } from "react-router-dom";
+// import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+// import toast from "react-hot-toast";
+// import { useSignup } from "./useAuth";
+// import { useForm } from "react-hook-form";
+// import { yupResolver } from "@hookform/resolvers/yup";
+// import * as yup from "yup";
+// import ImageSlider from "../../components/ImageSlider";
+
+
+// export default function Signup() {
+//   const { signupUser, isSigningUp } = useSignup();
+//   const {
+//     register,
+//     handleSubmit,
+//     formState: { errors },
+//   } = useForm({
+//     resolver: yupResolver(schema),
+//     mode: "onChange",
+//     reValidateMode: "onChange",
+//   });
+//   const [showPassword, setShowPassword] = useState(false);
+//   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+//   const onSubmit = (data) => {
+//     const loadingToast = toast.loading("Creating your account...");
+//     try {
+//       signupUser(
+//         {
+//           name: data.name,
+//           email: data.email,
+//           phone_number: data.phone,
+//           password: data.password.trim(),
+//           password_confirmation: data.confirmPassword.trim(),
+//           // nin: data.nin,
+//         },
+//         {
+//           onSuccess: () => {
+//             toast.dismiss(loadingToast);
+//           },
+//           onError: () => {
+//             toast.dismiss(loadingToast);
+//           },
+//         },
+//       );
+//     } catch (error) {
+//       toast.dismiss(loadingToast);
+//       toast.error(error.message || "Signup failed");
+//     }
+//   };
+
+//   return (
+//     <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8 flex-1 py-6">
+//       <div className="animate-fadeIn flex w-full max-w-4xl flex-col-reverse justify-between gap-8 rounded-[20px] bg-white p-4 sm:p-6 md:flex-row md:p-6">
+//         <div className="hidden w-full md:block md:w-1/2">
+//           <ImageSlider />
+//         </div>
+
+//         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
+
+//         <div className="w-full md:w-1/2">
+//           <div className="animate-slideDown mb-6 flex flex-col items-center justify-between space-y-2 sm:mb-9 sm:flex-row sm:space-y-0 md:mt-6">
+//             <h2 className="text-xl font-bold text-[#05243F] sm:text-2xl">
+//               Signup
+//             </h2>
+//             <div className="flex items-center">
+//               <span className="text-sm text-[#a8b2bd]">Have an account?</span>
+//               <Link
+//                 to="/auth/login"
+//                 className="ml-1 text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
+//               >
+//                 Login
+//               </Link>
+//             </div>
+//           </div>
+
+//           <form
+//             onSubmit={handleSubmit(onSubmit)}
+//             className="space-y-4 sm:space-y-5"
+//           >
+//             <div>
+//               <label
+//                 htmlFor="name"
+//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//               >
+//                 Username
+//               </label>
+//               <input
+//                 id="name"
+//                 type="text"
+//                 {...register("name")}
+//                 placeholder="Tomtiko"
+//                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//               />
+//               {errors.name && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//                   {errors.name.message}
+//                 </p>
+//               )}
+//             </div>
+
+//             <div>
+//               <label
+//                 htmlFor="email"
+//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//               >
+//                 Email
+//               </label>
+//               <input
+//                 id="email"
+//                 type="email"
+//                 {...register("email")}
+//                 placeholder="sample@gmail.com"
+//                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//               />
+//               {errors.email && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//                   {errors.email.message}
+//                 </p>
+//               )}
+//             </div>
+
+//             <div>
+//               <label
+//                 htmlFor="phone"
+//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//               >
+//                 Phone Number
+//               </label>
+//               <input
+//                 id="phone"
+//                 type="tel"
+//                 {...register("phone")}
+//                 placeholder="08012345678"
+//                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//               />
+//               {errors.phone && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//                   {errors.phone.message}
+//                 </p>
+//               )}
+//             </div>
+
+//             {/* <div>
+//               <label
+//                 htmlFor="nin"
+//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//               >
+//                 NIN
+//               </label>
+//               <input
+//                 id="nin"
+//                 type="number"
+//                 {...register("nin")}
+//                 placeholder=""
+//                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//               />
+//               {errors.nin && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//                   {errors.nin.message}
+//                 </p>
+//               )}
+//             </div> */}
+
+//             <div>
+//               <label
+//                 htmlFor="password"
+//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//               >
+//                 Password
+//               </label>
+//               <div className="relative">
+//                 <input
+//                   id="password"
+//                   {...register("password")}
+//                   type={showPassword ? "text" : "password"}
+//                   placeholder="••••••••••••"
+//                   className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//                 />
+//                 <div
+//                   className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
+//                   onClick={() => setShowPassword(!showPassword)}
+//                 >
+//                   {showPassword ? (
+//                     <FaRegEyeSlash size={20} />
+//                   ) : (
+//                     <FaRegEye size={20} />
+//                   )}
+//                 </div>
+//               </div>
+//               {errors.password && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//                   {errors.password.message}
+//                 </p>
+//               )}
+//             </div>
+
+//             <div>
+//               <label
+//                 htmlFor="confirmPassword"
+//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//               >
+//                 Confirm Password
+//               </label>
+//               <div className="relative">
+//                 <input
+//                   id="confirmPassword"
+//                   {...register("confirmPassword")}
+//                   type={showConfirmPassword ? "text" : "password"}
+//                   placeholder="••••••••••••"
+//                   className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//                 />
+//                 <div
+//                   className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
+//                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+//                 >
+//                   {showConfirmPassword ? (
+//                     <FaRegEyeSlash size={20} />
+//                   ) : (
+//                     <FaRegEye size={20} />
+//                   )}
+//                 </div>
+//               </div>
+//               {errors.confirmPassword && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//                   {errors.confirmPassword.message}
+//                 </p>
+//               )}
+//             </div>
+
+//             <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+//               <div className="flex items-center">
+//                 <input
+//                   id="terms"
+//                   {...register("terms")}
+//                   type="checkbox"
+//                   className="h-4 w-4 cursor-pointer rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC]"
+//                 />
+//                 <label
+//                   htmlFor="terms"
+//                   className="ml-3 block text-sm text-[#05243F] opacity-40"
+//                 >
+//                   I agree to the Terms & Conditions
+//                 </label>
+//               </div>
+//               {errors.terms && (
+//                 <p className="animate-shake mt-1 text-sm text-[#A73957] sm:mt-0">
+//                   {errors.terms.message}
+//                 </p>
+//               )}
+//             </div>
+
+//             <div>
+//               <button
+//                 type="submit"
+//                 disabled={isSigningUp}
+//                 className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-14 sm:w-36 mb-4"
+//               >
+//                 Sign Up
+//               </button>
+//             </div>
+//           </form>
+
+//           {/* Social login */}
+//           {/* <div className="mt-6">
+//             <div className="relative">
+//               <div className="absolute inset-0 flex items-center">
+//                 <div className="w-full border-t border-[#F2F2F2]"></div>
+//               </div>
+//               <div className="relative flex justify-center text-sm">
+//                 <span className="bg-white px-2 text-[#D9D9D9]">or</span>
+//               </div>
+//             </div>
+
+//             <div className="mt-4 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+//               <span className="text-center text-sm font-medium text-[#05243F] opacity-40 sm:text-sm">
+//                 Signup with socials
+//               </span>
+//               <div className="flex justify-center gap-x-3">
+//                 <button className="h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14">
+//                   <img
+//                     src="https://www.svgrepo.com/show/475656/google-color.svg"
+//                     alt="Google"
+//                     className="mx-auto h-5 w-5"
+//                   />
+//                 </button>
+//                 <button className="h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14">
+//                   <img
+//                     src="https://www.svgrepo.com/show/448224/facebook.svg"
+//                     alt="Facebook"
+//                     className="mx-auto h-5 w-5"
+//                   />
+//                 </button>
+//               </div>
+//             </div>
+//           </div> */}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
 "use client"
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import ImageSlider from "../../components/ImageSlider";
+import SignupImage from "../../components/SignupImage"
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import ImageSlider from "../../components/ImageSlider";
+import TwoFactorVerification from "../../components/TwoFA/TwoFactorVerification";
 
 const schema = yup.object().shape({
   name: yup
@@ -88,250 +404,169 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8 flex-1 py-6">
-      <div className="animate-fadeIn flex w-full max-w-4xl flex-col-reverse justify-between gap-8 rounded-[20px] bg-white p-4 sm:p-6 md:flex-row md:p-6">
+    <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
+      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row px-4 sm:px-0 ">
         <div className="hidden w-full md:block md:w-1/2">
-          <ImageSlider />
+          <SignupImage />
         </div>
 
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
-        <div className="w-full md:w-1/2">
-          <div className="animate-slideDown mb-6 flex flex-col items-center justify-between space-y-2 sm:mb-9 sm:flex-row sm:space-y-0 md:mt-6">
-            <h2 className="text-xl font-bold text-[#05243F] sm:text-2xl">
-              Signup
-            </h2>
-            <div className="flex items-center">
-              <span className="text-sm text-[#a8b2bd]">Have an account?</span>
-              <Link
-                to="/auth/login"
-                className="ml-1 text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-4 sm:space-y-5"
-          >
-            <div>
-              <label
-                htmlFor="name"
-                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-              >
-                Username
-              </label>
-              <input
-                id="name"
-                type="text"
-                {...register("name")}
-                placeholder="Tomtiko"
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-              />
-              {errors.name && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                {...register("email")}
-                placeholder="sample@gmail.com"
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-              />
-              {errors.email && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="phone"
-                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-              >
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                type="tel"
-                {...register("phone")}
-                placeholder="08012345678"
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-              />
-              {errors.phone && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.phone.message}
-                </p>
-              )}
-            </div>
-
-            {/* <div>
-              <label
-                htmlFor="nin"
-                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-              >
-                NIN
-              </label>
-              <input
-                id="nin"
-                type="number"
-                {...register("nin")}
-                placeholder=""
-                className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-              />
-              {errors.nin && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.nin.message}
-                </p>
-              )}
-            </div> */}
-
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••••••"
-                  className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-                />
-                <div
-                  className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <FaRegEyeSlash size={20} />
-                  ) : (
-                    <FaRegEye size={20} />
-                  )}
-                </div>
-              </div>
-              {errors.password && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-              >
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  {...register("confirmPassword")}
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="••••••••••••"
-                  className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-                />
-                <div
-                  className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <FaRegEyeSlash size={20} />
-                  ) : (
-                    <FaRegEye size={20} />
-                  )}
-                </div>
-              </div>
-              {errors.confirmPassword && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className="w-1/2">
+          <div className="w-full overflow-hidden p-0 sm:p-8 flex flex-col h-full flex-1">
+            <div className="animate-slideDown mb-2 flex flex-col space-y-1 sm:mb-2 sm:space-y-1 md:mt-3">
+              <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
+                Signup
+              </h2>
               <div className="flex items-center">
-                <input
-                  id="terms"
-                  {...register("terms")}
-                  type="checkbox"
-                  className="h-4 w-4 cursor-pointer rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC]"
-                />
-                <label
-                  htmlFor="terms"
-                  className="ml-3 block text-sm text-[#05243F] opacity-40"
+                <span className="text-sm text-[#697B8C4A] font-normal">
+                  Have an account?
+                </span>
+                <Link
+                  to="/auth/login"
+                  className="ml-1 text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#A73957]"
                 >
-                  I agree to the Terms & Conditions
-                </label>
-              </div>
-              {errors.terms && (
-                <p className="animate-shake mt-1 text-sm text-[#A73957] sm:mt-0">
-                  {errors.terms.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isSigningUp}
-                className="mx-auto mt-8 flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:mt-14 sm:w-36 mb-4"
-              >
-                Sign Up
-              </button>
-            </div>
-          </form>
-
-          {/* Social login */}
-          {/* <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#F2F2F2]"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-[#D9D9D9]">or</span>
+                  Login
+                </Link>
               </div>
             </div>
-
-            <div className="mt-4 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-              <span className="text-center text-sm font-medium text-[#05243F] opacity-40 sm:text-sm">
-                Signup with socials
-              </span>
-              <div className="flex justify-center gap-x-3">
-                <button className="h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14">
-                  <img
-                    src="https://www.svgrepo.com/show/475656/google-color.svg"
-                    alt="Google"
-                    className="mx-auto h-5 w-5"
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className=" flex flex-col flex-1"
+            >
+              <div className="space-y-3 sm:space-y-3 flex-1 flex items-center flex-col justify-center">
+                <div className="w-full">
+                  <input
+                    id="email"
+                    type="email"
+                    {...register("email")}
+                    placeholder="Enter your Email*"
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none `}
                   />
-                </button>
-                <button className="h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14">
-                  <img
-                    src="https://www.svgrepo.com/show/448224/facebook.svg"
-                    alt="Facebook"
-                    className="mx-auto h-5 w-5"
+                  {errors.email && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <input
+                    id="phone"
+                    type="tel"
+                    {...register("phone")}
+                    placeholder="08012345678"
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none`} />
+                  {errors.phone && (
+                    <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                      {errors.phone.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <div className="relative">
+                    <input id="password"
+                      {...register("password")} type={showPassword ? "text" : "password"}
+                      placeholder="••••••••••••"
+                      className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                    />
+                    <div
+                      className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <FaRegEyeSlash size={20} />
+                      ) : (
+                        <FaRegEye size={20} />
+                      )}
+                    </div>
+                  </div>
+                  {errors.password && (
+                    <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      {...register("confirmPassword")}
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••••••"
+                      className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                    />
+                    <div
+                      className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <FaRegEyeSlash size={20} />
+                      ) : (
+                        <FaRegEye size={20} />
+                      )}
+                    </div>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* <div className="flex items-center w-full">
+                  <input
+                    id="terms"
+                    {...register("terms")}
+                    type="checkbox"
+                    className="h-4 w-4 cursor-pointer rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC]"
                   />
-                </button>
+                  <label
+                    htmlFor="terms"
+                    className="ml-3 block text-sm text-[#05243F] opacity-40"
+                  >
+                    I agree to the Terms & Conditions
+                  </label>
+                </div> */}
+
               </div>
-            </div>
-          </div> */}
+              <div className="mt-0 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="submit"
+                      disabled={isSigningUp}
+                      className="mx-auto flex w-full justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-base font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:w-36"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                  <div className="flex justify-center gap-x-3 items-center">
+                    <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
+                      or Signup with
+                    </span>
+                    <button
+                      disabled={isSigningUp}
+                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp
+                        ? "cursor-not-allowed opacity-50"
+                        : "hover:bg-[#FFF4DD] active:scale-95"
+                        }`}
+                    >
+                      <img
+                        src="https://www.svgrepo.com/show/475656/google-color.svg"
+                        alt="Google"
+                        className="mx-auto h-4 w-4"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </form>
+          </div>
         </div>
       </div>
     </div>
