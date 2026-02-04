@@ -33,16 +33,16 @@ export function useProfile() {
       try {
         const response = await getProfile()
         if (response.success) {
-          setProfileData(response.data)
+          setProfileData(response.data.profile)
           profileFetched.current = true
-          return response.data
+          return response.data.profile
         } else {
           setError("Failed to load profile data")
           return null
         }
       } catch (err) {
         const message = err.response?.data?.message || err.message || "An error occurred while fetching profile data";
-        setError(message, { duration: 3000 })
+        setError(message)
         return null;
       } finally {
         setLoading(false)
@@ -68,7 +68,7 @@ export function useProfile() {
 
       if (response.success) {
        
-        setProfileData(response.data || data)
+        setProfileData(response.data.profile || data)
         
         profileFetched.current = false
         toast.success(response.message || "Profile updated successfully", { duration: 3000 })
@@ -81,7 +81,7 @@ export function useProfile() {
     } catch (err) {
       const message = err.response?.data?.message || err.message || "An error occurred while updating profile";
       toast.error(message, { duration: 3000 })
-      setError(message, { duration: 3000 })
+      setError(message)
       return null
     } finally {
       setLoading(false)
