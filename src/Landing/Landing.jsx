@@ -50,7 +50,7 @@ function LandingPage() {
         }
     },[location])
     return ( 
-        <div className="bg-white">
+        <div className="bg-[#EBF5FF]">
             <Header/>
             <Hero/>
             <Categories/>

@@ -14,7 +14,7 @@ function Header() {
   ];
 
   return (
-    <div className="w-full bg-[#ffffff]">
+    <div className="w-full">
       <div className="mx-auto px-6 sm:px-10">
         <header className="flex flex-wrap items-center justify-between py-2">
           <div className="flex cursor-pointer items-center">
@@ -30,7 +30,7 @@ function Header() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`mx-4 text-base font-normal hover:text-[#126cbb] ${item.name === "Home" ? "text-[#2388E1] bg-[#EBF6FF] rounded-full px-8 py-2" : "text-[#05243F99]"}`}
+                className={`mx-4 text-base font-normal hover:text-[#126cbb] ${item.name === "Home" ? "text-[#2388E1] bg-[#FFFFFF] rounded-lg px-8 py-2 font-bold" : "text-[#05243F99]"}`}
               >
                 {item.name}
               </Link>
@@ -39,13 +39,13 @@ function Header() {
           {/* Mobile Nav Toggle */}
           <div className="flex items-center gap-2">
             <button 
-             className="rounded-[10px] bg-[#2287E0] px-6 py-2 text-base font-semibold text-[#fff] sm:mt-0 "
+             className="rounded-[10px] border-[1.7px] border-[#2287E0] text-[#05243F] px-8 py-2 text-base font-semibold sm:mt-0 "
              onClick={() => navigate("/auth/login")}
              >
               Login
             </button>
             <button
-              className="hidden sm:block rounded-[10px] bg-[#38DA99] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
+              className="hidden sm:block rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
               onClick={() => navigate("/auth/signup")}
             >
               Register
