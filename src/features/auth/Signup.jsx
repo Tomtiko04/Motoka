@@ -320,6 +320,7 @@ import ImageSlider from "../../components/ImageSlider";
 import SignupImage from "../../components/SignupImage"
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -364,6 +365,7 @@ const schema = yup.object().shape({
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,
