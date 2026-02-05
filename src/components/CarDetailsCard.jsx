@@ -95,8 +95,8 @@ export default function CarDetailsCard({
   //   loadCarLogo();
   // }, [carDetail?.vehicle_make]);
 
-  // Use expiry_status from backend (new format)
-  const expiryStatusData = carDetail?.expiry_status;
+  // Use expiry_status from backend (new format), with graceful fallback to legacy "reminder"
+  const expiryStatusData = carDetail?.expiry_status || carDetail?.reminder;
   const statusStyle = getExpiryStatusStyle(expiryStatusData);
   
   // Extract data from expiry_status
