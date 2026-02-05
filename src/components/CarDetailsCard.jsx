@@ -24,35 +24,46 @@ const getExpiryStatusStyle = (expiryStatus) => {
     };
   }
 
-  const { status, label, days_remaining } = expiryStatus;
+  // Support both new shape ({ status, label, days_remaining }) and
+  // legacy backend shape ({ status, message, days_left }).
+  const { status, label, days_remaining, message } = expiryStatus;
+  const effectiveDays =
+    typeof days_remaining === "number" ? days_remaining : expiryStatus.days_left;
+  const effectiveLabel = label || message;
 
   // Map backend status to UI colors
   if (status === "overdue") {
     return { 
       bgColor: "#FFE8E8", 
       dotColor: "#DB8888",
-      message: label || "Overdue"
+      message: effectiveLabel || "Overdue"
     };
   } else if (status === "reminder") {
     // Show red/danger for 0-3 days, warning for 4-30 days
-    if (days_remaining !== null && days_remaining <= 3) {
+    if (typeof effectiveDays === "number" && effectiveDays <= 3) {
       return { 
         bgColor: "#FFE8E8", 
         dotColor: "#DB8888",
-        message: label || `${days_remaining} day${days_remaining === 1 ? '' : 's'} remaining`
+        message:
+          effectiveLabel ||
+          `${effectiveDays} day${effectiveDays === 1 ? "" : "s"} remaining`
       };
     }
     return { 
       bgColor: "#FFEFCE", 
       dotColor: "#FDB022",
-      message: label || `${days_remaining} days remaining`
+      message:
+        effectiveLabel ||
+        (typeof effectiveDays === "number"
+          ? `${effectiveDays} days remaining`
+          : "Reminder active")
     };
   } else {
     // status === "no_reminder"
     return { 
       bgColor: "#E8F5E8", 
       dotColor: "#4CAF50",
-      message: label || "No reminder available"
+      message: effectiveLabel || "No reminder available"
     };
   }
 };
