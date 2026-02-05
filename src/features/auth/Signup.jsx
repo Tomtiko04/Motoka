@@ -551,8 +551,10 @@ export default function Signup() {
                       or Signup with
                     </span>
                     <button
-                      disabled={isSigningUp}
-                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp
+                      type="button"
+                      onClick={() => loginWithGoogle()}
+                      disabled={isSigningUp || isLoadingGoogle}
+                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp || isLoadingGoogle
                         ? "cursor-not-allowed opacity-50"
                         : "hover:bg-[#FFF4DD] active:scale-95"
                         }`}
