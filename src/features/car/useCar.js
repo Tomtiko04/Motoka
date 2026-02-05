@@ -68,10 +68,12 @@ export function useGetCars() {
   const {
     data: cars,
     isLoading,
+    isPending,
     error,
   } = useQuery({
     queryKey: ["cars"],
     queryFn: getCarsApi,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     onError: (error) => {
       toast.error(
         error.response?.data?.message || error.message || "Failed to fetch cars",
@@ -79,7 +81,7 @@ export function useGetCars() {
     },
   });
 
-  return { cars, isLoading, error };
+  return { cars, isLoading: isLoading || isPending, error };
 }
 
 export function useUpdateCarDocuments() {
