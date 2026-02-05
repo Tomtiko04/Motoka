@@ -643,8 +643,10 @@ export default function Signin() {
                     or Login with
                   </span>
                   <button
-                    disabled={isLoggingIn}
-                    className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isLoggingIn
+                    type="button"
+                    onClick={() => loginWithGoogle()}
+                    disabled={isLoggingIn || isLoadingGoogle}
+                    className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isLoggingIn || isLoadingGoogle
                       ? "cursor-not-allowed opacity-50"
                       : "hover:bg-[#FFF4DD] active:scale-95"
                       }`}
