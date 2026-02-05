@@ -146,9 +146,9 @@ export default function CarDetailsCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div
-          className="flex items-center gap-2 rounded-full px-4 py-1.5"
+          className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-1.5 md:w-auto"
           style={{ backgroundColor: reminderStatus.bgColor }}
         >
           <span
@@ -161,7 +161,7 @@ export default function CarDetailsCard({
         </div>
         {isRenew && (
           <button
-            className="cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+            className="w-full cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
             onClick={(e) => {
               e.stopPropagation();
               handleRenewClick();
