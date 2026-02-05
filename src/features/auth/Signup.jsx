@@ -412,9 +412,9 @@ export default function Signup() {
 
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
-        <div className="w-1/2">
-          <div className="w-full overflow-hidden p-0 sm:p-8 flex flex-col h-full flex-1">
-            <div className="animate-slideDown mb-2 flex flex-col space-y-1 sm:mb-2 sm:space-y-1 md:mt-3">
+        <div className="w-full sm:w-1/2">
+          <div className="w-full overflow-hidden p-1 py-8 sm:p-8 flex flex-col h-full flex-1">
+            <div className="animate-slideDown mb-4 flex flex-col space-y-1 sm:mb-2 sm:space-y-1 md:mt-3">
               <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
                 Signup
               </h2>
@@ -432,7 +432,7 @@ export default function Signup() {
             </div>
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className=" flex flex-col flex-1"
+              className=" flex flex-col  flex-1"
             >
               <div className="space-y-3 sm:space-y-3 flex-1 flex items-center flex-col justify-center">
                 <div className="w-full">
@@ -532,8 +532,8 @@ export default function Signup() {
                 </div> */}
 
               </div>
-              <div className="mt-0 w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div className="mt-8 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <button
