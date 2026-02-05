@@ -363,7 +363,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import ImageSlider from "../../components/ImageSlider";
+// import ImageSlider from "../../components/ImageSlider";
 import LoginImage from "../../components/LoginImage"
 import toast from "react-hot-toast";
 import { useLogin } from "./useAuth";

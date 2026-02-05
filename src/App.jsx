@@ -53,22 +53,24 @@ import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
 
-export default function App() {
-  const queryClient = new QueryClient({
-    queryCache: new QueryCache({
-      onError: (error) => {
-        const status = error?.response?.status;
-        if (status === 401) return;
-        const message = error?.response?.data?.message || error?.message || "An error occurred";
-        toast.error(message);
-      },
-    }),
-    defaultOptions: {
-      queries: {
-        staleTime: 0,
-      },
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      const status = error?.response?.status;
+      if (status === 401) return;
+      const message =
+        error?.response?.data?.message || error?.message || "An error occurred";
+      toast.error(message);
     },
-  });
+  }),
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+    },
+  },
+});
+
+export default function App() {
   const { isOpen } = useModalStore();
   return (
     <QueryClientProvider client={queryClient}>

@@ -3,12 +3,11 @@
 import { useNavigate } from "react-router-dom";
 
 import Logo from "../assets/images/Logo.svg";
-import { BsStars } from "react-icons/bs";
 
 export default function Header() {
   const navigate = useNavigate();
   function handleHome() {
-    navigate("/dashboard");
+    navigate("/");
   }
   return (
     <div className="w-full">
