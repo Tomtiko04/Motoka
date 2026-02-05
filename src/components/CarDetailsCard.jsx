@@ -175,7 +175,7 @@ export default function CarDetailsCard({
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div
           className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-1.5 md:w-auto"
-          style={{ backgroundColor: reminderStatus.bgColor }}
+          style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
             className="h-2 w-2 rounded-full"

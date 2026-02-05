@@ -439,6 +439,21 @@ export default function Signup() {
               <div className="space-y-3 sm:space-y-3 flex-1 flex items-center flex-col justify-center">
                 <div className="w-full">
                   <input
+                    id="name"
+                    type="text"
+                    {...register("name")}
+                    placeholder="Enter your Username*"
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none `}
+                  />
+                  {errors.name && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <input
                     id="email"
                     type="email"
                     {...register("email")}
@@ -518,7 +533,7 @@ export default function Signup() {
                   )}
                 </div>
 
-                {/* <div className="flex items-center w-full">
+                <div className="flex items-center w-full">
                   <input
                     id="terms"
                     {...register("terms")}
@@ -531,7 +546,12 @@ export default function Signup() {
                   >
                     I agree to the Terms & Conditions
                   </label>
-                </div> */}
+                </div>
+                {errors.terms && (
+                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                    {errors.terms.message}
+                  </p>
+                )}
 
               </div>
               <div className="mt-0 w-full">
