@@ -4,7 +4,7 @@ import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { logout } from "../services/apiAuth";
 
 import Logo2 from "../assets/images/Logo.svg";
