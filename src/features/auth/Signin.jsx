@@ -496,7 +496,7 @@ export default function Signin() {
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
         <div className="w-full">
-          <div className="w-full overflow-hidden p-0 sm:p-8 flex flex-col h-full flex-1">
+          <div className="w-full overflow-hidden p-1 py-8 sm:p-8 flex flex-col h-full flex-1">
             <div className="animate-slideDown mb-4 flex flex-col space-y-1 sm:mb-8 sm:space-y-1 md:mt-3">
               <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
                 Login
@@ -621,8 +621,8 @@ export default function Signin() {
             </div> */}
             
  </div>
-            <div className="mt-0 sm:mt-3 w-full">
-              <div className="mt-2 flex flex-col space-y-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div className="mt-5 sm:mt-3 w-full">
+              <div className="mt-2 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <button
