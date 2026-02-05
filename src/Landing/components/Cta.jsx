@@ -3,7 +3,7 @@ import backgroundImage from "../../assets/images/landing/c0bb38f1602a93204edb149
 function CtaSection() {
   const navigate = useNavigate();
   return (
-    <div className="-mt-[0] bg-linear-180 from-[#FFF4DE] from-50% to-transparent to-50% px-6 sm:px-20">
+    <div className="-mt-[0] bg-[#ffffff] px-6 sm:px-20">
       <div className="relative mb-20 h-fit overflow-hidden rounded-[20px] bg-cover bg-center sm:h-[544px]">
         <div
           className="absolute inset-0 h-full w-full bg-cover bg-center"
