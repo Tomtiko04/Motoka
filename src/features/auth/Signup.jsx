@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -48,6 +49,7 @@ const schema = yup.object().shape({
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,
@@ -300,7 +302,7 @@ export default function Signup() {
           </form>
 
           {/* Social login */}
-          {/* <div className="mt-6">
+          <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#F2F2F2]"></div>
@@ -315,23 +317,23 @@ export default function Signup() {
                 Signup with socials
               </span>
               <div className="flex justify-center gap-x-3">
-                <button className="h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14">
+                <button 
+                  type="button"
+                  onClick={() => loginWithGoogle()}
+                  disabled={isSigningUp || isLoadingGoogle}
+                  className={`h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14 ${
+                    (isSigningUp || isLoadingGoogle) ? 'cursor-not-allowed opacity-50' : ''
+                  }`}
+                >
                   <img
                     src="https://www.svgrepo.com/show/475656/google-color.svg"
                     alt="Google"
                     className="mx-auto h-5 w-5"
                   />
                 </button>
-                <button className="h-12 w-12 rounded-full bg-[#F4F5FC] transition-all duration-300 hover:bg-[#FFF4DD] active:scale-95 sm:h-14 sm:w-14">
-                  <img
-                    src="https://www.svgrepo.com/show/448224/facebook.svg"
-                    alt="Facebook"
-                    className="mx-auto h-5 w-5"
-                  />
-                </button>
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>

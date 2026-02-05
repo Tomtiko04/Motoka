@@ -5,6 +5,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
 import toast from "react-hot-toast";
 import { useLogin } from "./useAuth";
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -31,6 +32,7 @@ export default function Signin() {
     verifyLoginOtp,
     isVerifyingLoginOtp,
   } = useLogin();
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,
@@ -287,24 +289,26 @@ export default function Signin() {
               </Link>
             </div>
 
-            {/* <div className="relative">
+            <div className="relative mt-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#F2F2F2]"></div>
               </div>
               <div className="relative flex justify-center text-xs">
                 <span className="bg-white px-2 text-[#D9D9D9]">or</span>
               </div>
-            </div> */}
+            </div>
 
-            {/* <div className="mt-2 flex flex-col space-y-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div className="mt-2 flex flex-col space-y-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <span className="text-center text-xs font-medium text-[#05243F] opacity-40">
                 Login with socials
               </span>
               <div className="flex justify-center gap-x-2">
                 <button
-                  disabled={isLoggingIn}
+                  type="button"
+                  onClick={() => loginWithGoogle()}
+                  disabled={isLoggingIn || isLoadingGoogle}
                   className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${
-                    isLoggingIn
+                    isLoggingIn || isLoadingGoogle
                       ? "cursor-not-allowed opacity-50"
                       : "hover:bg-[#FFF4DD] active:scale-95"
                   }`}
@@ -315,22 +319,8 @@ export default function Signin() {
                     className="mx-auto h-4 w-4"
                   />
                 </button>
-                <button
-                  disabled={isLoggingIn}
-                  className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${
-                    isLoggingIn
-                      ? "cursor-not-allowed opacity-50"
-                      : "hover:bg-[#FFF4DD] active:scale-95"
-                  }`}
-                >
-                  <img
-                    src="https://www.svgrepo.com/show/448224/facebook.svg"
-                    alt="Facebook"
-                    className="mx-auto h-4 w-4"
-                  />
-                </button>
               </div>
-            </div> */}
+            </div>
           </div>
 
           {/* 2FA Verification Modal */}

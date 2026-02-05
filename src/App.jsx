@@ -49,6 +49,7 @@ import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import ForgotPassword from "./features/auth/forgotPassword.jsx";
+import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
 
@@ -118,6 +119,7 @@ export default function App() {
               element={<VerificationSuccess />}
             />
             <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="callback" element={<OAuthCallback />} />
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}
