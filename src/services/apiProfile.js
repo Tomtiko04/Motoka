@@ -8,13 +8,13 @@ export async function getProfile() {
       'Pragma': 'no-cache'
     }
   })
-  return data.data // Extract { profile: {...} } from response wrapper
+  return data // Return full response with success field
 }
 
 // Update user profile
 export async function updateProfile(profileData) {
   const { data } = await api.put("/settings/profile", profileData)
-  return data.data // Extract { profile: {...} } from response wrapper
+  return data // Return full response with success field
 }
 
 // Change password
