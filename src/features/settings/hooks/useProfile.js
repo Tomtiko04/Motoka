@@ -114,7 +114,7 @@ export function useProfile() {
     } catch (err) {
       const message = err.response?.data?.message || err.message || "An error occurred while changing password";
       toast.error(message, { duration: 3000 })
-      setError(message, { duration: 3000 })
+      setError(message)
       return null
     } finally {
       setLoading(false)
@@ -147,7 +147,7 @@ export function useProfile() {
     } catch (err) {
       const message = err.response?.data?.message || err.message || "An error occurred while deleting account";
       toast.error(message, { duration: 3000 })
-      setError(message, { duration: 3000 })
+      setError(message)
       return null
     } finally {
       setLoading(false)
