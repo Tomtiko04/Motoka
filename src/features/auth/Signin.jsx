@@ -367,7 +367,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import LoginImage from "../../components/LoginImage"
 import toast from "react-hot-toast";
 import { useLogin } from "./useAuth";
-// import { useGoogleLogin } from "./useOAuth"; // TEMPORARILY DISABLED
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -394,7 +394,7 @@ export default function Signin() {
     verifyLoginOtp,
     isVerifyingLoginOtp,
   } = useLogin();
-  // const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin(); // TEMPORARILY DISABLED
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,
@@ -638,7 +638,6 @@ export default function Signin() {
                     {isLoggingIn ? "Logging in..." : "Login"}
                   </button>
                 </div>
-                {/* GOOGLE AUTH TEMPORARILY DISABLED
                 <div className="flex justify-center gap-x-3 items-center">
                   <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
                     or Login with
@@ -659,7 +658,6 @@ export default function Signin() {
                     />
                   </button>
                 </div>
-                */}
               </div>
               <div className="mt-0 sm:mt-2 text-center">
                 <Link
