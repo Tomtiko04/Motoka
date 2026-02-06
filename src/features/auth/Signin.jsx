@@ -489,11 +489,11 @@ export default function Signin() {
   return (
     <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
       <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row px-4 sm:px-0 ">
-        <div className="hidden w-full md:block md:w-1/2">
+        <div className="hidden w-full md:block sm:w-1/2 shrink-0 border-r border-[#F2F2F2] " >
           <LoginImage />
         </div>
 
-        <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
+        {/* <div className="hidden w-[1px] bg- md:block"></div> */}
 
         <div className="w-full">
           <div className="w-full overflow-hidden p-1 py-8 sm:p-8 flex flex-col h-full flex-1">
@@ -525,7 +525,7 @@ export default function Signin() {
                   {...register("email")}
                   placeholder="Enter your Email*"
                   disabled={isLoggingIn || isSendingLoginOtp}
-                  className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn || isSendingLoginOtp
+                  className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn || isSendingLoginOtp
                     ? "cursor-not-allowed opacity-50"
                     : ""
                     }`}
@@ -545,7 +545,7 @@ export default function Signin() {
                     type={!showPassword ? "password" : "text"}
                     placeholder="Password*"
                     disabled={isLoggingIn}
-                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn ? "cursor-not-allowed opacity-50" : ""
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn ? "cursor-not-allowed opacity-50" : ""
                       }`}
                   />
                   <div
@@ -622,7 +622,7 @@ export default function Signin() {
             
  </div>
             <div className="mt-5 sm:mt-3 w-full">
-              <div className="mt-2 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div className="mt-2 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 gap-5">
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <button
