@@ -521,95 +521,95 @@ export default function Signin() {
               className=" flex flex-col flex-1"
             >
               <div className="space-y-4 sm:space-y-4 flex-1 flex items-center flex-col justify-center">
-              <div className="w-full">
-                <input
-                  id="email"
-                  {...register("email")}
-                  placeholder="Enter your Email*"
-                  disabled={isLoggingIn || isSendingLoginOtp}
-                  className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn || isSendingLoginOtp
-                    ? "cursor-not-allowed opacity-50"
-                    : ""
-                    }`}
-                />
-                {errors.email && (
-                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="w-full">
-                <div className="relative">
+                <div className="w-full">
                   <input
-                    id="password"
-                    {...register("password")}
-                    type={!showPassword ? "password" : "text"}
-                    placeholder="Password*"
-                    disabled={isLoggingIn}
-                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn ? "cursor-not-allowed opacity-50" : ""
+                    id="email"
+                    {...register("email")}
+                    placeholder="Enter your Email*"
+                    disabled={isLoggingIn || isSendingLoginOtp}
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn || isSendingLoginOtp
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
                       }`}
                   />
-                  <div
-                    onClick={() => !isLoggingIn && setShowPassword(!showPassword)}
-                    className={`absolute top-1/2 right-3 -translate-y-1/2 transform text-[#05243F] opacity-40 transition-opacity duration-300 sm:right-4 ${isLoggingIn
-                      ? "cursor-not-allowed"
-                      : "cursor-pointer hover:opacity-100"
-                      }`}
-                  >
-                    {!showPassword ? (
-                      <FaRegEye size={18} />
-                    ) : (
-                      <FaRegEyeSlash size={18} />
-                    )}
+                  {errors.email && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <div className="relative">
+                    <input
+                      id="password"
+                      {...register("password")}
+                      type={!showPassword ? "password" : "text"}
+                      placeholder="Password*"
+                      disabled={isLoggingIn}
+                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn ? "cursor-not-allowed opacity-50" : ""
+                        }`}
+                    />
+                    <div
+                      onClick={() => !isLoggingIn && setShowPassword(!showPassword)}
+                      className={`absolute top-1/2 right-3 -translate-y-1/2 transform text-[#05243F] opacity-40 transition-opacity duration-300 sm:right-4 ${isLoggingIn
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:opacity-100"
+                        }`}
+                    >
+                      {!showPassword ? (
+                        <FaRegEye size={18} />
+                      ) : (
+                        <FaRegEyeSlash size={18} />
+                      )}
+                    </div>
+                  </div>
+                  {errors.password && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-row items-center justify-between space-y-2 w-full">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) =>
+                        !isLoggingIn && setRememberMe(e.target.checked)
+                      }
+                      disabled={isLoggingIn}
+                      className={`h-3 w-3 rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC] ${isLoggingIn
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer"
+                        }`}
+                    />
+                    <label
+                      htmlFor="remember-me"
+                      className={`ml-2 block text-xs text-[#05243F] opacity-40 ${isLoggingIn ? "cursor-not-allowed" : ""
+                        }`}
+                    >
+                      Remember me
+                    </label>
+                  </div>
+
+                  <div className="text-xs">
+                    <Link
+                      to="/auth/forgot-password"
+                      className={`text-[#A73957] opacity-70 transition-opacity duration-300 ${isLoggingIn
+                        ? "pointer-events-none cursor-not-allowed opacity-30"
+                        : "hover:opacity-100"
+                        }`}
+                    >
+                      Forgot Password?
+                    </Link>
                   </div>
                 </div>
-                {errors.password && (
-                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
 
-              <div className="flex flex-row items-center justify-between space-y-2 w-full">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) =>
-                      !isLoggingIn && setRememberMe(e.target.checked)
-                    }
-                    disabled={isLoggingIn}
-                    className={`h-3 w-3 rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC] ${isLoggingIn
-                      ? "cursor-not-allowed opacity-50"
-                      : "cursor-pointer"
-                      }`}
-                  />
-                  <label
-                    htmlFor="remember-me"
-                    className={`ml-2 block text-xs text-[#05243F] opacity-40 ${isLoggingIn ? "cursor-not-allowed" : ""
-                      }`}
-                  >
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-xs">
-                  <Link
-                    to="/auth/forgot-password"
-                    className={`text-[#A73957] opacity-70 transition-opacity duration-300 ${isLoggingIn
-                      ? "pointer-events-none cursor-not-allowed opacity-30"
-                      : "hover:opacity-100"
-                      }`}
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-              </div>
-
-              {/* <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="submit"
                 disabled={isLoggingIn}
@@ -621,24 +621,24 @@ export default function Signin() {
                 {isLoggingIn ? "Logging in..." : "Login"}
               </button>
             </div> */}
-            
- </div>
-            <div className="mt-5 sm:mt-3 w-full">
-              <div className="mt-2 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 gap-5">
 
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <button
-                    type="submit"
-                    disabled={isLoggingIn}
-                    className={`flex-1 rounded-3xl bg-[#2389E3] px-3 py-1.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:w-36 sm:py-2 ${isLoggingIn
-                      ? "transform-none cursor-not-allowed opacity-50 hover:bg-[#2389E3] hover:text-white"
-                      : ""
-                      }`}
-                  >
-                    {isLoggingIn ? "Logging in..." : "Login"}
-                  </button>
-                </div>
-                {/* GOOGLE AUTH TEMPORARILY DISABLED
+              </div>
+              <div className="mt-5 sm:mt-3 w-full">
+                <div className="mt-2 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 gap-5">
+
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="submit"
+                      disabled={isLoggingIn}
+                      className={`flex-1 rounded-3xl bg-[#2389E3] px-3 py-1.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:w-36 sm:py-2 ${isLoggingIn
+                        ? "transform-none cursor-not-allowed opacity-50 hover:bg-[#2389E3] hover:text-white"
+                        : ""
+                        }`}
+                    >
+                      {isLoggingIn ? "Logging in..." : "Login"}
+                    </button>
+                  </div>
+                  {/* GOOGLE AUTH TEMPORARILY DISABLED
                 <div className="flex justify-center gap-x-3 items-center">
                   <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
                     or Login with
@@ -660,18 +660,18 @@ export default function Signin() {
                   </button>
                 </div>
                 */}
+                </div>
+                <div className="mt-0 sm:mt-2 text-center">
+                  <Link
+                    to="/auth/otp-login"
+                    className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#2389E3]/70"
+                  >
+                    Login using OTP instead
+                  </Link>
+                </div>
               </div>
-              <div className="mt-0 sm:mt-2 text-center">
-                <Link
-                  to="/auth/otp-login"
-                  className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#2389E3]/70"
-                >
-                  Login using OTP instead
-                </Link>
-              </div>
-            </div>
-           
-</form>
+
+            </form>
             {/* 2FA Verification Modal */}
             {twoFactorRequired && (
               <TwoFactorVerification

@@ -6,7 +6,7 @@ export default function LoginImage(){
                 <div className="w-[300px] flex items-center justify-center rounded-full overflow-hidden">
                     <img src={image} alt="login image" className="rounded-full block"/>
                 </div>
-                <p className="font-medium text-xl text-center px-6 py- pt-8">
+                <p className="font-medium text-xl text-center px-6 py-2">
                     License, registration,<br />and a lot of explanation
                 </p>
             </div>
