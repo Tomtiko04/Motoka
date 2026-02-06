@@ -14,28 +14,57 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-// Helper function to determine status based on reminder message
-const getReminderStatus = (message) => {
-  if (!message)
-    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
+// Helper function to determine status based on backend expiry_status
+const getExpiryStatusStyle = (expiryStatus) => {
+  if (!expiryStatus || !expiryStatus.status) {
+    return { 
+      bgColor: "#E8F5E8", 
+      dotColor: "#4CAF50",
+      message: "No reminder available" 
+    };
+  }
 
-  const lowerMessage = message.toLowerCase();
+  // Support both new shape ({ status, label, days_remaining }) and
+  // legacy backend shape ({ status, message, days_left }).
+  const { status, label, days_remaining, message } = expiryStatus;
+  const effectiveDays =
+    typeof days_remaining === "number" ? days_remaining : expiryStatus.days_left;
+  const effectiveLabel = label || message;
 
-  if (
-    lowerMessage.includes("expired") ||
-    lowerMessage.includes("expiered") ||
-    lowerMessage.includes("0 day") ||
-    lowerMessage.includes("overdue")
-  ) {
-    return { type: "danger", bgColor: "#FFE8E8", dotColor: "#DB8888" };
-  } else if (
-    lowerMessage.includes("1 day") ||
-    lowerMessage.includes("2 day") ||
-    lowerMessage.includes("3 day")
-  ) {
-    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
+  // Map backend status to UI colors
+  if (status === "overdue") {
+    return { 
+      bgColor: "#FFE8E8", 
+      dotColor: "#DB8888",
+      message: effectiveLabel || "Overdue"
+    };
+  } else if (status === "reminder") {
+    // Show red/danger for 0-3 days, warning for 4-30 days
+    if (typeof effectiveDays === "number" && effectiveDays <= 3) {
+      return { 
+        bgColor: "#FFE8E8", 
+        dotColor: "#DB8888",
+        message:
+          effectiveLabel ||
+          `${effectiveDays} day${effectiveDays === 1 ? "" : "s"} remaining`
+      };
+    }
+    return { 
+      bgColor: "#FFEFCE", 
+      dotColor: "#FDB022",
+      message:
+        effectiveLabel ||
+        (typeof effectiveDays === "number"
+          ? `${effectiveDays} days remaining`
+          : "Reminder active")
+    };
   } else {
-    return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
+    // status === "no_reminder"
+    return { 
+      bgColor: "#E8F5E8", 
+      dotColor: "#4CAF50",
+      message: effectiveLabel || "No reminder available"
+    };
   }
 };
 
@@ -77,17 +106,14 @@ export default function CarDetailsCard({
   //   loadCarLogo();
   // }, [carDetail?.vehicle_make]);
 
-  // Use reminder data directly from carDetail (already embedded by backend)
-  const reminderMessage =
-    carDetail?.reminder?.message || "No reminder available";
-  const reminderStatus = getReminderStatus(reminderMessage);
-
-  // Get additional reminder properties from backend
-  const daysLeft = carDetail?.reminder?.days_left;
-  const reminderStatusType = carDetail?.reminder?.status;
-  const isUrgent = carDetail?.reminder?.is_urgent;
-  const isExpired = carDetail?.reminder?.is_expired;
-  const expiresToday = carDetail?.reminder?.expires_today;
+  // Use expiry_status from backend (new format), with graceful fallback to legacy "reminder"
+  const expiryStatusData = carDetail?.expiry_status || carDetail?.reminder;
+  const statusStyle = getExpiryStatusStyle(expiryStatusData);
+  
+  // Extract data from expiry_status
+  const reminderMessage = statusStyle.message;
+  const daysRemaining = expiryStatusData?.days_remaining;
+  const expiryStatus = expiryStatusData?.status; // "reminder", "overdue", or "no_reminder"
 
   return (
     <div
@@ -146,14 +172,14 @@ export default function CarDetailsCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div
-          className="flex items-center gap-2 rounded-full px-4 py-1.5"
-          style={{ backgroundColor: reminderStatus.bgColor }}
+          className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-1.5 md:w-auto"
+          style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
             className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: reminderStatus.dotColor }}
+            style={{ backgroundColor: statusStyle.dotColor }}
           ></span>
           <span className="text-sm font-medium text-[#05243F]">
             {reminderMessage}
@@ -161,7 +187,7 @@ export default function CarDetailsCard({
         </div>
         {isRenew && (
           <button
-            className="cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+            className="w-full cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
             onClick={(e) => {
               e.stopPropagation();
               handleRenewClick();

@@ -49,25 +49,28 @@ import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import ForgotPassword from "./features/auth/forgotPassword.jsx";
+import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
 
-export default function App() {
-  const queryClient = new QueryClient({
-    queryCache: new QueryCache({
-      onError: (error) => {
-        const status = error?.response?.status;
-        if (status === 401) return;
-        const message = error?.response?.data?.message || error?.message || "An error occurred";
-        toast.error(message);
-      },
-    }),
-    defaultOptions: {
-      queries: {
-        staleTime: 0,
-      },
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      const status = error?.response?.status;
+      if (status === 401) return;
+      const message =
+        error?.response?.data?.message || error?.message || "An error occurred";
+      toast.error(message);
     },
-  });
+  }),
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+    },
+  },
+});
+
+export default function App() {
   const { isOpen } = useModalStore();
   return (
     <QueryClientProvider client={queryClient}>
@@ -118,6 +121,7 @@ export default function App() {
               element={<VerificationSuccess />}
             />
             <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="callback" element={<OAuthCallback />} />
           </Route>
 
           {/* Add Car Route - Special case outside AppLayout */}

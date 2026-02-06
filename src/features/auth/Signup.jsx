@@ -320,6 +320,7 @@ import ImageSlider from "../../components/ImageSlider";
 import SignupImage from "../../components/SignupImage"
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
+// import { useGoogleLogin } from "./useOAuth"; // TEMPORARILY DISABLED
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -364,6 +365,7 @@ const schema = yup.object().shape({
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
+  // const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin(); // TEMPORARILY DISABLED
   const {
     register,
     handleSubmit,
@@ -533,7 +535,7 @@ export default function Signup() {
                   )}
                 </div>
 
-                {/* <div className="flex items-center w-full">
+                <div className="flex items-center w-full">
                   <input
                     id="terms"
                     {...register("terms")}
@@ -546,11 +548,16 @@ export default function Signup() {
                   >
                     I agree to the Terms & Conditions
                   </label>
-                </div> */}
+                </div>
+                {errors.terms && (
+                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                    {errors.terms.message}
+                  </p>
+                )}
 
               </div>
-              <div className="mt-8 w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="mt-0 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <button
@@ -561,13 +568,16 @@ export default function Signup() {
                       Sign Up
                     </button>
                   </div>
+                  {/* GOOGLE AUTH TEMPORARILY DISABLED
                   <div className="flex justify-center gap-x-3 items-center">
                     <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
                       or Signup with
                     </span>
                     <button
-                      disabled={isSigningUp}
-                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp
+                      type="button"
+                      onClick={() => loginWithGoogle()}
+                      disabled={isSigningUp || isLoadingGoogle}
+                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp || isLoadingGoogle
                         ? "cursor-not-allowed opacity-50"
                         : "hover:bg-[#FFF4DD] active:scale-95"
                         }`}
@@ -579,6 +589,7 @@ export default function Signup() {
                       />
                     </button>
                   </div>
+                  */}
                 </div>
               </div>
 
