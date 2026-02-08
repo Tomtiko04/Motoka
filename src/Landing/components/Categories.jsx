@@ -8,6 +8,7 @@ import category6 from "../../assets/images/landing/Group 1171279802 (4).svg";
 import category2 from "../../assets/images/landing/Group 1171279802.svg";
 import { Icon } from "@iconify/react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -188,15 +189,17 @@ function Categories() {
         <div className="relative mt-10 block sm:hidden text-left">
           <Swiper
             spaceBetween={16}
-            slidesPerView={1}
+            slidesPerView={1.1}
             onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
             onSwiper={(swiper) => setActiveIndex(swiper.activeIndex)}
+            pagination
             autoplay={{
               delay: 4000,
               disableOnInteraction: false,
               pauseOnMouseEnter: true,
             }}
             loop={true}
+            modules={[Pagination]}
             className="px-4"
           >
             {CategoryData.map((item, i) => (

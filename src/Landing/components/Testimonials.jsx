@@ -99,9 +99,9 @@ export default function Testimonials() {
                 />
                 </div>
                 {activeIndex === idx && (
-                  <div className="mt-6 relative h-[200px] sm:h-[180px] flex flex-col items-center w-full">
+                  <div className="mt-6 relative h-[200px] sm:h-[185px] flex flex-col items-center w-full">
                     <div className=" absolute w-full sm:w-lg">
-                    <p className="mb-6 text-lg text-gray-700">
+                    <p className="mb-6 text-lg text-gray-700 px-2">
                       {item.text}
                     </p>
                     <p className="font-normal text-[#05203DB2] text-sm ">
