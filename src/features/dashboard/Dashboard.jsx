@@ -15,8 +15,16 @@ import { FaCarAlt, FaPlus } from "react-icons/fa";
 import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function Dashboard() {
-  const { cars, isLoading } = useGetCars();
+  const { cars, isLoading, error } = useGetCars();
   const navigate = useNavigate();
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Dashboard mounted');
+    console.log('Cars data:', cars);
+    console.log('Loading state:', isLoading);
+    console.log('Error state:', error);
+  }, [cars, isLoading, error]);
 
   function handleRenewLicense(carDetail) {
     navigate("/licenses/renew", { state: { carDetail } });
@@ -43,6 +51,27 @@ export default function Dashboard() {
       return dateA - dateB;
     });
   }, [cars?.cars]);
+
+  // If there's an error, show it
+  if (error) {
+    console.error('Dashboard error:', error);
+    return (
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Dashboard</h2>
+            <p className="text-gray-600">{error.message || 'Failed to load dashboard data'}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-[#2389E3] text-white rounded-lg hover:bg-[#2389E3]/90"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">

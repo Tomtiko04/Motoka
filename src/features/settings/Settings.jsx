@@ -32,6 +32,9 @@ import AutocareMaintenance from "./components/autocare-maintenance"
 // import FAQs from "./components/faqs"
 
 export default function SettingsPage() {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Settings.jsx:render',message:'SettingsPage component rendering',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+  // #endregion
   const [activePage, setActivePage] = useState("main")
   const [expandedSection, setExpandedSection] = useState("account")
   const [activeTab, setActiveTab] = useState("collect")
