@@ -4,7 +4,7 @@ import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { LogOut } from "lucide-react";
 import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { logout } from "../services/apiAuth";
 
 import Logo2 from "../assets/images/Logo.svg";
@@ -36,9 +36,11 @@ export default function AppLayout() {
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
 
-  const totalLength = notifications?.data
-    ? Object.values(notifications.data).reduce(
-        (sum, arr) => sum + arr.length,
+  // Compute total notifications from the normalized container returned by the API.
+  // The hook already returns `data.data` from the backend, so `notifications` is the container.
+  const totalLength = notifications
+    ? Object.values(notifications).reduce(
+        (sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0),
         0,
       )
     : 0;

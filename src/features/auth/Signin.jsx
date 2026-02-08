@@ -363,10 +363,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import ImageSlider from "../../components/ImageSlider";
+// import ImageSlider from "../../components/ImageSlider";
 import LoginImage from "../../components/LoginImage"
 import toast from "react-hot-toast";
 import { useLogin } from "./useAuth";
+// import { useGoogleLogin } from "./useOAuth"; // TEMPORARILY DISABLED
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -393,6 +394,7 @@ export default function Signin() {
     verifyLoginOtp,
     isVerifyingLoginOtp,
   } = useLogin();
+  // const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin(); // TEMPORARILY DISABLED
   const {
     register,
     handleSubmit,
@@ -489,11 +491,11 @@ export default function Signin() {
   return (
     <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
       <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row px-4 sm:px-0 ">
-        <div className="hidden w-full md:block md:w-1/2">
+        <div className="hidden w-full md:block sm:w-1/2 shrink-0 border-r border-[#F2F2F2] " >
           <LoginImage />
         </div>
 
-        <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
+        {/* <div className="hidden w-[1px] bg- md:block"></div> */}
 
         <div className="w-full">
           <div className="w-full overflow-hidden p-0 sm:p-8 flex flex-col h-full flex-1">
@@ -519,95 +521,95 @@ export default function Signin() {
               className=" flex flex-col flex-1"
             >
               <div className="space-y-4 sm:space-y-4 flex-1 flex items-center flex-col justify-center">
-              <div className="w-full">
-                <input
-                  id="email"
-                  {...register("email")}
-                  placeholder="Enter your Email*"
-                  disabled={isLoggingIn || isSendingLoginOtp}
-                  className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn || isSendingLoginOtp
-                    ? "cursor-not-allowed opacity-50"
-                    : ""
-                    }`}
-                />
-                {errors.email && (
-                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="w-full">
-                <div className="relative">
+                <div className="w-full">
                   <input
-                    id="password"
-                    {...register("password")}
-                    type={!showPassword ? "password" : "text"}
-                    placeholder="Password*"
-                    disabled={isLoggingIn}
-                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn ? "cursor-not-allowed opacity-50" : ""
+                    id="email"
+                    {...register("email")}
+                    placeholder="Enter your Email*"
+                    disabled={isLoggingIn || isSendingLoginOtp}
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn || isSendingLoginOtp
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
                       }`}
                   />
-                  <div
-                    onClick={() => !isLoggingIn && setShowPassword(!showPassword)}
-                    className={`absolute top-1/2 right-3 -translate-y-1/2 transform text-[#05243F] opacity-40 transition-opacity duration-300 sm:right-4 ${isLoggingIn
-                      ? "cursor-not-allowed"
-                      : "cursor-pointer hover:opacity-100"
-                      }`}
-                  >
-                    {!showPassword ? (
-                      <FaRegEye size={18} />
-                    ) : (
-                      <FaRegEyeSlash size={18} />
-                    )}
+                  {errors.email && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <div className="relative">
+                    <input
+                      id="password"
+                      {...register("password")}
+                      type={!showPassword ? "password" : "text"}
+                      placeholder="Password*"
+                      disabled={isLoggingIn}
+                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 text-base sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isLoggingIn ? "cursor-not-allowed opacity-50" : ""
+                        }`}
+                    />
+                    <div
+                      onClick={() => !isLoggingIn && setShowPassword(!showPassword)}
+                      className={`absolute top-1/2 right-3 -translate-y-1/2 transform text-[#05243F] opacity-40 transition-opacity duration-300 sm:right-4 ${isLoggingIn
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:opacity-100"
+                        }`}
+                    >
+                      {!showPassword ? (
+                        <FaRegEye size={18} />
+                      ) : (
+                        <FaRegEyeSlash size={18} />
+                      )}
+                    </div>
+                  </div>
+                  {errors.password && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-row items-center justify-between space-y-2 w-full">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) =>
+                        !isLoggingIn && setRememberMe(e.target.checked)
+                      }
+                      disabled={isLoggingIn}
+                      className={`h-3 w-3 rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC] ${isLoggingIn
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer"
+                        }`}
+                    />
+                    <label
+                      htmlFor="remember-me"
+                      className={`ml-2 block text-xs text-[#05243F] opacity-40 ${isLoggingIn ? "cursor-not-allowed" : ""
+                        }`}
+                    >
+                      Remember me
+                    </label>
+                  </div>
+
+                  <div className="text-xs">
+                    <Link
+                      to="/auth/forgot-password"
+                      className={`text-[#A73957] opacity-70 transition-opacity duration-300 ${isLoggingIn
+                        ? "pointer-events-none cursor-not-allowed opacity-30"
+                        : "hover:opacity-100"
+                        }`}
+                    >
+                      Forgot Password?
+                    </Link>
                   </div>
                 </div>
-                {errors.password && (
-                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
 
-              <div className="flex flex-row items-center justify-between space-y-2 w-full">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) =>
-                      !isLoggingIn && setRememberMe(e.target.checked)
-                    }
-                    disabled={isLoggingIn}
-                    className={`h-3 w-3 rounded border-[#F4F5FC] text-[#F4F5FC] focus:ring-[#F4F5FC] ${isLoggingIn
-                      ? "cursor-not-allowed opacity-50"
-                      : "cursor-pointer"
-                      }`}
-                  />
-                  <label
-                    htmlFor="remember-me"
-                    className={`ml-2 block text-xs text-[#05243F] opacity-40 ${isLoggingIn ? "cursor-not-allowed" : ""
-                      }`}
-                  >
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-xs">
-                  <Link
-                    to="/auth/forgot-password"
-                    className={`text-[#A73957] opacity-70 transition-opacity duration-300 ${isLoggingIn
-                      ? "pointer-events-none cursor-not-allowed opacity-30"
-                      : "hover:opacity-100"
-                      }`}
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-              </div>
-
-              {/* <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="submit"
                 disabled={isLoggingIn}
@@ -619,30 +621,33 @@ export default function Signin() {
                 {isLoggingIn ? "Logging in..." : "Login"}
               </button>
             </div> */}
-            
- </div>
-            <div className="mt-0 sm:mt-3 w-full">
-              <div className="mt-2 flex flex-col space-y-2 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
 
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <button
-                    type="submit"
-                    disabled={isLoggingIn}
-                    className={`flex-1 rounded-3xl bg-[#2389E3] px-3 py-1.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:w-36 sm:py-2 ${isLoggingIn
-                      ? "transform-none cursor-not-allowed opacity-50 hover:bg-[#2389E3] hover:text-white"
-                      : ""
-                      }`}
-                  >
-                    {isLoggingIn ? "Logging in..." : "Login"}
-                  </button>
-                </div>
+              </div>
+              <div className="mt-5 sm:mt-3 w-full">
+                <div className="mt-2 flex flex-col space-y-4 sm:mt-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 gap-5">
+
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="submit"
+                      disabled={isLoggingIn}
+                      className={`flex-1 rounded-3xl bg-[#2389E3] px-3 py-1.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#FFF4DD] hover:text-[#05243F] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none hover:focus:ring-[#FFF4DD] active:scale-95 sm:w-36 sm:py-2 ${isLoggingIn
+                        ? "transform-none cursor-not-allowed opacity-50 hover:bg-[#2389E3] hover:text-white"
+                        : ""
+                        }`}
+                    >
+                      {isLoggingIn ? "Logging in..." : "Login"}
+                    </button>
+                  </div>
+                  {/* GOOGLE AUTH TEMPORARILY DISABLED
                 <div className="flex justify-center gap-x-3 items-center">
                   <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
                     or Login with
                   </span>
                   <button
-                    disabled={isLoggingIn}
-                    className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isLoggingIn
+                    type="button"
+                    onClick={() => loginWithGoogle()}
+                    disabled={isLoggingIn || isLoadingGoogle}
+                    className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isLoggingIn || isLoadingGoogle
                       ? "cursor-not-allowed opacity-50"
                       : "hover:bg-[#FFF4DD] active:scale-95"
                       }`}
@@ -653,33 +658,20 @@ export default function Signin() {
                       className="mx-auto h-4 w-4"
                     />
                   </button>
-                  {/* <button
-                  disabled={isLoggingIn}
-                  className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${
-                    isLoggingIn
-                      ? "cursor-not-allowed opacity-50"
-                      : "hover:bg-[#FFF4DD] active:scale-95"
-                  }`}
-                >
-                  <img
-                    src="https://www.svgrepo.com/show/448224/facebook.svg"
-                    alt="Facebook"
-                    className="mx-auto h-4 w-4"
-                  />
-                </button> */}
+                </div>
+                */}
+                </div>
+                <div className="mt-0 sm:mt-2 text-center">
+                  <Link
+                    to="/auth/otp-login"
+                    className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#2389E3]/70"
+                  >
+                    Login using OTP instead
+                  </Link>
                 </div>
               </div>
-              <div className="mt-0 sm:mt-2 text-center">
-                <Link
-                  to="/auth/otp-login"
-                  className="text-sm text-[#2389E3] transition-colors duration-300 hover:text-[#2389E3]/70"
-                >
-                  Login using OTP instead
-                </Link>
-              </div>
-            </div>
-           
-</form>
+
+            </form>
             {/* 2FA Verification Modal */}
             {twoFactorRequired && (
               <TwoFactorVerification
