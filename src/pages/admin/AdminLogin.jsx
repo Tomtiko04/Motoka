@@ -140,8 +140,8 @@ const AdminLogin = () => {
                   </svg>
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Check Your Email</h2>
-                <p className="text-sm text-gray-600">
-                  We've sent a 4-digit OTP to <span className="font-medium">{email}</span>
+<p className="text-sm text-gray-600">
+                  We've sent a 6-digit OTP to <span className="font-medium">{email}</span>
                 </p>
               </div>
 
@@ -156,8 +156,8 @@ const AdminLogin = () => {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-center text-lg tracking-widest"
-                    placeholder="0000"
-                    maxLength="4"
+                    placeholder="000000"
+                    maxLength="6"
                     required
                   />
                   <button
@@ -183,7 +183,7 @@ const AdminLogin = () => {
               <div className="space-y-2">
                 <button
                   type="submit"
-                  disabled={loading || otp.length !== 4}
+                  disabled={loading || otp.length !== 6}
                   className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}
