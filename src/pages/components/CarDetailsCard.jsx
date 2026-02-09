@@ -115,8 +115,6 @@ export default function CarDetailsCard({
   const daysRemaining = expiryStatusData?.days_remaining;
   const expiryStatus = expiryStatusData?.status; // "reminder", "overdue", or "no_reminder"
   
-  console.log('Car Detail:', carDetail);
-  console.log('Expiry Status:', expiryStatusData);
   return (
     <div
       className={`cursor-pointer rounded-2xl px-4 py-5 ${selectedCarId === carDetail.id ? "bg-[#45A1F2]" : "bg-white"}`}

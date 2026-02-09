@@ -18,14 +18,6 @@ export default function Dashboard() {
   const { cars, isLoading, error } = useGetCars();
   const navigate = useNavigate();
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('Dashboard mounted');
-    console.log('Cars data:', cars);
-    console.log('Loading state:', isLoading);
-    console.log('Error state:', error);
-  }, [cars, isLoading, error]);
-
   function handleRenewLicense(carDetail) {
     navigate("/licenses/renew", { state: { carDetail } });
   }
