@@ -14,9 +14,17 @@ const api = axios.create({
 
 // Add security headers to all requests
 api.interceptors.request.use((config) => {
+  // #region agent log
+  console.log('[DEBUG-A,E] API Request:', {url: config.url, method: config.method, baseURL: config.baseURL});
+  fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apiClient.js:request-interceptor',message:'API Request outgoing',data:{url:config.url,method:config.method,baseURL:config.baseURL},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,E'})}).catch(()=>{});
+  // #endregion
   // Use registrationToken only for specific registration-related endpoints
   const registrationToken = authStorage.getRegistrationToken()
   const authToken = authStorage.getToken()
+  // #region agent log
+  console.log('[DEBUG-A] Token status:', {hasAuthToken: !!authToken, hasRegToken: !!registrationToken, tokenPreview: authToken ? authToken.substring(0,20)+'...' : 'none'});
+  fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apiClient.js:token-check',message:'Token status',data:{hasAuthToken:!!authToken,hasRegToken:!!registrationToken,tokenPreview:authToken?authToken.substring(0,20)+'...':'none'},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
 
   // Prefer auth token whenever it's available
   if (authToken) {
@@ -36,18 +44,23 @@ api.interceptors.request.use((config) => {
     }
   }
 
-  // Add security headers
-  config.headers["X-Content-Type-Options"] = "nosniff"
-  config.headers["X-Frame-Options"] = "DENY"
-  config.headers["X-XSS-Protection"] = "1; mode=block"
-
   return config
 })
 
 // Handle token refresh and errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // #region agent log
+    console.log('[DEBUG-B] API Response success:', {url: response.config?.url, status: response.status, data: response.data});
+    fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apiClient.js:response-success',message:'API Response success',data:{url:response.config?.url,status:response.status,hasData:!!response.data},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    return response;
+  },
   async (error) => {
+    // #region agent log
+    console.log('[DEBUG-A,B,C] API Response ERROR:', {url: error.config?.url, status: error.response?.status, errorMsg: error.message, responseData: error.response?.data});
+    fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apiClient.js:response-error',message:'API Response error',data:{url:error.config?.url,status:error.response?.status,errorMsg:error.message,responseData:error.response?.data},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C'})}).catch(()=>{});
+    // #endregion
     const originalRequest = error.config
     const registrationToken = authStorage.getRegistrationToken();
     const isRegistrationRequest = originalRequest.url?.includes("add-car") || originalRequest.url?.includes("car/reg");

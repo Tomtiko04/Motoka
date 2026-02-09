@@ -2,55 +2,64 @@ import { api } from "./apiClient";
 import { authStorage } from "../utils/authStorage";
 
 export async function login({ email, password }) {
-  try {
-    const { data } = await api.post("/login2", { email, password });
+  const { data } = await api.post("/login", { email, password });
 
-    // Check if 2FA is required
-    if (data.status === "2fa_required") {
-      return data;
-    }
-
-    // Normal login flow
-    const token = data?.authorization?.token;
-    if (!token) throw new Error("Invalid token response");
-
-    // Stores token securely
-    authStorage.setToken(token);
-    // Clear any registration token after full login
-    authStorage.removeRegistrationToken();
-
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage =
-        error.response.data?.email?.[0] ||
-        error.response.data?.password?.[0] ||
-        error.response.data?.message ||
-        "Login failed";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Login failed");
-    }
+  // Check if 2FA is required (Node.js backend format)
+  if (data.data?.requires_2fa) {
+    return { status: "2fa_required", ...data.data };
   }
+
+  // Normal login flow - Node.js backend returns session.access_token
+  const token = data?.data?.session?.access_token;
+  const refreshTokenValue = data?.data?.session?.refresh_token;
+
+  if (!token) throw new Error("Invalid token response");
+
+  // Store tokens securely
+  authStorage.setToken(token);
+  if (refreshTokenValue) {
+    localStorage.setItem('refresh_token', refreshTokenValue);
+  }
+
+  // Store user info with constructed name
+  if (data?.data?.user) {
+    const user = data.data.user;
+    const userWithName = {
+      ...user,
+      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
+    };
+    authStorage.setUserInfo(userWithName);
+  }
+
+  // Clear any registration token after full login
+  authStorage.removeRegistrationToken();
+
+  return { ...data, authorization: { token }, user: data.data?.user };
 }
 
 export async function refreshToken() {
   try {
-    const currentToken = authStorage.getToken();
-    if (!currentToken) throw new Error("No token available");
+    const refreshTokenValue = localStorage.getItem('refresh_token');
+    if (!refreshTokenValue) throw new Error("No refresh token available");
 
-    const { data } = await api.post("/auth/refresh-token", {
-      token: currentToken,
+    const { data } = await api.post("/refresh", {
+      refresh_token: refreshTokenValue,
     });
-    const newToken = data?.authorization?.token;
+
+    // Node.js backend returns session.access_token
+    const newToken = data?.data?.session?.access_token;
+    const newRefreshToken = data?.data?.session?.refresh_token;
 
     if (!newToken) throw new Error("Invalid refresh token response");
 
     authStorage.setToken(newToken);
+    if (newRefreshToken) {
+      localStorage.setItem('refresh_token', newRefreshToken);
+    }
     return newToken;
-  } catch (error) {
+  } catch {
     authStorage.removeToken();
-    // throw new Error("Failed to refresh token");
+    localStorage.removeItem('refresh_token');
   }
 }
 
@@ -61,11 +70,13 @@ export async function logout() {
     authStorage.removeToken();
     localStorage.removeItem("userInfo");
     localStorage.removeItem("rememberedEmail");
+    localStorage.removeItem("refresh_token");
     return data;
   } catch (error) {
     authStorage.removeToken();
     localStorage.removeItem("userInfo");
     localStorage.removeItem("rememberedEmail");
+    localStorage.removeItem("refresh_token");
     throw new Error(error.response?.data?.message || "Logout failed");
   }
 }
@@ -75,163 +86,124 @@ export async function signupRequest({
   email,
   password,
   password_confirmation,
-  nin,
+  nin: _nin, // Reserved for future KYC
   phone_number,
 }) {
-  try {
-    const { data } = await api.post("/register", {
-      name,
-      email,
-      password,
-      password_confirmation,
-      nin,
-      phone_number,
-    });
+  // Split name into first_name and last_name for Node.js backend
+  const nameParts = (name || '').trim().split(' ');
+  const first_name = nameParts[0] || '';
+  const last_name = nameParts.slice(1).join(' ') || nameParts[0] || '';
 
-    // Store registration token if present
-    if (data.authorization?.token) {
-      authStorage.setRegistrationToken(data.authorization.token);
-    }
+  const { data } = await api.post("/register", {
+    first_name,
+    last_name,
+    email,
+    password,
+    password_confirmation,
+    phone: phone_number,
+  });
 
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage =
-        error.response.data?.email?.[0] ||
-        error.response.data?.password?.[0] ||
-        error.response.data?.name?.[0] ||
-        error.response.data?.message ||
-        "Signup failed";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Signup failed");
-    }
+  // Store registration token - Node.js returns session.access_token
+  const token = data?.data?.session?.access_token;
+  const refreshTokenValue = data?.data?.session?.refresh_token;
+
+  if (token) {
+    authStorage.setRegistrationToken(token);
   }
+  if (refreshTokenValue) {
+    localStorage.setItem('refresh_token', refreshTokenValue);
+  }
+
+  return { ...data, authorization: { token }, user: data?.data?.user };
 }
 
 export async function verifyAccount({ code, email }) {
-  try {
-    const { data } = await api.post("/verify/user", { code, email });
+  // Node.js backend uses /verify-email with otp field
+  const { data } = await api.post("/verify-email", { otp: code, email });
 
-    if (data.user) {
-      authStorage.setUserInfo(data.user);
-    }
+  if (data?.data?.user) {
+    const user = data.data.user;
+    // Construct name from first_name + last_name for localStorage
+    const userWithName = {
+      ...user,
+      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
+    };
+    authStorage.setUserInfo(userWithName);
+  }
 
-    // Store the auth token if provided after verification
-    if (data.authorization?.token) {
-      authStorage.setToken(data.authorization.token);
+  // Store the auth token if provided after verification
+  const token = data?.data?.session?.access_token;
+  const refreshTokenValue = data?.data?.session?.refresh_token;
 
-      // Also ensure we have a registration token for the add-car flow
-      // This is crucial - we need to make sure the registration token exists
-      if (!authStorage.getRegistrationToken()) {
-        authStorage.setRegistrationToken(data.authorization.token);
-      }
-    }
+  if (token) {
+    authStorage.setToken(token);
 
-    // console.log("Account verified successfully:", {
-    //   hasAuthToken: !!authStorage.getToken(),
-    //   hasRegistrationToken: !!authStorage.getRegistrationToken(),
-    //   user: !!data.user,
-    // })
-
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage =
-        error.response.data?.email?.[0] ||
-        error.response.data?.message ||
-        "Account Verification Failed";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Account Verification Failed");
+    // Also ensure we have a registration token for the add-car flow
+    if (!authStorage.getRegistrationToken()) {
+      authStorage.setRegistrationToken(token);
     }
   }
+  if (refreshTokenValue) {
+    localStorage.setItem('refresh_token', refreshTokenValue);
+  }
+
+  return { ...data, authorization: { token }, user: data?.data?.user };
 }
 
 export async function resendVerificationCode(email) {
-  try {
-    const { data } = await api.post("/verify/email-resend", { email });
-    return data;
-  } catch (error) {
-    throw new Error(
-      error.response?.data?.message || "Failed to resend verification code",
-    );
-  }
+  const { data } = await api.post("/verify/email-resend", { email });
+  return data;
 }
 
 // Send OTP for passwordless login
 export async function sendLoginOtp(email) {
-  try {
-    const { data } = await api.post("/send-login-otp", { email });
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage =
-        error.response.data?.email?.[0] ||
-        error.response.data?.message ||
-        "Failed to send login OTP";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to send login OTP");
-    }
-  }
+  const { data } = await api.post("/send-login-otp", { email });
+  return data;
 }
 
 // Verify OTP for passwordless login
 export async function verifyLoginOtp({ email, otp }) {
-  try {
-    const { data } = await api.post("/verify-login-otp", { email, otp });
+  const { data } = await api.post("/verify-login-otp", { email, otp });
 
-    const token = data?.authorization?.token;
-    if (token) {
-      authStorage.setToken(token);
-      // Clear any registration token after full login via OTP
-      authStorage.removeRegistrationToken();
-    }
+  // Node.js backend returns session.access_token
+  const token = data?.data?.session?.access_token;
+  const refreshTokenValue = data?.data?.session?.refresh_token;
 
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage =
-        error.response.data?.otp?.[0] ||
-        error.response.data?.email?.[0] ||
-        error.response.data?.message ||
-        "Failed to verify login OTP";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to verify login OTP");
-    }
+  if (token) {
+    authStorage.setToken(token);
+    // Clear any registration token after full login via OTP
+    authStorage.removeRegistrationToken();
   }
+  if (refreshTokenValue) {
+    localStorage.setItem('refresh_token', refreshTokenValue);
+  }
+
+  // Store user info with constructed name
+  if (data?.data?.user) {
+    const user = data.data.user;
+    const userWithName = {
+      ...user,
+      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
+    };
+    authStorage.setUserInfo(userWithName);
+  }
+
+  return { ...data, authorization: { token }, user: data?.data?.user };
 }
 
-// Forgotten password implementatiom
-export async function ForgotPassword(email){
+// Forgotten password implementation
+export async function ForgotPassword(email) {
   const { data } = await api.post("/send-otp", { email });
-
   return data;
 }
 
-export async function verifyRestPass({email, otp}){
-  const {data} = await api.post("/verify-otp", {email, otp});
-
-  return data;
+export async function verifyRestPass({ email, otp }) {
+  const { data } = await api.post("/verify-otp", { email, otp });
+  // Node.js backend returns reset_token in data.data
+  return { ...data, reset_token: data?.data?.reset_token };
 }
 
-export async function ResetPassword({ email, password, password_confirmation, token }){
-  try {
-    const { data } = await api.post("/reset-password", { email, password, password_confirmation, token });
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage =
-        error.response.data?.otp?.[0] ||
-        error.response.data?.email?.[0] ||
-        error.response.data?.password?.[0] ||
-        error.response.data?.message ||
-        "Failed to reset password";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to reset password");
-    }
-  }
+export async function ResetPassword({ email, password, password_confirmation, token }) {
+  const { data } = await api.post("/reset-password", { email, password, password_confirmation, token });
+  return data;
 }

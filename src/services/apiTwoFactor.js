@@ -2,91 +2,44 @@ import { api } from "./apiClient.js";
 import { authStorage } from "../utils/authStorage";
 
 // Function to handle 2FA verification during login
+// Function to handle 2FA verification during login
 export async function verifyLoginTwoFactor(twoFactorToken, code) {
-  try {
-    const { data } = await api.post("/2fa/verify-login", {
-      "2fa_token": twoFactorToken,
-      code
-    });
-    
-   
-    if (data?.authorization?.token) {
-      authStorage.setToken(data.authorization.token);
-      // Clear any registration token after full login via 2FA
-      authStorage.removeRegistrationToken();
-    }
-    
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage = error.response.data?.message || "Failed to verify 2FA code";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to verify 2FA code");
-    }
+  const { data } = await api.post("/2fa/verify-login", {
+    "2fa_token": twoFactorToken,
+    code
+  });
+
+  if (data?.authorization?.token) {
+    authStorage.setToken(data.authorization.token);
+    // Clear any registration token after full login via 2FA
+    authStorage.removeRegistrationToken();
   }
+
+  return data;
 }
 
 // Enable 2FA via email
 export async function enableTwoFactorEmail() {
-  try {
-    const { data } = await api.post("/2fa/enable-email");
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage = error.response.data?.message || "Failed to enable 2FA via email";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to enable 2FA via email");
-    }
-  }
+  const { data } = await api.post("/2fa/enable-email");
+  return data;
 }
 
 // Enable 2FA via mobile app
 export async function enableTwoFactorApp() {
-  try {
-    const { data } = await api.post("/2fa/enable-google");
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage = error.response.data?.message || "Failed to enable 2FA via mobile app";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to enable 2FA via mobile app");
-    }
-  }
+  const { data } = await api.post("/2fa/enable-google");
+  return data;
 }
 
 // Verify 2FA code sent via email
 export async function verifyTwoFactorEmail(code) {
-  try {
-  
-    const { data } = await api.post("/2fa/verify-email", { code });
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage = error.response.data?.message || "Failed to verify code";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to verify code");
-    }
-  }
+  const { data } = await api.post("/2fa/verify-email", { code });
+  return data;
 }
 
 // Verify 2FA code from mobile app
 export async function verifyTwoFactorApp(code) {
-  try {
-
-    const { data } = await api.post("/2fa/verify-app", { code });
-    return data;
-  } catch (error) {
-    if (error.response) {
-      const errorMessage = error.response.data?.message || "Failed to verify code";
-      throw new Error(errorMessage);
-    } else {
-      throw new Error(error.message || "Failed to verify code");
-    }
-  }
+  const { data } = await api.post("/2fa/verify-app", { code });
+  return data;
 }
 
 // Disable 2FA via email

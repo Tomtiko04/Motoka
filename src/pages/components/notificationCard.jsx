@@ -88,10 +88,10 @@ export default function NotificationCard({ notification }) {
   };
 
   return (
-    <div className="flex items-center justify-between rounded-[10px] bg-[#F4F5FC] p-3 px-4">
+    <div className="flex items-center justify-between rounded-[10px] bg-[#F4F5FC] p-3 px-4 w-full">
       <div className="flex items-center gap-2">
         <div>{renderIcon()}</div>
-        <div>
+        <div className="flex flex-col flex-1 pe-1">
           <p className="p-0 text-[14px] font-[600] text-[#05243F]">
             {category}
           </p>
@@ -100,7 +100,7 @@ export default function NotificationCard({ notification }) {
           </p>
         </div>
       </div>
-      <p className="text-[12px] text-[#05243F66]">{time}</p>
+      <p className="text-[12px] text-[#05243F66] text-nowrap">{time}</p>
     </div>
   );
 }

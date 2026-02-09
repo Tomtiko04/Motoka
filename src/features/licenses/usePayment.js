@@ -30,19 +30,16 @@ export function useInitializePayment() {
     },
     onSuccess: (data) => {
         console.log("payment data", data);
-        
-        if (data.fallback_to_paystack) {
-          toast.success("Redirecting to Paystack for payment...");
-          // Navigate to payment options page with Paystack pre-selected
-          window.location.href = `/payment?fallback=true&data=${encodeURIComponent(JSON.stringify(data))}`;
-        } else if (data.status && data.data?.authorization_url) {
-          toast.success(data.message);
-          window.location.href = data.data.authorization_url;
+        // Do not redirect here. Let the caller (page component) handle navigation to /payment
+        if (data?.fallback_to_paystack) {
+          toast.success("Paystack initialized. Proceeding to payment page...");
+        } else if (data?.status && data?.data?.authorization_url) {
+          toast.success(data?.message || "Payment initialized successfully");
         }
     },
     onError: (error) => {
       console.error("Payment initialization failed:", error);
-      toast.error(error.response.data.message || "Payment initialization failed. Please try again.");
+      toast.error(error.response?.data?.message || error.message || "Payment initialization failed. Please try again.");
     }
   });
 

@@ -14,28 +14,46 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-// Helper function to determine status based on reminder message
-const getReminderStatus = (message) => {
-  if (!message)
-    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
+// Helper function to determine status based on backend expiry_status
+const getExpiryStatusStyle = (expiryStatus) => {
+  if (!expiryStatus || !expiryStatus.status) {
+    return { 
+      bgColor: "#E8F5E8", 
+      dotColor: "#4CAF50",
+      message: "No reminder available" 
+    };
+  }
 
-  const lowerMessage = message.toLowerCase();
+  const { status, label, days_remaining } = expiryStatus;
 
-  if (
-    lowerMessage.includes("expired") ||
-    lowerMessage.includes("expiered") ||
-    lowerMessage.includes("0 day") ||
-    lowerMessage.includes("overdue")
-  ) {
-    return { type: "danger", bgColor: "#FFE8E8", dotColor: "#DB8888" };
-  } else if (
-    lowerMessage.includes("1 day") ||
-    lowerMessage.includes("2 day") ||
-    lowerMessage.includes("3 day")
-  ) {
-    return { type: "warning", bgColor: "#FFEFCE", dotColor: "#FDB022" };
+  // Map backend status to UI colors
+  if (status === "overdue") {
+    return { 
+      bgColor: "#FFE8E8", 
+      dotColor: "#DB8888",
+      message: label || "Overdue"
+    };
+  } else if (status === "reminder") {
+    // Show red/danger for 0-3 days, warning for 4-30 days
+    if (days_remaining !== null && days_remaining <= 3) {
+      return { 
+        bgColor: "#FFE8E8", 
+        dotColor: "#DB8888",
+        message: label || `${days_remaining} day${days_remaining === 1 ? '' : 's'} remaining`
+      };
+    }
+    return { 
+      bgColor: "#FFEFCE", 
+      dotColor: "#FDB022",
+      message: label || `${days_remaining} days remaining`
+    };
   } else {
-    return { type: "normal", bgColor: "#E8F5E8", dotColor: "#4CAF50" };
+    // status === "no_reminder"
+    return { 
+      bgColor: "#E8F5E8", 
+      dotColor: "#4CAF50",
+      message: label || "No reminder available"
+    };
   }
 };
 
@@ -46,7 +64,7 @@ export default function CarDetailsCard({
   onSelect,
   selectedCarId,
 }) {
-  const [carLogo, setCarLogo] = useState(MercedesLogo);
+  // const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
 
   const handleSelect = () => {
@@ -78,28 +96,27 @@ export default function CarDetailsCard({
   //     loadCarLogo();
   //   }, [carDetail?.vehicle_make]);
 
-  useEffect(() => {
-    const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
-    if (carMake) {
-      const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
-      setCarLogo(logoUrl);
-    } else {
-      setCarLogo(defaultLogo);
-    }
-  }, [carDetail?.vehicle_make]);
+  // useEffect(() => {
+  //   const carMake = carDetail?.vehicle_make?.toLowerCase() || "";
+  //   if (carMake) {
+  //     const logoUrl = `https://www.carlogos.org/car-logos/${carMake}-logo.png`;
+  //     setCarLogo(logoUrl);
+  //   } else {
+  //     setCarLogo(defaultLogo);
+  //   }
+  // }, [carDetail?.vehicle_make]);
 
-  // Use reminder data directly from carDetail (already embedded by backend)
-  const reminderMessage =
-    carDetail?.reminder?.message || "No reminder available";
-  const reminderStatus = getReminderStatus(reminderMessage);
-
-  // Get additional reminder properties from backend
-  const daysLeft = carDetail?.reminder?.days_left;
-  const reminderStatusType = carDetail?.reminder?.status;
-  const isUrgent = carDetail?.reminder?.is_urgent;
-  const isExpired = carDetail?.reminder?.is_expired;
-  const expiresToday = carDetail?.reminder?.expires_today;
-  console.log(carDetail);
+  // Use expiry_status from backend (new format)
+  const expiryStatusData = carDetail?.expiry_status;
+  const statusStyle = getExpiryStatusStyle(expiryStatusData);
+  
+  // Extract data from expiry_status
+  const reminderMessage = statusStyle.message;
+  const daysRemaining = expiryStatusData?.days_remaining;
+  const expiryStatus = expiryStatusData?.status; // "reminder", "overdue", or "no_reminder"
+  
+  console.log('Car Detail:', carDetail);
+  console.log('Expiry Status:', expiryStatusData);
   return (
     <div
       className={`cursor-pointer rounded-2xl px-4 py-5 ${selectedCarId === carDetail.id ? "bg-[#45A1F2]" : "bg-white"}`}
@@ -135,13 +152,13 @@ export default function CarDetailsCard({
       </div> */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <img
+          {/* <img
             src={carLogo}
             loading="lazy"
             alt={carDetail?.vehicle_make || "Car"}
             className="h-6 w-6 object-contain"
             onError={() => setCarLogo(MercedesLogo)}
-          />
+          /> */}
           <div className={`text-2xl font-semibold ${selectedCarId === carDetail.id ?"text-white":"text-[#05243F]"}`}>
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
@@ -176,11 +193,11 @@ export default function CarDetailsCard({
       <div className="flex items-center justify-between">
         <div
           className="flex items-center gap-2 rounded-full px-4 py-1.5"
-          style={{ backgroundColor: reminderStatus.bgColor }}
+          style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
             className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: reminderStatus.dotColor }}
+            style={{ backgroundColor: statusStyle.dotColor }}
           ></span>
           <span className="text-sm font-medium text-[#05243F]">
             {reminderMessage}

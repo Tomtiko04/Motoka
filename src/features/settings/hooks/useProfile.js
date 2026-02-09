@@ -31,18 +31,35 @@ export function useProfile() {
       requestInProgress.current = true
 
       try {
+        // #region agent log
+        console.log('[DEBUG-B] fetchProfile try block entered');
+        fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProfile.js:fetchProfile-try',message:'fetchProfile try block entered',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         const response = await getProfile()
+        // #region agent log
+        console.log('[DEBUG-B] getProfile returned:', {responseType: typeof response, hasSuccess: response?.success, hasData: !!response?.data, profileExists: !!response?.data?.profile, responseKeys: response ? Object.keys(response) : [], fullResponse: response});
+        fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProfile.js:fetchProfile-response',message:'getProfile returned',data:{responseType:typeof response,hasSuccess:response?.success,hasData:!!response?.data,profileExists:!!response?.data?.profile,responseKeys:response?Object.keys(response):[]},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         if (response.success) {
-          setProfileData(response.data)
+          setProfileData(response.data.profile)
           profileFetched.current = true
-          return response.data
+          return response.data.profile
         } else {
+          // #region agent log
+          console.log('[DEBUG-B] response.success is falsy:', {response});
+          fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProfile.js:fetchProfile-noSuccess',message:'response.success is falsy',data:{response},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+          // #endregion
           setError("Failed to load profile data")
           return null
         }
       } catch (err) {
-        setError(err.message || "An error occurred while fetching profile data", { duration: 3000 })
-        return null
+        // #region agent log
+        console.log('[DEBUG-B,C] fetchProfile caught error:', {errMsg: err.message, errName: err.name, errResponse: err.response?.data, fullError: err});
+        fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProfile.js:fetchProfile-catch',message:'fetchProfile caught error',data:{errMsg:err.message,errName:err.name,errResponse:err.response?.data},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B,C'})}).catch(()=>{});
+        // #endregion
+        const message = err.response?.data?.message || err.message || "An error occurred while fetching profile data";
+        setError(message)
+        return null;
       } finally {
         setLoading(false)
         requestInProgress.current = false
@@ -67,7 +84,7 @@ export function useProfile() {
 
       if (response.success) {
        
-        setProfileData(response.data || data)
+        setProfileData(response.data.profile || data)
         
         profileFetched.current = false
         toast.success(response.message || "Profile updated successfully", { duration: 3000 })
@@ -78,8 +95,9 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while updating profile", { duration: 3000 })
-      setError(err.message || "An error occurred while updating profile", { duration: 3000 })
+      const message = err.response?.data?.message || err.message || "An error occurred while updating profile";
+      toast.error(message, { duration: 3000 })
+      setError(message)
       return null
     } finally {
       setLoading(false)
@@ -110,8 +128,9 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while changing password", { duration: 3000 })
-      setError(err.message || "An error occurred while changing password", { duration: 3000 })
+      const message = err.response?.data?.message || err.message || "An error occurred while changing password";
+      toast.error(message, { duration: 3000 })
+      setError(message)
       return null
     } finally {
       setLoading(false)
@@ -142,8 +161,9 @@ export function useProfile() {
         return null
       }
     } catch (err) {
-      toast.error(err.message || "An error occurred while deleting account", { duration: 3000 })
-      setError(err.message || "An error occurred while deleting account", { duration: 3000 })
+      const message = err.response?.data?.message || err.message || "An error occurred while deleting account";
+      toast.error(message, { duration: 3000 })
+      setError(message)
       return null
     } finally {
       setLoading(false)
