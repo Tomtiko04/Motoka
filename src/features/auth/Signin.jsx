@@ -367,7 +367,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import LoginImage from "../../components/LoginImage"
 import toast from "react-hot-toast";
 import { useLogin } from "./useAuth";
-// import { useGoogleLogin } from "./useOAuth"; // TEMPORARILY DISABLED
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -394,7 +394,7 @@ export default function Signin() {
     verifyLoginOtp,
     isVerifyingLoginOtp,
   } = useLogin();
-  // const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin(); // TEMPORARILY DISABLED
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,

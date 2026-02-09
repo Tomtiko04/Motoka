@@ -17,21 +17,12 @@ import Avatar from "./ui/avatar";
 import { Icon } from "@iconify/react";
 import love from "../../../assets/images/setting/love-icon.png";
 export default function MainSettings({ onNavigate }) {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main-settings.jsx:render',message:'MainSettings component rendering',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
   const { loading, error, profileData, fetchProfile } = useProfile();
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main-settings.jsx:useProfile-state',message:'useProfile hook state',data:{loading,hasError:!!error,errorMsg:error,hasProfileData:!!profileData,profileDataKeys:profileData?Object.keys(profileData):[]},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
 
   const [fetchInitiated, setFetchInitiated] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1e16ac8b-8456-4f99-b1a0-b5941e2116f7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main-settings.jsx:loadProfile',message:'loadProfile useEffect running',data:{fetchInitiated},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       if (!fetchInitiated) {
         setFetchInitiated(true);
         await fetchProfile(true);

@@ -320,7 +320,7 @@ import ImageSlider from "../../components/ImageSlider";
 import SignupImage from "../../components/SignupImage"
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
-// import { useGoogleLogin } from "./useOAuth"; // TEMPORARILY DISABLED
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -365,7 +365,7 @@ const schema = yup.object().shape({
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
-  // const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin(); // TEMPORARILY DISABLED
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,
@@ -568,7 +568,6 @@ export default function Signup() {
                       Sign Up
                     </button>
                   </div>
-                  {/* GOOGLE AUTH TEMPORARILY DISABLED
                   <div className="flex justify-center gap-x-3 items-center">
                     <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
                       or Signup with
@@ -589,7 +588,6 @@ export default function Signup() {
                       />
                     </button>
                   </div>
-                  */}
                 </div>
               </div>
 
