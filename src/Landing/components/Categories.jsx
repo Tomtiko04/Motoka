@@ -30,6 +30,7 @@ function Categories() {
       image: category1,
       iconName: "mdi:auto-fix",
       bgColor: "#39F3A9",
+      button: "Renew Now"
     },
     {
       id: 2,
@@ -39,6 +40,7 @@ function Categories() {
       image: category2,
       iconName: "icon-park-solid:alarm-clock",
       bgColor: "#FFCC63",
+      button: "set reminder"
     },
     {
       id: 3,
@@ -48,6 +50,7 @@ function Categories() {
       image: category3,
       iconName: "ix:maintenance-filled",
       bgColor: "#E2E2E2",
+      button: "shedule now"
     },
     {
       id: 4,
@@ -57,6 +60,7 @@ function Categories() {
       image: category4,
       iconName: "mynaui:cart-solid",
       bgColor: "#2287E0",
+      button: "shop now"
     },
     {
       id: 5,
@@ -66,6 +70,7 @@ function Categories() {
       image: category5,
       iconName: "mynaui:sparkles-solid",
       bgColor: "#FFCC63",
+      button: "say hi mo"
     },
     {
       id: 6,
@@ -75,6 +80,7 @@ function Categories() {
       image: category6,
       iconName: "entypo:traffic-cone",
       bgColor: "#E2E2E2",
+      button: "get started"
     },
   ];
 
@@ -109,7 +115,7 @@ function Categories() {
               key={item.id}
               onClick={() => setActiveIndex(index)}
               className={`me-1 rounded-[17px] px-4 py-4 text-base font-bold text-[#05243F] transition-all ${
-                index === activeIndex ? "bg-[#F2F2F2] font-bold" : "font-medium"
+                index === activeIndex ? "bg-[#ffffff] font-bold" : "font-medium"
               }`}
             >
               {item.title}
@@ -176,8 +182,8 @@ function Categories() {
                     className="my-6 mt-12 w-full object-contain"
                   />
                   <div className="text-center">
-                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white">
-                      Get Started
+                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white capitalize">
+                      {item.button}
                     </button>
                   </div>
                 </motion.div>
@@ -231,8 +237,8 @@ function Categories() {
                     className="my-6 mt-12 w-full object-contain"
                   />
                   <div className="text-center">
-                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white" onClick={()=>navigate("/auth/signup")}>
-                      Get Started
+                    <button className="mt-6 rounded-[15px] bg-[#05243F] px-6 py-3 text-center text-lg font-bold text-white capitalize" onClick={()=>navigate("/auth/signup")}>
+                      {item.button}
                     </button>
                   </div>
                 </div>

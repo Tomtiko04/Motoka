@@ -33,7 +33,7 @@ function FaqsSection() {
         >
           <button
             onClick={() => setExpanded(expanded === idx + 1 ? 0 : idx + 1)}
-            className={`flex w-full items-center justify-between ${expanded === idx + 1 ? "bg-[#2389E3]" : ""} focus:outline-none px-6 py-5`}
+            className={`flex w-full items-center justify-between ${expanded === idx + 1 ? "bg-[#2389E3]" : ""} focus:outline-none px-6 sm:px-12  py-5 sm:py-6`}
           >
             <h4 className={`text-[18px] font-medium text-[#05243F] text-left ${expanded === idx + 1 ? "text-white" : ""}`}>
               {item.title}
@@ -46,7 +46,7 @@ function FaqsSection() {
           </button>
           {expanded === idx + 1 && (
             <div>
-              <p className="p-4 bg-[#45A1F233] text-[16px] font-medium text-[#05243F99]">
+              <p className="p-4 sm:p-12 sm:py-8 bg-[#FFFFFF] text-[16px] font-medium text-[#05243F99]">
                 {item.content}
               </p>
             </div>
