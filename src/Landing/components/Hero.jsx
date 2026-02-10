@@ -2,7 +2,7 @@ import Image1 from "../../assets/images/landing/pngwing.com (2) 1 (1).webp"
 import Checkmark from "../../assets/images/landing/bitcoin-icons_verify-filled.png"
 function Hero() {
     return ( 
-        <div className="p-4 sm:p-10 text-center">
+        <div className="p-4 sm:p-10 sm:pt-2 text-center">
             <div style={{background: 'linear-gradient(179.91deg, #2287E0 58.76%, #134A7A 99.92%)'}} className=" rounded-[20px] p-6 sm:p-10 text-white flex flex-col items-center justify-center pt-15 sm:pt-32">
                 <h1 className="text-[40px] sm:text-[64px] font-bold max-w-4xl text-left sm:text-center">Drive Assured: Effortless Car Ownership in Nigeria</h1>
                 <p className="text-xl max-w-[634px] pt-4 sm:pt-8 text-left sm:text-center">The all-in-one platform for managing your vehicle and vehicle documents, simplifying renewals, and connecting you with trusted services.</p>

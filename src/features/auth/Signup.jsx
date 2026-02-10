@@ -80,26 +80,26 @@
 //             onSubmit={handleSubmit(onSubmit)}
 //             className="space-y-4 sm:space-y-5"
 //           >
-//             <div>
-//               <label
-//                 htmlFor="name"
-//                 className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
-//               >
-//                 Username
-//               </label>
-//               <input
-//                 id="name"
-//                 type="text"
-//                 {...register("name")}
-//                 placeholder="Tomtiko"
-//                 className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
-//               />
-//               {errors.name && (
-//                 <p className="animate-shake mt-1 text-sm text-[#A73957]">
-//                   {errors.name.message}
-//                 </p>
-//               )}
-//             </div>
+// <div>
+//   <label
+//     htmlFor="name"
+//     className="mb-2 block text-sm font-medium text-[#05243F] sm:mb-3"
+//   >
+//     Username
+//   </label>
+//   <input
+//     id="name"
+//     type="text"
+//     {...register("name")}
+//     placeholder="Tomtiko"
+//     className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+//   />
+//   {errors.name && (
+//     <p className="animate-shake mt-1 text-sm text-[#A73957]">
+//       {errors.name.message}
+//     </p>
+//   )}
+// </div>
 
 //             <div>
 //               <label
@@ -320,6 +320,7 @@ import ImageSlider from "../../components/ImageSlider";
 import SignupImage from "../../components/SignupImage"
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
+import { useGoogleLogin } from "./useOAuth";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -364,6 +365,7 @@ const schema = yup.object().shape({
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
+  const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
   const {
     register,
     handleSubmit,
@@ -412,9 +414,9 @@ export default function Signup() {
 
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
-        <div className="w-1/2">
-          <div className="w-full overflow-hidden p-0 sm:p-8 flex flex-col h-full flex-1">
-            <div className="animate-slideDown mb-2 flex flex-col space-y-1 sm:mb-2 sm:space-y-1 md:mt-3">
+        <div className="w-full md:w-1/2">
+          <div className="w-full overflow-hidden p-1 py-8 sm:p-8 flex flex-col h-full flex-1">
+            <div className="animate-slideDown mb-4 flex flex-col space-y-1 sm:mb-2 sm:space-y-1 md:mt-3">
               <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
                 Signup
               </h2>
@@ -432,43 +434,60 @@ export default function Signup() {
             </div>
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className=" flex flex-col flex-1"
+              className=" flex flex-col  flex-1 overflow-auto"
             >
               <div className="space-y-3 sm:space-y-3 flex-1 flex items-center flex-col justify-center">
+
+
                 <div className="w-full">
                   <input
-                    id="email"
-                    type="email"
-                    {...register("email")}
-                    placeholder="Enter your Email*"
-                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none `}
+                    id="name"
+                    type="text"
+                    {...register("name")}
+                    placeholder="Username*"
+                    className="mt-1 block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                   />
-                  {errors.email && (
-                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="w-full">
-                  <input
-                    id="phone"
-                    type="tel"
-                    {...register("phone")}
-                    placeholder="08012345678"
-                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none`} />
-                  {errors.phone && (
+                  {errors.name && (
                     <p className="animate-shake mt-1 text-sm text-[#A73957]">
-                      {errors.phone.message}
+                      {errors.name.message}
                     </p>
                   )}
                 </div>
+                <div className="flex gap-3">
+                  <div className="w-full">
+                    <input
+                      id="email"
+                      type="email"
+                      {...register("email")}
+                      placeholder="Enter your Email*"
+                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[05243F] placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none `}
+                    />
+                    {errors.email && (
+                      <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
 
+                  <div className="w-full">
+                    <input
+                      id="phone"
+                      type="tel"
+                      {...register("phone")}
+                      placeholder="Phone Number*"
+                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F] placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none`} />
+                    {errors.phone && (
+                      <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                        {errors.phone.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
                 <div className="w-full">
                   <div className="relative">
                     <input id="password"
                       {...register("password")} type={showPassword ? "text" : "password"}
-                      placeholder="••••••••••••"
+                      placeholder="Password*"
                       className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                     />
                     <div
@@ -495,7 +514,7 @@ export default function Signup() {
                       id="confirmPassword"
                       {...register("confirmPassword")}
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="••••••••••••"
+                      placeholder="Confirm Password*"
                       className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                     />
                     <div
@@ -516,7 +535,7 @@ export default function Signup() {
                   )}
                 </div>
 
-                {/* <div className="flex items-center w-full">
+                <div className="flex items-center w-full">
                   <input
                     id="terms"
                     {...register("terms")}
@@ -529,7 +548,12 @@ export default function Signup() {
                   >
                     I agree to the Terms & Conditions
                   </label>
-                </div> */}
+                </div>
+                {errors.terms && (
+                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                    {errors.terms.message}
+                  </p>
+                )}
 
               </div>
               <div className="mt-0 w-full">
@@ -549,8 +573,10 @@ export default function Signup() {
                       or Signup with
                     </span>
                     <button
-                      disabled={isSigningUp}
-                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp
+                      type="button"
+                      onClick={() => loginWithGoogle()}
+                      disabled={isSigningUp || isLoadingGoogle}
+                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp || isLoadingGoogle
                         ? "cursor-not-allowed opacity-50"
                         : "hover:bg-[#FFF4DD] active:scale-95"
                         }`}
