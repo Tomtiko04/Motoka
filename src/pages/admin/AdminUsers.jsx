@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
 
 const AdminUsers = () => {
@@ -22,7 +23,12 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
       
       const params = new URLSearchParams({
         page: currentPage,
@@ -35,7 +41,7 @@ const AdminUsers = () => {
         `${config.getApiBaseUrl()}/admin/users?${params}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -70,14 +76,14 @@ const AdminUsers = () => {
 
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${deleteModal.user.userId}`,
         {
           method: 'DELETE',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -103,14 +109,14 @@ const AdminUsers = () => {
   const handleSuspendUser = async (userId) => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}/suspend`,
         {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -135,14 +141,14 @@ const AdminUsers = () => {
   const handleActivateUser = async (userId) => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}/activate`,
         {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
