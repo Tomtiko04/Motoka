@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import {
   TruckIcon,
   MagnifyingGlassIcon,
@@ -11,6 +14,7 @@ import {
 import config from '../../config/config';
 
 const AdminCars = () => {
+  const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +36,13 @@ const AdminCars = () => {
   const fetchCars = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
+
       const params = new URLSearchParams({
         page: currentPage,
         per_page: 15,
@@ -41,17 +51,20 @@ const AdminCars = () => {
 
       const response = await fetch(`${config.getApiBaseUrl()}/admin/cars?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
 
       const data = await response.json();
       if (data.status) {
-        setCars(data.data.data);
-        setTotalPages(data.data.last_page);
+        setCars(data.data.data || []);
+        setTotalPages(data.data.last_page || 1);
+      } else {
+        toast.error(data.message || 'Failed to fetch cars');
       }
     } catch (error) {
+      console.error('Fetch cars error:', error);
       toast.error('Failed to fetch cars');
     } finally {
       setLoading(false);

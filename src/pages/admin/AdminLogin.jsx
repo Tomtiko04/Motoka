@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import Logo from "../../assets/images/motoka logo.svg";
-import config from '../../config/config';
 
 
 const AdminLogin = () => {
@@ -20,22 +21,27 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/send-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Use Supabase OTP authentication
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          shouldCreateUser: false, // Don't create new users for admin login
         },
-        body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-
-      if (data.status) {
-        setStep('otp');
+      if (error) {
+        // Check if it's an admin user
+        if (error.message.includes('not found') || error.message.includes('disabled')) {
+          setError('Admin account not found or disabled');
+        } else {
+          setError(error.message || 'Failed to send OTP');
+        }
       } else {
-        setError(data.message || 'Failed to send OTP');
+        setStep('otp');
+        toast.success('OTP sent to your email');
       }
     } catch (err) {
+      console.error('Send OTP error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -48,38 +54,70 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp }),
+      // Verify OTP with Supabase
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: otp,
+        type: 'email',
       });
 
-      const data = await response.json();
+      if (error) {
+        setError(error.message || 'Invalid OTP');
+        setLoading(false);
+        return;
+      }
 
-      if (data.status) {
-        // Handle the response structure correctly
-        const token = data.data?.token || data.token;
-        const admin = data.data?.admin || data.admin;
-        
-        if (token) {
-          localStorage.setItem('adminToken', token);
-          localStorage.setItem('adminUser', JSON.stringify(admin));
-          
-          // Trigger a custom event to notify AdminRoutes of the authentication change
-          window.dispatchEvent(new CustomEvent('adminAuthChange', { 
-            detail: { isAuthenticated: true, token } 
-          }));
-          
-          navigate('/admin/dashboard');
-        } else {
-          setError('Token not received from server');
+      if (data.session) {
+        // Check if user is admin
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin, is_suspended, first_name, last_name, user_id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError || !profile) {
+          setError('Failed to verify admin privileges');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
         }
+
+        if (!profile.is_admin) {
+          setError('Access denied: Admin privileges required');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+
+        if (profile.is_suspended) {
+          setError('Your account has been suspended');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+
+        // Store admin info
+        const adminUser = {
+          id: data.user.id,
+          email: data.user.email,
+          name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+          user_id: profile.user_id,
+        };
+        
+        localStorage.setItem('adminUser', JSON.stringify(adminUser));
+        
+        // Trigger a custom event to notify AdminRoutes of the authentication change
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { 
+          detail: { isAuthenticated: true, session: data.session } 
+        }));
+        
+        toast.success('Login successful!');
+        navigate('/admin/dashboard');
       } else {
-        setError(data.message || 'Invalid OTP');
+        setError('Authentication failed');
       }
     } catch (err) {
+      console.error('Verify OTP error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);

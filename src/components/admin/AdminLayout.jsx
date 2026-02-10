@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../../config/supabaseClient';
+import { toast } from 'react-hot-toast';
 import Logo from "../../assets/images/motoka logo.svg";
 import {
   HomeIcon,
@@ -10,7 +12,6 @@ import {
   BellIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
-import config from '../../config/config';
 
 const AdminLayout = () => {
   const [adminUser, setAdminUser] = useState(null);
@@ -18,29 +19,58 @@ const AdminLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    const user = localStorage.getItem('adminUser');
-    
-    if (!token || !user) {
-      navigate('/admin/login');
-      return;
-    }
-    
-    setAdminUser(JSON.parse(user));
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
+
+      // Verify admin privileges
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('is_admin, is_suspended, first_name, last_name, user_id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error || !profile || !profile.is_admin || profile.is_suspended) {
+        toast.error('Access denied: Admin privileges required');
+        await supabase.auth.signOut();
+        navigate('/admin/login');
+        return;
+      }
+
+      const user = {
+        id: session.user.id,
+        email: session.user.email,
+        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+        user_id: profile.user_id,
+      };
+
+      setAdminUser(user);
+      localStorage.setItem('adminUser', JSON.stringify(user));
+    };
+
+    checkAuth();
   }, [navigate]);
 
-  const handleLogout = () => {
-    // Admin uses JWT tokens that are self-contained and expire automatically (30 minutes)
-    // No need to call backend to revoke them
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    
-    // Dispatch event to notify AdminRoutes
-    window.dispatchEvent(new CustomEvent('adminAuthChange', { 
-      detail: { isAuthenticated: false } 
-    }));
-    
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('adminUser');
+      
+      // Dispatch event to notify AdminRoutes
+      window.dispatchEvent(new CustomEvent('adminAuthChange', { 
+        detail: { isAuthenticated: false } 
+      }));
+      
+      toast.success('Logged out successfully');
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
+    }
   };
 
   const navigation = [
