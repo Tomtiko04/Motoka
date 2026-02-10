@@ -12,7 +12,7 @@ export default function Header() {
   return (
     <div className="w-full">
       <div className="mx-auto max-w-[864px] px-4 sm:px-0">
-        <header className="flex flex-wrap items-center justify-between py-4">
+        <header className="flex flex-wrap items-center justify-center md:justify-between py-6 sm:py-4">
           <div
             onClick={handleHome}
             className="flex cursor-pointer items-center"

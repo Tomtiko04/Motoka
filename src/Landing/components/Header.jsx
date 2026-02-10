@@ -39,13 +39,13 @@ function Header() {
           {/* Mobile Nav Toggle */}
           <div className="flex items-center gap-2">
             <button 
-             className="rounded-[10px] border-[1.7px] border-[#2287E0] text-[#05243F] px-8 py-2 text-base font-semibold sm:mt-0 "
+             className="hidden md:block rounded-[10px] border-[1.7px] border-[#2287E0] text-[#05243F] hover:text-white hover:bg-[#2287E0] transition-colors duration-300 ease-in-out px-8 py-2 text-base font-semibold sm:mt-0 "
              onClick={() => navigate("/auth/login")}
              >
               Login
             </button>
             <button
-              className="hidden sm:block rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
+              className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
               onClick={() => navigate("/auth/signup")}
             >
               Register
@@ -76,11 +76,11 @@ function Header() {
               </Link>
 
             ))}
-            <button
-              className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-lg font-semibold text-[#05243F] sm:mt-0"
-              onClick={() => navigate("/auth/signup")}
-            >
-              Register
+            <button 
+             className="rounded-[10px] border-[1.7px] border-[#2287E0] text-white bg-[#2287E0] transition-colors duration-300 ease-in-out px-8 py-2 text-base font-semibold sm:mt-0 "
+             onClick={() => navigate("/auth/login")}
+             >
+              Login
             </button>
           </nav>
         )}

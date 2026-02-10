@@ -4,7 +4,7 @@ function CtaSection() {
   const navigate = useNavigate();
   return (
     <div className="-mt-[0] bg-[#ffffff] px-6 sm:px-20">
-      <div className="relative mb-20 h-fit overflow-hidden rounded-[20px] bg-cover bg-center sm:h-[544px]">
+      <div className="relative mb-20 h-[500px] overflow-hidden rounded-[20px] bg-cover bg-center sm:h-[544px]">
         <div
           className="absolute inset-0 h-full w-full bg-cover bg-center"
           style={{ backgroundImage: `url(${backgroundImage})` }}
