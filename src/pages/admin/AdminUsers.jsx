@@ -92,7 +92,7 @@ const AdminUsers = () => {
       const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
-        `${config.getApiBaseUrl()}/admin/users/${deleteModal.user.userId}`,
+        `${config.getApiBaseUrl()}/admin/users/${deleteModal.user.id}`,
         {
           method: 'DELETE',
           headers: {
@@ -357,7 +357,7 @@ const AdminUsers = () => {
                     <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
                         <button
-                          onClick={() => handleViewUser(user.userId)}
+                          onClick={() => handleViewUser(user.id)}
                           className="text-blue-600 hover:text-blue-900"
                           title="View details"
                         >
@@ -367,7 +367,7 @@ const AdminUsers = () => {
                           <>
                             {user.is_suspended ? (
                               <button
-                                onClick={() => handleActivateUser(user.userId)}
+                                onClick={() => handleActivateUser(user.id)}
                                 disabled={actionLoading}
                                 className="text-green-600 hover:text-green-900 disabled:opacity-50"
                                 title="Activate user"
@@ -376,7 +376,7 @@ const AdminUsers = () => {
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleSuspendUser(user.userId)}
+                                onClick={() => handleSuspendUser(user.id)}
                                 disabled={actionLoading}
                                 className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
                                 title="Suspend user"
