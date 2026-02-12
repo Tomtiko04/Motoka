@@ -149,24 +149,24 @@ export default function CarDetailsCard({
         </div>
       </div>
 
-      <div className="mb-6 flex items-center">
-        <div>
-          <div className="text-sm text-nowrap text-[#05243F]/60">Plate No:</div>
-          <div className="text-base font-semibold text-[#05243F]">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm text-[#05243F]/60">Plate No:</div>
+          <div className="truncate text-base font-semibold text-[#05243F]">
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
-        <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-        <div>
-          <div className="text-sm text-nowrap text-[#05243F]/60">Exp. Date</div>
-          <div className="text-base font-semibold text-nowrap text-[#05243F]">
+        <div className="mx-3 h-8 w-[1px] shrink-0 bg-[#E1E5EE]"></div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm text-[#05243F]/60">Exp. Date</div>
+          <div className="truncate text-base font-semibold text-[#05243F]">
             {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
-        <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-        <div>
-          <div className="text-sm text-nowrap text-[#05243F]/60">Car Type</div>
-          <div className="text-base font-semibold text-nowrap text-[#05243F]">
+        <div className="mx-3 h-8 w-[1px] shrink-0 bg-[#E1E5EE]"></div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm text-[#05243F]/60">Car Type</div>
+          <div className="truncate text-base font-semibold text-[#05243F]">
             {carDetail?.vehicle_make || "-"}
           </div>
         </div>
