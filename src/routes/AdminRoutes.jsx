@@ -19,9 +19,10 @@ const AdminRoutes = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for admin token on component mount
+    // Check for admin token or adminUser (Supabase flow)
     const token = localStorage.getItem('adminToken');
-    setIsAuthenticated(!!token);
+    const adminUser = localStorage.getItem('adminUser');
+    setIsAuthenticated(!!token || !!adminUser);
     setIsLoading(false);
   }, []);
 
@@ -29,7 +30,8 @@ const AdminRoutes = () => {
   useEffect(() => {
     const handleStorageChange = () => {
       const token = localStorage.getItem('adminToken');
-      setIsAuthenticated(!!token);
+      const adminUser = localStorage.getItem('adminUser');
+      setIsAuthenticated(!!token || !!adminUser);
     };
 
     const handleAuthChange = (event) => {

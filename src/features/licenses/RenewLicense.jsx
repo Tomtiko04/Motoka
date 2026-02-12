@@ -30,7 +30,8 @@ export default function RenewLicense() {
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
-    state: "",
+    state: "",          // State code for backend
+    stateName: "",      // State name for display
     fee: "0",
     contact: "",
     amount: "0",
@@ -213,7 +214,8 @@ export default function RenewLicense() {
     return (
       deliveryDetails.address.trim() !== "" &&
       deliveryDetails.lg.trim() !== "" &&
-      deliveryDetails.state.trim() !== "" &&
+      deliveryDetails.state.trim() !== "" &&      // Check state code
+      deliveryDetails.stateName.trim() !== "" &&  // Check state name
       deliveryDetails.contact.trim() !== "" &&
       selectedSchedules.length > 0 &&
       getAvailableSchedules().length > 0 // Has available (unpaid) schedules
@@ -244,33 +246,38 @@ export default function RenewLicense() {
   // When state changes, fetch LGAs for that state
   const handleStateChange = (e) => {
     const selectedStateName = e.target.value;
-    handleDeliveryChange("state", selectedStateName);
-    handleDeliveryChange("lg", "");
-    // Find state_id
+    // Find state
     const selectedState = isState?.find(
       (s) => s.state_name === selectedStateName,
     );
     if (selectedState) {
-      fetchLGAs(selectedState.id);
+      // Save BOTH state code (for backend) and name (for display)
+      setDeliveryDetails((prev) => ({
+        ...prev,
+        state: selectedState.code,           // Backend needs code
+        stateName: selectedStateName,        // Display needs name
+        lg: "",
+        fee: selectedState.delivery_fee || "0",
+      }));
+      // Fetch LGAs using state code
+      fetchLGAs(selectedState.code);
     } else {
+      setDeliveryDetails((prev) => ({
+        ...prev,
+        state: "",
+        stateName: "",
+        lg: "",
+        fee: "0",
+      }));
       setLgaOptions([]);
     }
-    // Reset delivery fee when state changes
-    handleDeliveryChange("fee", "0");
   };
 
-  // When LGA changes, set delivery fee
+  // When LGA changes, just update the LGA (fee is already set from state)
   const handleLgaChange = (e) => {
     const selectedLgaName = e.target.value;
     handleDeliveryChange("lg", selectedLgaName);
-    const selectedLga = lgaOptions.find(
-      (lga) => lga.lga_name === selectedLgaName,
-    );
-    if (selectedLga && selectedLga.delivery_fee) {
-      handleDeliveryChange("fee", selectedLga.delivery_fee.fee);
-    } else {
-      handleDeliveryChange("fee", "0");
-    }
+    // Note: Delivery fee is per state, not per LGA, so no need to update it here
   };
 
   // Helper function to get state_id and lga_id
@@ -296,10 +303,8 @@ export default function RenewLicense() {
       return;
     }
 
-    const stateId = getStateId();
-    const lgaId = getLgaId();
-
-    if (!stateId || !lgaId) {
+    // Validate state and LGA names are selected
+    if (!deliveryDetails.state || !deliveryDetails.lg) {
       console.error("Invalid state or LGA selection");
       return;
     }
@@ -318,11 +323,11 @@ export default function RenewLicense() {
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
-      meta_data: {
-        delivery_address: deliveryDetails.address,
-        delivery_contact: deliveryDetails.contact,
-        state_id: stateId,
-        lga_id: lgaId,
+      delivery_details: {
+        address: deliveryDetails.address,
+        contact: deliveryDetails.contact,
+        state: deliveryDetails.state,  // Send state name
+        lga: deliveryDetails.lg,        // Send LGA name
       },
     };
 
@@ -336,10 +341,8 @@ export default function RenewLicense() {
   React.useEffect(() => {
     if (!paymentInitData) return;
 
-    // Support both Monicredit and Paystack response shapes
-    // Monicredit: { status, data: { data: { ...session } } }
-    // Paystack:   { status, data: { ...session } }
-    const inner = paymentInitData?.data?.data || null;
+    // Backend returns: { status, data: { reference, authorization_url, ... } }
+    const inner = paymentInitData?.data || null;
     if (!inner) return;
 
     // Normalize into the structure PaymentOptions expects
@@ -531,7 +534,7 @@ export default function RenewLicense() {
                   Renewal Amount
                 </div>
                 <div className="mt-3 w-full rounded-[10px] border-3 border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/40">
-                  {formatCurrency(Number(deliveryDetails.amount))}
+                  {formatCurrency(Number(deliveryDetails.amount) / 100)}
                 </div>
               </div>
 
@@ -556,7 +559,7 @@ export default function RenewLicense() {
                   <SearchableSelect
                     label="State"
                     name="state"
-                    value={deliveryDetails.state}
+                    value={deliveryDetails.stateName}
                     onChange={handleStateChange}
                     options={
                       Array.isArray(isState)
@@ -603,7 +606,7 @@ export default function RenewLicense() {
                 <input
                   disabled={true}
                   type="text"
-                  value={formatCurrency(deliveryDetails.fee)}
+                  value={formatCurrency(Number(deliveryDetails.fee) / 100)}
                   onChange={(e) => handleDeliveryChange("fee", e.target.value)}
                   className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
                   placeholder="Enter delivery fee"
@@ -652,8 +655,8 @@ export default function RenewLicense() {
                   <>
                     ₦
                     {(
-                      Number(deliveryDetails.amount) +
-                      Number(deliveryDetails.fee)
+                      (Number(deliveryDetails.amount) +
+                      Number(deliveryDetails.fee)) / 100
                     ).toLocaleString()}{" "}
                     Pay Now
                     {isPaymentInitializing && "..."}

@@ -164,7 +164,7 @@ const AdminPayments = () => {
         <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
           <CreditCardIcon className="h-6 w-6 text-blue-600" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Transaction</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Transaction</h1>
       </div>
 
       {/* Summary Cards */}

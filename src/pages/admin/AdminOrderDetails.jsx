@@ -453,7 +453,7 @@ const AdminOrderDetails = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Order Details</h1>
             <p className="mt-1 text-sm text-gray-500">
               Order #{order.slug?.substring(0, 8)}
             </p>
