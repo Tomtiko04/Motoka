@@ -490,7 +490,7 @@ export default function Signin() {
 
   return (
     <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row p-4 sm:px-0">
+      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row p-4 sm:p-0 sm:px-0">
         <div className="hidden w-full md:block sm:w-1/2 shrink-0 border-r border-[#F2F2F2] " >
           <LoginImage />
         </div>
