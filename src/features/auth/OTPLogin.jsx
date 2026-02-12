@@ -187,7 +187,7 @@ export default function OTPLogin() {
         </div> */}
 
       {/* Right side - Login Form */}
-      <div className="w-full flex items-center justify-center lg:px-8 p-3 py-6 pt-10 px-9 sm:px-9 sm:py-8 sm:p-4 sm:pt-12 ">
+      <div className="w-full flex items-center justify-center lg:px-8 p-3 py-6 pt-10 px-4 sm:px-9 sm:py-8 sm:p-4 sm:pt-12">
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
           <div className="text-center">
@@ -251,7 +251,7 @@ export default function OTPLogin() {
               <button
                 type="submit"
                 disabled={isSendingOTP}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#2389E3] hover:bg-[#3795e7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#2389E3] hover:bg-[#3795e7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSendingOTP ? (
                   <div className="flex items-center">
@@ -346,7 +346,7 @@ export default function OTPLogin() {
               </Link>
             </p>
             <p className="text-sm text-gray-600">
-              Prefer password login?{" "}
+              Or?{" "}
               <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
                 Sign in with password
               </Link>
