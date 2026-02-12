@@ -32,7 +32,14 @@ const getExpiryStatusStyle = (expiryStatus) => {
   const effectiveLabel = label || message;
 
   // Map backend status to UI colors
-  if (status === "overdue") {
+  if (status === "renewal_pending") {
+    // Renewal order in progress
+    return {
+      bgColor: "#E3F2FD",
+      dotColor: "#2196F3",
+      message: "Renewal in progress"
+    };
+  } else if (status === "overdue") {
     return { 
       bgColor: "#FFE8E8", 
       dotColor: "#DB8888",
@@ -172,9 +179,9 @@ export default function CarDetailsCard({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center justify-between">
         <div
-          className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-1.5 md:w-auto"
+          className="flex items-center gap-2 rounded-full px-4 py-1.5"
           style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
@@ -187,7 +194,7 @@ export default function CarDetailsCard({
         </div>
         {isRenew && (
           <button
-            className="w-full cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
+            className="cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
             onClick={(e) => {
               e.stopPropagation();
               handleRenewClick();

@@ -24,35 +24,44 @@ const getExpiryStatusStyle = (expiryStatus) => {
     };
   }
 
-  const { status, label, days_remaining } = expiryStatus;
+  const { status, label, days_remaining, message: legacyMessage } = expiryStatus;
+  const effectiveDays = typeof days_remaining === "number" ? days_remaining : expiryStatus.days_left;
+  const effectiveLabel = label || legacyMessage;
 
   // Map backend status to UI colors
-  if (status === "overdue") {
+  if (status === "renewal_pending") {
+    // Renewal order in progress
+    return {
+      bgColor: "#E3F2FD",
+      dotColor: "#2196F3",
+      message: "Renewal in progress"
+    };
+  } else if (status === "overdue") {
     return { 
       bgColor: "#FFE8E8", 
       dotColor: "#DB8888",
-      message: label || "Overdue"
+      message: effectiveLabel || "Overdue"
     };
   } else if (status === "reminder") {
     // Show red/danger for 0-3 days, warning for 4-30 days
-    if (days_remaining !== null && days_remaining <= 3) {
+    if (effectiveDays !== null && effectiveDays <= 3) {
       return { 
         bgColor: "#FFE8E8", 
         dotColor: "#DB8888",
-        message: label || `${days_remaining} day${days_remaining === 1 ? '' : 's'} remaining`
+        message: effectiveLabel || `${effectiveDays} day${effectiveDays === 1 ? '' : 's'} remaining`
       };
     }
     return { 
       bgColor: "#FFEFCE", 
       dotColor: "#FDB022",
-      message: label || `${days_remaining} days remaining`
+      message: effectiveLabel || `${effectiveDays} days remaining`
     };
   } else {
     // status === "no_reminder"
     return { 
       bgColor: "#E8F5E8", 
       dotColor: "#4CAF50",
-      message: label || "No reminder available"
+      message: effectiveLabel || "No reminder available"
     };
   }
 };
