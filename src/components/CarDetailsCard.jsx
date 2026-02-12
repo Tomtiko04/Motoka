@@ -149,24 +149,24 @@ export default function CarDetailsCard({
         </div>
       </div>
 
-      <div className="mb-6 flex items-center">
-        <div>
-          <div className="text-sm text-nowrap text-[#05243F]/60">Plate No:</div>
-          <div className="text-base font-semibold text-[#05243F]">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm text-[#05243F]/60">Plate No:</div>
+          <div className="truncate text-base font-semibold text-[#05243F]">
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
-        <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-        <div>
-          <div className="text-sm text-nowrap text-[#05243F]/60">Exp. Date</div>
-          <div className="text-base font-semibold text-nowrap text-[#05243F]">
+        <div className="mx-3 h-8 w-[1px] shrink-0 bg-[#E1E5EE]"></div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm text-[#05243F]/60">Exp. Date</div>
+          <div className="truncate text-base font-semibold text-[#05243F]">
             {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
-        <div className="mx-6 h-8 w-[1px] bg-[#E1E5EE]"></div>
-        <div>
-          <div className="text-sm text-nowrap text-[#05243F]/60">Car Type</div>
-          <div className="text-base font-semibold text-nowrap text-[#05243F]">
+        <div className="mx-3 h-8 w-[1px] shrink-0 bg-[#E1E5EE]"></div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm text-[#05243F]/60">Car Type</div>
+          <div className="truncate text-base font-semibold text-[#05243F]">
             {carDetail?.vehicle_make || "-"}
           </div>
         </div>
@@ -174,20 +174,20 @@ export default function CarDetailsCard({
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div
-          className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-1.5 md:w-auto"
+          className="flex w-full items-center justify-center gap-2 rounded-full px-3 py-1.5 md:w-auto"
           style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
-            className="h-2 w-2 rounded-full"
+            className="h-2 w-2 shrink-0 rounded-full"
             style={{ backgroundColor: statusStyle.dotColor }}
           ></span>
-          <span className="text-sm font-medium text-[#05243F]">
+          <span className="whitespace-nowrap text-xs font-medium text-[#05243F]">
             {reminderMessage}
           </span>
         </div>
         {isRenew && (
           <button
-            className="w-full cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
+            className="w-full cursor-pointer whitespace-nowrap rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
             onClick={(e) => {
               e.stopPropagation();
               handleRenewClick();

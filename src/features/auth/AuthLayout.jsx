@@ -7,7 +7,7 @@ export default function AuthLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <div className="flex flex-grow flex-col w-full px-0 mt-8 sm:mt-0 sm:items-center sm:justify-center sm:px-6">
+      <div className="flex flex-grow flex-col w-full px-0 mt-6 sm:mt-0 sm:items-center sm:justify-center sm:px-6">
         <Outlet />
       </div>
     </div>
