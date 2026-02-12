@@ -174,20 +174,20 @@ export default function CarDetailsCard({
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div
-          className="flex w-full items-center justify-center gap-2 rounded-full px-4 py-1.5 md:w-auto"
+          className="flex w-full items-center justify-center gap-2 rounded-full px-3 py-1.5 md:w-auto"
           style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
-            className="h-2 w-2 rounded-full"
+            className="h-2 w-2 shrink-0 rounded-full"
             style={{ backgroundColor: statusStyle.dotColor }}
           ></span>
-          <span className="text-sm font-medium text-[#05243F]">
+          <span className="whitespace-nowrap text-xs font-medium text-[#05243F]">
             {reminderMessage}
           </span>
         </div>
         {isRenew && (
           <button
-            className="w-full cursor-pointer rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
+            className="w-full cursor-pointer whitespace-nowrap rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
             onClick={(e) => {
               e.stopPropagation();
               handleRenewClick();
