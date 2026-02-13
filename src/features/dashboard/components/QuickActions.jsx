@@ -49,7 +49,7 @@ const quickActions = [
     ),
     title: "New/Renew\nDriver's License",
     link: "/licenses/drivers-license",
-    comingSoon: true,
+    // comingSoon: true,
   },
   {
     icon: (
@@ -60,14 +60,14 @@ const quickActions = [
       />
     ),
     title: "Request\nPlate Number",
-    // link: "/licenses/plate-number",
-    comingSoon: true,
+    link: "/licenses/plate-number",
+    // comingSoon: true,
   },
   {
     icon: <Icon icon="jam:plane-f" fontSize={30} color="#2389E3" />,
     title: "International\nDriver's License",
-    // link: "/licenses/international-driver's-license",
-    comingSoon: true,
+    link: "/licenses/international-driver's-license",
+    // comingSoon: true,
   },
 ];
 

@@ -415,7 +415,7 @@ export default function Signup() {
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 
         <div className="w-full md:w-1/2">
-          <div className="w-full overflow-hidden p-1 py-8 sm:p-8 flex flex-col h-full flex-1">
+          <div className="w-full overflow-hidden p-1 pb-4 pt-6 sm:p-8 flex flex-col h-full flex-1 justify-center">
             <div className="animate-slideDown mb-4 flex flex-col space-y-1 sm:mb-2 sm:space-y-1 md:mt-3">
               <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
                 Signup
@@ -445,10 +445,10 @@ export default function Signup() {
                     type="text"
                     {...register("name")}
                     placeholder="Username*"
-                    className="mt-1 block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                    className="mt-1 block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 !text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                   />
                   {errors.name && (
-                    <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
                       {errors.name.message}
                     </p>
                   )}
@@ -460,7 +460,7 @@ export default function Signup() {
                       type="email"
                       {...register("email")}
                       placeholder="Enter your Email*"
-                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[05243F] placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none `}
+                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 !text-sm sm:text-sm text-[05243F] placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none `}
                     />
                     {errors.email && (
                       <p className="animate-shake mt-1 text-xs text-[#A73957]">
@@ -475,9 +475,9 @@ export default function Signup() {
                       type="tel"
                       {...register("phone")}
                       placeholder="Phone Number*"
-                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-sm text-[#05243F] placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none`} />
+                      className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-4 !text-sm sm:text-sm text-[#05243F] placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none`} />
                     {errors.phone && (
-                      <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                      <p className="animate-shake mt-1 text-xs text-[#A73957]">
                         {errors.phone.message}
                       </p>
                     )}
@@ -488,7 +488,7 @@ export default function Signup() {
                     <input id="password"
                       {...register("password")} type={showPassword ? "text" : "password"}
                       placeholder="Password*"
-                      className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                      className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 !text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                     />
                     <div
                       className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
@@ -502,7 +502,7 @@ export default function Signup() {
                     </div>
                   </div>
                   {errors.password && (
-                    <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
                       {errors.password.message}
                     </p>
                   )}
@@ -515,7 +515,7 @@ export default function Signup() {
                       {...register("confirmPassword")}
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm Password*"
-                      className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                      className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 !text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
                     />
                     <div
                       className="absolute top-1/2 right-4 -translate-y-1/2 transform cursor-pointer text-[#05243F] opacity-40 transition-opacity duration-300 hover:opacity-100 sm:right-5"
@@ -529,13 +529,13 @@ export default function Signup() {
                     </div>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="animate-shake mt-1 text-sm text-[#A73957]">
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
                       {errors.confirmPassword.message}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center w-full">
+                <div className="flex items-center w-full mt-2">
                   <input
                     id="terms"
                     {...register("terms")}
@@ -550,14 +550,14 @@ export default function Signup() {
                   </label>
                 </div>
                 {errors.terms && (
-                  <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                  <p className="animate-shake mt-1 !text-xs text-[#A73957]">
                     {errors.terms.message}
                   </p>
                 )}
 
               </div>
-              <div className="mt-0 w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div className="mt-4 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
 
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <button
