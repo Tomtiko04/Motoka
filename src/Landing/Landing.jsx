@@ -10,10 +10,11 @@ import Testimonials from "./components/Testimonials";
 import Whyus from "./components/Whyus";
 import { useEffect, useState } from "react";
 import Action from "./components/Actions";
+import DirectRenewal from "../pages/DirectRenewal";
 
 function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
-
+  
   useEffect(() => {
     const onScroll = () => {
       setVisible(window.scrollY > 300);
@@ -40,6 +41,7 @@ function ScrollToTopButton() {
 
 function LandingPage() {
     const location = useLocation();
+    const [form, setForm]=useState(true);
     useEffect(()=> {
         if (location.hash) {
             const id = location.hash.substring(1);
@@ -50,6 +52,10 @@ function LandingPage() {
         }
     },[location])
     return ( 
+      <div>
+        <div className={`${form===true?"fixed":"hidden"} w-full z-200 `}>
+          <DirectRenewal/>
+        </div>
         <div className="bg-[#EBF5FF]">
             <Header/>
             <Hero/>
@@ -62,6 +68,7 @@ function LandingPage() {
             <Mobile/>
             <Footer/>
             <ScrollToTopButton />
+        </div>
         </div>
      );
 }
