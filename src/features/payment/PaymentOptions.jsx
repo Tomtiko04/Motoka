@@ -745,7 +745,7 @@ export default function PaymentOptions() {
                     <div className="flex justify-between">
                       <span>Amount:</span>
                       <span className="font-semibold">
-                        ₦{Number(paymentSession?.amount || 0).toLocaleString()}
+                        ₦{(Number(paymentSession?.amount || 0) / 100).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
