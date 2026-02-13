@@ -121,7 +121,7 @@ const AdminAgents = () => {
       {/* Header */}
       <div className="flex items-center justify-center">
         <UserGroupIcon className="h-6 w-6 text-gray-600 mr-2" />
-        <h1 className="text-2xl font-bold text-gray-900">Agents</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Agents</h1>
       </div>
 
       {/* Filter Tabs */}

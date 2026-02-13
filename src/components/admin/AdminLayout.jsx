@@ -20,9 +20,13 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
         navigate('/admin/login');
         return;
       }
@@ -37,6 +41,9 @@ const AdminLayout = () => {
       if (error || !profile || !profile.is_admin || profile.is_suspended) {
         toast.error('Access denied: Admin privileges required');
         await supabase.auth.signOut();
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
         navigate('/admin/login');
         return;
       }
@@ -50,6 +57,13 @@ const AdminLayout = () => {
 
       setAdminUser(user);
       localStorage.setItem('adminUser', JSON.stringify(user));
+      } catch (err) {
+        console.error('Admin auth check failed:', err);
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
+        navigate('/admin/login');
+      }
     };
 
     checkAuth();
@@ -59,6 +73,7 @@ const AdminLayout = () => {
     try {
       await supabase.auth.signOut();
       localStorage.removeItem('adminUser');
+      localStorage.removeItem('adminToken');
       
       // Dispatch event to notify AdminRoutes
       window.dispatchEvent(new CustomEvent('adminAuthChange', { 
@@ -111,7 +126,7 @@ const AdminLayout = () => {
                 <div className="h-8 w-8  rounded-lg flex items-center justify-center mr-3">
                   <img src={Logo} alt="Motoka" className="h-8 w-auto" />
                 </div>
-                <span className="text-xl font-bold text-gray-900">Motoka</span>
+                <span className="text-lg font-semibold text-gray-900">Motoka</span>
               </div>
             </div>
 
@@ -173,9 +188,9 @@ const AdminLayout = () => {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6">
-        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200">
-          <span className="text-lg">Ask Mo</span>
-          <span className="text-lg">+</span>
+        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 text-sm font-medium transition-colors duration-200">
+          <span>Ask Mo</span>
+          <span>+</span>
         </button>
       </div>
     </div>

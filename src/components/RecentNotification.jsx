@@ -1,12 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useNotifications } from "../features/notifications/useNotification";
 import NotificationCard from "../pages/components/notificationCard";
 import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
+import { markAllNotificationsAsRead } from "../services/apiNotification";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function RecentNotificationModal({ setNotificationsModal }) {
   const { data } = useNotifications({ enabled: true });
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   function mapUiCategory(type, action) {
     const t = (type || "").toLowerCase();
     const a = (action || "").toLowerCase();
@@ -49,6 +52,21 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
     const allNotifications = flattenNotifications(data);
     return allNotifications.slice(-5);
   }, [data]);
+
+  // Mark all notifications as read when modal is opened
+  useEffect(() => {
+    const markAsRead = async () => {
+      try {
+        await markAllNotificationsAsRead();
+        // Refetch notifications to update unread count
+        queryClient.invalidateQueries(["notifications"]);
+      } catch (error) {
+        console.error("Failed to mark notifications as read:", error);
+      }
+    };
+    
+    markAsRead();
+  }, [queryClient]);
   
   return (
     <div className="">

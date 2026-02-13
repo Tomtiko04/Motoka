@@ -105,6 +105,7 @@ const AdminLogin = () => {
         };
         
         localStorage.setItem('adminUser', JSON.stringify(adminUser));
+        localStorage.setItem('adminToken', data.session.access_token);
         
         // Trigger a custom event to notify AdminRoutes of the authentication change
         window.dispatchEvent(new CustomEvent('adminAuthChange', { 
@@ -132,7 +133,7 @@ const AdminLogin = () => {
           <div className="inline-flex items-center justify-center w-12 h-12  rounded-full mb-3">
             <img src={Logo} alt="Motoka" className="h-8 w-auto" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Motoka Admin</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Motoka Admin</h1>
           <p className="text-sm text-gray-600 mt-1">Secure Admin Access</p>
         </div>
 
@@ -149,7 +150,7 @@ const AdminLogin = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your admin email"
                   required
                 />
@@ -193,7 +194,7 @@ const AdminLogin = () => {
                     id="otp"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-center text-lg tracking-widest"
+                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-center text-base tracking-widest placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                     placeholder="000000"
                     maxLength="6"
                     required

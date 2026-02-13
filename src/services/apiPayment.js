@@ -1,7 +1,7 @@
 import { api } from "./apiClient";
 
 export async function initializePayment(payload) {
-  const { data } = await api.post("/payment/initialize", payload);
+  const { data } = await api.post("/payments/initialize", payload);
   return data;
 }
 
