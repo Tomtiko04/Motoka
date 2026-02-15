@@ -21,7 +21,7 @@ export async function verifyPaystackPayment(reference) {
 }
 
 export async function getPaymentHistory() {
-  const { data } = await api.get("/payment/history");
+  const { data } = await api.get("/payments/history");
   return data;
 }
 
