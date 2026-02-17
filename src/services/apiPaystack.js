@@ -6,7 +6,7 @@ import { api } from "./apiClient";
  * @returns {Promise<Object>} API response with payment initialization data
  */
 export async function initializePaystackPayment(paymentData) {
-  const { data } = await api.post("/paystack/initialize", paymentData);
+  const { data } = await api.post("/payments/initialize", paymentData);
   return data;
 }
 

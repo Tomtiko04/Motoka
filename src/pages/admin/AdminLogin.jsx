@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import Logo from "../../assets/images/motoka logo.svg";
-import config from '../../config/config';
 
 
 const AdminLogin = () => {
@@ -20,22 +21,27 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/send-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Use Supabase OTP authentication
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          shouldCreateUser: false, // Don't create new users for admin login
         },
-        body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-
-      if (data.status) {
-        setStep('otp');
+      if (error) {
+        // Check if it's an admin user
+        if (error.message.includes('not found') || error.message.includes('disabled')) {
+          setError('Admin account not found or disabled');
+        } else {
+          setError(error.message || 'Failed to send OTP');
+        }
       } else {
-        setError(data.message || 'Failed to send OTP');
+        setStep('otp');
+        toast.success('OTP sent to your email');
       }
     } catch (err) {
+      console.error('Send OTP error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -48,38 +54,71 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp }),
+      // Verify OTP with Supabase
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: otp,
+        type: 'email',
       });
 
-      const data = await response.json();
+      if (error) {
+        setError(error.message || 'Invalid OTP');
+        setLoading(false);
+        return;
+      }
 
-      if (data.status) {
-        // Handle the response structure correctly
-        const token = data.data?.token || data.token;
-        const admin = data.data?.admin || data.admin;
-        
-        if (token) {
-          localStorage.setItem('adminToken', token);
-          localStorage.setItem('adminUser', JSON.stringify(admin));
-          
-          // Trigger a custom event to notify AdminRoutes of the authentication change
-          window.dispatchEvent(new CustomEvent('adminAuthChange', { 
-            detail: { isAuthenticated: true, token } 
-          }));
-          
-          navigate('/admin/dashboard');
-        } else {
-          setError('Token not received from server');
+      if (data.session) {
+        // Check if user is admin
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin, is_suspended, first_name, last_name, user_id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError || !profile) {
+          setError('Failed to verify admin privileges');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
         }
+
+        if (!profile.is_admin) {
+          setError('Access denied: Admin privileges required');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+
+        if (profile.is_suspended) {
+          setError('Your account has been suspended');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+
+        // Store admin info
+        const adminUser = {
+          id: data.user.id,
+          email: data.user.email,
+          name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+          user_id: profile.user_id,
+        };
+        
+        localStorage.setItem('adminUser', JSON.stringify(adminUser));
+        localStorage.setItem('adminToken', data.session.access_token);
+        
+        // Trigger a custom event to notify AdminRoutes of the authentication change
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { 
+          detail: { isAuthenticated: true, session: data.session } 
+        }));
+        
+        toast.success('Login successful!');
+        navigate('/admin/dashboard');
       } else {
-        setError(data.message || 'Invalid OTP');
+        setError('Authentication failed');
       }
     } catch (err) {
+      console.error('Verify OTP error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -94,7 +133,7 @@ const AdminLogin = () => {
           <div className="inline-flex items-center justify-center w-12 h-12  rounded-full mb-3">
             <img src={Logo} alt="Motoka" className="h-8 w-auto" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Motoka Admin</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Motoka Admin</h1>
           <p className="text-sm text-gray-600 mt-1">Secure Admin Access</p>
         </div>
 
@@ -111,7 +150,7 @@ const AdminLogin = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your admin email"
                   required
                 />
@@ -140,8 +179,8 @@ const AdminLogin = () => {
                   </svg>
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Check Your Email</h2>
-                <p className="text-sm text-gray-600">
-                  We've sent a 4-digit OTP to <span className="font-medium">{email}</span>
+<p className="text-sm text-gray-600">
+                  We've sent a 6-digit OTP to <span className="font-medium">{email}</span>
                 </p>
               </div>
 
@@ -155,9 +194,9 @@ const AdminLogin = () => {
                     id="otp"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-center text-lg tracking-widest"
-                    placeholder="0000"
-                    maxLength="4"
+                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-center text-base tracking-widest placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    placeholder="000000"
+                    maxLength="6"
                     required
                   />
                   <button
@@ -183,7 +222,7 @@ const AdminLogin = () => {
               <div className="space-y-2">
                 <button
                   type="submit"
-                  disabled={loading || otp.length !== 4}
+                  disabled={loading || otp.length !== 6}
                   className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}

@@ -36,11 +36,14 @@ export default function AppLayout() {
     ? JSON.parse(localStorage.getItem("userInfo")).name
     : "";
 
-  // Compute total notifications from the normalized container returned by the API.
-  // The hook already returns `data.data` from the backend, so `notifications` is the container.
-  const totalLength = notifications
+  // Count only unread notifications
+  const unreadCount = notifications
     ? Object.values(notifications).reduce(
-        (sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0),
+        (sum, arr) => {
+          if (!Array.isArray(arr)) return sum;
+          const unread = arr.filter(n => n.is_read === false).length;
+          return sum + unread;
+        },
         0,
       )
     : 0;
@@ -134,9 +137,11 @@ export default function AppLayout() {
                     fontSize={20}
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    {totalLength}
-                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
+                      {unreadCount}
+                    </span>
+                  )}
                 </div>
                 <button
                   onClick={toggleMenu}
@@ -182,9 +187,11 @@ export default function AppLayout() {
                     fontSize={20}
                     className="cursor-pointer text-[#05243F]/60 hover:text-[#05243F]"
                   />
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
-                    {totalLength}
-                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FDB022] text-[10px] font-medium text-white">
+                      {unreadCount}
+                    </span>
+                  )}
                 </div>
                 {/* <div className="h-10 w-10 overflow-hidden rounded-full bg-gray-200">
                   <img

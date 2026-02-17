@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../../config/supabaseClient';
+import { toast } from 'react-hot-toast';
 import Logo from "../../assets/images/motoka logo.svg";
 import {
   HomeIcon,
@@ -10,7 +12,6 @@ import {
   BellIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
-import config from '../../config/config';
 
 const AdminLayout = () => {
   const [adminUser, setAdminUser] = useState(null);
@@ -18,37 +19,72 @@ const AdminLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    const user = localStorage.getItem('adminUser');
-    
-    if (!token || !user) {
-      navigate('/admin/login');
-      return;
-    }
-    
-    setAdminUser(JSON.parse(user));
+    const checkAuth = async () => {
+      try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
+        navigate('/admin/login');
+        return;
+      }
+
+      // Verify admin privileges
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('is_admin, is_suspended, first_name, last_name, user_id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error || !profile || !profile.is_admin || profile.is_suspended) {
+        toast.error('Access denied: Admin privileges required');
+        await supabase.auth.signOut();
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
+        navigate('/admin/login');
+        return;
+      }
+
+      const user = {
+        id: session.user.id,
+        email: session.user.email,
+        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+        user_id: profile.user_id,
+      };
+
+      setAdminUser(user);
+      localStorage.setItem('adminUser', JSON.stringify(user));
+      } catch (err) {
+        console.error('Admin auth check failed:', err);
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
+        navigate('/admin/login');
+      }
+    };
+
+    checkAuth();
   }, [navigate]);
 
   const handleLogout = async () => {
     try {
-      // Call backend logout API to revoke the token
-      const token = localStorage.getItem('adminToken');
-      if (token) {
-        await fetch(`${config.getApiBaseUrl()}/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-    } catch (error) {
-      // Continue with logout even if API call fails
-    } finally {
-      // Always clear local storage and redirect
-      localStorage.removeItem('adminToken');
+      await supabase.auth.signOut();
       localStorage.removeItem('adminUser');
+      localStorage.removeItem('adminToken');
+      
+      // Dispatch event to notify AdminRoutes
+      window.dispatchEvent(new CustomEvent('adminAuthChange', { 
+        detail: { isAuthenticated: false } 
+      }));
+      
+      toast.success('Logged out successfully');
       navigate('/admin/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
     }
   };
 
@@ -62,7 +98,20 @@ const AdminLayout = () => {
   ];
 
   if (!adminUser) {
-    return null; // Loading state
+    // Loading state - show spinner instead of blank page
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full mb-3">
+            <svg className="w-7 h-7 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -77,7 +126,7 @@ const AdminLayout = () => {
                 <div className="h-8 w-8  rounded-lg flex items-center justify-center mr-3">
                   <img src={Logo} alt="Motoka" className="h-8 w-auto" />
                 </div>
-                <span className="text-xl font-bold text-gray-900">Motoka</span>
+                <span className="text-lg font-semibold text-gray-900">Motoka</span>
               </div>
             </div>
 
@@ -139,9 +188,9 @@ const AdminLayout = () => {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6">
-        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200">
-          <span className="text-lg">Ask Mo</span>
-          <span className="text-lg">+</span>
+        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 text-sm font-medium transition-colors duration-200">
+          <span>Ask Mo</span>
+          <span>+</span>
         </button>
       </div>
     </div>

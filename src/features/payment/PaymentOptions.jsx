@@ -228,20 +228,15 @@ export default function PaymentOptions() {
         // Get receipt URL based on payment type
         const receiptUrl = getReceiptUrl(null, responseData || result);
         
-        if (receiptUrl) {
-          // Navigate to general receipt page
-          navigate(receiptUrl);
-        } else {
-          // Fallback to success page if identifier not found
-          console.warn('Payment identifier not found, navigating to success page');
-          navigate('/payment/success', {
-            state: {
-              amount: paymentSession.amount,
-              reference,
-              paymentMethod: 'paystack'
-            }
-          });
-        }
+        // Redirect to dashboard with success message
+        toast.success('Payment successful! Your renewal is being processed.');
+        navigate('/dashboard', {
+          state: {
+            paymentSuccess: true,
+            reference,
+            amount: paymentSession.amount
+          }
+        });
       } else {
         toast.error('Payment verification failed. Please try again.');
         setIsProcessing(false);
@@ -267,23 +262,16 @@ export default function PaymentOptions() {
       const result = await verifyMonicredit.mutateAsync(orderId);
       console.log(result);
       if (result.data.status === "APPROVED") {
-        // Get receipt URL based on payment type
-        const receiptUrl = getReceiptUrl(null, result.data || result);
-        
-        if (receiptUrl) {
-          // Navigate to general receipt page
-          navigate(receiptUrl);
-        } else {
-          // Fallback to success page if identifier not found
-          console.warn('Payment identifier not found, navigating to success page');
-          navigate("/payment/success", {
-            state: {
-              amount: paymentSession.amount,
-              orderId,
-              paymentMethod: "monicredit",
-            },
-          });
-        }
+        // Redirect to dashboard with success message
+        toast.success('Payment successful! Your renewal is being processed.');
+        navigate('/dashboard', {
+          state: {
+            paymentSuccess: true,
+            orderId,
+            amount: paymentSession.amount,
+            paymentMethod: "monicredit"
+          }
+        });
       } else {
         toast.error("Payment verification failed");
         setIsProcessing(false);
@@ -314,23 +302,16 @@ export default function PaymentOptions() {
                        responseData?.status === 'success';
 
       if (isSuccess) {
-        // Get receipt URL based on payment type
-        const receiptUrl = getReceiptUrl(null, responseData || result);
-        
-        if (receiptUrl) {
-          // Navigate to general receipt page
-          navigate(receiptUrl);
-        } else {
-          // Fallback to success page if identifier not found
-          console.warn('Payment identifier not found, navigating to success page');
-          navigate("/payment/success", {
-            state: {
-              amount: paymentSession.amount,
-              reference,
-              paymentMethod: "paystack",
-            },
-          });
-        }
+        // Redirect to dashboard with success message
+        toast.success('Payment successful! Your renewal is being processed.');
+        navigate('/dashboard', {
+          state: {
+            paymentSuccess: true,
+            reference,
+            amount: paymentSession.amount,
+            paymentMethod: "paystack"
+          }
+        });
       } else {
         toast.error("Payment verification failed");
         setIsProcessing(false);
@@ -351,28 +332,16 @@ export default function PaymentOptions() {
           setIsProcessing(true);
           try {
             // Payment already verified in callback, get receipt URL
-            let receiptUrl = getReceiptUrl(null, paymentData || event.data);
-            
-            if (!receiptUrl) {
-              // If receipt URL not found, try to verify again to get identifier
-              const result = await verifyPaystack.mutateAsync(reference);
-              receiptUrl = getReceiptUrl(null, result?.data || result);
-            }
-            
-            if (receiptUrl) {
-              // Navigate to general receipt page
-              navigate(receiptUrl);
-            } else {
-              // Fallback to success page
-              console.warn('Payment identifier not found after verification, navigating to success page');
-              navigate('/payment/success', {
-                state: {
-                  amount: paymentSession?.amount,
-                  reference,
-                  paymentMethod: 'paystack'
-                }
-              });
-            }
+            // Redirect to dashboard with success message
+            toast.success('Payment successful! Your renewal is being processed.');
+            navigate('/dashboard', {
+              state: {
+                paymentSuccess: true,
+                reference,
+                amount: paymentSession?.amount,
+                paymentMethod: 'paystack'
+              }
+            });
           } catch (error) {
             console.error('Error processing payment success:', error);
             toast.error('Failed to process payment. Please verify manually.');
@@ -776,7 +745,7 @@ export default function PaymentOptions() {
                     <div className="flex justify-between">
                       <span>Amount:</span>
                       <span className="font-semibold">
-                        ₦{Number(paymentSession?.amount || 0).toLocaleString()}
+                        ₦{(Number(paymentSession?.amount || 0) / 100).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">

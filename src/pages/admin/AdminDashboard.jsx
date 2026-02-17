@@ -124,7 +124,7 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-center">
         <DocumentTextIcon className="h-6 w-6 text-gray-600 mr-2" />
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
       </div>
 
       {/* Stats Cards */}

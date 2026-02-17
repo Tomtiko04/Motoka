@@ -31,7 +31,6 @@ export function useAddCar() {
         car_type: formData.carType || null,
       };
 
-      console.log("Adding car with data:", transformedData);
       return addCarApi(transformedData);
     },
     onSuccess: (data) => {
@@ -42,7 +41,6 @@ export function useAddCar() {
       // Only remove registration token if it was used for this operation
       const registrationToken = authStorage.getRegistrationToken();
       if (registrationToken) {
-        console.log("Removing registration token after successful car creation");
         authStorage.removeRegistrationToken();
       }
     },
@@ -54,7 +52,6 @@ export function useAddCar() {
       // Only redirect to login if not using registration token
       const registrationToken = authStorage.getRegistrationToken();
       if (error.response?.status === 401 && !registrationToken) {
-        console.log("Token invalid, clearing and redirecting to login");
         authStorage.clearAll();
         window.location.href = "/auth/login";
       }
