@@ -63,9 +63,9 @@ export default function SettingsPage() {
     } else if (page === "contact-support" || page === "report-issue" || page === "live-chat") {
       setExpandedSection("support")
     } else if (page === "terms-condition" || page === "data-permission" || page === "delete-account") {
-      setExpandedSection("legal")
+      setExpandedSection("legal-privacy")
     } else if (page === "info-collect" || page === "info-sharing" || page === "data-security") {
-      setExpandedSection("privacy")
+      setExpandedSection("legal-privacy")
       setActiveTab(tab) // Update activeTab based on the tab
     } else if (page === "faqs" || page === "licensing" || page === "autocare") {
       setExpandedSection("faqs")
@@ -107,9 +107,9 @@ export default function SettingsPage() {
         {activePage === "custom-notification" && <CustomizedNotification onNavigate={handleNavigate} />}
 
         {/* App Preference */}
-        {activePage === "language-region" && <LanguageRegion onNavigate={handleNavigate} />}
+        {/* {activePage === "language-region" && <LanguageRegion onNavigate={handleNavigate} />}
         {activePage === "dark-mode" && <DarkMode onNavigate={handleNavigate} />}
-        {activePage === "location-service" && <LocationService onNavigate={handleNavigate} />}
+        {activePage === "location-service" && <LocationService onNavigate={handleNavigate} />} */}
          {/* Support & Help */}
          {activePage === "contact-support" && <ContactSupport onNavigate={handleNavigate} />}
         {activePage === "report-issue" && <ReportIssue onNavigate={handleNavigate} />}
