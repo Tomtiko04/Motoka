@@ -167,7 +167,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
         )}
 
         {/* App Preference */}
-        <div
+        {/* <div
           className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
             expandedSection === "preference" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
@@ -207,7 +207,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               <ChevronRight className="h-5 w-5" />
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Support & Help */}
         <div
@@ -252,18 +252,18 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
           </div>
         )}
 
-        {/* Legal */}
+        {/* Legal & Privacy */}
         <div
           className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "legal" ? "bg-amber-50" : "hover:bg-gray-50"
+            expandedSection === "legal-privacy" ? "bg-amber-50" : "hover:bg-gray-50"
           }`}
-          onClick={() => onSectionToggle("legal")}
+          onClick={() => onSectionToggle("legal-privacy")}
         >
-          <span className="text-sm font-semibold text-[#05243F]/95">Legal</span>
+          <span className="text-sm font-semibold text-[#05243F]/95">Legal & Privacy</span>
           <ChevronDown className="h-5 w-5 text-gray-500" />
         </div>
 
-        {expandedSection === "legal" && (
+        {expandedSection === "legal-privacy" && (
           <div className="bg-amber-50 pl-4">
             <div
               className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
@@ -292,22 +292,6 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               <span className={`text-sm font-semibold ${isActive("delete-account") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Delete Account</span>
               <ChevronRight className="h-5 w-5" />
             </div>
-          </div>
-        )}
-
-        {/* Privacy Policy */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "privacy" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("privacy")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">Privacy Policy</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "privacy" && (
-          <div className="bg-amber-50 pl-4">
             <div
               className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
                 isActive("info-collect") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
