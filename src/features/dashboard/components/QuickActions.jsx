@@ -34,9 +34,9 @@ const quickActions = [
         color="#2389E3"
       />
     ),
-    title: "How can\nwe Help?",
+    title: "FAQs/How can\nwe Help?",
     // link: "/help",
-    comingSoon: true,
+    // comingSoon: true,
   },
   {
     icon: <Icon icon="mdi:car-pickup" fontSize={30} color="#2389E3" />,
