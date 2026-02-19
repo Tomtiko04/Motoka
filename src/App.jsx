@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import {
   QueryCache,
@@ -38,6 +38,7 @@ import GuestRoute from "./components/GuestRoute";
 import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
+import { authStorage } from "./utils/authStorage.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
@@ -70,12 +71,70 @@ const queryClient = new QueryClient({
   },
 });
 
+function parseJwtPayload(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function OAuthHashHandler() {
+  useEffect(() => {
+    // Handle Supabase Implicit Flow: tokens land in URL hash on ANY page
+    const hash = window.location.hash;
+    if (!hash || !hash.includes("access_token=")) return;
+
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const error = params.get("error");
+    const errorDescription = params.get("error_description");
+
+    if (error) {
+      console.error("OAuth error:", error, errorDescription);
+      window.location.replace("/auth/login");
+      return;
+    }
+
+    if (accessToken) {
+      // Store the access token
+      authStorage.setToken(accessToken);
+      if (refreshToken) {
+        localStorage.setItem("refresh_token", refreshToken);
+      }
+
+      // Extract user info directly from JWT payload (no network call needed)
+      const payload = parseJwtPayload(accessToken);
+      if (payload) {
+        const meta = payload.user_metadata || {};
+        authStorage.setUserInfo({
+          id: payload.sub,
+          email: payload.email || meta.email,
+          name: meta.full_name || meta.name || payload.email,
+          avatar_url: meta.avatar_url || meta.picture,
+          email_verified: meta.email_verified ?? true,
+        });
+      }
+
+      // Redirect to dashboard
+      window.location.replace("/dashboard");
+    }
+  }, []);
+
+  return null;
+}
+
 export default function App() {
   const { isOpen } = useModalStore();
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
+        <OAuthHashHandler />
         <ScrollToTop />
         {isOpen && <CarDetailsModal />}
         <Routes>
