@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import {
   QueryCache,
@@ -82,59 +82,67 @@ function parseJwtPayload(token) {
   }
 }
 
-function OAuthHashHandler() {
-  useEffect(() => {
-    // Handle Supabase Implicit Flow: tokens land in URL hash on ANY page
-    const hash = window.location.hash;
-    if (!hash || !hash.includes("access_token=")) return;
+// Process OAuth hash tokens synchronously before any render
+// so we never show the landing page when Google redirects back
+function processOAuthHash() {
+  const hash = window.location.hash;
+  if (!hash || !hash.includes("access_token=")) return false;
 
-    const params = new URLSearchParams(hash.substring(1));
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-    const error = params.get("error");
-    const errorDescription = params.get("error_description");
+  const params = new URLSearchParams(hash.substring(1));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  const error = params.get("error");
 
-    if (error) {
-      console.error("OAuth error:", error, errorDescription);
-      window.location.replace("/auth/login");
-      return;
+  if (error) {
+    window.location.replace("/auth/login");
+    return true;
+  }
+
+  if (accessToken) {
+    authStorage.setToken(accessToken);
+    if (refreshToken) {
+      localStorage.setItem("refresh_token", refreshToken);
     }
-
-    if (accessToken) {
-      // Store the access token
-      authStorage.setToken(accessToken);
-      if (refreshToken) {
-        localStorage.setItem("refresh_token", refreshToken);
-      }
-
-      // Extract user info directly from JWT payload (no network call needed)
-      const payload = parseJwtPayload(accessToken);
-      if (payload) {
-        const meta = payload.user_metadata || {};
-        authStorage.setUserInfo({
-          id: payload.sub,
-          email: payload.email || meta.email,
-          name: meta.full_name || meta.name || payload.email,
-          avatar_url: meta.avatar_url || meta.picture,
-          email_verified: meta.email_verified ?? true,
-        });
-      }
-
-      // Redirect to dashboard
-      window.location.replace("/dashboard");
+    const payload = parseJwtPayload(accessToken);
+    if (payload) {
+      const meta = payload.user_metadata || {};
+      authStorage.setUserInfo({
+        id: payload.sub,
+        email: payload.email || meta.email,
+        name: meta.full_name || meta.name || payload.email,
+        avatar_url: meta.avatar_url || meta.picture,
+        email_verified: meta.email_verified ?? true,
+      });
     }
-  }, []);
+    window.location.replace("/dashboard");
+    return true;
+  }
 
-  return null;
+  return false;
 }
+
+// Run immediately — if this returns true we're mid-redirect, skip rendering
+const isProcessingOAuth = processOAuthHash();
 
 export default function App() {
   const { isOpen } = useModalStore();
+
+  // Show nothing while the redirect is in-flight — avoids the landing page flash
+  if (isProcessingOAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-green-500" />
+          <p className="text-sm text-gray-500">Signing you in…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
-        <OAuthHashHandler />
         <ScrollToTop />
         {isOpen && <CarDetailsModal />}
         <Routes>
