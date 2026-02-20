@@ -26,6 +26,9 @@ export default function RenewLicense() {
   const [existingPayments, setExistingPayments] = useState([]);
   const [duplicateCheckLoading, setDuplicateCheckLoading] = useState(false);
 
+  // Delivery checkbox state
+  const [wantsDelivery, setWantsDelivery] = useState(false);
+
   // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
@@ -211,15 +214,24 @@ export default function RenewLicense() {
   };
 
   const isFormValid = () => {
-    return (
-      deliveryDetails.address.trim() !== "" &&
-      deliveryDetails.lg.trim() !== "" &&
-      deliveryDetails.state.trim() !== "" &&      // Check state code
-      deliveryDetails.stateName.trim() !== "" &&  // Check state name
-      deliveryDetails.contact.trim() !== "" &&
+    // Basic validation: require selected schedules and available schedules
+    const hasValidSchedules = 
       selectedSchedules.length > 0 &&
-      getAvailableSchedules().length > 0 // Has available (unpaid) schedules
-    );
+      getAvailableSchedules().length > 0; // Has available (unpaid) schedules
+
+    // If user wants delivery, all delivery fields must be filled
+    if (wantsDelivery) {
+      const hasCompleteDeliveryDetails = 
+        deliveryDetails.address.trim() !== "" &&
+        deliveryDetails.state.trim() !== "" &&
+        deliveryDetails.lg.trim() !== "" &&
+        deliveryDetails.contact.trim() !== "";
+
+      return hasValidSchedules && hasCompleteDeliveryDetails;
+    }
+
+    // If delivery is not wanted, only validate schedules
+    return hasValidSchedules;
   };
 
   const getAvailableSchedules = () => {
@@ -241,6 +253,26 @@ export default function RenewLicense() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Handle delivery checkbox change
+  const handleDeliveryCheckboxChange = (e) => {
+    const checked = e.target.checked;
+    setWantsDelivery(checked);
+    
+    // Clear delivery details when unchecked
+    if (!checked) {
+      setDeliveryDetails({
+        address: "",
+        lg: "",
+        state: "",
+        stateName: "",
+        fee: "0",
+        contact: "",
+        amount: deliveryDetails.amount, // Keep amount as it's not part of delivery
+      });
+      setLgaOptions([]);
+    }
   };
 
   // When state changes, fetch LGAs for that state
@@ -303,12 +335,6 @@ export default function RenewLicense() {
       return;
     }
 
-    // Validate state and LGA names are selected
-    if (!deliveryDetails.state || !deliveryDetails.lg) {
-      console.error("Invalid state or LGA selection");
-      return;
-    }
-
     // Get only available schedules (no duplicates)
     const availableSchedules = getAvailableSchedules();
 
@@ -320,15 +346,25 @@ export default function RenewLicense() {
     }
 
     // Create payload for bulk payment (supports multiple schedules)
+    // Note: payment_gateway defaults to 'monicredit' in apiPayment.js
+    // Users can change to Paystack in PaymentOptions.jsx after navigation
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
-      delivery_details: {
-        address: deliveryDetails.address,
-        contact: deliveryDetails.contact,
-        state: deliveryDetails.state,  // Send state name
-        lga: deliveryDetails.lg,        // Send LGA name
-      },
+      // payment_gateway will default to 'monicredit' via apiPayment.js
+      // Users can select Paystack in PaymentOptions page
+      // Delivery details are optional for license renewal - only include if provided
+      ...(deliveryDetails.address.trim() !== "" || 
+          deliveryDetails.contact.trim() !== "" || 
+          deliveryDetails.state.trim() !== "" || 
+          deliveryDetails.lg.trim() !== "" ? {
+        delivery_details: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+          ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+        },
+      } : {}),
     };
 
     // Initialize payment for all selected schedules
@@ -347,8 +383,15 @@ export default function RenewLicense() {
 
     // Normalize into the structure PaymentOptions expects
     let normalized = {};
-    // Decide by presence of fields on inner session
-    if (inner?.authorization_url || inner?.reference || inner?.transaction_id) {
+    // Check gateway field first, then check for gateway-specific fields
+    const isMonicredit = inner?.gateway === 'monicredit' || 
+                        inner?.customer || 
+                        inner?.account_number || 
+                        inner?.bank_name;
+    const isPaystack = inner?.gateway === 'paystack' || 
+                      (inner?.authorization_url && !isMonicredit);
+    
+    if (isPaystack) {
       // Paystack init
       const authUrl = inner.authorization_url;
       const reference = inner.reference || inner.transaction_id;
@@ -362,7 +405,7 @@ export default function RenewLicense() {
         items: inner.items || [],
       };
     } else {
-      // Ensure monicredit data is nested under monicredit.data
+      // Monicredit init - ensure monicredit data is nested under monicredit.data
       let itemsArray = [];
       try {
         const itemsRaw = inner.items;
@@ -379,23 +422,36 @@ export default function RenewLicense() {
     }
 
     // Create a complete payment data object that includes all necessary information
+    // For license renewal, delivery details are optional
     const completePaymentData = {
       ...normalized,
       car_slug: carDetail?.slug,
       selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
-      deliveryDetails: {
-        address: deliveryDetails.address,
-        contact: deliveryDetails.contact,
-        state_id: getStateId(),
-        lga_id: getLgaId(),
-      },
-      // Ensure meta_data is available
-      meta_data: {
-        delivery_address: deliveryDetails.address,
-        delivery_contact: deliveryDetails.contact,
-        state_id: getStateId(),
-        lga_id: getLgaId(),
-      },
+      // Only include delivery details if provided
+      ...(deliveryDetails.address.trim() !== "" || 
+          deliveryDetails.contact.trim() !== "" || 
+          deliveryDetails.state.trim() !== "" || 
+          deliveryDetails.lg.trim() !== "" ? {
+        deliveryDetails: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(getStateId() && { state_id: getStateId() }),
+          ...(getLgaId() && { lga_id: getLgaId() }),
+        },
+        // Only include meta_data if delivery details are provided
+        meta_data: {
+          ...(deliveryDetails.address.trim() !== "" && { 
+            delivery_address: deliveryDetails.address,
+            address: deliveryDetails.address 
+          }),
+          ...(deliveryDetails.contact.trim() !== "" && { 
+            delivery_contact: deliveryDetails.contact,
+            contact: deliveryDetails.contact 
+          }),
+          ...(getStateId() && { state_id: getStateId() }),
+          ...(getLgaId() && { lga_id: getLgaId() }),
+        },
+      } : {}),
     };
 
     // Persist for PaymentOptions fallback
@@ -538,96 +594,116 @@ export default function RenewLicense() {
                 </div>
               </div>
 
-              {/* Delivery Address */}
+              {/* Delivery Checkbox */}
               <div className="mb-6">
-                <div className="text-sm font-medium text-[#05243F]">
-                  Delivery Address
-                </div>
-                <input
-                  type="text"
-                  value={deliveryDetails.address}
-                  onChange={(e) =>
-                    handleDeliveryChange("address", e.target.value)
-                  }
-                  className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                  placeholder="Enter delivery address"
-                />
-              </div>
-
-              <div className="mb-6 grid grid-cols-2 gap-4">
-                <div>
-                  <SearchableSelect
-                    label="State"
-                    name="state"
-                    value={deliveryDetails.stateName}
-                    onChange={handleStateChange}
-                    options={
-                      Array.isArray(isState)
-                        ? isState.map((state) => ({
-                            id: state.id,
-                            name: state.state_name,
-                          }))
-                        : []
-                    }
-                    placeholder="Select state"
-                    filterKey="name"
-                    isLoading={isGettingState}
-                    className="text-[#05243F] placeholder:text-[#05243F]/40"
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wantsDelivery}
+                    onChange={handleDeliveryCheckboxChange}
+                    className="h-5 w-5 rounded border-[#D1D5DB] text-[#2284DB] focus:ring-2 focus:ring-[#2284DB] focus:ring-offset-0 cursor-pointer"
                   />
-                </div>
-                <div>
-                  <SearchableSelect
-                    label="Local Government"
-                    name="lg"
-                    value={deliveryDetails.lg}
-                    onChange={handleLgaChange}
-                    options={
-                      Array.isArray(lgaOptions)
-                        ? lgaOptions.map((lg) => ({
-                            id: lg.id,
-                            name: lg.lga_name,
-                          }))
-                        : []
-                    }
-                    placeholder="Select LG"
-                    filterKey="name"
-                    isLoading={isGettingLG}
-                    disabled={!deliveryDetails.state}
-                    className="text-[#05243F] placeholder:text-[#05243F]/40"
-                  />
-                </div>
+                  <span className="text-sm font-medium text-[#05243F]">
+                    Request Delivery
+                  </span>
+                </label>
               </div>
 
-              {/* Delivery Fee */}
-              <div className="mb-6">
-                <div className="text-sm font-medium text-[#05243F]">
-                  Delivery Fee
-                </div>
-                <input
-                  disabled={true}
-                  type="text"
-                  value={formatCurrency(Number(deliveryDetails.fee) / 100)}
-                  onChange={(e) => handleDeliveryChange("fee", e.target.value)}
-                  className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                  placeholder="Enter delivery fee"
-                />
-              </div>
+              {/* Delivery Fields — only shown when checkbox is checked */}
+              {wantsDelivery && (
+                <>
+                  {/* Delivery Address */}
+                  <div className="mb-6">
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Address
+                    </div>
+                    <input
+                      type="text"
+                      value={deliveryDetails.address}
+                      onChange={(e) =>
+                        handleDeliveryChange("address", e.target.value)
+                      }
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                      placeholder="Enter delivery address"
+                    />
+                  </div>
 
-              {/* Delivery Contact */}
-              <div className="mb-6">
-                <div className="text-sm font-medium text-[#05243F]">
-                  Delivery Contact
-                </div>
-                <input
-                  type="tel"
-                  value={deliveryDetails.contact}
-                  onChange={(e) =>
-                    handleDeliveryChange("contact", e.target.value)
-                  }
-                  className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                  placeholder="08012345678"
-                />
-              </div>
+                  <div className="mb-6 grid grid-cols-2 gap-4">
+                    <div>
+                      <SearchableSelect
+                        label="State"
+                        name="state"
+                        value={deliveryDetails.stateName}
+                        onChange={handleStateChange}
+                        options={
+                          Array.isArray(isState)
+                            ? isState.map((state) => ({
+                                id: state.id,
+                                name: state.state_name,
+                              }))
+                            : []
+                        }
+                        placeholder="Select state"
+                        filterKey="name"
+                        isLoading={isGettingState}
+                        className="text-[#05243F] placeholder:text-[#05243F]/40"
+                      />
+                    </div>
+                    <div>
+                      <SearchableSelect
+                        label="Local Government"
+                        name="lg"
+                        value={deliveryDetails.lg}
+                        onChange={handleLgaChange}
+                        options={
+                          Array.isArray(lgaOptions)
+                            ? lgaOptions.map((lg) => ({
+                                id: lg.id,
+                                name: lg.lga_name,
+                              }))
+                            : []
+                        }
+                        placeholder="Select LG"
+                        filterKey="name"
+                        isLoading={isGettingLG}
+                        disabled={!deliveryDetails.state}
+                        className="text-[#05243F] placeholder:text-[#05243F]/40"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Delivery Fee */}
+                  <div className="mb-6">
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Fee
+                    </div>
+                    <input
+                      disabled={true}
+                      type="text"
+                      value={formatCurrency(Number(deliveryDetails.fee) / 100)}
+                      onChange={(e) => handleDeliveryChange("fee", e.target.value)}
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                      placeholder="Enter delivery fee"
+                    />
+                  </div>
+
+                  {/* Delivery Contact */}
+                  <div className="mb-6">
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Contact
+                    </div>
+                    <input
+                      type="tel"
+                      value={deliveryDetails.contact}
+                      onChange={(e) =>
+                        handleDeliveryChange("contact", e.target.value)
+                      }
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                      placeholder="08012345678"
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Error Message */}
               {/* {paymentError && (

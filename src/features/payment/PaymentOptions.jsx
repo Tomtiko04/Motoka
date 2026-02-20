@@ -8,6 +8,7 @@ import {
 } from "./config/paymentTypes";
 import { usePaymentVerification } from "./hooks/usePayment";
 import { initializePaystackPayment } from "../../services/apiPaystack";
+import { initiateMonicreditPayment } from "../../services/apiMonicredit";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
@@ -22,15 +23,33 @@ export default function PaymentOptions() {
     PAYMENT_METHODS.MONICREDIT,
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [isPaymentMethodConfirmed, setIsPaymentMethodConfirmed] = useState(false);
 
   // For Monicredit
   const customer = paymentSession?.monicredit?.data?.customer;
-  const totalAmount = paymentSession?.monicredit?.data?.total_amount || null;
+  // Get total_amount in naira (backend now sends both total_amount and amount in naira for Monicredit)
+  // Prefer total_amount, fallback to amount (both should be in naira from backend)
+  const totalAmount = paymentSession?.monicredit?.data?.total_amount || 
+                      paymentSession?.monicredit?.data?.amount || 
+                      null;
+  
+  // For Paystack - amount is in kobo from backend, convert to naira for display
+  const paystackAmount = paymentSession?.amount 
+    ? Number(paymentSession.amount) / 100 
+    : null;
 
   const { verifyMonicredit, verifyPaystack } = usePaymentVerification();
 
   useEffect(() => {
     console.log("Payment session updated:", paymentSession);
+    if (paymentSession?.monicredit?.data) {
+      console.log("Monicredit data:", {
+        total_amount: paymentSession.monicredit.data.total_amount,
+        amount: paymentSession.monicredit.data.amount,
+        customer: paymentSession.monicredit.data.customer
+      });
+    }
   }, [paymentSession]);
 
   useEffect(() => {
@@ -49,9 +68,8 @@ export default function PaymentOptions() {
         }
 
         setPaymentSession(sessionData);
-        // Default method selection: prefer provided method, else auto-select Paystack if available, else Monicredit
-        const defaultMethod = sessionData.method 
-          || (sessionData?.paystack?.authorization_url ? PAYMENT_METHODS.PAYSTACK : PAYMENT_METHODS.MONICREDIT);
+        // Default method selection: prefer provided method, else default to Monicredit
+        const defaultMethod = sessionData.method || PAYMENT_METHODS.MONICREDIT;
         setSelectedMethod(defaultMethod);
       } catch (err) {
         console.error("Payment initialization error:", err);
@@ -66,6 +84,177 @@ export default function PaymentOptions() {
   // Handle payment method selection
   const handleMethodSelect = (method) => {
     setSelectedMethod(method);
+    // Reset confirmation when switching payment methods
+    setIsPaymentMethodConfirmed(false);
+  };
+
+  // Helper function to build payment payload
+  const buildPaymentPayload = () => {
+    const schedules = paymentSession?.selectedSchedules || [];
+    
+    // Normalize payment_schedule_id - backend REQUIRES a non-empty array
+    let payment_schedule_id = [];
+    
+    if (Array.isArray(schedules) && schedules.length > 0) {
+      payment_schedule_id = schedules.map(s => s?.id || s).filter(id => id !== null && id !== undefined && id !== '');
+    } else if (paymentSession?.payment_schedule_id) {
+      if (Array.isArray(paymentSession.payment_schedule_id)) {
+        payment_schedule_id = paymentSession.payment_schedule_id.filter(id => id !== null && id !== undefined && id !== '');
+      } else {
+        payment_schedule_id = [paymentSession.payment_schedule_id].filter(id => id !== null && id !== undefined && id !== '');
+      }
+    } else {
+      const monicreditScheduleId = paymentSession?.monicredit?.data?.payment_schedule_id;
+      if (monicreditScheduleId) {
+        if (Array.isArray(monicreditScheduleId)) {
+          payment_schedule_id = monicreditScheduleId.filter(id => id !== null && id !== undefined && id !== '');
+        } else {
+          payment_schedule_id = [monicreditScheduleId].filter(id => id !== null && id !== undefined && id !== '');
+        }
+      }
+    }
+
+    const car_slug = paymentSession?.car_slug || paymentSession?.car_id || paymentSession?.monicredit?.data?.car_slug;
+    const delivery = paymentSession?.deliveryDetails || paymentSession?.delivery_details || paymentSession?.meta_data || {};
+
+    // Extract delivery fields
+    const address = delivery?.address || delivery?.delivery_address || "";
+    const contact = delivery?.contact || delivery?.delivery_contact || "";
+    const stateId = delivery?.state_id;
+    const state = delivery?.state;
+    const lgaId = delivery?.lga_id;
+    const lga = delivery?.lga;
+
+    // For license renewal, delivery details are optional
+    // For other payment types, backend requires: address, state/state_id, lga/lga_id, and contact
+    const hasAddress = address && address.trim() !== "";
+    const hasContact = contact && contact.trim() !== "";
+    const hasState = (stateId !== undefined && stateId !== null && stateId !== "") || 
+                     (state !== undefined && state !== null && state !== "");
+    const hasLga = (lgaId !== undefined && lgaId !== null && lgaId !== "") || 
+                   (lga !== undefined && lga !== null && lga !== "");
+
+    // Backend requires: if ANY delivery field is sent, ALL must be complete
+    // For license renewal: send meta_data only if ALL fields are provided, otherwise omit entirely
+    // For other types: require all fields to be complete
+    const hasCompleteDeliveryDetails = hasAddress && hasContact && hasState && hasLga;
+
+    const payload = {
+      car_slug,
+      payment_schedule_id
+    };
+
+    // Only include meta_data if ALL delivery details are complete
+    // This prevents backend validation errors (backend rejects partial delivery details)
+    if (hasCompleteDeliveryDetails) {
+      payload.meta_data = {
+        address: address.trim(),
+        delivery_address: address.trim(),
+        contact: contact.trim(),
+        delivery_contact: contact.trim(),
+        ...(stateId !== undefined && stateId !== null && stateId !== "" ? { state_id: stateId } : {}),
+        ...(stateId === undefined && state && state.trim() !== "" ? { state: state.trim() } : {}),
+        ...(lgaId !== undefined && lgaId !== null && lgaId !== "" ? { lga_id: lgaId } : {}),
+        ...(lgaId === undefined && lga && lga.trim() !== "" ? { lga: lga.trim() } : {}),
+      };
+    }
+    // For license renewal, if delivery details are incomplete, we simply don't send meta_data
+    // Backend will handle this as "no delivery required"
+
+    return payload;
+  };
+
+  // Confirm and initialize selected payment method
+  const handleConfirmPaymentMethod = async () => {
+    setIsInitializing(true);
+    try {
+      const payload = buildPaymentPayload();
+      
+      // Validate required fields
+      if (!payload.car_slug) {
+        toast.error('Car information is missing. Please try again.');
+        return;
+      }
+
+      if (!Array.isArray(payload.payment_schedule_id) || payload.payment_schedule_id.length === 0) {
+        toast.error('Payment schedule information is missing. Please try again.');
+        return;
+      }
+
+      if (selectedMethod === PAYMENT_METHODS.PAYSTACK) {
+        // Initialize Paystack
+        payload.payment_gateway = 'paystack';
+        console.log("Initializing Paystack with payload:", payload);
+
+        const initRes = await initializePaystackPayment(payload);
+        // Backend response structure: { status: true, data: {...}, message: '...' }
+        const responseData = initRes?.data || initRes;
+        const paystackUrl = responseData?.authorization_url || responseData?.data?.authorization_url;
+        const reference = responseData?.reference || responseData?.data?.reference || responseData?.transaction_id;
+        // Paystack amount is in kobo from backend
+        const amount = responseData?.amount || responseData?.data?.amount;
+
+        if (paystackUrl && reference) {
+          setPaymentSession(prev => {
+            const updated = {
+              ...prev,
+              paystack: {
+                ...(prev?.paystack || {}),
+                authorization_url: paystackUrl,
+                reference,
+              },
+              // Store amount from Paystack response (in kobo)
+              amount: amount || prev?.amount
+            };
+            try {
+              sessionStorage.setItem("paymentData", JSON.stringify(updated));
+            } catch (storageError) {
+              console.warn("Failed to save payment data to sessionStorage:", storageError);
+            }
+            return updated;
+          });
+          setIsPaymentMethodConfirmed(true);
+          toast.success('Paystack payment initialized successfully');
+        } else {
+          toast.error('Failed to initialize Paystack payment');
+        }
+      } else if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
+        // Initialize Monicredit
+        payload.payment_gateway = 'monicredit';
+        console.log("Initializing Monicredit with payload:", payload);
+
+        const initRes = await initiateMonicreditPayment(payload);
+        // initRes structure: { status: true, data: {...}, message: '...' }
+        const responseData = initRes?.data || initRes;
+
+        if (initRes?.status && responseData) {
+          setPaymentSession(prev => {
+            const updated = {
+              ...prev,
+              monicredit: {
+                ...(prev?.monicredit || {}),
+                data: responseData
+              }
+            };
+            try {
+              sessionStorage.setItem("paymentData", JSON.stringify(updated));
+            } catch (storageError) {
+              console.warn("Failed to save payment data to sessionStorage:", storageError);
+            }
+            return updated;
+          });
+          setIsPaymentMethodConfirmed(true);
+          toast.success('Monicredit payment initialized successfully');
+        } else {
+          toast.error(initRes?.message || 'Failed to initialize Monicredit payment');
+        }
+      }
+    } catch (err) {
+      console.error("Payment initialization error:", err);
+      toast.error(err.response?.data?.message || err.message || 'Failed to initialize payment');
+    } finally {
+      setIsInitializing(false);
+    }
   };
 
   // Note: Monicredit doesn't require a separate payment initiation step
@@ -103,57 +292,15 @@ export default function PaymentOptions() {
     return null;
   }, [paymentSession, location.search]);
 
-  // Handle Paystack payment
+  // Handle Paystack payment - redirects to Paystack payment page
   const handlePaystackPayment = async () => {
     try {
-      let paystackUrl = paymentSession?.paystack?.authorization_url;
-      let reference = paymentSession?.paystack?.reference;
+      const paystackUrl = paymentSession?.paystack?.authorization_url;
+      const reference = paymentSession?.paystack?.reference;
 
-      // If no authorization URL OR reference missing, initialize Paystack now to ensure reference is present
-      if (!paystackUrl || !reference) {
-        const schedules = paymentSession?.selectedSchedules || [];
-        const payment_schedule_id = Array.isArray(schedules) && schedules.length > 0
-          ? schedules.map(s => s.id)
-          : paymentSession?.payment_schedule_id;
-        const delivery = paymentSession?.deliveryDetails || {};
-
-        const payload = {
-          car_slug: paymentSession?.car_slug || paymentSession?.car_id,
-          payment_schedule_id,
-          meta_data: {
-            delivery_address: delivery?.address,
-            delivery_contact: delivery?.contact,
-            state_id: delivery?.state_id,
-            lga_id: delivery?.lga_id,
-          }
-        };
-
-        const initRes = await initializePaystackPayment(payload);
-        const data = initRes?.data || initRes;
-        paystackUrl = data?.data?.authorization_url || data?.authorization_url;
-        reference = data?.data?.reference || data?.reference || data?.transaction_id;
-
-        if (!paystackUrl) {
-          toast.error('Payment URL not found');
-          return;
-        }
-
-        // Update session with paystack details so UI reflects the reference
-        setPaymentSession(prev => {
-          const updated = {
-            ...prev,
-            paystack: {
-              ...(prev?.paystack || {}),
-              authorization_url: paystackUrl,
-              reference,
-            }
-          };
-          // Persist updated session to sessionStorage so refresh keeps the reference
-          try {
-            sessionStorage.setItem("paymentData", JSON.stringify(updated));
-          } catch {}
-          return updated;
-        });
+      if (!paystackUrl) {
+        toast.error('Payment not initialized. Please confirm your payment method first.');
+        return;
       }
 
       // Store reference for later verification
@@ -250,10 +397,13 @@ export default function PaymentOptions() {
 
   // Handle Monicredit verification
   const handleVerifyMonicredit = async () => {
-    const orderId = paymentSession?.monicredit?.data?.orderid || paymentSession?.monicredit?.data?.order_id;
+    // Try monicredit order_id first, then fall back to internal transaction reference
+    const orderId = paymentSession?.monicredit?.data?.orderid ||
+                    paymentSession?.monicredit?.data?.order_id ||
+                    paymentSession?.monicredit?.data?.reference;
     console.log("orderId", orderId);
     if (!orderId) {
-      toast.error("No payment orderId found");
+      toast.error("No payment reference found. Please contact support.");
       return;
     }
 
@@ -467,7 +617,29 @@ export default function PaymentOptions() {
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Bank Transfer Details
               </h2>
-              {paymentSession?.monicredit?.data?.customer ? (
+              {!isPaymentMethodConfirmed ? (
+                <div className="space-y-4 rounded-[20px] border border-[#697B8C]/11 px-6 py-6">
+                  <div className="text-center">
+                    <p className="text-sm text-[#05243F]/60 mb-4">
+                      Click the button below to confirm your payment method and view bank transfer details.
+                    </p>
+                    <button
+                      onClick={handleConfirmPaymentMethod}
+                      disabled={isInitializing}
+                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6bb8] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isInitializing ? (
+                        <span className="flex items-center justify-center">
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                          Initializing...
+                        </span>
+                      ) : (
+                        "Confirm Payment Method"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : paymentSession?.monicredit?.data?.customer ? (
                 <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-4">
                   <div className="text-center">
                     <h3 className="text-sm font-normal text-[#05243F]/40">
@@ -721,140 +893,175 @@ export default function PaymentOptions() {
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Paystack Payment
               </h2>
-              <div className="space-y-4">
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl">💳</div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Secure Payment
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Pay securely with your card, bank transfer, or mobile
-                        money
-                      </p>
+              {!isPaymentMethodConfirmed ? (
+                <div className="space-y-4 rounded-[20px] border border-[#697B8C]/11 px-6 py-6">
+                  <div className="rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl">💳</div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Secure Payment
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Pay securely with your card, bank transfer, or mobile money
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  <div className="text-center">
+                    <p className="text-sm text-[#05243F]/60 mb-4">
+                      Click the button below to confirm your payment method and proceed with payment.
+                    </p>
+                    <button
+                      onClick={handleConfirmPaymentMethod}
+                      disabled={isInitializing}
+                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6bb8] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isInitializing ? (
+                        <span className="flex items-center justify-center">
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                          Initializing...
+                        </span>
+                      ) : (
+                        "Confirm Payment Method"
+                      )}
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl">💳</div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Secure Payment
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Pay securely with your card, bank transfer, or mobile
+                          money
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="rounded-lg bg-gray-50 p-1">
-                  <h4 className="mb-2 text-sm font-medium text-gray-900">
-                    Payment Summary
-                  </h4>
-                  <div className="space-y-1 text-xs text-[#697C8C]">
-                    <div className="flex justify-between">
-                      <span>Amount:</span>
-                      <span className="font-semibold">
-                        ₦{(Number(paymentSession?.amount || 0) / 100).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Reference:</span>
-                      <span className="font-mono text-xs">
-                        {paymentSession?.paystack?.reference ||
-                          "Not initialized"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Payment Method:</span>
-                      <span>Paystack</span>
-                    </div>
-                    {paymentSession?.items?.length > 1 && (
+                  <div className="rounded-lg bg-gray-50 p-1">
+                    <h4 className="mb-2 text-sm font-medium text-gray-900">
+                      Payment Summary
+                    </h4>
+                    <div className="space-y-1 text-xs text-[#697C8C]">
                       <div className="flex justify-between">
-                        <span>Documents:</span>
-                        <span className="font-semibold text-blue-600">
-                          {paymentSession.items.length} items
+                        <span>Amount:</span>
+                        <span className="font-semibold">
+                          ₦{(paystackAmount || 0).toLocaleString()}
                         </span>
                       </div>
-                    )}
+                      <div className="flex justify-between">
+                        <span>Reference:</span>
+                        <span className="font-mono text-xs">
+                          {paymentSession?.paystack?.reference || "Not initialized"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Payment Method:</span>
+                        <span>Paystack</span>
+                      </div>
+                      {paymentSession?.items?.length > 1 && (
+                        <div className="flex justify-between">
+                          <span>Documents:</span>
+                          <span className="font-semibold text-blue-600">
+                            {paymentSession.items.length} items
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                </div>
-
-                <>
-                  <button
-                    onClick={handlePaystackPayment}
-                    disabled={!paymentSession?.selectedSchedules?.length && !paymentSession?.payment_schedule_id || isProcessing}
-                    className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      "Pay with Paystack"
-                    )}
-                  </button>
+                  <>
+                    <button
+                      onClick={handlePaystackPayment}
+                      disabled={!paymentSession?.paystack?.authorization_url || isProcessing}
+                      className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                          Processing...
+                        </>
+                      ) : (
+                        "Pay with Paystack"
+                      )}
+                    </button>
 
                   <div className="text-center text-xs text-gray-500">
                     You will be redirected to Paystack's secure payment page
                   </div>
 
-                  {/* Manual Verification Section */}
-                  {paymentSession?.paystack?.reference && (
-                    <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                      <div className="mb-4 flex items-center space-x-3">
-                        <div className="text-yellow-600">
-                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
+                    {/* Manual Verification Section */}
+                    {paymentSession?.paystack?.reference && (
+                      <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div className="mb-4 flex items-center space-x-3">
+                          <div className="text-yellow-600">
+                            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-800">Payment Reference</h4>
+                            <p className="text-sm font-mono text-gray-600">{paymentSession?.paystack?.reference}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-800">Payment Reference</h4>
-                          <p className="text-sm font-mono text-gray-600">{paymentSession?.paystack?.reference}</p>
+                        
+                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-4">
+                          <p className="text-xs text-blue-800">
+                            If you've completed the payment, click below to verify and confirm your order.
+                          </p>
                         </div>
-                      </div>
-                      
-                      <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-4">
-                        <p className="text-xs text-blue-800">
-                          If you've completed the payment, click below to verify and confirm your order.
-                        </p>
-                      </div>
-                      
-                      <button
-                        onClick={handleVerifyPaystack}
-                        disabled={verifyPaystack.isPending || isProcessing}
-                        className="w-full rounded-lg bg-green-600 py-3 px-4 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
-                      >
-                        {verifyPaystack.isPending ? (
-                          <>
-                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                            Verifying Payment...
-                          </>
-                        ) : (
-                          "Verify Payment"
+                        
+                        <button
+                          onClick={handleVerifyPaystack}
+                          disabled={verifyPaystack.isPending || isProcessing}
+                          className="w-full rounded-lg bg-green-600 py-3 px-4 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
+                        >
+                          {verifyPaystack.isPending ? (
+                            <>
+                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                              Verifying Payment...
+                            </>
+                          ) : (
+                            "Verify Payment"
+                          )}
+                        </button>
+                        
+                        {verifyPaystack.data && (
+                          <div className={`mt-3 text-center text-sm font-semibold ${
+                            verifyPaystack.data?.status === 'success' || 
+                            verifyPaystack.data?.data?.status === 'success' ||
+                            verifyPaystack.data?.status === true
+                              ? "text-green-600" 
+                              : "text-red-600"
+                          }`}>
+                            {typeof verifyPaystack.data === "object" && verifyPaystack.data !== null
+                              ? verifyPaystack.data?.message ||
+                                verifyPaystack.data?.data?.message ||
+                                "Verification completed"
+                              : String(verifyPaystack.data)}
+                          </div>
                         )}
-                      </button>
-                      
-                      {verifyPaystack.data && (
-                        <div className={`mt-3 text-center text-sm font-semibold ${
-                          verifyPaystack.data?.status === 'success' || 
-                          verifyPaystack.data?.data?.status === 'success' ||
-                          verifyPaystack.data?.status === true
-                            ? "text-green-600" 
-                            : "text-red-600"
-                        }`}>
-                          {typeof verifyPaystack.data === "object" && verifyPaystack.data !== null
-                            ? verifyPaystack.data?.message ||
-                              verifyPaystack.data?.data?.message ||
-                              "Verification completed"
-                            : String(verifyPaystack.data)}
-                        </div>
-                      )}
-                      {verifyPaystack.isError && (
-                        <div className="mt-3 text-center text-sm font-semibold text-red-600">
-                          {typeof verifyPaystack.error === "string"
-                            ? verifyPaystack.error
-                            : verifyPaystack.error?.message || 
-                              verifyPaystack.error?.response?.data?.message ||
-                              "Verification failed"}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              </div>
+                        {verifyPaystack.isError && (
+                          <div className="mt-3 text-center text-sm font-semibold text-red-600">
+                            {typeof verifyPaystack.error === "string"
+                              ? verifyPaystack.error
+                              : verifyPaystack.error?.message || 
+                                verifyPaystack.error?.response?.data?.message ||
+                                "Verification failed"}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                </div>
+              )}
             </div>
           )}
         </div>
