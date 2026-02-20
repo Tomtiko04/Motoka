@@ -317,6 +317,7 @@ export default function RenewLicense() {
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
+      payment_gateway: 'monicredit', // Default to monicredit
       meta_data: {
         delivery_address: deliveryDetails.address,
         delivery_contact: deliveryDetails.contact,
