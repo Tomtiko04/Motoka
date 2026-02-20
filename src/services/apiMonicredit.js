@@ -4,11 +4,16 @@ import { api } from "./apiClient";
 
 // Initialize Payment via backend
 export async function initiateMonicreditPayment(paymentData) {
+  // Ensure payment_gateway is set to 'monicredit'
+  const payload = {
+    ...paymentData,
+    payment_gateway: 'monicredit'
+  };
   // Debug: log the payload
-  console.log("Monicredit Payment Payload:", paymentData, JSON.stringify(paymentData));
+  console.log("Monicredit Payment Payload:", payload, JSON.stringify(payload));
   const res = await api.post(
-    "/payment/initialize",
-    paymentData,
+    "/payments/initialize",
+    payload,
     {
       headers: {
         "Content-Type": "application/json"

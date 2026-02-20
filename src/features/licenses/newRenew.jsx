@@ -97,6 +97,7 @@ export default function RenewLicense() {
     const paymentPayloads = selectedSchedules.map(schedule => ({
       car_id: carDetail?.id,
       payment_schedule_id: schedule.id,
+      payment_gateway: 'monicredit', // Default to monicredit
       meta_data: {
         delivery_address: deliveryDetails.address,
         delivery_contact: deliveryDetails.contact,

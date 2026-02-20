@@ -1,7 +1,12 @@
 import { api } from "./apiClient";
 
 export async function initializePayment(payload) {
-  const { data } = await api.post("/payments/initialize", payload);
+  // If payment_gateway is not specified, default to 'monicredit' to match backend default
+  const paymentPayload = {
+    ...payload,
+    payment_gateway: payload.payment_gateway || 'monicredit'
+  };
+  const { data } = await api.post("/payments/initialize", paymentPayload);
   return data;
 }
 
