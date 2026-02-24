@@ -596,12 +596,12 @@ export default function RenewLicense() {
 
               {/* Delivery Checkbox */}
               <div className="mb-6">
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={wantsDelivery}
                     onChange={handleDeliveryCheckboxChange}
-                    className="h-5 w-5 rounded border-[#D1D5DB] text-[#2284DB] focus:ring-2 focus:ring-[#2284DB] focus:ring-offset-0 cursor-pointer"
+                    className="h-4 w-4 rounded border-[#D1D5DB] text-[#2284DB] focus:ring-2 focus:ring-[#2284DB] focus:ring-offset-0 cursor-pointer"
                   />
                   <span className="text-sm font-medium text-[#05243F]">
                     Request Delivery
