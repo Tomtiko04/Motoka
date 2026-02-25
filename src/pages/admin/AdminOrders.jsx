@@ -40,8 +40,16 @@ const AdminOrders = () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       
+      // Map display labels to backend status values
+      const filterStatusMap = {
+        'All': 'all',
+        'New': 'pending',
+        'In Progress': 'in_progress',
+        'Completed': 'completed',
+        'Declined': 'declined',
+      };
       const params = new URLSearchParams({
-        status: activeFilter === 'All' ? 'all' : activeFilter.toLowerCase().replace(' ', '_'),
+        status: filterStatusMap[activeFilter] || 'all',
         page: currentPage,
         per_page: perPage,
       });
@@ -107,26 +115,25 @@ const AdminOrders = () => {
   const handleProcessOrder = async (order) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${order.originalOrder.slug}/process`, {
-        method: 'POST',
+      const orderNumber = order.originalOrder.order_number || order.originalOrder.slug;
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${orderNumber}/status`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ status: 'in_progress' }),
       });
 
       const data = await response.json();
       if (data.status) {
-        setPaymentModal({
-          isOpen: true,
-          order: data.data.order,
-          agent: data.data.agent
-        });
+        toast.success('Order marked as In Progress');
+        fetchOrders(); // Refresh the list
       } else {
-        toast.error(data.message || 'Failed to process order');
+        toast.error(data.message || 'Failed to update order status');
       }
     } catch (error) {
-      toast.error('Failed to process order. Please try again.');
+      toast.error('Failed to update order. Please try again.');
     }
   };
 

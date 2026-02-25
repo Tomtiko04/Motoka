@@ -84,11 +84,8 @@ export function usePaymentVerification() {
       const response = await verifyPaystackPayment(reference);
       return response;
     },
-    onSuccess: (data) => {
-      toast.success(data?.message || 'Payment verified successfully!');
-    },
     onError: (error) => {
-      toast.error(error.response.data.message ||error.message || 'Failed to verify payment');
+      toast.error(error.response?.data?.message || error.message || 'Failed to verify payment');
     }
   });
 

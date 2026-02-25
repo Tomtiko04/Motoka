@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import { IoIosArrowBack } from "react-icons/io";
 import {
   PAYMENT_METHODS,
@@ -9,6 +10,7 @@ import {
 import { usePaymentVerification } from "./hooks/usePayment";
 import { initializePaystackPayment } from "../../services/apiPaystack";
 import { initiateMonicreditPayment } from "../../services/apiMonicredit";
+import { abandonPayment } from "../../services/apiPayment";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
@@ -18,6 +20,7 @@ const paymentMethods = [
 export default function PaymentOptions() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [paymentSession, setPaymentSession] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState(
     PAYMENT_METHODS.MONICREDIT,
@@ -41,16 +44,26 @@ export default function PaymentOptions() {
 
   const { verifyMonicredit, verifyPaystack } = usePaymentVerification();
 
+  // Invalidate cars + notifications cache so dashboard and bell update immediately
+  const navigateAfterPayment = useCallback((state) => {
+    queryClient.invalidateQueries({ queryKey: ['cars'] });
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    navigate('/dashboard', { state });
+  }, [navigate, queryClient]);
+
+  // Abandon any initialized-but-unpaid transaction when user leaves this page
   useEffect(() => {
-    console.log("Payment session updated:", paymentSession);
-    if (paymentSession?.monicredit?.data) {
-      console.log("Monicredit data:", {
-        total_amount: paymentSession.monicredit.data.total_amount,
-        amount: paymentSession.monicredit.data.amount,
-        customer: paymentSession.monicredit.data.customer
-      });
-    }
-  }, [paymentSession]);
+    return () => {
+      const paystackRef = paymentSession?.paystack?.reference;
+      const monicreditRef = paymentSession?.monicredit?.data?.reference ||
+                            paymentSession?.monicredit?.data?.orderid;
+      const ref = paystackRef || monicreditRef;
+      if (ref && isPaymentMethodConfirmed && !isProcessing) {
+        abandonPayment(ref, 'User left payment page');
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentSession, isPaymentMethodConfirmed, isProcessing]);
 
   useEffect(() => {
     const initializePaymentSession = () => {
@@ -372,24 +385,16 @@ export default function PaymentOptions() {
                        responseData?.status === 'success';
 
       if (isSuccess) {
-        // Get receipt URL based on payment type
-        const receiptUrl = getReceiptUrl(null, responseData || result);
-        
-        // Redirect to dashboard with success message
-        toast.success('Payment successful! Your renewal is being processed.');
-        navigate('/dashboard', {
-          state: {
-            paymentSuccess: true,
-            reference,
-            amount: paymentSession.amount
-          }
+        navigateAfterPayment({
+          paymentSuccess: true,
+          reference,
+          amount: paymentSession.amount
         });
       } else {
         toast.error('Payment verification failed. Please try again.');
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error('Payment verification error:', error);
       toast.error(error.message || 'Failed to verify payment');
       setIsProcessing(false);
     }
@@ -397,11 +402,9 @@ export default function PaymentOptions() {
 
   // Handle Monicredit verification
   const handleVerifyMonicredit = async () => {
-    // Try monicredit order_id first, then fall back to internal transaction reference
     const orderId = paymentSession?.monicredit?.data?.orderid ||
                     paymentSession?.monicredit?.data?.order_id ||
                     paymentSession?.monicredit?.data?.reference;
-    console.log("orderId", orderId);
     if (!orderId) {
       toast.error("No payment reference found. Please contact support.");
       return;
@@ -410,24 +413,19 @@ export default function PaymentOptions() {
     setIsProcessing(true);
     try {
       const result = await verifyMonicredit.mutateAsync(orderId);
-      console.log(result);
       if (result.data.status === "APPROVED") {
-        // Redirect to dashboard with success message
         toast.success('Payment successful! Your renewal is being processed.');
-        navigate('/dashboard', {
-          state: {
-            paymentSuccess: true,
-            orderId,
-            amount: paymentSession.amount,
-            paymentMethod: "monicredit"
-          }
+        navigateAfterPayment({
+          paymentSuccess: true,
+          orderId,
+          amount: paymentSession.amount,
+          paymentMethod: "monicredit"
         });
       } else {
         toast.error("Payment verification failed");
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("Verification failed:", error);
       setIsProcessing(false);
     }
   };
@@ -444,7 +442,6 @@ export default function PaymentOptions() {
     try {
       const result = await verifyPaystack.mutateAsync(reference);
       
-      // Handle different response structures
       const responseData = result?.data || result;
       const status = responseData?.status || responseData?.data?.status;
       const isSuccess = status === 'success' || status === true || 
@@ -452,22 +449,18 @@ export default function PaymentOptions() {
                        responseData?.status === 'success';
 
       if (isSuccess) {
-        // Redirect to dashboard with success message
         toast.success('Payment successful! Your renewal is being processed.');
-        navigate('/dashboard', {
-          state: {
-            paymentSuccess: true,
-            reference,
-            amount: paymentSession.amount,
-            paymentMethod: "paystack"
-          }
+        navigateAfterPayment({
+          paymentSuccess: true,
+          reference,
+          amount: paymentSession.amount,
+          paymentMethod: "paystack"
         });
       } else {
         toast.error("Payment verification failed");
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("Verification failed:", error);
       setIsProcessing(false);
     }
   };
@@ -475,22 +468,17 @@ export default function PaymentOptions() {
   // Listen for messages from PaystackCallback window
   useEffect(() => {
     const handleMessage = async (event) => {
-      // Security: Check origin if needed
       if (event.data.type === 'PAYMENT_SUCCESS') {
-        const { reference, paymentData } = event.data;
+        const { reference } = event.data;
         if (reference) {
           setIsProcessing(true);
           try {
-            // Payment already verified in callback, get receipt URL
-            // Redirect to dashboard with success message
             toast.success('Payment successful! Your renewal is being processed.');
-            navigate('/dashboard', {
-              state: {
-                paymentSuccess: true,
-                reference,
-                amount: paymentSession?.amount,
-                paymentMethod: 'paystack'
-              }
+            navigateAfterPayment({
+              paymentSuccess: true,
+              reference,
+              amount: paymentSession?.amount,
+              paymentMethod: 'paystack'
             });
           } catch (error) {
             console.error('Error processing payment success:', error);
@@ -508,7 +496,7 @@ export default function PaymentOptions() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [navigate, paymentSession, verifyPaystack, getReceiptUrl]);
+  }, [navigate, navigateAfterPayment, paymentSession, verifyPaystack, getReceiptUrl]);
 
   if (!paymentSession) {
     return (
@@ -977,89 +965,23 @@ export default function PaymentOptions() {
                     </div>
                   </div>
 
-                  <>
-                    <button
-                      onClick={handlePaystackPayment}
-                      disabled={!paymentSession?.paystack?.authorization_url || isProcessing}
-                      className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                          Processing...
-                        </>
-                      ) : (
-                        "Pay with Paystack"
-                      )}
-                    </button>
-
-                  <div className="text-center text-xs text-gray-500">
-                    You will be redirected to Paystack's secure payment page
-                  </div>
-
-                    {/* Manual Verification Section */}
-                    {paymentSession?.paystack?.reference && (
-                      <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div className="mb-4 flex items-center space-x-3">
-                          <div className="text-yellow-600">
-                            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-800">Payment Reference</h4>
-                            <p className="text-sm font-mono text-gray-600">{paymentSession?.paystack?.reference}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 mb-4">
-                          <p className="text-xs text-blue-800">
-                            If you've completed the payment, click below to verify and confirm your order.
-                          </p>
-                        </div>
-                        
-                        <button
-                          onClick={handleVerifyPaystack}
-                          disabled={verifyPaystack.isPending || isProcessing}
-                          className="w-full rounded-lg bg-green-600 py-3 px-4 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
-                        >
-                          {verifyPaystack.isPending ? (
-                            <>
-                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                              Verifying Payment...
-                            </>
-                          ) : (
-                            "Verify Payment"
-                          )}
-                        </button>
-                        
-                        {verifyPaystack.data && (
-                          <div className={`mt-3 text-center text-sm font-semibold ${
-                            verifyPaystack.data?.status === 'success' || 
-                            verifyPaystack.data?.data?.status === 'success' ||
-                            verifyPaystack.data?.status === true
-                              ? "text-green-600" 
-                              : "text-red-600"
-                          }`}>
-                            {typeof verifyPaystack.data === "object" && verifyPaystack.data !== null
-                              ? verifyPaystack.data?.message ||
-                                verifyPaystack.data?.data?.message ||
-                                "Verification completed"
-                              : String(verifyPaystack.data)}
-                          </div>
-                        )}
-                        {verifyPaystack.isError && (
-                          <div className="mt-3 text-center text-sm font-semibold text-red-600">
-                            {typeof verifyPaystack.error === "string"
-                              ? verifyPaystack.error
-                              : verifyPaystack.error?.message || 
-                                verifyPaystack.error?.response?.data?.message ||
-                                "Verification failed"}
-                          </div>
-                        )}
-                      </div>
+                  <button
+                    onClick={handlePaystackPayment}
+                    disabled={!paymentSession?.paystack?.authorization_url || isProcessing}
+                    className="flex w-full items-center justify-center rounded-full bg-[#2284DB] px-4 py-3 text-base font-semibold text-white hover:bg-[#1a6bb8] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                        Verifying payment...
+                      </>
+                    ) : (
+                      "Pay with Paystack"
                     )}
-                  </>
+                  </button>
+                  <p className="mt-2 text-center text-xs text-[#697C8C]">
+                    You will be redirected to Paystack's secure payment page. Verification is automatic after payment.
+                  </p>
                 </div>
               )}
             </div>

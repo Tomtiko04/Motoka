@@ -10,21 +10,18 @@ export function useInitializePayment() {
         // Try Monicredit first
         return await initializePaymentApi(paymentData);
       } catch (monicreditError) {
-        console.warn("Monicredit payment failed, falling back to Paystack:", monicreditError);
-        
-        // Fallback to Paystack
-        toast.error("Monicredit payment failed, redirecting to Paystack...");
-        
+        console.warn("Primary payment gateway failed, falling back to Paystack:", monicreditError);
+
         try {
           const paystackResult = await initializePaystackPayment(paymentData);
           return {
             ...paystackResult,
             fallback_to_paystack: true,
-            original_monicredit_error: monicreditError?.message
+            original_monicredit_error: monicreditError?.message,
           };
         } catch (paystackError) {
-          console.error("Both Monicredit and Paystack failed:", { monicreditError, paystackError });
-          throw paystackError; // Throw the Paystack error as the final error
+          console.error("Both payment gateways failed:", { monicreditError, paystackError });
+          throw paystackError;
         }
       }
     },

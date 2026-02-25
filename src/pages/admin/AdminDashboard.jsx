@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 import config from '../../config/config';
 
 const AdminDashboard = () => {

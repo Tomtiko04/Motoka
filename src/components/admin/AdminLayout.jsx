@@ -19,10 +19,7 @@ const AdminLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+    const applySession = async (session) => {
       if (!session) {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
@@ -31,7 +28,9 @@ const AdminLayout = () => {
         return;
       }
 
-      // Verify admin privileges
+      // Always keep adminToken in sync with the current (possibly refreshed) session token
+      localStorage.setItem('adminToken', session.access_token);
+
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('is_admin, is_suspended, first_name, last_name, user_id')
@@ -57,16 +56,30 @@ const AdminLayout = () => {
 
       setAdminUser(user);
       localStorage.setItem('adminUser', JSON.stringify(user));
+    };
+
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        await applySession(session);
       } catch (err) {
         console.error('Admin auth check failed:', err);
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
-        window.dispatchEvent(new CustomEvent('adminAuthChange', { detail: { isAuthenticated: false } }));
         navigate('/admin/login');
       }
     };
 
     checkAuth();
+
+    // Keep adminToken updated whenever Supabase silently refreshes the token
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) {
+        localStorage.setItem('adminToken', session.access_token);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleLogout = async () => {
