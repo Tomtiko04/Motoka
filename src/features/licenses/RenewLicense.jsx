@@ -153,43 +153,15 @@ export default function RenewLicense() {
   const checkForExistingPayments = async () => {
     if (selectedSchedules.length === 0) return;
 
-    console.log("🔍 Checking existing payments...", {
-      selectedSchedules: selectedSchedules.map((s) => ({
-        id: s.id,
-        name: s.payment_head?.payment_head_name,
-      })),
-      carSlug: carDetail?.slug,
-    });
-
     setDuplicateCheckLoading(true);
     try {
-      const paymentScheduleIds = selectedSchedules.map(
-        (schedule) => schedule.id,
-      );
-
-      console.log("📡 Calling checkExistingPayments API with:", {
-        car_slug: carDetail.slug,
-        payment_schedule_ids: paymentScheduleIds,
-      });
-
-      const result = await checkExistingPayments(
-        carDetail.slug,
-        paymentScheduleIds,
-      );
-
-      console.log("✅ API Response:", result);
-
+      const paymentScheduleIds = selectedSchedules.map((schedule) => schedule.id);
+      const result = await checkExistingPayments(carDetail.slug, paymentScheduleIds);
       if (result.status) {
         setExistingPayments(result.data.existing_payments || []);
-        console.log(
-          "📋 Existing payments set:",
-          result.data.existing_payments || [],
-        );
-      } else {
-        console.error("❌ API returned false status:", result);
       }
     } catch (error) {
-      console.error("❌ Error checking existing payments:", error);
+      console.error("Error checking existing payments:", error);
     } finally {
       setDuplicateCheckLoading(false);
     }

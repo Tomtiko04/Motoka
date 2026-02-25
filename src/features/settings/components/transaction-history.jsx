@@ -14,9 +14,9 @@ export default function TransactionHistory({ onNavigate }) {
       try {
         setLoading(true);
         const response = await getPaymentHistory();
-        setTransactions(response.data?.transactions || []);
-      } catch (error) {
-        console.error("Failed to fetch transaction history:", error);
+        // getPaymentHistory returns data.data which is { transactions: [], pagination: {} }
+        setTransactions(response?.transactions || []);
+      } catch {
         setTransactions([]);
       } finally {
         setLoading(false);

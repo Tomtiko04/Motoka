@@ -7,6 +7,7 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   EyeIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
@@ -26,6 +27,8 @@ const AdminPayments = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [txDetailLoading, setTxDetailLoading] = useState(false);
 
   const statusOptions = [
     { value: 'All', label: 'All Transactions', color: 'gray' },
@@ -157,6 +160,26 @@ const AdminPayments = () => {
     setCurrentPage(page);
   };
 
+  const handleViewTransaction = async (reference) => {
+    try {
+      setTxDetailLoading(true);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/transactions/${reference}`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (data.status) {
+        setSelectedTransaction(data.data);
+      } else {
+        toast.error('Failed to load transaction details');
+      }
+    } catch (error) {
+      toast.error('Failed to load transaction details');
+    } finally {
+      setTxDetailLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -190,7 +213,7 @@ const AdminPayments = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Amount Spent</p>
               <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(summary.total_amount * 0.45)} {/* Example calculation */}
+                {formatCurrency(summary.successful_transactions > 0 ? summary.total_amount : 0)}
               </p>
             </div>
             <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -389,7 +412,10 @@ const AdminPayments = () => {
                       {formatDate(transaction.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
+                      <button
+                        onClick={() => handleViewTransaction(transaction.transaction_id)}
+                        className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
+                      >
                         <EyeIcon className="h-4 w-4" />
                         <span>View</span>
                       </button>
@@ -433,6 +459,80 @@ const AdminPayments = () => {
           </div>
         )}
       </div>
+
+      {/* Transaction Detail Modal */}
+      {(selectedTransaction || txDetailLoading) && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-black bg-opacity-40" onClick={() => setSelectedTransaction(null)} />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-6 z-10">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-semibold text-gray-900">Transaction Details</h2>
+                <button onClick={() => setSelectedTransaction(null)} className="text-gray-400 hover:text-gray-600">
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              {txDetailLoading ? (
+                <div className="space-y-3">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="animate-pulse h-4 bg-gray-200 rounded" />
+                  ))}
+                </div>
+              ) : selectedTransaction && (
+                <div className="space-y-4 text-sm">
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      ['Reference', selectedTransaction.reference],
+                      ['Gateway', selectedTransaction.payment_gateway?.toUpperCase()],
+                      ['Amount', formatCurrency(selectedTransaction.amount)],
+                      ['Status', selectedTransaction.status],
+                      ['Type', selectedTransaction.payment_description],
+                      ['Channel', selectedTransaction.channel || '—'],
+                      ['Date', selectedTransaction.created_at ? formatDate(selectedTransaction.created_at) : '—'],
+                      ['Paid At', selectedTransaction.paid_at ? formatDate(selectedTransaction.paid_at) : '—'],
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <p className="text-gray-500">{label}</p>
+                        <p className="font-medium text-gray-900 break-all">{value || '—'}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedTransaction.user && (
+                    <div className="border-t pt-4">
+                      <p className="text-gray-500 mb-1">Customer</p>
+                      <p className="font-medium text-gray-900">{selectedTransaction.user.name}</p>
+                      <p className="text-gray-500">{selectedTransaction.user.email}</p>
+                      {selectedTransaction.user.phone_number && (
+                        <p className="text-gray-500">{selectedTransaction.user.phone_number}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {selectedTransaction.car && (
+                    <div className="border-t pt-4">
+                      <p className="text-gray-500 mb-1">Vehicle</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedTransaction.car.vehicle_make} {selectedTransaction.car.vehicle_model}
+                      </p>
+                      <p className="text-gray-500">Plate: {selectedTransaction.car.registration_no || '—'}</p>
+                    </div>
+                  )}
+
+                  {selectedTransaction.order && (
+                    <div className="border-t pt-4">
+                      <p className="text-gray-500 mb-1">Linked Order</p>
+                      <p className="font-medium text-gray-900">{selectedTransaction.order.order_number}</p>
+                      <p className="text-gray-500">Status: {selectedTransaction.order.status}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
