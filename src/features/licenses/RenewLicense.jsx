@@ -68,6 +68,7 @@ export default function RenewLicense() {
 
   const [inlinePhone, setInlinePhone] = useState("");
   const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [phoneStep, setPhoneStep] = useState(""); // "saving" | "initializing"
 
   const isState = state?.data;
 
@@ -392,10 +393,11 @@ export default function RenewLicense() {
       return;
     }
     setIsSavingPhone(true);
+    setPhoneStep("saving");
     try {
       await updateProfile({ phone_number: phone });
+      setPhoneStep("initializing");
       resetPaymentInit();
-      // Re-build payload and retry with Monicredit
       const availableSchedules = getAvailableSchedules();
       const paymentPayload = {
         car_slug: carDetail?.slug,
@@ -418,6 +420,7 @@ export default function RenewLicense() {
       toast.error(err.response?.data?.message || err.message || "Failed to save phone number");
     } finally {
       setIsSavingPhone(false);
+      setPhoneStep("");
     }
   };
 
@@ -782,7 +785,11 @@ export default function RenewLicense() {
                 }
                 className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
-                {isSavingPhone || isPaymentInitializing ? (
+                {phoneStep === "saving" ? (
+                  "Saving phone number..."
+                ) : phoneStep === "initializing" || isPaymentInitializing ? (
+                  "Initializing payment..."
+                ) : isSavingPhone ? (
                   "Please wait..."
                 ) : duplicateCheckLoading ? (
                   "Checking for existing payments..."
