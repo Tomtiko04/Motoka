@@ -103,3 +103,18 @@ export async function initiateDriversLicensePayment(slug) {
   const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
   return data;
 }
+
+/**
+ * Initialize plate number payment — reuses the same /payments/initialize endpoint
+ * with payment_type: 'plate_number'. Backend branches on this to fetch price
+ * from plate_number_prices instead of renewal items.
+ * @param {Object} payload - { car_slug, plate_type, sub_type?, payment_gateway? }
+ */
+export async function initializePlatePayment(payload) {
+  const { data } = await api.post('/payments/initialize', {
+    ...payload,
+    payment_type: 'plate_number',
+    payment_gateway: payload.payment_gateway || 'monicredit'
+  });
+  return data;
+}

@@ -28,6 +28,7 @@ import DriversLicense from "./features/licenses/driverslicense/DriversLicense.js
 import Settings from "./features/settings/Settings.jsx";
 import PlateNumber from "./features/licenses/PlateNumber.jsx";
 import PlateDetails from "./features/licenses/platenumber/PlateDetails.jsx";
+import PlateOrderSummary from "./features/licenses/platenumber/PlateOrderSummary.jsx";
 import LocalGovPaper from "./features/licenses/LocalGovPaper.jsx";
 import TintPermit from "./features/licenses/TintPermit.jsx";
 import IntlDriverLicense from "./features/licenses/IntlDriverLicense.jsx";
@@ -219,6 +220,7 @@ export default function App() {
               <Route path="documents" element={<VehiclePaper />} />
               <Route path="drivers-license" element={<DriversLicense />} />
               <Route path="plate-number" element={<PlateNumber />} />
+              <Route path="plate-number/order-summary" element={<PlateOrderSummary />} />
               <Route path="plate-number/:type" element={<PlateDetails />} />
               <Route
                 path="local-government-papers"
