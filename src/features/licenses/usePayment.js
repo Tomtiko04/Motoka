@@ -1,45 +1,17 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { initializePayment as initializePaymentApi, verifyPayment as verifyPaymentApi, getPaymentHistory as getPaymentHistoryApi, getCarPaymentReceipt } from "../../services/apiPayment";
-import { initializePaystackPayment } from "../../services/apiPaystack";
 import toast from "react-hot-toast";
 
 export function useInitializePayment() {
-  const { mutate: startPayment, isPending: isPaymentInitializing, error, data } = useMutation({
-    mutationFn: async (paymentData) => {
-      try {
-        // Try Monicredit first
-        return await initializePaymentApi(paymentData);
-      } catch (monicreditError) {
-        console.warn("Monicredit payment failed, falling back to Paystack:", monicreditError);
-        
-        // Fallback to Paystack
-        toast.error("Monicredit payment failed, redirecting to Paystack...");
-        
-        try {
-          const paystackResult = await initializePaystackPayment(paymentData);
-          return {
-            ...paystackResult,
-            fallback_to_paystack: true,
-            original_monicredit_error: monicreditError?.message
-          };
-        } catch (paystackError) {
-          console.error("Both Monicredit and Paystack failed:", { monicreditError, paystackError });
-          throw paystackError; // Throw the Paystack error as the final error
-        }
-      }
-    },
-    onSuccess: (data) => {
-        console.log("payment data", data);
-        // Do not redirect here. Let the caller (page component) handle navigation to /payment
-        if (data?.fallback_to_paystack) {
-          toast.success("Paystack initialized. Proceeding to payment page...");
-        } else if (data?.status && data?.data?.authorization_url) {
-          toast.success(data?.message || "Payment initialized successfully");
-        }
-    },
+  const { mutate: startPayment, isPending: isPaymentInitializing, error, data, reset } = useMutation({
+    mutationFn: (paymentData) => initializePaymentApi(paymentData),
     onError: (error) => {
       console.error("Payment initialization failed:", error);
-      toast.error(error.response?.data?.message || error.message || "Payment initialization failed. Please try again.");
+      const msg = error.response?.data?.message || error.message || "";
+      // Only show toast for non-phone errors; phone errors are handled inline in the UI
+      if (!msg.toLowerCase().includes("phone")) {
+        toast.error(msg || "Failed to initialize payment. Please try again.");
+      }
     }
   });
 
@@ -47,7 +19,8 @@ export function useInitializePayment() {
     startPayment,
     isPaymentInitializing,
     error,
-    data
+    data,
+    reset
   };
 }
 

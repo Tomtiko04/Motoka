@@ -4,33 +4,18 @@ import { api } from "./apiClient";
 
 // Initialize Payment via backend
 export async function initiateMonicreditPayment(paymentData) {
-  // Ensure payment_gateway is set to 'monicredit'
-  const payload = {
-    ...paymentData,
-    payment_gateway: 'monicredit'
-  };
-  // Debug: log the payload
-  console.log("Monicredit Payment Payload:", payload, JSON.stringify(payload));
-  const res = await api.post(
-    "/payments/initialize",
-    payload,
-    {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-  );
+  const payload = { ...paymentData, payment_gateway: 'monicredit' };
+  const res = await api.post("/payments/initialize", payload);
   if (!res.data.status) throw new Error(res.data.message || "Payment initialization failed");
-  // Return what your backend returns (e.g., authorization_url, id, etc)
   return res.data;
 }
 
 // Verify Payment via backend
-export async function verifyMonicreditPayment(transaction_id) {
-  // You may need to pass additional params if your backend requires
-  const res = await api.get(`/payment/verify?transaction_id=${transaction_id}`);
-  if (!res.data.data) throw new Error("Invalid response from verification");
-  return res.data.data;
+// Uses POST /payment/verify-payment/:reference — consistent with apiPayment.js
+export async function verifyMonicreditPayment(reference) {
+  const res = await api.post(`/payment/verify-payment/${reference}`);
+  if (!res.data) throw new Error("Invalid response from verification");
+  return res.data.data || res.data;
 }
 
 // Fetch all payment schedules

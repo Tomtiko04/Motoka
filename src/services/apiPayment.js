@@ -88,6 +88,15 @@ export async function checkExistingPayments(carSlug, paymentScheduleIds) {
   return data;
 }
 
+export async function abandonPayment(reference, reason = 'User navigated away') {
+  try {
+    const { data } = await api.put(`/payments/${reference}/cancel`, { reason });
+    return data;
+  } catch {
+    // Silent fail — best-effort cleanup, don't block navigation
+  }
+}
+
 
 
 export async function initiateDriversLicensePayment(slug) {

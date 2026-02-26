@@ -5,11 +5,13 @@ import { useInitializePayment } from "./usePayment";
 import { PAYMENT_TYPES } from "../payment/config/paymentTypes";
 import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
 import { checkExistingPayments } from "../../services/apiPayment";
+import { updateProfile } from "../../services/apiProfile";
 import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { ClipLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -53,7 +55,20 @@ export default function RenewLicense() {
     startPayment,
     isPaymentInitializing,
     data: paymentInitData,
+    error: paymentInitError,
+    reset: resetPaymentInit,
   } = useInitializePayment();
+
+  // Detect Monicredit "missing phone" error — show inline phone collector
+  const monicreditPhoneError = paymentInitError &&
+    (paymentInitError.response?.data?.message || paymentInitError.message || "")
+      .toLowerCase().includes("phone")
+    ? (paymentInitError.response?.data?.message || paymentInitError.message)
+    : null;
+
+  const [inlinePhone, setInlinePhone] = useState("");
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [phoneStep, setPhoneStep] = useState(""); // "saving" | "initializing"
 
   const isState = state?.data;
 
@@ -153,43 +168,15 @@ export default function RenewLicense() {
   const checkForExistingPayments = async () => {
     if (selectedSchedules.length === 0) return;
 
-    console.log("🔍 Checking existing payments...", {
-      selectedSchedules: selectedSchedules.map((s) => ({
-        id: s.id,
-        name: s.payment_head?.payment_head_name,
-      })),
-      carSlug: carDetail?.slug,
-    });
-
     setDuplicateCheckLoading(true);
     try {
-      const paymentScheduleIds = selectedSchedules.map(
-        (schedule) => schedule.id,
-      );
-
-      console.log("📡 Calling checkExistingPayments API with:", {
-        car_slug: carDetail.slug,
-        payment_schedule_ids: paymentScheduleIds,
-      });
-
-      const result = await checkExistingPayments(
-        carDetail.slug,
-        paymentScheduleIds,
-      );
-
-      console.log("✅ API Response:", result);
-
+      const paymentScheduleIds = selectedSchedules.map((schedule) => schedule.id);
+      const result = await checkExistingPayments(carDetail.slug, paymentScheduleIds);
       if (result.status) {
         setExistingPayments(result.data.existing_payments || []);
-        console.log(
-          "📋 Existing payments set:",
-          result.data.existing_payments || [],
-        );
-      } else {
-        console.error("❌ API returned false status:", result);
       }
     } catch (error) {
-      console.error("❌ Error checking existing payments:", error);
+      console.error("Error checking existing payments:", error);
     } finally {
       setDuplicateCheckLoading(false);
     }
@@ -370,6 +357,70 @@ export default function RenewLicense() {
     // Initialize payment for all selected schedules
     if (paymentPayload.payment_schedule_id.length > 0) {
       startPayment(paymentPayload);
+    }
+  };
+
+  // When Monicredit fails due to missing phone, user can switch to Paystack
+  const handlePayWithPaystack = () => {
+    if (!isFormValid()) return;
+    const availableSchedules = getAvailableSchedules();
+    if (availableSchedules.length === 0) return;
+    resetPaymentInit();
+    const paymentPayload = {
+      car_slug: carDetail?.slug,
+      payment_schedule_id: availableSchedules.map((s) => s.id),
+      payment_gateway: 'paystack',
+      ...(deliveryDetails.address.trim() !== "" ||
+          deliveryDetails.contact.trim() !== "" ||
+          deliveryDetails.state.trim() !== "" ||
+          deliveryDetails.lg.trim() !== "" ? {
+        delivery_details: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+          ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+        },
+      } : {}),
+    };
+    startPayment(paymentPayload);
+  };
+
+  // Save phone to profile then retry Monicredit — no Settings round-trip needed
+  const handleSavePhoneAndRetry = async () => {
+    const phone = inlinePhone.trim();
+    if (!phone || phone.length < 7) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    setIsSavingPhone(true);
+    setPhoneStep("saving");
+    try {
+      await updateProfile({ phone_number: phone });
+      setPhoneStep("initializing");
+      resetPaymentInit();
+      const availableSchedules = getAvailableSchedules();
+      const paymentPayload = {
+        car_slug: carDetail?.slug,
+        payment_schedule_id: availableSchedules.map((s) => s.id),
+        payment_gateway: 'monicredit',
+        ...(deliveryDetails.address.trim() !== "" ||
+            deliveryDetails.contact.trim() !== "" ||
+            deliveryDetails.state.trim() !== "" ||
+            deliveryDetails.lg.trim() !== "" ? {
+          delivery_details: {
+            ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+            ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+            ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+            ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+          },
+        } : {}),
+      };
+      startPayment(paymentPayload);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save phone number");
+    } finally {
+      setIsSavingPhone(false);
+      setPhoneStep("");
     }
   };
 
@@ -705,24 +756,42 @@ export default function RenewLicense() {
                 </>
               )}
 
-              {/* Error Message */}
-              {/* {paymentError && (
-                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                  {paymentError.message}
+              {/* Phone required (Google OAuth users) — inline input, same Pay Now button */}
+              {monicreditPhoneError && (
+                <div className="mb-3 rounded-[12px] border border-blue-200 bg-blue-50 px-4 pt-4 pb-2">
+                  <p className="text-sm font-semibold text-[#05243F] mb-1">Phone number required to continue</p>
+                  <p className="text-xs text-[#05243F]/60 mb-2">
+                    Enter your phone number below — it will be saved to your profile.
+                  </p>
+                  <input
+                    type="tel"
+                    value={inlinePhone}
+                    onChange={(e) => setInlinePhone(e.target.value)}
+                    placeholder="e.g. 08012345678"
+                    className="w-full rounded-[10px] bg-white border border-blue-200 px-3 py-2 text-sm text-[#05243F] focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
+                  />
                 </div>
-              )} */}
+              )}
 
               {/* Pay Now Button */}
               <button
-                onClick={handlePayNow}
+                onClick={monicreditPhoneError ? handleSavePhoneAndRetry : handlePayNow}
                 disabled={
                   isPaymentInitializing ||
+                  isSavingPhone ||
                   !isFormValid() ||
-                  duplicateCheckLoading
+                  duplicateCheckLoading ||
+                  (monicreditPhoneError && !inlinePhone.trim())
                 }
                 className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
-                {duplicateCheckLoading ? (
+                {phoneStep === "saving" ? (
+                  "Saving phone number..."
+                ) : phoneStep === "initializing" || isPaymentInitializing ? (
+                  "Initializing payment..."
+                ) : isSavingPhone ? (
+                  "Please wait..."
+                ) : duplicateCheckLoading ? (
                   "Checking for existing payments..."
                 ) : existingPayments.length > 0 &&
                   getAvailableSchedules().length === 0 ? (
@@ -735,7 +804,6 @@ export default function RenewLicense() {
                       Number(deliveryDetails.fee)) / 100
                     ).toLocaleString()}{" "}
                     Pay Now
-                    {isPaymentInitializing && "..."}
                   </>
                 )}
               </button>
