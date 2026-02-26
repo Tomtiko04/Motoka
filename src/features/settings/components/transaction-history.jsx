@@ -14,8 +14,8 @@ export default function TransactionHistory({ onNavigate }) {
       try {
         setLoading(true);
         const response = await getPaymentHistory();
-        // getPaymentHistory returns data.data which is { transactions: [], pagination: {} }
-        setTransactions(response?.transactions || []);
+        // Backend: { success, data: { transactions: [], pagination: {} } }
+        setTransactions(response?.data?.transactions || response?.transactions || []);
       } catch {
         setTransactions([]);
       } finally {

@@ -3,11 +3,15 @@ import { initializePayment as initializePaymentApi, verifyPayment as verifyPayme
 import toast from "react-hot-toast";
 
 export function useInitializePayment() {
-  const { mutate: startPayment, isPending: isPaymentInitializing, error, data } = useMutation({
+  const { mutate: startPayment, isPending: isPaymentInitializing, error, data, reset } = useMutation({
     mutationFn: (paymentData) => initializePaymentApi(paymentData),
     onError: (error) => {
       console.error("Payment initialization failed:", error);
-      toast.error(error.response?.data?.message || error.message || "Failed to initialize payment. Please try again.");
+      const msg = error.response?.data?.message || error.message || "";
+      // Only show toast for non-phone errors; phone errors are handled inline in the UI
+      if (!msg.toLowerCase().includes("phone")) {
+        toast.error(msg || "Failed to initialize payment. Please try again.");
+      }
     }
   });
 
@@ -15,7 +19,8 @@ export function useInitializePayment() {
     startPayment,
     isPaymentInitializing,
     error,
-    data
+    data,
+    reset
   };
 }
 

@@ -28,6 +28,7 @@ export default function PaymentOptions() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isPaymentMethodConfirmed, setIsPaymentMethodConfirmed] = useState(false);
+  const [monicreditFallbackError, setMonicreditFallbackError] = useState(null);
 
   // For Monicredit
   const customer = paymentSession?.monicredit?.data?.customer;
@@ -97,8 +98,8 @@ export default function PaymentOptions() {
   // Handle payment method selection
   const handleMethodSelect = (method) => {
     setSelectedMethod(method);
-    // Reset confirmation when switching payment methods
     setIsPaymentMethodConfirmed(false);
+    setMonicreditFallbackError(null);
   };
 
   // Helper function to build payment payload
@@ -234,10 +235,9 @@ export default function PaymentOptions() {
       } else if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
         // Initialize Monicredit
         payload.payment_gateway = 'monicredit';
-        console.log("Initializing Monicredit with payload:", payload);
+        setMonicreditFallbackError(null);
 
         const initRes = await initiateMonicreditPayment(payload);
-        // initRes structure: { status: true, data: {...}, message: '...' }
         const responseData = initRes?.data || initRes;
 
         if (initRes?.status && responseData) {
@@ -264,10 +264,24 @@ export default function PaymentOptions() {
       }
     } catch (err) {
       console.error("Payment initialization error:", err);
-      toast.error(err.response?.data?.message || err.message || 'Failed to initialize payment');
+      const errMsg = err.response?.data?.message || err.message || 'Failed to initialize payment';
+
+      // When Monicredit fails, offer the user a clear path to switch to card payment
+      if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
+        setMonicreditFallbackError(errMsg);
+      } else {
+        toast.error(errMsg);
+      }
     } finally {
       setIsInitializing(false);
     }
+  };
+
+  // Switch to Paystack after Monicredit failure
+  const handleSwitchToPaystack = () => {
+    setMonicreditFallbackError(null);
+    setSelectedMethod(PAYMENT_METHODS.PAYSTACK);
+    setIsPaymentMethodConfirmed(false);
   };
 
   // Note: Monicredit doesn't require a separate payment initiation step
@@ -605,6 +619,21 @@ export default function PaymentOptions() {
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Bank Transfer Details
               </h2>
+
+              {/* Monicredit fallback banner — shown when initialization fails */}
+              {monicreditFallbackError && (
+                <div className="mb-4 rounded-[12px] border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-medium text-amber-800 mb-1">Bank transfer unavailable</p>
+                  <p className="text-xs text-amber-700 mb-3">{monicreditFallbackError}</p>
+                  <button
+                    onClick={handleSwitchToPaystack}
+                    className="w-full rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors"
+                  >
+                    Pay via Paystack instead
+                  </button>
+                </div>
+              )}
+
               {!isPaymentMethodConfirmed ? (
                 <div className="space-y-4 rounded-[20px] border border-[#697B8C]/11 px-6 py-6">
                   <div className="text-center">
