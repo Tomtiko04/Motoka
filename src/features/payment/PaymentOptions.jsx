@@ -629,7 +629,7 @@ export default function PaymentOptions() {
                     onClick={handleSwitchToPaystack}
                     className="w-full rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors"
                   >
-                    Pay by Card instead
+                    Pay via Paystack instead
                   </button>
                 </div>
               )}

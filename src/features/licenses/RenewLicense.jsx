@@ -5,11 +5,13 @@ import { useInitializePayment } from "./usePayment";
 import { PAYMENT_TYPES } from "../payment/config/paymentTypes";
 import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
 import { checkExistingPayments } from "../../services/apiPayment";
+import { updateProfile } from "../../services/apiProfile";
 import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { ClipLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -57,12 +59,15 @@ export default function RenewLicense() {
     reset: resetPaymentInit,
   } = useInitializePayment();
 
-  // Detect Monicredit "missing phone" error so we can offer Paystack fallback
+  // Detect Monicredit "missing phone" error — show inline phone collector
   const monicreditPhoneError = paymentInitError &&
     (paymentInitError.response?.data?.message || paymentInitError.message || "")
       .toLowerCase().includes("phone")
     ? (paymentInitError.response?.data?.message || paymentInitError.message)
     : null;
+
+  const [inlinePhone, setInlinePhone] = useState("");
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
 
   const isState = state?.data;
 
@@ -377,6 +382,43 @@ export default function RenewLicense() {
       } : {}),
     };
     startPayment(paymentPayload);
+  };
+
+  // Save phone to profile then retry Monicredit — no Settings round-trip needed
+  const handleSavePhoneAndRetry = async () => {
+    const phone = inlinePhone.trim();
+    if (!phone || phone.length < 7) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    setIsSavingPhone(true);
+    try {
+      await updateProfile({ phone_number: phone });
+      resetPaymentInit();
+      // Re-build payload and retry with Monicredit
+      const availableSchedules = getAvailableSchedules();
+      const paymentPayload = {
+        car_slug: carDetail?.slug,
+        payment_schedule_id: availableSchedules.map((s) => s.id),
+        payment_gateway: 'monicredit',
+        ...(deliveryDetails.address.trim() !== "" ||
+            deliveryDetails.contact.trim() !== "" ||
+            deliveryDetails.state.trim() !== "" ||
+            deliveryDetails.lg.trim() !== "" ? {
+          delivery_details: {
+            ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+            ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+            ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+            ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+          },
+        } : {}),
+      };
+      startPayment(paymentPayload);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save phone number");
+    } finally {
+      setIsSavingPhone(false);
+    }
   };
 
   // Navigate to payment page after successful payment initialization
@@ -711,24 +753,34 @@ export default function RenewLicense() {
                 </>
               )}
 
-              {/* Monicredit phone error — offer Paystack as alternative */}
+              {/* Monicredit requires phone — collect it inline and retry */}
               {monicreditPhoneError && (
-                <div className="mb-3 rounded-[12px] border border-amber-200 bg-amber-50 p-4">
-                  <p className="text-sm font-medium text-amber-800 mb-1">Bank transfer unavailable</p>
-                  <p className="text-xs text-amber-700 mb-3">{monicreditPhoneError}</p>
+                <div className="mb-3 rounded-[12px] border border-blue-200 bg-blue-50 p-4">
+                  <p className="text-sm font-semibold text-[#05243F] mb-1">Phone number required</p>
+                  <p className="text-xs text-[#05243F]/60 mb-3">
+                    Bank transfer requires your phone number. Enter it below to continue — it will be saved to your profile.
+                  </p>
+                  <input
+                    type="tel"
+                    value={inlinePhone}
+                    onChange={(e) => setInlinePhone(e.target.value)}
+                    placeholder="e.g. 08012345678"
+                    className="w-full rounded-[10px] bg-white border border-blue-200 px-3 py-2 text-sm text-[#05243F] mb-3 focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
+                  />
                   <div className="flex gap-2">
+                    <button
+                      onClick={handleSavePhoneAndRetry}
+                      disabled={isSavingPhone || isPaymentInitializing || !inlinePhone.trim()}
+                      className="flex-1 rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors disabled:opacity-50"
+                    >
+                      {isSavingPhone || isPaymentInitializing ? "Please wait..." : "Save & Continue with Bank Transfer"}
+                    </button>
                     <button
                       onClick={handlePayWithPaystack}
                       disabled={isPaymentInitializing}
-                      className="flex-1 rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors disabled:opacity-50"
+                      className="flex-1 rounded-full border border-[#2284DB] py-2 text-sm font-semibold text-[#2284DB] hover:bg-blue-50 transition-colors disabled:opacity-50"
                     >
-                      {isPaymentInitializing ? "Initializing..." : "Pay by Card instead"}
-                    </button>
-                    <button
-                      onClick={() => navigate("/settings", { state: { section: "edit-profile" } })}
-                      className="flex-1 rounded-full border border-[#2284DB] py-2 text-sm font-semibold text-[#2284DB] hover:bg-blue-50 transition-colors"
-                    >
-                      Add Phone Number
+                      Pay via Paystack instead
                     </button>
                   </div>
                 </div>
