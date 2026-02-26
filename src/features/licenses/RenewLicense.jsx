@@ -53,7 +53,16 @@ export default function RenewLicense() {
     startPayment,
     isPaymentInitializing,
     data: paymentInitData,
+    error: paymentInitError,
+    reset: resetPaymentInit,
   } = useInitializePayment();
+
+  // Detect Monicredit "missing phone" error so we can offer Paystack fallback
+  const monicreditPhoneError = paymentInitError &&
+    (paymentInitError.response?.data?.message || paymentInitError.message || "")
+      .toLowerCase().includes("phone")
+    ? (paymentInitError.response?.data?.message || paymentInitError.message)
+    : null;
 
   const isState = state?.data;
 
@@ -343,6 +352,31 @@ export default function RenewLicense() {
     if (paymentPayload.payment_schedule_id.length > 0) {
       startPayment(paymentPayload);
     }
+  };
+
+  // When Monicredit fails due to missing phone, user can switch to Paystack
+  const handlePayWithPaystack = () => {
+    if (!isFormValid()) return;
+    const availableSchedules = getAvailableSchedules();
+    if (availableSchedules.length === 0) return;
+    resetPaymentInit();
+    const paymentPayload = {
+      car_slug: carDetail?.slug,
+      payment_schedule_id: availableSchedules.map((s) => s.id),
+      payment_gateway: 'paystack',
+      ...(deliveryDetails.address.trim() !== "" ||
+          deliveryDetails.contact.trim() !== "" ||
+          deliveryDetails.state.trim() !== "" ||
+          deliveryDetails.lg.trim() !== "" ? {
+        delivery_details: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+          ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+        },
+      } : {}),
+    };
+    startPayment(paymentPayload);
   };
 
   // Navigate to payment page after successful payment initialization
@@ -677,12 +711,28 @@ export default function RenewLicense() {
                 </>
               )}
 
-              {/* Error Message */}
-              {/* {paymentError && (
-                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                  {paymentError.message}
+              {/* Monicredit phone error — offer Paystack as alternative */}
+              {monicreditPhoneError && (
+                <div className="mb-3 rounded-[12px] border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-medium text-amber-800 mb-1">Bank transfer unavailable</p>
+                  <p className="text-xs text-amber-700 mb-3">{monicreditPhoneError}</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handlePayWithPaystack}
+                      disabled={isPaymentInitializing}
+                      className="flex-1 rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors disabled:opacity-50"
+                    >
+                      {isPaymentInitializing ? "Initializing..." : "Pay by Card instead"}
+                    </button>
+                    <button
+                      onClick={() => navigate("/settings", { state: { section: "edit-profile" } })}
+                      className="flex-1 rounded-full border border-[#2284DB] py-2 text-sm font-semibold text-[#2284DB] hover:bg-blue-50 transition-colors"
+                    >
+                      Add Phone Number
+                    </button>
+                  </div>
                 </div>
-              )} */}
+              )}
 
               {/* Pay Now Button */}
               <button
