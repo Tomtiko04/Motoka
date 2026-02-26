@@ -753,50 +753,38 @@ export default function RenewLicense() {
                 </>
               )}
 
-              {/* Monicredit requires phone — collect it inline and retry */}
+              {/* Phone required (Google OAuth users) — inline input, same Pay Now button */}
               {monicreditPhoneError && (
-                <div className="mb-3 rounded-[12px] border border-blue-200 bg-blue-50 p-4">
-                  <p className="text-sm font-semibold text-[#05243F] mb-1">Phone number required</p>
-                  <p className="text-xs text-[#05243F]/60 mb-3">
-                    Bank transfer requires your phone number. Enter it below to continue — it will be saved to your profile.
+                <div className="mb-3 rounded-[12px] border border-blue-200 bg-blue-50 px-4 pt-4 pb-2">
+                  <p className="text-sm font-semibold text-[#05243F] mb-1">Phone number required to continue</p>
+                  <p className="text-xs text-[#05243F]/60 mb-2">
+                    Enter your phone number below — it will be saved to your profile.
                   </p>
                   <input
                     type="tel"
                     value={inlinePhone}
                     onChange={(e) => setInlinePhone(e.target.value)}
                     placeholder="e.g. 08012345678"
-                    className="w-full rounded-[10px] bg-white border border-blue-200 px-3 py-2 text-sm text-[#05243F] mb-3 focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
+                    className="w-full rounded-[10px] bg-white border border-blue-200 px-3 py-2 text-sm text-[#05243F] focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
                   />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleSavePhoneAndRetry}
-                      disabled={isSavingPhone || isPaymentInitializing || !inlinePhone.trim()}
-                      className="flex-1 rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors disabled:opacity-50"
-                    >
-                      {isSavingPhone || isPaymentInitializing ? "Please wait..." : "Save & Continue with Bank Transfer"}
-                    </button>
-                    <button
-                      onClick={handlePayWithPaystack}
-                      disabled={isPaymentInitializing}
-                      className="flex-1 rounded-full border border-[#2284DB] py-2 text-sm font-semibold text-[#2284DB] hover:bg-blue-50 transition-colors disabled:opacity-50"
-                    >
-                      Pay via Paystack instead
-                    </button>
-                  </div>
                 </div>
               )}
 
               {/* Pay Now Button */}
               <button
-                onClick={handlePayNow}
+                onClick={monicreditPhoneError ? handleSavePhoneAndRetry : handlePayNow}
                 disabled={
                   isPaymentInitializing ||
+                  isSavingPhone ||
                   !isFormValid() ||
-                  duplicateCheckLoading
+                  duplicateCheckLoading ||
+                  (monicreditPhoneError && !inlinePhone.trim())
                 }
                 className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
-                {duplicateCheckLoading ? (
+                {isSavingPhone || isPaymentInitializing ? (
+                  "Please wait..."
+                ) : duplicateCheckLoading ? (
                   "Checking for existing payments..."
                 ) : existingPayments.length > 0 &&
                   getAvailableSchedules().length === 0 ? (
@@ -809,7 +797,6 @@ export default function RenewLicense() {
                       Number(deliveryDetails.fee)) / 100
                     ).toLocaleString()}{" "}
                     Pay Now
-                    {isPaymentInitializing && "..."}
                   </>
                 )}
               </button>
