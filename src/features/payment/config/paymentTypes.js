@@ -2,6 +2,7 @@ export const PAYMENT_TYPES = {
   DRIVERS_LICENSE: 'drivers_license',
   VEHICLE_PAPER: 'vehicle_paper',
   LICENSE_RENEWAL: 'license_renewal',
+  PLATE_NUMBER: 'plate_number',
 };
 
 export const PAYMENT_METHODS = {

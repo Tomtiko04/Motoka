@@ -104,6 +104,19 @@ export default function PaymentOptions() {
 
   // Helper function to build payment payload
   const buildPaymentPayload = () => {
+    const car_slug = paymentSession?.car_slug || paymentSession?.car_id || paymentSession?.monicredit?.data?.car_slug;
+
+    // ── Plate number payment: no schedules or delivery needed ────────────────
+    if (paymentSession?.type === PAYMENT_TYPES.PLATE_NUMBER) {
+      return {
+        car_slug,
+        payment_type: 'plate_number',
+        plate_type: paymentSession.plate_type,
+        ...(paymentSession.sub_type ? { sub_type: paymentSession.sub_type } : {}),
+      };
+    }
+
+    // ── Renewal / other payment types ────────────────────────────────────────
     const schedules = paymentSession?.selectedSchedules || [];
     
     // Normalize payment_schedule_id - backend REQUIRES a non-empty array
@@ -128,7 +141,6 @@ export default function PaymentOptions() {
       }
     }
 
-    const car_slug = paymentSession?.car_slug || paymentSession?.car_id || paymentSession?.monicredit?.data?.car_slug;
     const delivery = paymentSession?.deliveryDetails || paymentSession?.delivery_details || paymentSession?.meta_data || {};
 
     // Extract delivery fields
@@ -190,9 +202,12 @@ export default function PaymentOptions() {
         return;
       }
 
-      if (!Array.isArray(payload.payment_schedule_id) || payload.payment_schedule_id.length === 0) {
-        toast.error('Payment schedule information is missing. Please try again.');
-        return;
+      // Skip schedule validation for plate number payments
+      if (paymentSession?.type !== PAYMENT_TYPES.PLATE_NUMBER) {
+        if (!Array.isArray(payload.payment_schedule_id) || payload.payment_schedule_id.length === 0) {
+          toast.error('Payment schedule information is missing. Please try again.');
+          return;
+        }
       }
 
       if (selectedMethod === PAYMENT_METHODS.PAYSTACK) {
