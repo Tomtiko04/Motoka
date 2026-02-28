@@ -106,6 +106,14 @@ export default function PaymentOptions() {
   const buildPaymentPayload = () => {
     const car_slug = paymentSession?.car_slug || paymentSession?.car_id || paymentSession?.monicredit?.data?.car_slug;
 
+    // ── Driver license payment: no car, no schedules ─────────────────────────
+    if (paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE || paymentSession?.type === 'drivers_license') {
+      return {
+        payment_type: 'driver_license',
+        license_type: paymentSession.license_type || 'new',
+      };
+    }
+
     // ── Plate number payment: no schedules or delivery needed ────────────────
     if (paymentSession?.type === PAYMENT_TYPES.PLATE_NUMBER) {
       return {
@@ -195,15 +203,16 @@ export default function PaymentOptions() {
     setIsInitializing(true);
     try {
       const payload = buildPaymentPayload();
-      
-      // Validate required fields
-      if (!payload.car_slug) {
+
+      // Driver license: no car_slug or schedule required
+      const isDriverLicense = paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE || paymentSession?.type === 'drivers_license';
+      if (!isDriverLicense && !payload.car_slug) {
         toast.error('Car information is missing. Please try again.');
         return;
       }
 
-      // Skip schedule validation for plate number payments
-      if (paymentSession?.type !== PAYMENT_TYPES.PLATE_NUMBER) {
+      // Skip schedule validation for plate number and driver license payments
+      if (paymentSession?.type !== PAYMENT_TYPES.PLATE_NUMBER && !isDriverLicense) {
         if (!Array.isArray(payload.payment_schedule_id) || payload.payment_schedule_id.length === 0) {
           toast.error('Payment schedule information is missing. Please try again.');
           return;
