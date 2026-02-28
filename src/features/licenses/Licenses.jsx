@@ -26,8 +26,7 @@ const licensesTypes = [
       <Icon icon="mingcute:steering-wheel-fill" fontSize={24} color="#2389E3" />
     ),
     title: "Driver’s license",
-    // link: "drivers-license",
-    comingSoon: true,
+    link: "drivers-license",
   },
   {
     icon: (
@@ -69,7 +68,7 @@ export default function Licenses() {
   return (
     <LicenseLayout
       title="Licenses"
-      subTitle="All licenses are issued by government, we are only an agent that helps you with the process."
+      subTitle="All licenses are issued by government, we will only do legal stuff that helps you with documents."
       mainContentTitle="Select the type of License(s) we can help you with?"
     >
       {/* Licenses Types */}
