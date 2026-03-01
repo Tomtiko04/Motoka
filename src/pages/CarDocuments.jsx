@@ -34,6 +34,7 @@ function CarDocuments() {
       <PagesLayout
         title="Car Documents"
         subTitle="This is where you find all your vehicle papers e.g Vehicle License, Road worthiness and so on."
+      bg="!bg-white"
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
@@ -42,7 +43,7 @@ function CarDocuments() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 rounded-[20px] overflow-hidden relative">
             {/* side 1 */}
-            <div className="flex-1 px-4 sm:px-8 pt-6 pb-10 bg-[linear-gradient(90deg,_rgba(255,255,255,0)_25.17%,_rgba(115,115,115,0.1)_128.52%)] overflow-hidden h-full w-full absolute z-9 sm:relative">
+            <div className="flex-1 px-4 sm:px-8 pt-6 pb-10 bg-white overflow-hidden h-full w-full absolute z-9 sm:relative">
               <DocumentsNav
                 setDocType={setDocType}
                 docType={docType}
@@ -64,9 +65,11 @@ function CarDocuments() {
                 }}
               />
             </div>
+            {/* Divider */}
+            <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-[#E1E6F4] -translate-x-1/2 z-[15]" />
             {/* side 2 */}
             <div
-              className={`flex-1 px-4 sm:px-6 bg-[#F9FAFC] pt-6 pb-6 ${
+              className={`flex-1 px-4 sm:px-6 bg-white pt-6 pb-6 ${
                 showsidebar ? "w-0 overflow-hidden relative -z-10" : "w-full z-300 flex overflow-hidden"
               } sm:z-10 sm:w-full`}
             >
