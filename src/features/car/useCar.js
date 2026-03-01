@@ -4,6 +4,7 @@ import {
   addCar as addCarApi,
   getCars as getCarsApi,
   updateCarDocuments as updateCarDocumentsApi,
+  getPlateNumberPrices as getPlateNumberPricesApi,
 } from "../../services/apiCar";
 import { authStorage } from "../../utils/authStorage";
 
@@ -31,7 +32,6 @@ export function useAddCar() {
         car_type: formData.carType || null,
       };
 
-      console.log("Adding car with data:", transformedData);
       return addCarApi(transformedData);
     },
     onSuccess: (data) => {
@@ -42,7 +42,6 @@ export function useAddCar() {
       // Only remove registration token if it was used for this operation
       const registrationToken = authStorage.getRegistrationToken();
       if (registrationToken) {
-        console.log("Removing registration token after successful car creation");
         authStorage.removeRegistrationToken();
       }
     },
@@ -54,7 +53,6 @@ export function useAddCar() {
       // Only redirect to login if not using registration token
       const registrationToken = authStorage.getRegistrationToken();
       if (error.response?.status === 401 && !registrationToken) {
-        console.log("Token invalid, clearing and redirecting to login");
         authStorage.clearAll();
         window.location.href = "/auth/login";
       }
@@ -82,6 +80,32 @@ export function useGetCars() {
   });
 
   return { cars, isLoading: isLoading || isPending, error };
+}
+
+/**
+ * Fetches all active plate number prices from the backend.
+ * Returns a helper `getPrice(plateType, subType)` for easy lookup.
+ */
+export function usePlateNumberPrices() {
+  const { data: prices = [], isLoading } = useQuery({
+    queryKey: ["plate-number-prices"],
+    queryFn: getPlateNumberPricesApi,
+    staleTime: 10 * 60 * 1000, // prices rarely change – cache for 10 min
+    onError: () => {
+      // Silently fail; the UI will fall back to showing "—"
+    },
+  });
+
+  const getPrice = (plateType, subType = null) => {
+    const row = prices.find(
+      (p) =>
+        p.plate_type === plateType &&
+        (subType ? p.sub_type === subType : p.sub_type === null),
+    );
+    return row ? row.price : null;
+  };
+
+  return { prices, isLoading, getPrice };
 }
 
 export function useUpdateCarDocuments() {

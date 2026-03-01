@@ -13,6 +13,7 @@ export default function EditProfile({ onNavigate }) {
     email: "",
     address: "",
     gender: "",
+    phone_number: "",
   })
  
   const [displayData, setDisplayData] = useState({
@@ -20,6 +21,7 @@ export default function EditProfile({ onNavigate }) {
     email: "",
     address: "",
     gender: "",
+    phone_number: "",
   })
   const [submitting, setSubmitting] = useState(false)
   const [fetchInitiated, setFetchInitiated] = useState(false)
@@ -35,6 +37,7 @@ export default function EditProfile({ onNavigate }) {
             email: data.email || "",
             address: data.address || "",
             gender: data.gender || "",
+            phone_number: data.phone_number || "",
           }
           setFormData(newFormData)
           setDisplayData({
@@ -42,6 +45,7 @@ export default function EditProfile({ onNavigate }) {
             email: data.email || "",
             address: data.address || "",
             gender: data.gender || "",
+            phone_number: data.phone_number || "",
           })
         }
       }
@@ -126,6 +130,21 @@ export default function EditProfile({ onNavigate }) {
             name="name"
             type="text"
             value={formData.name}
+            onChange={handleChange}
+            className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F66]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phone_number" className="mb-2 block text-sm font-medium text-[#05243F]">
+            Phone Number <span className="text-xs text-amber-600 font-normal">(Required for bank transfer)</span>
+          </label>
+          <input
+            id="phone_number"
+            name="phone_number"
+            type="tel"
+            placeholder="e.g. 08012345678"
+            value={formData.phone_number}
             onChange={handleChange}
             className="block w-full rounded-lg bg-[#FFF] px-4 py-3 text-sm text-[#05243F66] placeholder:text-[#05243F66]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />

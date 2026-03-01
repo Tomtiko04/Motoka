@@ -5,11 +5,13 @@ import { useInitializePayment } from "./usePayment";
 import { PAYMENT_TYPES } from "../payment/config/paymentTypes";
 import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
 import { checkExistingPayments } from "../../services/apiPayment";
+import { updateProfile } from "../../services/apiProfile";
 import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { ClipLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -26,11 +28,15 @@ export default function RenewLicense() {
   const [existingPayments, setExistingPayments] = useState([]);
   const [duplicateCheckLoading, setDuplicateCheckLoading] = useState(false);
 
+  // Delivery checkbox state
+  const [wantsDelivery, setWantsDelivery] = useState(false);
+
   // Delivery details
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
     lg: "",
-    state: "",
+    state: "",          // State code for backend
+    stateName: "",      // State name for display
     fee: "0",
     contact: "",
     amount: "0",
@@ -49,7 +55,20 @@ export default function RenewLicense() {
     startPayment,
     isPaymentInitializing,
     data: paymentInitData,
+    error: paymentInitError,
+    reset: resetPaymentInit,
   } = useInitializePayment();
+
+  // Detect Monicredit "missing phone" error — show inline phone collector
+  const monicreditPhoneError = paymentInitError &&
+    (paymentInitError.response?.data?.message || paymentInitError.message || "")
+      .toLowerCase().includes("phone")
+    ? (paymentInitError.response?.data?.message || paymentInitError.message)
+    : null;
+
+  const [inlinePhone, setInlinePhone] = useState("");
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [phoneStep, setPhoneStep] = useState(""); // "saving" | "initializing"
 
   const isState = state?.data;
 
@@ -149,43 +168,15 @@ export default function RenewLicense() {
   const checkForExistingPayments = async () => {
     if (selectedSchedules.length === 0) return;
 
-    console.log("🔍 Checking existing payments...", {
-      selectedSchedules: selectedSchedules.map((s) => ({
-        id: s.id,
-        name: s.payment_head?.payment_head_name,
-      })),
-      carSlug: carDetail?.slug,
-    });
-
     setDuplicateCheckLoading(true);
     try {
-      const paymentScheduleIds = selectedSchedules.map(
-        (schedule) => schedule.id,
-      );
-
-      console.log("📡 Calling checkExistingPayments API with:", {
-        car_slug: carDetail.slug,
-        payment_schedule_ids: paymentScheduleIds,
-      });
-
-      const result = await checkExistingPayments(
-        carDetail.slug,
-        paymentScheduleIds,
-      );
-
-      console.log("✅ API Response:", result);
-
+      const paymentScheduleIds = selectedSchedules.map((schedule) => schedule.id);
+      const result = await checkExistingPayments(carDetail.slug, paymentScheduleIds);
       if (result.status) {
         setExistingPayments(result.data.existing_payments || []);
-        console.log(
-          "📋 Existing payments set:",
-          result.data.existing_payments || [],
-        );
-      } else {
-        console.error("❌ API returned false status:", result);
       }
     } catch (error) {
-      console.error("❌ Error checking existing payments:", error);
+      console.error("Error checking existing payments:", error);
     } finally {
       setDuplicateCheckLoading(false);
     }
@@ -210,14 +201,24 @@ export default function RenewLicense() {
   };
 
   const isFormValid = () => {
-    return (
-      deliveryDetails.address.trim() !== "" &&
-      deliveryDetails.lg.trim() !== "" &&
-      deliveryDetails.state.trim() !== "" &&
-      deliveryDetails.contact.trim() !== "" &&
+    // Basic validation: require selected schedules and available schedules
+    const hasValidSchedules = 
       selectedSchedules.length > 0 &&
-      getAvailableSchedules().length > 0 // Has available (unpaid) schedules
-    );
+      getAvailableSchedules().length > 0; // Has available (unpaid) schedules
+
+    // If user wants delivery, all delivery fields must be filled
+    if (wantsDelivery) {
+      const hasCompleteDeliveryDetails = 
+        deliveryDetails.address.trim() !== "" &&
+        deliveryDetails.state.trim() !== "" &&
+        deliveryDetails.lg.trim() !== "" &&
+        deliveryDetails.contact.trim() !== "";
+
+      return hasValidSchedules && hasCompleteDeliveryDetails;
+    }
+
+    // If delivery is not wanted, only validate schedules
+    return hasValidSchedules;
   };
 
   const getAvailableSchedules = () => {
@@ -241,36 +242,61 @@ export default function RenewLicense() {
     }));
   };
 
+  // Handle delivery checkbox change
+  const handleDeliveryCheckboxChange = (e) => {
+    const checked = e.target.checked;
+    setWantsDelivery(checked);
+    
+    // Clear delivery details when unchecked
+    if (!checked) {
+      setDeliveryDetails({
+        address: "",
+        lg: "",
+        state: "",
+        stateName: "",
+        fee: "0",
+        contact: "",
+        amount: deliveryDetails.amount, // Keep amount as it's not part of delivery
+      });
+      setLgaOptions([]);
+    }
+  };
+
   // When state changes, fetch LGAs for that state
   const handleStateChange = (e) => {
     const selectedStateName = e.target.value;
-    handleDeliveryChange("state", selectedStateName);
-    handleDeliveryChange("lg", "");
-    // Find state_id
+    // Find state
     const selectedState = isState?.find(
       (s) => s.state_name === selectedStateName,
     );
     if (selectedState) {
-      fetchLGAs(selectedState.id);
+      // Save BOTH state code (for backend) and name (for display)
+      setDeliveryDetails((prev) => ({
+        ...prev,
+        state: selectedState.code,           // Backend needs code
+        stateName: selectedStateName,        // Display needs name
+        lg: "",
+        fee: selectedState.delivery_fee || "0",
+      }));
+      // Fetch LGAs using state code
+      fetchLGAs(selectedState.code);
     } else {
+      setDeliveryDetails((prev) => ({
+        ...prev,
+        state: "",
+        stateName: "",
+        lg: "",
+        fee: "0",
+      }));
       setLgaOptions([]);
     }
-    // Reset delivery fee when state changes
-    handleDeliveryChange("fee", "0");
   };
 
-  // When LGA changes, set delivery fee
+  // When LGA changes, just update the LGA (fee is already set from state)
   const handleLgaChange = (e) => {
     const selectedLgaName = e.target.value;
     handleDeliveryChange("lg", selectedLgaName);
-    const selectedLga = lgaOptions.find(
-      (lga) => lga.lga_name === selectedLgaName,
-    );
-    if (selectedLga && selectedLga.delivery_fee) {
-      handleDeliveryChange("fee", selectedLga.delivery_fee.fee);
-    } else {
-      handleDeliveryChange("fee", "0");
-    }
+    // Note: Delivery fee is per state, not per LGA, so no need to update it here
   };
 
   // Helper function to get state_id and lga_id
@@ -296,14 +322,6 @@ export default function RenewLicense() {
       return;
     }
 
-    const stateId = getStateId();
-    const lgaId = getLgaId();
-
-    if (!stateId || !lgaId) {
-      console.error("Invalid state or LGA selection");
-      return;
-    }
-
     // Get only available schedules (no duplicates)
     const availableSchedules = getAvailableSchedules();
 
@@ -315,15 +333,25 @@ export default function RenewLicense() {
     }
 
     // Create payload for bulk payment (supports multiple schedules)
+    // Note: payment_gateway defaults to 'monicredit' in apiPayment.js
+    // Users can change to Paystack in PaymentOptions.jsx after navigation
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
-      meta_data: {
-        delivery_address: deliveryDetails.address,
-        delivery_contact: deliveryDetails.contact,
-        state_id: stateId,
-        lga_id: lgaId,
-      },
+      // payment_gateway will default to 'monicredit' via apiPayment.js
+      // Users can select Paystack in PaymentOptions page
+      // Delivery details are optional for license renewal - only include if provided
+      ...(deliveryDetails.address.trim() !== "" || 
+          deliveryDetails.contact.trim() !== "" || 
+          deliveryDetails.state.trim() !== "" || 
+          deliveryDetails.lg.trim() !== "" ? {
+        delivery_details: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+          ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+        },
+      } : {}),
     };
 
     // Initialize payment for all selected schedules
@@ -332,20 +360,89 @@ export default function RenewLicense() {
     }
   };
 
+  // When Monicredit fails due to missing phone, user can switch to Paystack
+  const handlePayWithPaystack = () => {
+    if (!isFormValid()) return;
+    const availableSchedules = getAvailableSchedules();
+    if (availableSchedules.length === 0) return;
+    resetPaymentInit();
+    const paymentPayload = {
+      car_slug: carDetail?.slug,
+      payment_schedule_id: availableSchedules.map((s) => s.id),
+      payment_gateway: 'paystack',
+      ...(deliveryDetails.address.trim() !== "" ||
+          deliveryDetails.contact.trim() !== "" ||
+          deliveryDetails.state.trim() !== "" ||
+          deliveryDetails.lg.trim() !== "" ? {
+        delivery_details: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+          ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+        },
+      } : {}),
+    };
+    startPayment(paymentPayload);
+  };
+
+  // Save phone to profile then retry Monicredit — no Settings round-trip needed
+  const handleSavePhoneAndRetry = async () => {
+    const phone = inlinePhone.trim();
+    if (!phone || phone.length < 7) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    setIsSavingPhone(true);
+    setPhoneStep("saving");
+    try {
+      await updateProfile({ phone_number: phone });
+      setPhoneStep("initializing");
+      resetPaymentInit();
+      const availableSchedules = getAvailableSchedules();
+      const paymentPayload = {
+        car_slug: carDetail?.slug,
+        payment_schedule_id: availableSchedules.map((s) => s.id),
+        payment_gateway: 'monicredit',
+        ...(deliveryDetails.address.trim() !== "" ||
+            deliveryDetails.contact.trim() !== "" ||
+            deliveryDetails.state.trim() !== "" ||
+            deliveryDetails.lg.trim() !== "" ? {
+          delivery_details: {
+            ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+            ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+            ...(deliveryDetails.state.trim() !== "" && { state: deliveryDetails.state }),
+            ...(deliveryDetails.lg.trim() !== "" && { lga: deliveryDetails.lg }),
+          },
+        } : {}),
+      };
+      startPayment(paymentPayload);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save phone number");
+    } finally {
+      setIsSavingPhone(false);
+      setPhoneStep("");
+    }
+  };
+
   // Navigate to payment page after successful payment initialization
   React.useEffect(() => {
     if (!paymentInitData) return;
 
-    // Support both Monicredit and Paystack response shapes
-    // Monicredit: { status, data: { data: { ...session } } }
-    // Paystack:   { status, data: { ...session } }
-    const inner = paymentInitData?.data?.data || null;
+    // Backend returns: { status, data: { reference, authorization_url, ... } }
+    const inner = paymentInitData?.data || null;
     if (!inner) return;
 
     // Normalize into the structure PaymentOptions expects
     let normalized = {};
-    // Decide by presence of fields on inner session
-    if (inner?.authorization_url || inner?.reference || inner?.transaction_id) {
+    // Check gateway field first, then check for gateway-specific fields
+    const isMonicredit = inner?.gateway === 'monicredit' || 
+                        inner?.customer || 
+                        inner?.account_number || 
+                        inner?.bank_name;
+    const isPaystack = inner?.gateway === 'paystack' || 
+                      (inner?.authorization_url && !isMonicredit);
+    
+    if (isPaystack) {
       // Paystack init
       const authUrl = inner.authorization_url;
       const reference = inner.reference || inner.transaction_id;
@@ -359,7 +456,7 @@ export default function RenewLicense() {
         items: inner.items || [],
       };
     } else {
-      // Ensure monicredit data is nested under monicredit.data
+      // Monicredit init - ensure monicredit data is nested under monicredit.data
       let itemsArray = [];
       try {
         const itemsRaw = inner.items;
@@ -376,23 +473,36 @@ export default function RenewLicense() {
     }
 
     // Create a complete payment data object that includes all necessary information
+    // For license renewal, delivery details are optional
     const completePaymentData = {
       ...normalized,
       car_slug: carDetail?.slug,
       selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
-      deliveryDetails: {
-        address: deliveryDetails.address,
-        contact: deliveryDetails.contact,
-        state_id: getStateId(),
-        lga_id: getLgaId(),
-      },
-      // Ensure meta_data is available
-      meta_data: {
-        delivery_address: deliveryDetails.address,
-        delivery_contact: deliveryDetails.contact,
-        state_id: getStateId(),
-        lga_id: getLgaId(),
-      },
+      // Only include delivery details if provided
+      ...(deliveryDetails.address.trim() !== "" || 
+          deliveryDetails.contact.trim() !== "" || 
+          deliveryDetails.state.trim() !== "" || 
+          deliveryDetails.lg.trim() !== "" ? {
+        deliveryDetails: {
+          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
+          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          ...(getStateId() && { state_id: getStateId() }),
+          ...(getLgaId() && { lga_id: getLgaId() }),
+        },
+        // Only include meta_data if delivery details are provided
+        meta_data: {
+          ...(deliveryDetails.address.trim() !== "" && { 
+            delivery_address: deliveryDetails.address,
+            address: deliveryDetails.address 
+          }),
+          ...(deliveryDetails.contact.trim() !== "" && { 
+            delivery_contact: deliveryDetails.contact,
+            contact: deliveryDetails.contact 
+          }),
+          ...(getStateId() && { state_id: getStateId() }),
+          ...(getLgaId() && { lga_id: getLgaId() }),
+        },
+      } : {}),
     };
 
     // Persist for PaymentOptions fallback
@@ -531,119 +641,157 @@ export default function RenewLicense() {
                   Renewal Amount
                 </div>
                 <div className="mt-3 w-full rounded-[10px] border-3 border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/40">
-                  {formatCurrency(Number(deliveryDetails.amount))}
+                  {formatCurrency(Number(deliveryDetails.amount) / 100)}
                 </div>
               </div>
 
-              {/* Delivery Address */}
+              {/* Delivery Checkbox */}
               <div className="mb-6">
-                <div className="text-sm font-medium text-[#05243F]">
-                  Delivery Address
-                </div>
-                <input
-                  type="text"
-                  value={deliveryDetails.address}
-                  onChange={(e) =>
-                    handleDeliveryChange("address", e.target.value)
-                  }
-                  className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                  placeholder="Enter delivery address"
-                />
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wantsDelivery}
+                    onChange={handleDeliveryCheckboxChange}
+                    className="h-5 w-5 rounded border-[#D1D5DB] text-[#2284DB] focus:ring-2 focus:ring-[#2284DB] focus:ring-offset-0 cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-[#05243F]">
+                    Request Delivery
+                  </span>
+                </label>
               </div>
 
-              <div className="mb-6 grid grid-cols-2 gap-4">
-                <div>
-                  <SearchableSelect
-                    label="State"
-                    name="state"
-                    value={deliveryDetails.state}
-                    onChange={handleStateChange}
-                    options={
-                      Array.isArray(isState)
-                        ? isState.map((state) => ({
-                            id: state.id,
-                            name: state.state_name,
-                          }))
-                        : []
-                    }
-                    placeholder="Select state"
-                    filterKey="name"
-                    isLoading={isGettingState}
-                    className="text-[#05243F] placeholder:text-[#05243F]/40"
+              {/* Delivery Fields — only shown when checkbox is checked */}
+              {wantsDelivery && (
+                <>
+                  {/* Delivery Address */}
+                  <div className="mb-6">
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Address
+                    </div>
+                    <input
+                      type="text"
+                      value={deliveryDetails.address}
+                      onChange={(e) =>
+                        handleDeliveryChange("address", e.target.value)
+                      }
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                      placeholder="Enter delivery address"
+                    />
+                  </div>
+
+                  <div className="mb-6 grid grid-cols-2 gap-4">
+                    <div>
+                      <SearchableSelect
+                        label="State"
+                        name="state"
+                        value={deliveryDetails.stateName}
+                        onChange={handleStateChange}
+                        options={
+                          Array.isArray(isState)
+                            ? isState.map((state) => ({
+                                id: state.id,
+                                name: state.state_name,
+                              }))
+                            : []
+                        }
+                        placeholder="Select state"
+                        filterKey="name"
+                        isLoading={isGettingState}
+                        className="text-[#05243F] placeholder:text-[#05243F]/40"
+                      />
+                    </div>
+                    <div>
+                      <SearchableSelect
+                        label="Local Government"
+                        name="lg"
+                        value={deliveryDetails.lg}
+                        onChange={handleLgaChange}
+                        options={
+                          Array.isArray(lgaOptions)
+                            ? lgaOptions.map((lg) => ({
+                                id: lg.id,
+                                name: lg.lga_name,
+                              }))
+                            : []
+                        }
+                        placeholder="Select LG"
+                        filterKey="name"
+                        isLoading={isGettingLG}
+                        disabled={!deliveryDetails.state}
+                        className="text-[#05243F] placeholder:text-[#05243F]/40"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Delivery Fee */}
+                  <div className="mb-6">
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Fee
+                    </div>
+                    <input
+                      disabled={true}
+                      type="text"
+                      value={formatCurrency(Number(deliveryDetails.fee) / 100)}
+                      onChange={(e) => handleDeliveryChange("fee", e.target.value)}
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                      placeholder="Enter delivery fee"
+                    />
+                  </div>
+
+                  {/* Delivery Contact */}
+                  <div className="mb-6">
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Contact
+                    </div>
+                    <input
+                      type="tel"
+                      value={deliveryDetails.contact}
+                      onChange={(e) =>
+                        handleDeliveryChange("contact", e.target.value)
+                      }
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                      placeholder="08012345678"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Phone required (Google OAuth users) — inline input, same Pay Now button */}
+              {monicreditPhoneError && (
+                <div className="mb-3 rounded-[12px] border border-blue-200 bg-blue-50 px-4 pt-4 pb-2">
+                  <p className="text-sm font-semibold text-[#05243F] mb-1">Phone number required to continue</p>
+                  <p className="text-xs text-[#05243F]/60 mb-2">
+                    Enter your phone number below — it will be saved to your profile.
+                  </p>
+                  <input
+                    type="tel"
+                    value={inlinePhone}
+                    onChange={(e) => setInlinePhone(e.target.value)}
+                    placeholder="e.g. 08012345678"
+                    className="w-full rounded-[10px] bg-white border border-blue-200 px-3 py-2 text-sm text-[#05243F] focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
                   />
                 </div>
-                <div>
-                  <SearchableSelect
-                    label="Local Government"
-                    name="lg"
-                    value={deliveryDetails.lg}
-                    onChange={handleLgaChange}
-                    options={
-                      Array.isArray(lgaOptions)
-                        ? lgaOptions.map((lg) => ({
-                            id: lg.id,
-                            name: lg.lga_name,
-                          }))
-                        : []
-                    }
-                    placeholder="Select LG"
-                    filterKey="name"
-                    isLoading={isGettingLG}
-                    disabled={!deliveryDetails.state}
-                    className="text-[#05243F] placeholder:text-[#05243F]/40"
-                  />
-                </div>
-              </div>
-
-              {/* Delivery Fee */}
-              <div className="mb-6">
-                <div className="text-sm font-medium text-[#05243F]">
-                  Delivery Fee
-                </div>
-                <input
-                  disabled={true}
-                  type="text"
-                  value={formatCurrency(deliveryDetails.fee)}
-                  onChange={(e) => handleDeliveryChange("fee", e.target.value)}
-                  className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                  placeholder="Enter delivery fee"
-                />
-              </div>
-
-              {/* Delivery Contact */}
-              <div className="mb-6">
-                <div className="text-sm font-medium text-[#05243F]">
-                  Delivery Contact
-                </div>
-                <input
-                  type="tel"
-                  value={deliveryDetails.contact}
-                  onChange={(e) =>
-                    handleDeliveryChange("contact", e.target.value)
-                  }
-                  className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                  placeholder="08012345678"
-                />
-              </div>
-
-              {/* Error Message */}
-              {/* {paymentError && (
-                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                  {paymentError.message}
-                </div>
-              )} */}
+              )}
 
               {/* Pay Now Button */}
               <button
-                onClick={handlePayNow}
+                onClick={monicreditPhoneError ? handleSavePhoneAndRetry : handlePayNow}
                 disabled={
                   isPaymentInitializing ||
+                  isSavingPhone ||
                   !isFormValid() ||
-                  duplicateCheckLoading
+                  duplicateCheckLoading ||
+                  (monicreditPhoneError && !inlinePhone.trim())
                 }
                 className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
               >
-                {duplicateCheckLoading ? (
+                {phoneStep === "saving" ? (
+                  "Saving phone number..."
+                ) : phoneStep === "initializing" || isPaymentInitializing ? (
+                  "Initializing payment..."
+                ) : isSavingPhone ? (
+                  "Please wait..."
+                ) : duplicateCheckLoading ? (
                   "Checking for existing payments..."
                 ) : existingPayments.length > 0 &&
                   getAvailableSchedules().length === 0 ? (
@@ -652,11 +800,10 @@ export default function RenewLicense() {
                   <>
                     ₦
                     {(
-                      Number(deliveryDetails.amount) +
-                      Number(deliveryDetails.fee)
+                      (Number(deliveryDetails.amount) +
+                      Number(deliveryDetails.fee)) / 100
                     ).toLocaleString()}{" "}
                     Pay Now
-                    {isPaymentInitializing && "..."}
                   </>
                 )}
               </button>

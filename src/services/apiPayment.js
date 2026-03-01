@@ -1,7 +1,12 @@
 import { api } from "./apiClient";
 
 export async function initializePayment(payload) {
-  const { data } = await api.post("/payment/initialize", payload);
+  // If payment_gateway is not specified, default to 'monicredit' to match backend default
+  const paymentPayload = {
+    ...payload,
+    payment_gateway: payload.payment_gateway || 'monicredit'
+  };
+  const { data } = await api.post("/payments/initialize", paymentPayload);
   return data;
 }
 
@@ -21,7 +26,7 @@ export async function verifyPaystackPayment(reference) {
 }
 
 export async function getPaymentHistory() {
-  const { data } = await api.get("/payment/history");
+  const { data } = await api.get("/payments/history");
   return data;
 }
 
@@ -83,9 +88,48 @@ export async function checkExistingPayments(carSlug, paymentScheduleIds) {
   return data;
 }
 
+export async function abandonPayment(reference, reason = 'User navigated away') {
+  try {
+    const { data } = await api.put(`/payments/${reference}/cancel`, { reason });
+    return data;
+  } catch {
+    // Silent fail — best-effort cleanup, don't block navigation
+  }
+}
+
 
 
 export async function initiateDriversLicensePayment(slug) {
   const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
+  return data;
+}
+
+/**
+ * Initialize plate number payment — reuses the same /payments/initialize endpoint
+ * with payment_type: 'plate_number'. Backend branches on this to fetch price
+ * from plate_number_prices instead of renewal items.
+ * @param {Object} payload - { car_slug, plate_type, sub_type?, payment_gateway? }
+ */
+export async function initializePlatePayment(payload) {
+  const { data } = await api.post('/payments/initialize', {
+    ...payload,
+    payment_type: 'plate_number',
+    payment_gateway: payload.payment_gateway || 'monicredit'
+  });
+  return data;
+}
+
+/**
+ * Initialize driver license payment — uses /payments/initialize with
+ * payment_type: 'driver_license'. No car_slug; backend fetches price from
+ * driver_license_prices by license_type.
+ * @param {Object} payload - { license_type: 'new'|'renew', payment_gateway? }
+ */
+export async function initializeDriverLicensePayment(payload) {
+  const { data } = await api.post('/payments/initialize', {
+    ...payload,
+    payment_type: 'driver_license',
+    payment_gateway: payload.payment_gateway || 'monicredit'
+  });
   return data;
 }

@@ -453,7 +453,7 @@ const AdminOrderDetails = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Order Details</h1>
             <p className="mt-1 text-sm text-gray-500">
               Order #{order.slug?.substring(0, 8)}
             </p>
@@ -493,6 +493,21 @@ const AdminOrderDetails = () => {
                   {order.documents_sent_at ? 'Sent to User' : 'Not Sent'}
                 </p>
               </div>
+              {order.selected_items?.length > 0 && (
+                <div className="md:col-span-2">
+                  <label className="text-sm font-medium text-gray-500">Documents Requested</label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {order.selected_items.map((item) => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                      >
+                        {String(item).split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

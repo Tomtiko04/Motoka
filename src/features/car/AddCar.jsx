@@ -333,7 +333,6 @@ export default function AddCar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("submit button");
 
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {

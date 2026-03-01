@@ -11,7 +11,7 @@ import CarDetailsCard from "../../components/CarDetailsCard";
 
 export default function Garage() {
   const { cars, isLoading } = useGetCars();
-  const carArray = Object.values(cars.cars) || [];
+  const carArray = cars?.cars || [];
 
   const navigate = useNavigate();
   function handleLicence() {

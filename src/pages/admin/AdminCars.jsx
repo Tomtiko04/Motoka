@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import {
   TruckIcon,
   MagnifyingGlassIcon,
@@ -11,6 +14,7 @@ import {
 import config from '../../config/config';
 
 const AdminCars = () => {
+  const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +36,13 @@ const AdminCars = () => {
   const fetchCars = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
+
       const params = new URLSearchParams({
         page: currentPage,
         per_page: 15,
@@ -41,17 +51,20 @@ const AdminCars = () => {
 
       const response = await fetch(`${config.getApiBaseUrl()}/admin/cars?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
       });
 
       const data = await response.json();
       if (data.status) {
-        setCars(data.data.data);
-        setTotalPages(data.data.last_page);
+        setCars(data.data.data || []);
+        setTotalPages(data.data.last_page || 1);
+      } else {
+        toast.error(data.message || 'Failed to fetch cars');
       }
     } catch (error) {
+      console.error('Fetch cars error:', error);
       toast.error('Failed to fetch cars');
     } finally {
       setLoading(false);
@@ -68,7 +81,7 @@ const AdminCars = () => {
     const config = statusConfig[status] || statusConfig.active;
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.color}`}>
         {status.toUpperCase()}
       </span>
     );
@@ -102,10 +115,8 @@ const AdminCars = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Cars</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            View and manage all registered vehicles
-          </p>
+          <h1 className="text-xl font-semibold text-gray-900">Cars</h1>
+          <p className="mt-1 text-sm text-gray-500">View and manage all registered vehicles</p>
         </div>
       </div>
 
@@ -115,13 +126,13 @@ const AdminCars = () => {
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search cars..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -147,25 +158,25 @@ const AdminCars = () => {
       {/* Cars Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Vehicle
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Owner
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Registration
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Expiry Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -173,7 +184,7 @@ const AdminCars = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredCars.map((car) => (
                 <tr key={car.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -190,7 +201,7 @@ const AdminCars = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
                       <div>
@@ -203,7 +214,7 @@ const AdminCars = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {car.registration_no}
                     </div>
@@ -211,16 +222,16 @@ const AdminCars = () => {
                       {car.car_type?.toUpperCase()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {getStatusBadge(car.status)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
                       <CalendarIcon className="h-4 w-4 mr-2" />
                       {formatDate(car.expiry_date)}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                     <a
                       href={`/admin/cars/${car.slug}`}
                       className="text-blue-600 hover:text-blue-900"

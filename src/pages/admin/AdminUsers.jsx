@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
 
 const AdminUsers = () => {
@@ -15,6 +16,19 @@ const AdminUsers = () => {
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
   const [actionLoading, setActionLoading] = useState(false);
 
+  const mapUser = (row) => ({
+    userId: row.user_id || row.id,
+    id: row.id,
+    name: row.first_name && row.last_name ? `${row.first_name} ${row.last_name}`.trim() : row.full_name || row.name || row.email || 'N/A',
+    email: row.email || 'N/A',
+    phone: row.phone_number || row.phone || '',
+    is_suspended: row.is_suspended || false,
+    deleted_at: row.deleted_at || null,
+    created_at: row.created_at,
+    cars_count: row.cars_count || 0,
+    orders_count: row.orders_count || 0,
+  });
+
   useEffect(() => {
     fetchUsers();
   }, [currentPage, searchTerm, statusFilter]);
@@ -22,8 +36,13 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
       
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
+
       const params = new URLSearchParams({
         page: currentPage,
         per_page: 15,
@@ -35,7 +54,7 @@ const AdminUsers = () => {
         `${config.getApiBaseUrl()}/admin/users?${params}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -70,14 +89,14 @@ const AdminUsers = () => {
 
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
-        `${config.getApiBaseUrl()}/admin/users/${deleteModal.user.userId}`,
+        `${config.getApiBaseUrl()}/admin/users/${deleteModal.user.id}`,
         {
           method: 'DELETE',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -103,14 +122,14 @@ const AdminUsers = () => {
   const handleSuspendUser = async (userId) => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}/suspend`,
         {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -135,14 +154,14 @@ const AdminUsers = () => {
   const handleActivateUser = async (userId) => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}/activate`,
         {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -167,7 +186,7 @@ const AdminUsers = () => {
   const getStatusBadge = (user) => {
     if (user.deleted_at) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
           <Icon icon="mdi:delete" className="mr-1 h-3 w-3" />
           Deleted
         </span>
@@ -175,14 +194,14 @@ const AdminUsers = () => {
     }
     if (user.is_suspended) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
           <Icon icon="mdi:lock" className="mr-1 h-3 w-3" />
           Suspended
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
         <Icon icon="mdi:check-circle" className="mr-1 h-3 w-3" />
         Active
       </span>
@@ -204,10 +223,8 @@ const AdminUsers = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage all registered users
-          </p>
+          <h1 className="text-xl font-semibold text-gray-900">Users</h1>
+          <p className="mt-1 text-sm text-gray-500">Manage all registered users</p>
         </div>
       </div>
 
@@ -216,7 +233,7 @@ const AdminUsers = () => {
         <div className="relative flex-1">
           <Icon
             icon="mdi:magnify"
-            className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
           />
           <input
             type="text"
@@ -226,7 +243,7 @@ const AdminUsers = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 py-1 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <select
@@ -235,7 +252,7 @@ const AdminUsers = () => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-4 py-1 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -260,28 +277,28 @@ const AdminUsers = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     No
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Stats
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Joined
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Actions
                   </th>
                 </tr>
@@ -289,36 +306,36 @@ const AdminUsers = () => {
               <tbody className="divide-y divide-gray-200 bg-white">
                 {users.map((user, index) => (
                   <tr key={user.userId} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
                       {(currentPage - 1) * 15 + (index + 1)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-600">
+                        <div className="h-9 w-9 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-blue-600">
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </span>
                         </div>
-                        <div className="ml-4">
+                        <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
                             {user.name || 'N/A'}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-xs text-gray-500">
                             ID: {user.userId}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-4 py-3">
                       <div className="text-sm text-gray-900">{user.email}</div>
                       <div className="text-sm text-gray-500">
                         {user.phone || 'No phone'}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-4 py-3">
                       {getStatusBadge(user)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex gap-4 text-sm">
                         <div>
                           <span className="text-gray-500">Cars:</span>{' '}
@@ -334,13 +351,13 @@ const AdminUsers = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                       {formatDate(user.created_at)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                    <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
                         <button
-                          onClick={() => handleViewUser(user.userId)}
+                          onClick={() => handleViewUser(user.id)}
                           className="text-blue-600 hover:text-blue-900"
                           title="View details"
                         >
@@ -350,7 +367,7 @@ const AdminUsers = () => {
                           <>
                             {user.is_suspended ? (
                               <button
-                                onClick={() => handleActivateUser(user.userId)}
+                                onClick={() => handleActivateUser(user.id)}
                                 disabled={actionLoading}
                                 className="text-green-600 hover:text-green-900 disabled:opacity-50"
                                 title="Activate user"
@@ -359,7 +376,7 @@ const AdminUsers = () => {
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleSuspendUser(user.userId)}
+                                onClick={() => handleSuspendUser(user.id)}
                                 disabled={actionLoading}
                                 className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
                                 title="Suspend user"

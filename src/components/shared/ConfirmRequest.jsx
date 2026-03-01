@@ -2,10 +2,6 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LicenseLayout from "../../features/licenses/components/LicenseLayout";
 import OrderList from "./OrderList";
-import {
-  initializeDriversLicensePaymentPaystack,
-  initializeDriversLicensePaymentMonicredit,
-} from "../../services/apiDriversLicense";
 import { toast } from "react-hot-toast";
 
 // Configuration for different request types
@@ -32,7 +28,6 @@ export default function ConfirmRequest() {
   const {
     items = [],
     type = "default",
-    amount,
     details = {},
     carDetail,
     ...restState
@@ -43,9 +38,6 @@ export default function ConfirmRequest() {
 
   const handleProceed = async ({ total, items: orderItems }) => {
     setIsProcessing(true);
-
-    // Slug comes from navigation state set by DriversLicense.jsx
-    const resolvedSlug = location?.state?.orderDetails?.slug;
 
     try {
       switch (type) {
@@ -85,132 +77,17 @@ export default function ConfirmRequest() {
             });
           }
           break;
-        // case 'drivers_license':
-        //   if (orderDetails.slug) {
-        //    initiateDriversLicensePayment({
-        //       slug: orderDetails.slug,
-        //       onSuccess: (data) => {
-        //         // Handle successful payment initiation
-        //         console.log('Payment initiated:', data);
-        //       },
-        //       onError: (error) => {
-        //         toast.error(error.message || 'Failed to initiate payment');
-        //       }
-        //     });
-        //   }
-        //   break;
         case "drivers_license":
-          // if (resolvedSlug) {
-          //   try {
-          //     const initRes = await initializeDriversLicensePaymentPaystack(resolvedSlug);
-          //     const initPayload = initRes?.data?.data || initRes?.data || initRes;
-
-          //     if (initPayload) {
-          //       navigate("/payment", {
-          //         state: {
-          //           paymentData: initPayload,
-          //           type: "drivers_license",
-          //           items: orderItems,
-          //           amount: total,
-          //           ...restState,
-          //         },
-          //       });
-          //     } else {
-          //       throw new Error("Failed to initialize payment: Missing payload");
-          //     }
-          //   } catch (error) {
-          //     console.error("Payment initialization error:", error);
-          //     toast.error(error.message || "Failed to initialize payment");
-          //     setIsProcessing(false);
-          //   }
-          // } else {
-          //   toast.error("Invalid license details");
-          //   setIsProcessing(false);
-          // }
-          if (resolvedSlug) {
-            try {
-              const [paystackRes, monicreditRes] = await Promise.allSettled([
-                initializeDriversLicensePaymentPaystack(resolvedSlug),
-                initializeDriversLicensePaymentMonicredit(resolvedSlug)
-              ]);
-
-              const paystackData = paystackRes.status === 'fulfilled' ?
-                (paystackRes.value?.data?.data || paystackRes.value?.data || paystackRes.value) : null;
-
-              const monicreditData = monicreditRes.status === 'fulfilled' ?
-                (monicreditRes.value?.data?.data || monicreditRes.value?.data || monicreditRes.value) : null;
-
-              if (!paystackData && !monicreditData) {
-                throw new Error("Failed to initialize any payment gateway");
-              }
-
-              const paymentData = {
-                type: "drivers_license",
-                items: orderItems,
-                amount: total,
-                slug: resolvedSlug,
-                paystack:
-                  paystackRes.status === "fulfilled"
-                    ? {
-                        authorization_url:
-                          paystackRes.value?.data?.authorization_url,
-                        reference: paystackRes.value?.data?.reference,
-                      }
-                    : null,
-                monicredit:
-                  monicreditRes.status === "fulfilled"
-                    ? {
-                        // payment_url: monicreditRes.value?.data?.data?.payment_url,
-                        transid: monicreditRes.value?.data?.data?.transid,
-                        orderid: monicreditRes.value?.data?.data?.order_id,
-
-                        data: {
-                          ...monicreditRes.value?.data?.data, // This contains customer, amount, etc.
-                          payment_url:
-                            monicreditRes.value?.data?.data?.payment_url,
-                          orderid: monicreditRes.value?.data?.data?.order_id,
-                          total_amount:
-                            monicreditRes.value?.data?.data?.total_amount,
-                          customer: monicreditRes.value?.data?.data
-                            ?.customer || {
-                            account_number:
-                              monicreditRes.value?.data?.data?.account_number,
-                            bank_name:
-                              monicreditRes.value?.data?.data?.bank_name,
-                            account_name:
-                              monicreditRes.value?.data?.data?.account_name,
-                          },
-                        },
-                      }
-                    : null,
-                ...restState,
-              };
-
-              // Save to session storage
-              sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
-
-              navigate(`/payment?type=drivers_license`, {
-                state: {
-                  paymentData: paymentData
-                }
-              });
-
-            } catch (error) {
-              console.error("Payment initialization error:", error);
-              toast.error(error.message || "Failed to initialize payment");
-              setIsProcessing(false);
-            }
-          } else {
-            toast.error("Invalid license details");
-            setIsProcessing(false);
-          }
+          // Driver's license now uses DriversLicense -> DriverLicenseOrderSummary -> Payment flow
+          toast.error("Please use the Driver's License flow from the licenses menu.");
+          setIsProcessing(false);
           break;
 
         default:
           if (config.nextStep) {
             navigate(config.nextStep, {
               state: {
-                ...orderDetails,
+                ...restState,
                 type,
                 amount: total,
                 items: orderItems,

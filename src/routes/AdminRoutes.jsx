@@ -13,15 +13,17 @@ import AdminCarDetails from '../pages/admin/AdminCarDetails';
 import AdminPayments from '../pages/admin/AdminPayments';
 import AdminUsers from '../pages/admin/AdminUsers.jsx';
 import AdminUserDetails from '../pages/admin/AdminUserDetails.jsx';
+import AdminDocuments from '../pages/admin/AdminDocuments.jsx';
 
 const AdminRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for admin token on component mount
+    // Check for admin token or adminUser (Supabase flow)
     const token = localStorage.getItem('adminToken');
-    setIsAuthenticated(!!token);
+    const adminUser = localStorage.getItem('adminUser');
+    setIsAuthenticated(!!token || !!adminUser);
     setIsLoading(false);
   }, []);
 
@@ -29,7 +31,8 @@ const AdminRoutes = () => {
   useEffect(() => {
     const handleStorageChange = () => {
       const token = localStorage.getItem('adminToken');
-      setIsAuthenticated(!!token);
+      const adminUser = localStorage.getItem('adminUser');
+      setIsAuthenticated(!!token || !!adminUser);
     };
 
     const handleAuthChange = (event) => {
@@ -84,6 +87,7 @@ const AdminRoutes = () => {
                 <Route path="payments" element={<AdminPayments />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:userId" element={<AdminUserDetails />} />
+                <Route path="documents" element={<AdminDocuments />} />
       </Route>
     </Routes>
   );

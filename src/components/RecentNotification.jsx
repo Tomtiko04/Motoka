@@ -49,7 +49,7 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
     const allNotifications = flattenNotifications(data);
     return allNotifications.slice(-5);
   }, [data]);
-  console.log("Flattened notifications:", flattenNotifications(data));
+  
   return (
     <div className="">
       <div

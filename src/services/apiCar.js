@@ -24,3 +24,16 @@ export async function deleteCar(carId) {
   const { data } = await api.delete(`/car/${carId}`);
   return data;
 }
+
+export async function applyPlateNumber(carSlug, formData) {
+  const isFormData = formData instanceof FormData;
+  const { data } = await api.post(`/cars/${carSlug}/plate-number`, formData, {
+    headers: isFormData ? { "Content-Type": "multipart/form-data" } : {},
+  });
+  return data;
+}
+
+export async function getPlateNumberPrices() {
+  const { data } = await api.get("/plate-number-prices");
+  return data.data.prices; // array of { id, plate_type, sub_type, price, description }
+}

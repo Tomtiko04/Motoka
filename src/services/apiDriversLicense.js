@@ -1,45 +1,25 @@
 import { api } from "./apiClient";
 
-export async function getDriversLicensePaymentOptions() {
-  const { data } = await api.get("/driver-license/payment-options");
-  return data;
+/**
+ * Get driver license prices (new / renew) from backend.
+ * @returns {Promise<Array>} [{ id, license_type, price, description }, ...]
+ */
+export async function getDriverLicensePrices() {
+  const { data } = await api.get("/driver-license-prices");
+  return data?.data?.prices || data?.prices || [];
 }
 
-export async function createDriversLicense(payload) {
-  let dataToSend = payload;
-  let config = {};
-
-  if (payload && payload.passport_photograph instanceof File) {
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) formData.append(key, value);
-    });
-    dataToSend = formData;
-    config.headers = { "Content-Type": "multipart/form-data" };
-  }
-
-  const { data } = await api.post("/driver-license", dataToSend, config);
-  return data;
-}
-
-export async function initializeDriversLicensePayment(slug) {
-  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
-  return data;
-}
-
-export async function initializeDriversLicensePaymentPaystack(slug) {
-  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
-  return data;
-}
-
-export async function initializeDriversLicensePaymentMonicredit(slug) {
-  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
-  return data;
-}
-
-export async function verifyDriversLicensePayment(reference, licenseId) {
-  const { data } = await api.get(`/driver-license/${licenseId}/verify-payment`, {
-    params: { reference }
+/**
+ * Initialize driver license payment — uses /payments/initialize with
+ * payment_type: 'driver_license'. No car_slug; backend fetches price from
+ * driver_license_prices by license_type.
+ * @param {Object} payload - { license_type: 'new'|'renew', payment_gateway? }
+ */
+export async function initializeDriverLicensePayment(payload) {
+  const { data } = await api.post("/payments/initialize", {
+    ...payload,
+    payment_type: "driver_license",
+    payment_gateway: payload.payment_gateway || "monicredit",
   });
   return data;
 }

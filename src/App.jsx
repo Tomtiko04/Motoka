@@ -25,9 +25,13 @@ import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
+import DriverLicenseForm from "./features/licenses/driverslicense/DriverLicenseForm.jsx";
+import DriverLicenseRenew from "./features/licenses/driverslicense/DriverLicenseRenew.jsx";
+import DriverLicenseOrderSummary from "./features/licenses/driverslicense/DriverLicenseOrderSummary.jsx";
 import Settings from "./features/settings/Settings.jsx";
 import PlateNumber from "./features/licenses/PlateNumber.jsx";
 import PlateDetails from "./features/licenses/platenumber/PlateDetails.jsx";
+import PlateOrderSummary from "./features/licenses/platenumber/PlateOrderSummary.jsx";
 import LocalGovPaper from "./features/licenses/LocalGovPaper.jsx";
 import TintPermit from "./features/licenses/TintPermit.jsx";
 import IntlDriverLicense from "./features/licenses/IntlDriverLicense.jsx";
@@ -38,6 +42,7 @@ import GuestRoute from "./components/GuestRoute";
 import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
+import { authStorage } from "./utils/authStorage.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
@@ -70,8 +75,74 @@ const queryClient = new QueryClient({
   },
 });
 
+function parseJwtPayload(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// Process OAuth hash tokens synchronously before any render
+// so we never show the landing page when Google redirects back
+function processOAuthHash() {
+  const hash = window.location.hash;
+  if (!hash || !hash.includes("access_token=")) return false;
+
+  const params = new URLSearchParams(hash.substring(1));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  const error = params.get("error");
+
+  if (error) {
+    window.location.replace("/auth/login");
+    return true;
+  }
+
+  if (accessToken) {
+    authStorage.setToken(accessToken);
+    if (refreshToken) {
+      localStorage.setItem("refresh_token", refreshToken);
+    }
+    const payload = parseJwtPayload(accessToken);
+    if (payload) {
+      const meta = payload.user_metadata || {};
+      authStorage.setUserInfo({
+        id: payload.sub,
+        email: payload.email || meta.email,
+        name: meta.full_name || meta.name || payload.email,
+        avatar_url: meta.avatar_url || meta.picture,
+        email_verified: meta.email_verified ?? true,
+      });
+    }
+    window.location.replace("/dashboard");
+    return true;
+  }
+
+  return false;
+}
+
+// Run immediately — if this returns true we're mid-redirect, skip rendering
+const isProcessingOAuth = processOAuthHash();
+
 export default function App() {
   const { isOpen } = useModalStore();
+
+  // Show nothing while the redirect is in-flight — avoids the landing page flash
+  if (isProcessingOAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-green-500" />
+          <p className="text-sm text-gray-500">Signing you in…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
@@ -151,7 +222,11 @@ export default function App() {
               <Route path="renew" element={<RenewLicense />} />
               <Route path="documents" element={<VehiclePaper />} />
               <Route path="drivers-license" element={<DriversLicense />} />
+              <Route path="drivers-license/new" element={<DriverLicenseForm />} />
+              <Route path="drivers-license/renew" element={<DriverLicenseRenew />} />
+              <Route path="drivers-license/order-summary" element={<DriverLicenseOrderSummary />} />
               <Route path="plate-number" element={<PlateNumber />} />
+              <Route path="plate-number/order-summary" element={<PlateOrderSummary />} />
               <Route path="plate-number/:type" element={<PlateDetails />} />
               <Route
                 path="local-government-papers"
