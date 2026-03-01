@@ -48,6 +48,20 @@ api.interceptors.response.use(
     const isRegistrationRequest = originalRequest.url?.includes("add-car") || originalRequest.url?.includes("car/reg");
 
     if (error.response?.status === 401) {
+      // Don't redirect if this is already an auth request or on an auth page
+      const isAuthRequest = 
+        originalRequest.url?.includes("/login") || 
+        originalRequest.url?.includes("/register") || 
+        originalRequest.url?.includes("/verify") ||
+        originalRequest.url?.includes("/reset-password") ||
+        originalRequest.url?.includes("/send-otp");
+      
+      const isAuthPage = window.location.pathname.includes("/auth/");
+
+      if (isAuthRequest || isAuthPage) {
+        return Promise.reject(error);
+      }
+
       // Prevent infinite retry loops and duplicate redirects
       if (!originalRequest._retry) {
         originalRequest._retry = true
@@ -70,7 +84,7 @@ api.interceptors.response.use(
         }
       }
 
-      // For registration flows or after retry, ensure we don't spam toasts/redirects
+      // Final fallback for 401s on non-auth requests
       if (!isRedirectingToLogin && !isRegistrationRequest) {
         authStorage.clearAll?.() || authStorage.removeToken()
         isRedirectingToLogin = true
