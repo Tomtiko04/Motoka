@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeftIcon,
   TrashIcon,
   UserIcon,
-  CalendarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
@@ -13,6 +12,10 @@ import {
   EnvelopeIcon,
   CreditCardIcon,
   ClipboardDocumentListIcon,
+  DocumentArrowUpIcon,
+  DocumentIcon,
+  XMarkIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import config from '../../config/config';
@@ -52,6 +55,29 @@ const StatusPill = ({ status }) => {
   );
 };
 
+const DOC_CATEGORIES = [
+  { value: 'registration_certificate', label: 'Registration Certificate' },
+  { value: 'insurance', label: 'Insurance' },
+  { value: 'roadworthiness', label: 'Roadworthiness' },
+  { value: 'inspection_report', label: 'Inspection Report' },
+  { value: 'proof_of_ownership', label: 'Proof of Ownership' },
+  { value: 'other', label: 'Other' },
+];
+
+const DocStatusPill = ({ status }) => {
+  const map = {
+    pending:  { bg: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
+    approved: { bg: 'bg-green-100 text-green-800',  label: 'Approved' },
+    rejected: { bg: 'bg-red-100 text-red-800',      label: 'Rejected' },
+  };
+  const cfg = map[status?.toLowerCase()] || { bg: 'bg-gray-100 text-gray-700', label: status };
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.bg}`}>
+      {cfg.label}
+    </span>
+  );
+};
+
 const AdminCarDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -59,6 +85,15 @@ const AdminCarDetails = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Documents state
+  const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadCategory, setUploadCategory] = useState('registration_certificate');
+  const [uploading, setUploading] = useState(false);
+  const [rejectingId, setRejectingId] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => { fetchCarDetails(); }, [slug]);
 
@@ -72,6 +107,7 @@ const AdminCarDetails = () => {
       const data = await response.json();
       if (data.status) {
         setCar(data.data);
+        fetchCarDocuments(data.data.id);
       } else {
         toast.error(data.message || 'Failed to fetch car details');
         navigate('/admin/cars');
@@ -81,6 +117,96 @@ const AdminCarDetails = () => {
       navigate('/admin/cars');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCarDocuments = async (carId) => {
+    try {
+      setDocsLoading(true);
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${config.getApiBaseUrl()}/admin/documents?car_id=${carId}&limit=50`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.status) setDocuments(data.data || []);
+    } catch {
+      // non-blocking
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  const handleDocumentUpload = async (e) => {
+    e.preventDefault();
+    if (!uploadFile) return toast.error('Please select a file');
+    try {
+      setUploading(true);
+      const token = localStorage.getItem('adminToken');
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      formData.append('car_slug', slug);
+      formData.append('document_type', 'car');
+      formData.append('document_category', uploadCategory);
+      const res = await fetch(`${config.getApiBaseUrl()}/admin/documents/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.status) {
+        toast.success('Document uploaded successfully');
+        setUploadFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        fetchCarDocuments(car.id);
+      } else {
+        toast.error(data.message || 'Upload failed');
+      }
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleApproveDoc = async (docId) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${config.getApiBaseUrl()}/admin/documents/${docId}/approve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.status) {
+        toast.success('Document approved');
+        setDocuments(prev => prev.map(d => d.id === docId ? { ...d, status: 'approved' } : d));
+      } else {
+        toast.error(data.message || 'Failed to approve');
+      }
+    } catch {
+      toast.error('Failed to approve document');
+    }
+  };
+
+  const handleRejectDoc = async (docId) => {
+    try {
+      setRejectingId(docId);
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${config.getApiBaseUrl()}/admin/documents/${docId}/reject`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejection_reason: 'Rejected by admin' }),
+      });
+      const data = await res.json();
+      if (data.status) {
+        toast.success('Document rejected');
+        setDocuments(prev => prev.map(d => d.id === docId ? { ...d, status: 'rejected' } : d));
+      } else {
+        toast.error(data.message || 'Failed to reject');
+      }
+    } catch {
+      toast.error('Failed to reject document');
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -338,6 +464,117 @@ const AdminCarDetails = () => {
           <div className="flex flex-col items-center justify-center py-10 text-gray-400">
             <CreditCardIcon className="h-10 w-10 mb-2 opacity-40" />
             <p className="text-sm">No transactions yet</p>
+          </div>
+        )}
+      </div>
+
+      {/* Car Documents */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+          <DocumentArrowUpIcon className="h-5 w-5 text-gray-400" />
+          <h3 className="text-sm font-semibold text-gray-900">Car Documents</h3>
+          <span className="ml-auto text-xs text-gray-400">{documents.length} file{documents.length !== 1 ? 's' : ''}</span>
+        </div>
+
+        {/* Upload Form */}
+        <div className="border-b border-gray-100 px-6 py-4 bg-gray-50/50">
+          <p className="mb-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Upload Document</p>
+          <form onSubmit={handleDocumentUpload} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs text-gray-600">Category</label>
+              <select
+                value={uploadCategory}
+                onChange={e => setUploadCategory(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                {DOC_CATEGORIES.map(c => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="mb-1 block text-xs text-gray-600">File (PDF / Image)</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                onChange={e => setUploadFile(e.target.files[0] || null)}
+                className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={uploading || !uploadFile}
+              className="shrink-0 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {uploading ? 'Uploading…' : 'Upload'}
+            </button>
+          </form>
+        </div>
+
+        {/* Document List */}
+        {docsLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+          </div>
+        ) : documents.length > 0 ? (
+          <div className="divide-y divide-gray-50">
+            {documents.map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between gap-4 px-6 py-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                    <DocumentIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900">
+                      {doc.document_category
+                        ? DOC_CATEGORIES.find(c => c.value === doc.document_category)?.label || doc.document_category
+                        : 'Document'}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {doc.uploaded_by_type === 'admin' ? 'Uploaded by admin' : 'Uploaded by user'} &bull; {formatDate(doc.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <DocStatusPill status={doc.status} />
+                  <a
+                    href={doc.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                    title="View document"
+                  >
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                  </a>
+                  {doc.status !== 'approved' && (
+                    <button
+                      onClick={() => handleApproveDoc(doc.id)}
+                      className="rounded-lg p-1.5 text-green-600 hover:bg-green-50 transition-colors"
+                      title="Approve"
+                    >
+                      <CheckCircleIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  {doc.status !== 'rejected' && (
+                    <button
+                      onClick={() => handleRejectDoc(doc.id)}
+                      disabled={rejectingId === doc.id}
+                      className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      title="Reject"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+            <DocumentArrowUpIcon className="h-10 w-10 mb-2 opacity-40" />
+            <p className="text-sm">No documents uploaded yet</p>
+            <p className="text-xs mt-1">Use the form above to upload car documents</p>
           </div>
         )}
       </div>
