@@ -34,13 +34,13 @@ const licensesTypes = [
     ),
     title: "Plate Number",
     // link: "plate-number",
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     icon: <Icon icon="mingcute:car-fill" fontSize={24} color="#2389E3" />,
     title: "Int’l Driver’s\nLicense",
     // link: "international-driver's-license",
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     icon: (
