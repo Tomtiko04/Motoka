@@ -317,7 +317,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
-import SignupImage from "../../components/SignupImage"
+import AuthSideHero from "../../components/AuthSideHero"
 import toast from "react-hot-toast";
 import { useSignup } from "./useAuth";
 import { useGoogleLogin } from "./useOAuth";
@@ -408,9 +408,7 @@ export default function Signup() {
   return (
     <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
       <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row px-4 sm:px-0 ">
-        <div className="hidden w-full md:block md:w-1/2">
-          <SignupImage />
-        </div>
+        <AuthSideHero />
 
         <div className="hidden w-[1px] bg-[#F2F2F2] md:block"></div>
 

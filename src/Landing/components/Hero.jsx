@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import Image1 from "../../assets/images/landing/pngwing.com (2) 1 (1).webp"
 import Checkmark from "../../assets/images/landing/bitcoin-icons_verify-filled.png"
 import RenewModal from "./RenewModal"
+import toast from "react-hot-toast"
 
 function Hero() {
     const [plateNumber, setPlateNumber] = useState("");
@@ -27,6 +28,10 @@ function Hero() {
     };
 
     const handleRenewClick = () => {
+        if (plateNumber.trim() === "") {
+            toast.error("Please enter your plate number");
+            return;
+        }
         setIsModalOpen(true);
     };
 
