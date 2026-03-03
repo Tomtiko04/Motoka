@@ -122,8 +122,8 @@ export async function initializePlatePayment(payload) {
 /**
  * Initialize driver license payment — uses /payments/initialize with
  * payment_type: 'driver_license'. No car_slug; backend fetches price from
- * driver_license_prices by license_type.
- * @param {Object} payload - { license_type: 'new'|'renew', payment_gateway? }
+ * driver_license_prices by license_type + duration.
+ * @param {Object} payload - { license_type: 'new'|'renew', duration: '3yr'|'5yr'|'international', payment_gateway? }
  */
 export async function initializeDriverLicensePayment(payload) {
   const { data } = await api.post('/payments/initialize', {
