@@ -359,12 +359,16 @@ const AdminDashboard = () => {
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Recent Transaction</h3>
-          <a href="/admin/transactions" className="text-blue-600 text-sm font-medium">See More</a>
+          <a href="/admin/payments" className="text-blue-600 text-sm font-medium">See More</a>
         </div>
         <div className="space-y-3">
           {recentTransactions.length > 0 ? (
             recentTransactions.map((transaction, index) => (
-              <div key={index} className="flex items-center space-x-3 py-2">
+              <div
+                key={index}
+                className="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => window.location.href = '/admin/payments'}
+              >
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                   <DocumentTextIcon className="h-4 w-4 text-blue-600" />
                 </div>

@@ -85,6 +85,7 @@ const AdminRoutes = () => {
                 <Route path="cars" element={<AdminCars />} />
                 <Route path="cars/:slug" element={<AdminCarDetails />} />
                 <Route path="payments" element={<AdminPayments />} />
+                <Route path="transactions" element={<Navigate to="/admin/payments" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:userId" element={<AdminUserDetails />} />
                 <Route path="documents" element={<AdminDocuments />} />
