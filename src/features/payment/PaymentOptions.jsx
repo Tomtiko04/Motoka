@@ -111,6 +111,7 @@ export default function PaymentOptions() {
       return {
         payment_type: 'driver_license',
         license_type: paymentSession.license_type || 'new',
+        duration: paymentSession.duration || null,
       };
     }
 

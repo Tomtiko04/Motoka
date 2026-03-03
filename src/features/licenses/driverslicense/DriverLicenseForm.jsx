@@ -8,20 +8,19 @@ import { uploadDocument, buildDriverLicenseFormData } from "../../../services/ap
 import { toast } from "react-hot-toast";
 
 const FORM_FIELDS = [
-  { name: "full_name", label: "Full Name", type: "text", placeholder: "" },
-  { name: "phone", label: "Phone No.", type: "tel", placeholder: "234xxxxxxx" },
-  { name: "address", label: "Address", type: "text", placeholder: "Agbara, Ogun State" },
-  { name: "date_of_birth", label: "Date of Birth", type: "date", placeholder: "dd/mm/yyyy" },
-  { name: "place_of_birth", label: "Place of Birth", type: "text", placeholder: "" },
-  { name: "home_of_origin", label: "Home of Origin", type: "text", placeholder: "" },
-  { name: "local_government", label: "Local Government", type: "text", placeholder: "" },
-  { name: "blood_group", label: "Blood Group", type: "text", placeholder: "" },
-  { name: "height", label: "Height", type: "text", placeholder: "" },
-  { name: "occupation", label: "Occupation", type: "text", placeholder: "" },
-  { name: "next_of_kin_name", label: "Next of Kin Name", type: "text", placeholder: "" },
-  { name: "next_of_kin_phone", label: "Next of Kin's Phone Number", type: "tel", placeholder: "" },
-  { name: "mother_maiden_name", label: "Mother's Maiden Name", type: "text", placeholder: "" },
-  { name: "license_years", label: "License Years", type: "text", placeholder: "4 years" },
+  { name: "full_name",         label: "Full Name",                  type: "text", placeholder: "" },
+  { name: "phone",             label: "Phone No.",                  type: "tel",  placeholder: "234xxxxxxx" },
+  { name: "address",           label: "Address",                    type: "text", placeholder: "Agbara, Ogun State" },
+  { name: "date_of_birth",     label: "Date of Birth",              type: "date", placeholder: "dd/mm/yyyy" },
+  { name: "place_of_birth",    label: "Place of Birth",             type: "text", placeholder: "" },
+  { name: "home_of_origin",    label: "Home of Origin",             type: "text", placeholder: "" },
+  { name: "local_government",  label: "Local Government",           type: "text", placeholder: "" },
+  { name: "blood_group",       label: "Blood Group",                type: "text", placeholder: "" },
+  { name: "height",            label: "Height",                     type: "text", placeholder: "" },
+  { name: "occupation",        label: "Occupation",                 type: "text", placeholder: "" },
+  { name: "next_of_kin_name",  label: "Next of Kin Name",           type: "text", placeholder: "" },
+  { name: "next_of_kin_phone", label: "Next of Kin's Phone Number", type: "tel",  placeholder: "" },
+  { name: "mother_maiden_name",label: "Mother's Maiden Name",       type: "text", placeholder: "" },
 ];
 
 export default function DriverLicenseForm() {
@@ -33,7 +32,20 @@ export default function DriverLicenseForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { prices } = useDriverLicensePrices();
-  const priceNew = prices?.find((p) => p.license_type === "new")?.price ?? 0;
+  // New-license durations from DB
+  const newPrices = (prices || []).filter((p) => p.license_type === "new");
+  const [selectedDuration, setSelectedDuration] = useState(null);
+
+  // Auto-select first option once prices load
+  React.useEffect(() => {
+    if (newPrices.length && !selectedDuration) {
+      setSelectedDuration(newPrices[0].duration);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prices]);
+
+  const selectedPriceRow = newPrices.find((p) => p.duration === selectedDuration);
+  const priceNew = selectedPriceRow?.price ?? 0;
 
   useEffect(() => {
     const load = async () => {
@@ -111,7 +123,12 @@ export default function DriverLicenseForm() {
         status: "submitted",
       });
       navigate("/licenses/drivers-license/order-summary", {
-        state: { license_type: "new", price: priceNew, formData: { ...form, passport_photo_url: passportUrl } },
+        state: {
+          license_type: "new",
+          duration: selectedDuration,
+          price: priceNew,
+          formData: { ...form, passport_photo_url: passportUrl },
+        },
       });
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save application");
@@ -164,6 +181,38 @@ export default function DriverLicenseForm() {
             </p>
           </div>
         </div>
+
+        {/* Duration selector */}
+        {newPrices.length > 0 && (
+          <div>
+            <p className="mb-2 text-sm font-medium text-[#05243F]">License Duration</p>
+            <div className="grid grid-cols-3 gap-2">
+              {newPrices.map((p) => {
+                const label = p.duration === "international" ? "International" : p.duration === "3yr" ? "3 Years" : "5 Years";
+                const active = selectedDuration === p.duration;
+                return (
+                  <button
+                    key={p.duration}
+                    type="button"
+                    onClick={() => setSelectedDuration(p.duration)}
+                    className={`flex flex-col items-center rounded-xl border-2 px-3 py-3 text-center transition-colors ${
+                      active
+                        ? "border-[#2284DB] bg-[#EBF4FD]"
+                        : "border-[#E1E6F4] bg-white hover:border-[#2284DB]/40"
+                    }`}
+                  >
+                    <span className={`text-sm font-semibold ${active ? "text-[#2284DB]" : "text-[#05243F]"}`}>
+                      {label}
+                    </span>
+                    <span className={`mt-1 text-xs ${active ? "text-[#2284DB]/80" : "text-[#05243F]/50"}`}>
+                      ₦{Number(p.price).toLocaleString()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">

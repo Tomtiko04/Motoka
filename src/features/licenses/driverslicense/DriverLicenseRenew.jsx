@@ -22,7 +22,18 @@ export default function DriverLicenseRenew() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { prices } = useDriverLicensePrices();
-  const priceRenew = prices?.find((p) => p.license_type === "renew")?.price ?? 0;
+  const renewPrices = (prices || []).filter((p) => p.license_type === "renew");
+  const [selectedDuration, setSelectedDuration] = useState(null);
+
+  useEffect(() => {
+    if (renewPrices.length && !selectedDuration) {
+      setSelectedDuration(renewPrices[0].duration);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prices]);
+
+  const selectedPriceRow = renewPrices.find((p) => p.duration === selectedDuration);
+  const priceRenew = selectedPriceRow?.price ?? 0;
 
   const isExpired = dateOfExpiry ? new Date(dateOfExpiry) < new Date() : false;
 
@@ -99,6 +110,7 @@ export default function DriverLicenseRenew() {
       navigate("/licenses/drivers-license/order-summary", {
         state: {
           license_type: "renew",
+          duration: selectedDuration,
           price: priceRenew,
           licenseNumber,
           dateOfBirth,
@@ -224,6 +236,38 @@ export default function DriverLicenseRenew() {
             className="h-24 w-auto rounded-lg object-contain"
           />
         </div>
+
+        {/* Duration selector */}
+        {renewPrices.length > 0 && (
+          <div>
+            <p className="mb-2 text-sm font-medium text-[#05243F]">Renewal Duration</p>
+            <div className="grid grid-cols-2 gap-3">
+              {renewPrices.map((p) => {
+                const label = p.duration === "3yr" ? "3 Years" : "5 Years";
+                const active = selectedDuration === p.duration;
+                return (
+                  <button
+                    key={p.duration}
+                    type="button"
+                    onClick={() => setSelectedDuration(p.duration)}
+                    className={`flex flex-col items-center rounded-xl border-2 px-3 py-3 text-center transition-colors ${
+                      active
+                        ? "border-[#2284DB] bg-[#EBF4FD]"
+                        : "border-[#E1E6F4] bg-white hover:border-[#2284DB]/40"
+                    }`}
+                  >
+                    <span className={`text-sm font-semibold ${active ? "text-[#2284DB]" : "text-[#05243F]"}`}>
+                      {label}
+                    </span>
+                    <span className={`mt-1 text-xs ${active ? "text-[#2284DB]/80" : "text-[#05243F]/50"}`}>
+                      ₦{Number(p.price).toLocaleString()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <button
           onClick={handleConfirmAndProceed}
