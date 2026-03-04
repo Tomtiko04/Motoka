@@ -10,21 +10,23 @@ export async function uploadDocument(formData) {
 }
 
 // Helper to build FormData for car document upload
-export function buildCarDocumentFormData(file, carSlug, documentCategory = null) {
+export function buildCarDocumentFormData(file, carSlug, documentCategory = null, description = null) {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("document_type", "car");
   fd.append("car_slug", carSlug);
   if (documentCategory) fd.append("document_category", documentCategory);
+  if (description) fd.append("description", description);
   return fd;
 }
 
 // Helper to build FormData for driver license document upload
-export function buildDriverLicenseFormData(file, documentCategory = "driver_license") {
+export function buildDriverLicenseFormData(file, documentCategory = "driver_license", description = null) {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("document_type", "driver_license");
   if (documentCategory) fd.append("document_category", documentCategory);
+  if (description) fd.append("description", description);
   return fd;
 }
 

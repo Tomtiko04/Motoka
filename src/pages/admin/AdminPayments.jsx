@@ -8,9 +8,11 @@ import {
   FunnelIcon,
   EyeIcon,
   XMarkIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import { markTransactionPaid } from '../../services/apiAdminDocument';
 
 const AdminPayments = () => {
   const [transactions, setTransactions] = useState([]);
@@ -101,12 +103,13 @@ const AdminPayments = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      successful: { color: 'bg-green-100 text-green-800', label: 'Success' },
       approved: { color: 'bg-green-100 text-green-800', label: 'Success' },
-      pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      declined: { color: 'bg-red-100 text-red-800', label: 'Failed' },
-      // Fallback for old data
       success: { color: 'bg-green-100 text-green-800', label: 'Success' },
+      pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
       failed: { color: 'bg-red-100 text-red-800', label: 'Failed' },
+      declined: { color: 'bg-red-100 text-red-800', label: 'Failed' },
+      abandoned: { color: 'bg-gray-100 text-gray-700', label: 'Abandoned' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -130,6 +133,21 @@ const AdminPayments = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleMarkPaid = async (reference) => {
+    if (!window.confirm(`Process transaction ${reference}? This will create an order and notify the user.`)) return;
+    try {
+      const result = await markTransactionPaid(reference);
+      if (result?.data?.alreadyProcessed) {
+        toast.error('This transaction already has an order.');
+      } else {
+        toast.success('Order created — user notified');
+      }
+      fetchTransactions();
+    } catch (err) {
+      toast.error(err.message || 'Failed to process transaction');
+    }
   };
 
   const handleViewTransaction = async (reference) => {
@@ -324,13 +342,29 @@ const AdminPayments = () => {
                       {formatDate(transaction.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleViewTransaction(transaction.transaction_id)}
-                        className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                        <span>View</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleViewTransaction(transaction.transaction_id)}
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          View
+                        </button>
+                        {(transaction.status === 'pending' || transaction.status === 'approved') && (
+                          <button
+                            onClick={() => handleMarkPaid(transaction.transaction_id)}
+                            className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
+                              transaction.status === 'pending'
+                                ? 'text-green-600 hover:text-green-800 border-green-300'
+                                : 'text-blue-600 hover:text-blue-800 border-blue-300'
+                            }`}
+                            title={transaction.status === 'pending' ? 'Manually mark this payment as received' : 'Create missing order for this payment'}
+                          >
+                            <CheckCircleIcon className="h-3.5 w-3.5" />
+                            {transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
