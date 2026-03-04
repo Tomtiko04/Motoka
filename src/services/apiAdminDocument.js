@@ -102,3 +102,58 @@ export async function rejectDocument(id, reason = '') {
   if (!res.ok) throw new Error(data.message || 'Failed to reject document');
   return data;
 }
+
+/**
+ * Get document download URL (admin)
+ */
+export async function getDocumentDownloadUrl(id) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/documents/${id}/download`,
+    { headers: getAdminHeaders() }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to get download URL');
+  return data.url;
+}
+
+/**
+ * Search users by name / email / phone (for upload modal)
+ */
+export async function searchAdminUsers(q) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/users/search?q=${encodeURIComponent(q)}`,
+    { headers: getAdminHeaders() }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Search failed');
+  return data.data || [];
+}
+
+/**
+ * Get cars belonging to a user (for upload modal)
+ */
+export async function getUserCarsForUpload(userId) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/users/${userId}/cars`,
+    { headers: getAdminHeaders() }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch cars');
+  return data.data || [];
+}
+
+/**
+ * Manually mark a pending transaction as paid (creates order + sends notifications)
+ */
+export async function markTransactionPaid(reference) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/transactions/${reference}/mark-paid`,
+    {
+      method: 'PUT',
+      headers: { ...getAdminHeaders(), 'Content-Type': 'application/json' },
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to mark transaction as paid');
+  return data;
+}

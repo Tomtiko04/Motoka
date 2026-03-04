@@ -8,6 +8,15 @@ import {
   buildCarDocumentFormData,
 } from "../../services/apiDocument";
 
+const CAR_DOC_CATEGORIES = [
+  "Registration Certificate",
+  "Insurance",
+  "Roadworthiness",
+  "Inspection Report",
+  "Proof of Ownership",
+  "Other",
+];
+
 function DocumentList({
   selectedDocument,
   setSelectedDocument,
@@ -18,14 +27,15 @@ function DocumentList({
   const fileInputRef = useRef(null);
   const [documents, setDocuments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+  const [uploadModal, setUploadModal] = useState(false);
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const loadDocs = async () => {
-      if (!car?.slug) {
-        setDocuments([]);
-        return;
-      }
+      if (!car?.slug) { setDocuments([]); return; }
       setIsLoading(true);
       try {
         const docs = await getCarDocuments(car.slug);
@@ -40,7 +50,7 @@ function DocumentList({
     loadDocs();
   }, [car?.slug]);
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file || !car?.slug) return;
 
@@ -55,9 +65,20 @@ function DocumentList({
       return;
     }
 
+    // Instead of uploading immediately, open the description modal
+    setPendingFile(file);
+    setCategory("");
+    setDescription("");
+    setUploadModal(true);
+    e.target.value = "";
+  };
+
+  const handleUploadConfirm = async () => {
+    if (!pendingFile || !car?.slug) return;
+
     setIsUploading(true);
     try {
-      const formData = buildCarDocumentFormData(file, car.slug);
+      const formData = buildCarDocumentFormData(pendingFile, car.slug, category || null, description || null);
       const res = await uploadDocument(formData);
       const doc = res?.data?.document || res?.document;
       if (doc) {
@@ -68,17 +89,17 @@ function DocumentList({
       toast.error(error.response?.data?.message || "Failed to upload document");
     } finally {
       setIsUploading(false);
-      e.target.value = "";
+      setUploadModal(false);
+      setPendingFile(null);
     }
   };
 
-  const triggerUpload = () => {
-    fileInputRef.current?.click();
-  };
+  const triggerUpload = () => fileInputRef.current?.click();
 
   const displayDocs = documents.map((doc, idx) => ({
     key: doc.id || `doc-${idx}`,
-    title: `Document ${idx + 1}`,
+    title: doc.document_category || `Document ${idx + 1}`,
+    description: doc.description || null,
     image: doc.file_url,
     status: doc.status,
   }));
@@ -92,6 +113,7 @@ function DocumentList({
         className="hidden"
         accept="image/*,application/pdf"
       />
+
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
@@ -124,14 +146,20 @@ function DocumentList({
                     <Icon icon="mdi:clock-outline" className="text-amber-400 text-xl" title="Pending approval" />
                   )}
                 </div>
-                <p className="text-white text-[15px] font-medium">{doc.title}</p>
-                {doc.status !== "approved" && (
-                  <span className="text-[10px] text-white/80 capitalize">{doc.status}</span>
-                )}
+                <div>
+                  <p className="text-white text-[15px] font-medium leading-tight">{doc.title}</p>
+                  {doc.description && (
+                    <p className="text-white/70 text-[11px] truncate">{doc.description}</p>
+                  )}
+                  {doc.status !== "approved" && (
+                    <span className="text-[10px] text-white/80 capitalize">{doc.status}</span>
+                  )}
+                </div>
               </div>
             </div>
           ))}
 
+          {/* Add Documents card */}
           <div
             onClick={isUploading ? undefined : triggerUpload}
             className={`bg-[#eaecf3] rounded-[17px] relative overflow-hidden h-[111px] flex items-center transition-colors ${
@@ -149,6 +177,59 @@ function DocumentList({
               <p className="text-[#05243F] text-[16px] font-semibold">
                 {isUploading ? "Uploading..." : "Add Documents"}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category + description modal before uploading */}
+      {uploadModal && pendingFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+            <h3 className="font-semibold text-gray-900 text-base">Document Details</h3>
+            <p className="text-sm text-gray-500">
+              File: <span className="font-medium text-gray-700">{pendingFile.name}</span>
+            </p>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select category (optional)</option>
+                {CAR_DOC_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g. Vehicle license renewed Jan 2026"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end pt-1">
+              <button
+                onClick={() => { setUploadModal(false); setPendingFile(null); }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUploadConfirm}
+                disabled={isUploading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isUploading ? "Uploading…" : "Upload"}
+              </button>
             </div>
           </div>
         </div>

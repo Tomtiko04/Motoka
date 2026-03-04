@@ -200,13 +200,6 @@ const AdminLayout = () => {
         <Outlet />
       </main>
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6">
-        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 text-sm font-medium transition-colors duration-200">
-          <span>Ask Mo</span>
-          <span>+</span>
-        </button>
-      </div>
     </div>
   );
 };
