@@ -26,22 +26,19 @@ const licensesTypes = [
       <Icon icon="mingcute:steering-wheel-fill" fontSize={24} color="#2389E3" />
     ),
     title: "Driver’s license",
-    // link: "drivers-license",
-    comingSoon: true,
+    link: "drivers-license",
   },
   {
     icon: (
       <Icon icon="stash:data-numbers-duotone" fontSize={24} color="#2389E3" />
     ),
     title: "Plate Number",
-    // link: "plate-number",
-    comingSoon: true,
+    link: "plate-number",
   },
   {
     icon: <Icon icon="mingcute:car-fill" fontSize={24} color="#2389E3" />,
     title: "Int’l Driver’s\nLicense",
-    // link: "international-driver's-license",
-    comingSoon: true,
+    link: "international-driver's-license",
   },
   {
     icon: (
