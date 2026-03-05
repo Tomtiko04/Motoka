@@ -2,6 +2,10 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LicenseLayout from "../../features/licenses/components/LicenseLayout";
 import OrderList from "./OrderList";
+import {
+  initializeDriversLicensePaymentPaystack,
+  initializeDriversLicensePaymentMonicredit,
+} from "../../services/apiDriversLicense";
 import { toast } from "react-hot-toast";
 
 // Configuration for different request types
@@ -28,6 +32,7 @@ export default function ConfirmRequest() {
   const {
     items = [],
     type = "default",
+    amount,
     details = {},
     carDetail,
     ...restState
@@ -38,6 +43,9 @@ export default function ConfirmRequest() {
 
   const handleProceed = async ({ total, items: orderItems }) => {
     setIsProcessing(true);
+
+    // Slug comes from navigation state set by DriversLicense.jsx
+    const resolvedSlug = location?.state?.orderDetails?.slug;
 
     try {
       switch (type) {
@@ -77,17 +85,114 @@ export default function ConfirmRequest() {
             });
           }
           break;
+        // case 'drivers_license':
+        //   if (orderDetails.slug) {
+        //    initiateDriversLicensePayment({
+        //       slug: orderDetails.slug,
+        //       onSuccess: (data) => {
+        //         // Handle successful payment initiation
+        //         console.log('Payment initiated:', data);
+        //       },
+        //       onError: (error) => {
+        //         toast.error(error.message || 'Failed to initiate payment');
+        //       }
+        //     });
+        //   }
+        //   break;
         case "drivers_license":
-          // Driver's license now uses DriversLicense -> DriverLicenseOrderSummary -> Payment flow
-          toast.error("Please use the Driver's License flow from the licenses menu.");
-          setIsProcessing(false);
+          // Extract license type and duration from details or orderDetails
+          const orderDetails = location?.state?.orderDetails || {};
+          const licenseType = details?.license_type || orderDetails?.license_type || details?.application_type || 'new';
+          const duration = details?.duration || orderDetails?.duration || null;
+          
+          // Prepare payment data for initialization
+          const paymentInitData = {
+            license_type: licenseType === 'Renew' || licenseType === 'renew' ? 'renew' : 'new',
+            duration: duration
+          };
+
+          if (resolvedSlug || licenseType) {
+            try {
+              const [paystackRes, monicreditRes] = await Promise.allSettled([
+                initializeDriversLicensePaymentPaystack(paymentInitData),
+                initializeDriversLicensePaymentMonicredit(paymentInitData)
+              ]);
+
+              // Paystack: apiDriversLicense returns the backend JSON body directly
+              const paystackData = paystackRes.status === "fulfilled"
+                ? (paystackRes.value?.data || paystackRes.value)
+                : null;
+
+              // Monicredit: apiDriversLicense returns { success, data, message }
+              // We want the inner `data` object which contains total_amount, customer, etc.
+              const monicreditInit = monicreditRes.status === "fulfilled"
+                ? (monicreditRes.value?.data || monicreditRes.value)
+                : null;
+              const monicreditCore = monicreditInit?.data || monicreditInit || null;
+
+              if (!paystackData && !monicreditData) {
+                throw new Error("Failed to initialize any payment gateway");
+              }
+
+              const paymentData = {
+                type: "drivers_license",
+                items: orderItems,
+                // Store amount in naira so PaymentOptions can display it directly
+                amount: total,
+                slug: resolvedSlug,
+                paystack:
+                  paystackRes.status === "fulfilled"
+                    ? {
+                        authorization_url:
+                          paystackData?.authorization_url,
+                        reference: paystackData?.reference,
+                      }
+                    : null,
+                monicredit:
+                  monicreditRes.status === "fulfilled"
+                    ? {
+                        transid: monicreditCore?.transaction_id || monicreditCore?.transaction_id_monicredit,
+                        orderid: monicreditCore?.order_id,
+                        data: {
+                          // Monicredit normalized response: total_amount (naira), account/customer details, etc.
+                          ...(monicreditCore || {}),
+                          total_amount: monicreditCore?.total_amount ?? monicreditCore?.amount ?? 0,
+                          customer: monicreditCore?.customer || {
+                            account_number: monicreditCore?.account_number,
+                            bank_name: monicreditCore?.bank_name,
+                            account_name: monicreditCore?.account_name,
+                          },
+                        },
+                      }
+                    : null,
+                ...restState,
+              };
+
+              // Save to session storage
+              sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
+
+              navigate(`/payment?type=drivers_license`, {
+                state: {
+                  paymentData: paymentData
+                }
+              });
+
+            } catch (error) {
+              console.error("Payment initialization error:", error);
+              toast.error(error.message || "Failed to initialize payment");
+              setIsProcessing(false);
+            }
+          } else {
+            toast.error("Invalid license details");
+            setIsProcessing(false);
+          }
           break;
 
         default:
           if (config.nextStep) {
             navigate(config.nextStep, {
               state: {
-                ...restState,
+                ...orderDetails,
                 type,
                 amount: total,
                 items: orderItems,
