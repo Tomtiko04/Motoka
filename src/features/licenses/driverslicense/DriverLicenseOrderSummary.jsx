@@ -21,6 +21,12 @@ const LICENSE_LABELS = {
   renew: "Driver's License Renewal",
 };
 
+const DURATION_LABELS = {
+  "3yr": "3 Years",
+  "5yr": "5 Years",
+  "international": "International",
+};
+
 export default function DriverLicenseOrderSummary() {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -66,13 +72,15 @@ export default function DriverLicenseOrderSummary() {
     );
   }
 
-  const { license_type, price } = summaryState;
+  const { license_type, duration, price } = summaryState;
   const label = LICENSE_LABELS[license_type] || license_type;
+  const durationLabel = duration ? DURATION_LABELS[duration] : null;
 
   const handleProceedToPayment = () => {
     const paymentData = {
       type: PAYMENT_TYPES.DRIVERS_LICENSE,
       license_type,
+      duration,
       price,
     };
 
@@ -127,6 +135,15 @@ export default function DriverLicenseOrderSummary() {
               {label}
             </span>
           </div>
+
+          {durationLabel && (
+            <div className="flex items-center justify-between border-b border-[#F4F5FC] pb-3">
+              <span className="text-sm text-[#05243F]/60">Duration</span>
+              <span className="text-sm font-semibold text-[#05243F]">
+                {durationLabel}
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-sm font-medium text-[#05243F]/70">

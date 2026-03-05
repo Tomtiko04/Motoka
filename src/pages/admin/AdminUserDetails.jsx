@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from 'react';
+import React,{ useState, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-hot-toast';
 import config from '../../config/config';
@@ -14,9 +14,9 @@ const AdminUserDetails = () => {
 
   useEffect(() => {
     fetchUserDetails();
-  }, []);
+  }, [fetchUserDetails]);
 
-  const fetchUserDetails = async () => {
+  const fetchUserDetails = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
@@ -35,7 +35,11 @@ const AdminUserDetails = () => {
 
       if (data.status) {
         setUser(data.data.user);
-        setStats(data.data.stats);
+        setStats(data.data.stats || {
+          pending_orders: 0,
+          total_spent: 0,
+          last_activity: data.data.user?.updated_at,
+        });
       } else {
         toast.error(data.message || 'Failed to fetch user details');
       }
@@ -45,7 +49,7 @@ const AdminUserDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   const handleBack = () => {
     window.history.back();
