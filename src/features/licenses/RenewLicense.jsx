@@ -556,36 +556,39 @@ export default function RenewLicense() {
             <div className="mt-6">
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
 
-              {/* Duplicate Payment Warning */}
+              {/* Already Paid Documents Card */}
               {existingPayments.length > 0 && (
-                <div className="mb-4 rounded-lg border border-[#FDB022] bg-[#FFFCF5] p-4">
-                  <div className="flex items-start">
-                    <div className="mr-3 text-[#FDB022]">
-                      <svg
-                        className="h-5 w-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                <div className="mb-4 overflow-hidden rounded-[16px] border border-[#FDB022]/30 bg-gradient-to-br from-[#FFFBF2] to-[#FFF8E7]">
+                  <div className="flex gap-4 p-4">
+                    <div className="flex shrink-0 items-center justify-center rounded-xl bg-[#FDB022]/15 p-2.5">
+                      <Icon
+                        icon="solar:verified-check-bold"
+                        className="text-[#C98B1A]"
+                        fontSize={22}
+                      />
                     </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-[#FDB022]">
-                        Already Paid Documents
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold text-[#5C3D0B]">
+                        Already paid
                       </h4>
-                      <p className="mt-1 text-sm text-[#5C3D0B]">
-                        You have already paid for:{" "}
-                        {existingPayments
-                          .map((p) => p.payment_head_name)
-                          .join(", ")}
+                      <p className="mt-1.5 text-xs text-[#5C3D0B]/80">
+                        These will be excluded from your payment.
                       </p>
-                      <p className="mt-1 text-xs text-[#5C3D0B]">
-                        These documents will be excluded from your payment.
-                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {existingPayments.map((p) => (
+                          <span
+                            key={p.payment_head_name}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#5C3D0B] shadow-sm ring-1 ring-[#FDB022]/20"
+                          >
+                            <Icon
+                              icon="solar:check-circle-bold"
+                              fontSize={14}
+                              className="text-[#C98B1A]"
+                            />
+                            {p.payment_head_name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -611,35 +614,35 @@ export default function RenewLicense() {
                         type="button"
                         onClick={() => !isAlreadyPaid && handleToggleDoc(doc)}
                         disabled={isAlreadyPaid}
-                        className={`group relative flex w-70 items-center gap-4 rounded-full px-4 py-4 transition-all bg-[#F4F5FC] ${
+                        className={`group relative flex w-80 items-center gap-3 rounded-full px-6 py-3 transition-all ${
                           isAlreadyPaid
-                            ? "cursor-not-allowed bg-gray-50 opacity-50 border-transparent"
-                            : isSelected
-                              ? "bg-white border-[#2389E3] shadow-sm"
-                              : "bg-white border-gray-100 hover:border-[#2389E3]/20 hover:shadow-md"
+                            ? "cursor-not-allowed bg-[#F4F5FC] border border-[#D1D5DB]"
+                            : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
                         }`}
                       >
-                        <div className={`flex shrink-0 items-center justify-center transition-colors ${
-                          isSelected ? "text-[#2389E3]" : "text-[#D1D5DB]"
-                        }`}>
-                          <Icon 
-                            icon={isSelected ? "solar:check-square-bold" : "solar:square-outline"} 
-                            fontSize={26} 
+                        <div
+                          className={`flex shrink-0 items-center justify-center transition-colors ${
+                            isAlreadyPaid
+                              ? "text-gray-400"
+                              : isSelected
+                                ? "text-[#05243F]"
+                                : "text-[#9CA3AF] group-hover:text-[#697C8C]"
+                          }`}
+                        >
+                          <Icon
+                            icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
+                            fontSize={24}
+                            color={isSelected ? "#2389E3" : "#9CA3AF"}
                           />
                         </div>
-                        <span className={`text-base md:text-lg font-semibold transition-colors ${
-                          isSelected ? "text-[#05243F]" : "text-[#05243F]/60"
+                        <span className={`text-sm md:text-base font-normal transition-colors ${
+                          isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
                         }`}>
                           {doc}
                         </span>
-                        {!isSelected && !isAlreadyPaid && (
-                          <div className="ml-auto text-gray-300">
-                             <Icon icon="solar:square-outline" fontSize={22} />
-                          </div>
-                        )}
                         {isAlreadyPaid && (
                           <span className="ml-auto rounded-full bg-gray-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                             Paid
+                            Paid
                           </span>
                         )}
                       </button>
