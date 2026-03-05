@@ -100,45 +100,35 @@ export default function ConfirmRequest() {
         //   }
         //   break;
         case "drivers_license":
-          // if (resolvedSlug) {
-          //   try {
-          //     const initRes = await initializeDriversLicensePaymentPaystack(resolvedSlug);
-          //     const initPayload = initRes?.data?.data || initRes?.data || initRes;
+          // Extract license type and duration from details or orderDetails
+          const orderDetails = location?.state?.orderDetails || {};
+          const licenseType = details?.license_type || orderDetails?.license_type || details?.application_type || 'new';
+          const duration = details?.duration || orderDetails?.duration || null;
+          
+          // Prepare payment data for initialization
+          const paymentInitData = {
+            license_type: licenseType === 'Renew' || licenseType === 'renew' ? 'renew' : 'new',
+            duration: duration
+          };
 
-          //     if (initPayload) {
-          //       navigate("/payment", {
-          //         state: {
-          //           paymentData: initPayload,
-          //           type: "drivers_license",
-          //           items: orderItems,
-          //           amount: total,
-          //           ...restState,
-          //         },
-          //       });
-          //     } else {
-          //       throw new Error("Failed to initialize payment: Missing payload");
-          //     }
-          //   } catch (error) {
-          //     console.error("Payment initialization error:", error);
-          //     toast.error(error.message || "Failed to initialize payment");
-          //     setIsProcessing(false);
-          //   }
-          // } else {
-          //   toast.error("Invalid license details");
-          //   setIsProcessing(false);
-          // }
-          if (resolvedSlug) {
+          if (resolvedSlug || licenseType) {
             try {
               const [paystackRes, monicreditRes] = await Promise.allSettled([
-                initializeDriversLicensePaymentPaystack(resolvedSlug),
-                initializeDriversLicensePaymentMonicredit(resolvedSlug)
+                initializeDriversLicensePaymentPaystack(paymentInitData),
+                initializeDriversLicensePaymentMonicredit(paymentInitData)
               ]);
 
-              const paystackData = paystackRes.status === 'fulfilled' ?
-                (paystackRes.value?.data?.data || paystackRes.value?.data || paystackRes.value) : null;
+              // Paystack: apiDriversLicense returns the backend JSON body directly
+              const paystackData = paystackRes.status === "fulfilled"
+                ? (paystackRes.value?.data || paystackRes.value)
+                : null;
 
-              const monicreditData = monicreditRes.status === 'fulfilled' ?
-                (monicreditRes.value?.data?.data || monicreditRes.value?.data || monicreditRes.value) : null;
+              // Monicredit: apiDriversLicense returns { success, data, message }
+              // We want the inner `data` object which contains total_amount, customer, etc.
+              const monicreditInit = monicreditRes.status === "fulfilled"
+                ? (monicreditRes.value?.data || monicreditRes.value)
+                : null;
+              const monicreditCore = monicreditInit?.data || monicreditInit || null;
 
               if (!paystackData && !monicreditData) {
                 throw new Error("Failed to initialize any payment gateway");
@@ -147,38 +137,30 @@ export default function ConfirmRequest() {
               const paymentData = {
                 type: "drivers_license",
                 items: orderItems,
+                // Store amount in naira so PaymentOptions can display it directly
                 amount: total,
                 slug: resolvedSlug,
                 paystack:
                   paystackRes.status === "fulfilled"
                     ? {
                         authorization_url:
-                          paystackRes.value?.data?.authorization_url,
-                        reference: paystackRes.value?.data?.reference,
+                          paystackData?.authorization_url,
+                        reference: paystackData?.reference,
                       }
                     : null,
                 monicredit:
                   monicreditRes.status === "fulfilled"
                     ? {
-                        // payment_url: monicreditRes.value?.data?.data?.payment_url,
-                        transid: monicreditRes.value?.data?.data?.transid,
-                        orderid: monicreditRes.value?.data?.data?.order_id,
-
+                        transid: monicreditCore?.transaction_id || monicreditCore?.transaction_id_monicredit,
+                        orderid: monicreditCore?.order_id,
                         data: {
-                          ...monicreditRes.value?.data?.data, // This contains customer, amount, etc.
-                          payment_url:
-                            monicreditRes.value?.data?.data?.payment_url,
-                          orderid: monicreditRes.value?.data?.data?.order_id,
-                          total_amount:
-                            monicreditRes.value?.data?.data?.total_amount,
-                          customer: monicreditRes.value?.data?.data
-                            ?.customer || {
-                            account_number:
-                              monicreditRes.value?.data?.data?.account_number,
-                            bank_name:
-                              monicreditRes.value?.data?.data?.bank_name,
-                            account_name:
-                              monicreditRes.value?.data?.data?.account_name,
+                          // Monicredit normalized response: total_amount (naira), account/customer details, etc.
+                          ...(monicreditCore || {}),
+                          total_amount: monicreditCore?.total_amount ?? monicreditCore?.amount ?? 0,
+                          customer: monicreditCore?.customer || {
+                            account_number: monicreditCore?.account_number,
+                            bank_name: monicreditCore?.bank_name,
+                            account_name: monicreditCore?.account_name,
                           },
                         },
                       }

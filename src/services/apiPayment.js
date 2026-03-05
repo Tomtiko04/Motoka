@@ -99,8 +99,18 @@ export async function abandonPayment(reference, reason = 'User navigated away') 
 
 
 
-export async function initiateDriversLicensePayment(slug) {
-  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
+/**
+ * Initialize driver license payment — uses /payments/initialize endpoint
+ * with payment_type: 'driver_license'. Backend branches on this to fetch price
+ * from driver_license_prices.
+ * @param {Object} payload - { license_type, duration?, payment_gateway? }
+ */
+export async function initiateDriversLicensePayment(payload) {
+  const { data } = await api.post('/payments/initialize', {
+    ...payload,
+    payment_type: 'driver_license',
+    payment_gateway: payload.payment_gateway || 'monicredit'
+  });
   return data;
 }
 

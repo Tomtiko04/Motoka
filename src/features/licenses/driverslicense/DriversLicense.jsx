@@ -32,7 +32,7 @@ export default function DriversLicense() {
     nextOfKin: "",
     nextOfKinPhone: "",
     motherMaidenName: "",
-    licenseYear: null,
+    licenseYear: "",
     passportPhoto: null, // For New
     expiredLicenseUpload: null, // For Renew (Expired)
     affidavit: null,
@@ -49,17 +49,45 @@ export default function DriversLicense() {
   }, [licenseType, renewType]);
 
   const selectedPaymentOption = useMemo(() => {
-    const list = isPaymentOptions?.data || [];
-    return list.find((opt) => opt.type === selectedOptionType);
-  }, [isPaymentOptions, selectedOptionType]);
+    // Handle different response structures
+    const list = Array.isArray(isPaymentOptions?.data) 
+      ? isPaymentOptions.data 
+      : Array.isArray(isPaymentOptions) 
+        ? isPaymentOptions 
+        : [];
+    
+    if (!Array.isArray(list)) {
+      console.warn('Payment options is not an array:', isPaymentOptions);
+      return null;
+    }
+    
+    // Until user selects years, don't pre-select any price to avoid misleading defaults
+    if (!formData.licenseYear) return null;
+
+    // Match by type and, when available, by duration derived from selected licenseYear
+    const matchesType = list.filter((opt) => opt.type === selectedOptionType);
+
+    if (!matchesType.length) return null;
+
+    // If backend provides duration (e.g. '3yr', '5yr', 'international'),
+    // try to pick the one matching the selected licenseYear
+    if (formData.licenseYear) {
+      const desiredDuration = `${formData.licenseYear}yr`;
+      const byDuration = matchesType.find(
+        (opt) => opt.duration && String(opt.duration).toLowerCase() === desiredDuration.toLowerCase(),
+      );
+      if (byDuration) return byDuration;
+    }
+
+    // Fallback: first option for this type
+    return matchesType[0];
+  }, [isPaymentOptions, selectedOptionType, formData.licenseYear]);
 
   const computedAmount = useMemo(() => {
+    // Frontend should not multiply by years; backend prices already include duration.
     const base = selectedPaymentOption ? parseFloat(selectedPaymentOption.amount) : 0;
-    if (licenseType === "New" && formData.licenseYear) {
-      return base * Number(formData.licenseYear);
-    }
-    return base;
-  }, [selectedPaymentOption, licenseType, formData.licenseYear]);
+    return base || 0;
+  }, [selectedPaymentOption]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -195,6 +223,19 @@ export default function DriversLicense() {
       createLicense(payload, {
         onSuccess: (data) => {
           const amount = Number(computedAmount || 0);
+
+          // Map selected payment option to backend driver_license_prices fields
+          const license_type =
+            selectedPaymentOption?.type ||
+            (licenseType === "Renew" || selectedOptionType === "renew"
+              ? "renew"
+              : "new");
+          const duration =
+            selectedPaymentOption?.duration ||
+            (formData.licenseYear
+              ? `${formData.licenseYear}yr`
+              : null);
+
           navigate("/licenses/confirm-request", {
             state: {
               type: "drivers_license",
@@ -205,6 +246,8 @@ export default function DriversLicense() {
                   years: formData.licenseYear,
                   revenueHeadCode: selectedPaymentOption?.revenue_head_code,
                   optionType: selectedOptionType,
+                  license_type,
+                  duration,
                 },
               ],
               details: {
@@ -214,9 +257,13 @@ export default function DriversLicense() {
                 years: formData.licenseYear,
                 revenueHeadCode: selectedPaymentOption?.revenue_head_code,
                 optionType: selectedOptionType,
+                license_type,
+                duration,
               },
               orderDetails: {
                 slug: data?.license?.slug || "",
+                license_type,
+                duration,
               },
             },
           });
@@ -239,9 +286,14 @@ export default function DriversLicense() {
           <p className="text-xl font-semibold text-[#05243F]">
             {computedAmount > 0 ? `₦${Number(computedAmount).toLocaleString()}` : "—"}
           </p>
-          {selectedPaymentOption && licenseType === "New" && (
+          {selectedPaymentOption && (
             <p className="text-xs text-[#05243F]/40">
-              Base price: ₦{Number(parseFloat(selectedPaymentOption.amount) || 0).toLocaleString()} x {Number(formData.licenseYear || 0)} year(s)
+              Plan: {licenseType === "New" ? "New" : "Renew"}{" "}
+              {selectedPaymentOption.duration
+                ? `(${String(selectedPaymentOption.duration).toUpperCase()})`
+                : ""}
+              {" • "}
+              ₦{Number(parseFloat(selectedPaymentOption.amount) || 0).toLocaleString()}
             </p>
           )}
         </div>
@@ -507,7 +559,7 @@ export default function DriversLicense() {
                   </p>
                   <select
                     name="licenseYear"
-                    value={formData.licenseYear}
+                    value={formData.licenseYear || ""}
                     onChange={handleInputChange}
                     className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none"
                   >
@@ -591,9 +643,14 @@ export default function DriversLicense() {
             <p className="text-xl font-semibold text-[#05243F]">
               {computedAmount > 0 ? `₦${Number(computedAmount).toLocaleString()}` : "—"}
             </p>
-            {selectedPaymentOption && licenseType === "New" && (
+            {selectedPaymentOption && (
               <p className="text-xs text-[#05243F]/40">
-                Base price: ₦{Number(parseFloat(selectedPaymentOption.amount) || 0).toLocaleString()} x {Number(formData.licenseYear || 0)} year(s)
+                Plan: {licenseType === "New" ? "New" : "Renew"}{" "}
+                {selectedPaymentOption.duration
+                  ? `(${String(selectedPaymentOption.duration).toUpperCase()})`
+                  : ""}
+                {" • "}
+                ₦{Number(parseFloat(selectedPaymentOption.amount) || 0).toLocaleString()}
               </p>
             )}
           </div>
