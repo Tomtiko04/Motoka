@@ -12,6 +12,7 @@ import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { ClipLoader } from "react-spinners";
 import toast from "react-hot-toast";
+import { Icon } from "@iconify/react";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -547,6 +548,8 @@ export default function RenewLicense() {
               carDetail={carDetail}
               isRenew={false}
               reminderObj={getCarReminder(carDetail?.id)}
+              bg="bg-gradient-to-br from-[#104675] to-[#E3E3E3]"
+              textColor="text-white"
             />
 
             {/* Document Details */}
@@ -588,7 +591,7 @@ export default function RenewLicense() {
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3">
                 {loadingPayments ? (
                   <div className="mx-auto my-10 flex items-center justify-center">
                     <div>
@@ -608,15 +611,37 @@ export default function RenewLicense() {
                         type="button"
                         onClick={() => !isAlreadyPaid && handleToggleDoc(doc)}
                         disabled={isAlreadyPaid}
-                        className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
+                        className={`group relative flex w-70 items-center gap-4 rounded-full px-4 py-4 transition-all bg-[#F4F5FC] ${
                           isAlreadyPaid
-                            ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                            ? "cursor-not-allowed bg-gray-50 opacity-50 border-transparent"
                             : isSelected
-                              ? "bg-[#2284DB] text-white"
-                              : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"
-                        } `}
+                              ? "bg-white border-[#2389E3] shadow-sm"
+                              : "bg-white border-gray-100 hover:border-[#2389E3]/20 hover:shadow-md"
+                        }`}
                       >
-                        {doc}
+                        <div className={`flex shrink-0 items-center justify-center transition-colors ${
+                          isSelected ? "text-[#2389E3]" : "text-[#D1D5DB]"
+                        }`}>
+                          <Icon 
+                            icon={isSelected ? "solar:check-square-bold" : "solar:square-outline"} 
+                            fontSize={26} 
+                          />
+                        </div>
+                        <span className={`text-base md:text-lg font-semibold transition-colors ${
+                          isSelected ? "text-[#05243F]" : "text-[#05243F]/60"
+                        }`}>
+                          {doc}
+                        </span>
+                        {!isSelected && !isAlreadyPaid && (
+                          <div className="ml-auto text-gray-300">
+                             <Icon icon="solar:square-outline" fontSize={22} />
+                          </div>
+                        )}
+                        {isAlreadyPaid && (
+                          <span className="ml-auto rounded-full bg-gray-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                             Paid
+                          </span>
+                        )}
                       </button>
                     );
                   })
