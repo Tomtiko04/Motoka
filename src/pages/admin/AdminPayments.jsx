@@ -8,13 +8,14 @@ import {
   FunnelIcon,
   EyeIcon,
   XMarkIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import { markTransactionPaid } from '../../services/apiAdminDocument';
 
 const AdminPayments = () => {
   const [transactions, setTransactions] = useState([]);
-  const [failedTransactions, setFailedTransactions] = useState([]);
   const [summary, setSummary] = useState({
     total_amount: 0,
     total_transactions: 0,
@@ -45,7 +46,6 @@ const AdminPayments = () => {
       return;
     }
     fetchTransactions();
-    fetchFailedTransactions();
   }, [activeFilter, currentPage, searchTerm]);
 
   const fetchTransactions = async () => {
@@ -78,36 +78,10 @@ const AdminPayments = () => {
       } else {
         toast.error('Failed to fetch transactions');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch transactions');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchFailedTransactions = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      
-      const params = new URLSearchParams({
-        per_page: 8,
-        search: searchTerm,
-      });
-
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/transactions/failed?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-      
-      if (data.status) {
-        setFailedTransactions(data.data.data || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch failed transactions:', error);
     }
   };
 
@@ -129,12 +103,13 @@ const AdminPayments = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      successful: { color: 'bg-green-100 text-green-800', label: 'Success' },
       approved: { color: 'bg-green-100 text-green-800', label: 'Success' },
-      pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      declined: { color: 'bg-red-100 text-red-800', label: 'Failed' },
-      // Fallback for old data
       success: { color: 'bg-green-100 text-green-800', label: 'Success' },
+      pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
       failed: { color: 'bg-red-100 text-red-800', label: 'Failed' },
+      declined: { color: 'bg-red-100 text-red-800', label: 'Failed' },
+      abandoned: { color: 'bg-gray-100 text-gray-700', label: 'Abandoned' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -160,6 +135,21 @@ const AdminPayments = () => {
     setCurrentPage(page);
   };
 
+  const handleMarkPaid = async (reference) => {
+    if (!window.confirm(`Process transaction ${reference}? This will create an order and notify the user.`)) return;
+    try {
+      const result = await markTransactionPaid(reference);
+      if (result?.data?.alreadyProcessed) {
+        toast.error('This transaction already has an order.');
+      } else {
+        toast.success('Order created — user notified');
+      }
+      fetchTransactions();
+    } catch (err) {
+      toast.error(err.message || 'Failed to process transaction');
+    }
+  };
+
   const handleViewTransaction = async (reference) => {
     try {
       setTxDetailLoading(true);
@@ -173,7 +163,7 @@ const AdminPayments = () => {
       } else {
         toast.error('Failed to load transaction details');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load transaction details');
     } finally {
       setTxDetailLoading(false);
@@ -227,66 +217,6 @@ const AdminPayments = () => {
           <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
             Make Payment
           </button>
-        </div>
-      </div>
-
-      {/* Failed Payment Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Failed Payment</h2>
-          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-            See More
-          </button>
-        </div>
-        
-        <div className="p-6">
-          {loading ? (
-            <div className="space-y-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center space-x-4">
-                  <div className="h-4 w-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded flex-1"></div>
-                  <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-16 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                </div>
-              ))}
-            </div>
-          ) : failedTransactions.length > 0 ? (
-            <div className="space-y-3">
-              {failedTransactions.map((transaction, index) => (
-                <div
-                  key={transaction.id}
-                  className={`flex items-center space-x-4 p-3 rounded-lg ${
-                    index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                  }`}
-                >
-                  <div className="h-4 w-4 text-blue-600">
-                    <DocumentTextIcon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {transaction.transaction_id}
-                    </p>
-                    <p className="text-sm text-gray-500 truncate">
-                      {transaction.payment_description || 'Transaction'}
-                    </p>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {formatDate(transaction.created_at)}
-                  </div>
-                  <div className="text-sm font-medium text-blue-600">
-                    {formatCurrency(transaction.amount)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No failed transactions found</p>
-            </div>
-          )}
         </div>
       </div>
 
@@ -412,13 +342,29 @@ const AdminPayments = () => {
                       {formatDate(transaction.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleViewTransaction(transaction.transaction_id)}
-                        className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                        <span>View</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleViewTransaction(transaction.transaction_id)}
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          View
+                        </button>
+                        {(transaction.status === 'pending' || transaction.status === 'approved') && (
+                          <button
+                            onClick={() => handleMarkPaid(transaction.transaction_id)}
+                            className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
+                              transaction.status === 'pending'
+                                ? 'text-green-600 hover:text-green-800 border-green-300'
+                                : 'text-blue-600 hover:text-blue-800 border-blue-300'
+                            }`}
+                            title={transaction.status === 'pending' ? 'Manually mark this payment as received' : 'Create missing order for this payment'}
+                          >
+                            <CheckCircleIcon className="h-3.5 w-3.5" />
+                            {transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

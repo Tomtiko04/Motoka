@@ -107,7 +107,8 @@ const AdminLayout = () => {
     { name: 'Payment', href: '/admin/payments', current: location.pathname.startsWith('/admin/payments') },
     { name: 'Agent', href: '/admin/agents', current: location.pathname.startsWith('/admin/agents') },
     { name: 'Cars', href: '/admin/cars', current: location.pathname.startsWith('/admin/cars') },
-    { name: "Users", href: "/admin/users", current: location.pathname.startsWith('/admin/users') },
+    { name: 'Users', href: '/admin/users', current: location.pathname.startsWith('/admin/users') },
+    { name: 'Documents', href: '/admin/documents', current: location.pathname.startsWith('/admin/documents') },
   ];
 
   if (!adminUser) {
@@ -199,13 +200,6 @@ const AdminLayout = () => {
         <Outlet />
       </main>
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6">
-        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 text-sm font-medium transition-colors duration-200">
-          <span>Ask Mo</span>
-          <span>+</span>
-        </button>
-      </div>
     </div>
   );
 };

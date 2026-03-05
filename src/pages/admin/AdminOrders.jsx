@@ -8,7 +8,6 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
-import PaymentModal from '../../components/admin/PaymentModal';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -19,11 +18,6 @@ const AdminOrders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
   const [perPage, setPerPage] = useState(15);
-  const [paymentModal, setPaymentModal] = useState({
-    isOpen: false,
-    order: null,
-    agent: null
-  });
 
   useEffect(() => {
     // Check if admin is authenticated
@@ -112,63 +106,11 @@ const AdminOrders = () => {
     }
   };
 
-  const handleProcessOrder = async (order) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const orderNumber = order.originalOrder.order_number || order.originalOrder.slug;
-      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${orderNumber}/status`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'in_progress' }),
-      });
-
-      const data = await response.json();
-      if (data.status) {
-        toast.success('Order marked as In Progress');
-        fetchOrders(); // Refresh the list
-      } else {
-        toast.error(data.message || 'Failed to update order status');
-      }
-    } catch (error) {
-      toast.error('Failed to update order. Please try again.');
-    }
+  const handleViewOrder = (order) => {
+    window.location.href = `/admin/orders/${order.originalOrder.slug}`;
   };
 
-  const handlePaymentInitiated = (paymentData) => {
-    fetchOrders();
-    setPaymentModal({
-      isOpen: false,
-      order: null,
-      agent: null
-    });
-  };
-
-  const handleClosePaymentModal = () => {
-    setPaymentModal({
-      isOpen: false,
-      order: null,
-      agent: null
-    });
-  };
-
-  const getActionButton = (status) => {
-    switch (status) {
-      case 'New':
-        return { text: 'Process Order', color: 'bg-blue-600 hover:bg-blue-700' };
-      case 'Inprogress':
-        return { text: 'Check Order', color: 'bg-blue-600 hover:bg-blue-700' };
-      case 'Completed':
-        return { text: 'Process Order', color: 'bg-blue-300 cursor-not-allowed' };
-      case 'Declined':
-        return { text: 'Process Order', color: 'bg-blue-600 hover:bg-blue-700' };
-      default:
-        return { text: 'Process Order', color: 'bg-blue-600 hover:bg-blue-700' };
-    }
-  };
-
+  
   const filteredOrders = transformedOrders.filter(order => {
     const matchesSearch = order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -327,17 +269,11 @@ const AdminOrders = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.map((order, index) => {
-                const actionButton = getActionButton(order.status);
-                return (
-                  <tr 
-                    key={index} 
+              {filteredOrders.map((order, index) => (
+                  <tr
+                    key={index}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={(e) => {
-                      if (!e.target.closest('button')) {
-                        window.location.href = `/admin/orders/${order.originalOrder.slug}`;
-                      }
-                    }}
+                    onClick={() => handleViewOrder(order)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       <span className="text-blue-600 hover:text-blue-800 hover:underline">
@@ -348,14 +284,7 @@ const AdminOrders = () => {
                       {order.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center gap-2">
-                        <span>{order.purpose}</span>
-                        {/* {order.originalOrder?.notes?.includes('Bulk payment') && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Bulk
-                          </span>
-                        )} */}
-                      </div>
+                      {order.purpose}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.amount}
@@ -372,17 +301,15 @@ const AdminOrders = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleProcessOrder(order);
+                          handleViewOrder(order);
                         }}
-                        className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${actionButton.color}`}
-                        disabled={order.status === 'Completed'}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                       >
-                        {actionButton.text}
+                        Check Order
                       </button>
                     </td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>
@@ -469,14 +396,6 @@ const AdminOrders = () => {
         </div>
       )}
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={paymentModal.isOpen}
-        onClose={handleClosePaymentModal}
-        order={paymentModal.order}
-        agent={paymentModal.agent}
-        onPaymentInitiated={handlePaymentInitiated}
-      />
     </div>
   );
 };

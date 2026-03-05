@@ -75,7 +75,12 @@ function DocumentPage({
           />
         </div>
       ) : (
-        <LicenseDoc />
+        <LicenseDoc
+          selectedDocument={selectedDocument}
+          setSelectedDocument={setSelectedDocument}
+          showsidebar={showsidebar}
+          setShowsidebar={setShowsidebar}
+        />
       )}
     </div>
   );
