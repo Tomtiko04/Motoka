@@ -1,3 +1,4 @@
+import React, { useRef } from "react";
 import { Icon } from "@iconify/react";
 import DocumentList from "./DocumentList";
 import LicenseDoc from "./drivers license/licenseDoc";
@@ -12,18 +13,54 @@ function DocumentPage({
   cars = [],
   onCarChange,
 }) {
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <div className="">
       {docType === "MyCar" ? (
         <div>
-          <div className="mb-6">
-            {/* Horizontal List of Selectable Cars */}
-            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+          <div className="mb-2">
+            <div className="flex items-center justify-between mb-2">
+               <label className="block text-sm font-medium text-gray-600">
+                Select Vehicle
+              </label>
+              <div className="flex items-center rounded-full bg-white border border-gray-100 overflow-hidden">
+                <button
+                  onClick={() => scroll("left")}
+                  className="flex h-8 w-8 items-center justify-center hover:bg-[#F4F5FC] transition-colors border-r border-gray-50"
+                  aria-label="Scroll left"
+                >
+                  <Icon icon="lucide:chevron-left" fontSize={18} color="#05243F" />
+                </button>
+                <button
+                  onClick={() => scroll("right")}
+                  className="flex h-8 w-8 items-center justify-center hover:bg-[#F4F5FC] transition-colors"
+                  aria-label="Scroll right"
+                >
+                  <Icon icon="lucide:chevron-right" fontSize={18} color="#05243F" />
+                </button>
+              </div>
+            </div>
+
+            <div 
+              ref={scrollRef}
+              className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar scroll-smooth -mx-4 sm:-mx-8 px-4 sm:px-8"
+            >
               {cars.map((c, idx) => (
                 <div
                   key={c.id || idx}
                   onClick={() => onCarChange(idx)}
-                  className={`flex flex-shrink-0 cursor-pointer items-center justify-between rounded-[10px] min-w-[180px] gap-6 px-4 py-2.5 transition-all shadow-sm ${
+                  className={`flex flex-shrink-0 cursor-pointer items-center justify-between rounded-[10px] w-[calc(50%-5px)] min-w-[140px] gap-2 px-3 py-2.5 transition-all shadow-sm ${
                     car?.id === c.id 
                       ? "bg-[#45A1F2] text-white scale-[1.02]" 
                       : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#e8ebf5]"
@@ -55,7 +92,7 @@ function DocumentPage({
               >
                 Documents
               </label>
-              <select
+              {/* <select
                 name="year"
                 className="h-fit text-gray-600 font-semibold text-sm rounded-lg block w-fit py-2.5 px-0 focus:outline-none bg-transparent cursor-pointer"
               >
@@ -63,7 +100,7 @@ function DocumentPage({
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
                 <option value="2022">2022</option>
-              </select>
+              </select> */}
             </div>
           </div>
           <DocumentList

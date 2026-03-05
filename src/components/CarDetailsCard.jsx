@@ -80,6 +80,8 @@ export default function CarDetailsCard({
   carDetail,
   isRenew,
   onSelect,
+  bg="bg-white",
+  textColor=""
 }) {
   // const [carLogo, setCarLogo] = useState(MercedesLogo);
   const { showModal } = useModalStore();
@@ -124,19 +126,19 @@ export default function CarDetailsCard({
 
   return (
     <div
-      className="cursor-pointer rounded-2xl bg-white px-4 py-5"
+      className={`cursor-pointer rounded-2xl px-4 py-5 ${bg} ${textColor}`}
       onClick={handleSelect}
       role="button"
     >
       <div className="mb-6">
-        <div className="text-sm font-light text-[#05243F]/60">Car Model</div>
+        <div className={`text-sm font-light ${textColor ? 'text-inherit opacity-70' : 'text-[#05243F]/60'}`}>Car Model</div>
         <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-2">
             <div>
-              <Icon icon="ion:car-sport-sharp" fontSize={30} color="#2389E3" />
+              <Icon icon="ion:car-sport-sharp" fontSize={30} color={textColor ? "currentColor" : "#2389E3"} />
             </div>
             <h3
-              className="cursor-pointer text-xl font-semibold text-[#05243F]"
+              className={`cursor-pointer text-xl font-semibold ${textColor || 'text-[#05243F]'}`}
               role="button"
               onClick={() => showModal(true, carDetail)}
             >
@@ -158,30 +160,30 @@ export default function CarDetailsCard({
 
       <div className="mb-6 flex items-center justify-between">
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm text-[#05243F]/60">Plate No:</div>
-          <div className="truncate text-base font-semibold text-[#05243F]">
+          <div className={`truncate text-sm ${textColor ? 'text-inherit opacity-70' : 'text-[#05243F]/60'}`}>Plate No:</div>
+          <div className={`truncate text-base font-semibold ${textColor || 'text-[#05243F]'}`}>
             {carDetail?.plate_number || carDetail?.registration_no || "-"}
           </div>
         </div>
-        <div className="mx-3 h-8 w-[1px] shrink-0 bg-[#E1E5EE]"></div>
+        <div className={`mx-3 h-8 w-[1px] shrink-0 ${textColor ? 'bg-white/20' : 'bg-[#E1E5EE]'}`}></div>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm text-[#05243F]/60">Exp. Date</div>
-          <div className="truncate text-base font-semibold text-[#05243F]">
+          <div className={`truncate text-sm ${textColor ? 'text-inherit opacity-70' : 'text-[#05243F]/60'}`}>Exp. Date</div>
+          <div className={`truncate text-base font-semibold ${textColor || 'text-[#05243F]'}`}>
             {formatDate(carDetail?.expiry_date)}
           </div>
         </div>
-        <div className="mx-3 h-8 w-[1px] shrink-0 bg-[#E1E5EE]"></div>
+        <div className={`mx-3 h-8 w-[1px] shrink-0 ${textColor ? 'bg-white/20' : 'bg-[#E1E5EE]'}`}></div>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm text-[#05243F]/60">Car Type</div>
-          <div className="truncate text-base font-semibold text-[#05243F]">
+          <div className={`truncate text-sm ${textColor ? 'text-inherit opacity-70' : 'text-[#05243F]/60'}`}>Car Type</div>
+          <div className={`truncate text-base font-semibold ${textColor || 'text-[#05243F]'}`}>
             {carDetail?.vehicle_make || "-"}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className={` ${!isRenew ? 'w-full' : 'flex items-center justify-between'}`}>
         <div
-          className="flex w-full items-center justify-center gap-2 rounded-full px-3 py-1.5 md:w-auto"
+          className={`flex w-full items-center gap-2 rounded-full px-3 md:w-auto ${!isRenew ? 'justify-start py-3' : 'justify-center py-1.5'}`}
           style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span

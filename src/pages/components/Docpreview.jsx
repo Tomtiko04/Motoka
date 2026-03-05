@@ -111,9 +111,9 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
       </div>
       <div className="flex justify-between w-full h-fit">
         <p className="py-2 text-sm font-semibold">{docTitle}</p>
-        <p className="py-2 text-red-600 text-sm font-light">
+        {/* <p className="py-2 text-red-600 text-sm font-light">
           Expires on {formattedExpiry}
-        </p>
+        </p> */}
       </div>
       <div className="w-full px-16 py-4 flex flex-1 h-64 items-center justify-center overflow-hidden">
         {selectedDocument ? (
@@ -121,9 +121,7 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
             src={imageSrc}
             alt={docTitle}
             onLoad={docType === "MyCar" ? handleLoad : Normal}
-            className={`shadow-2xl rounded-[7px] max-h-full max-w-full object-contain ${
-              aspect === "landscape" ? "rotate-90 scale-125" : ""
-            }`}
+            className="h-100 w-full"
             style={{
               transition: "transform 0.3s ease",
             }}
