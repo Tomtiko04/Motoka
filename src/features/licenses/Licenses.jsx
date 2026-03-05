@@ -66,7 +66,7 @@ export default function Licenses() {
   return (
     <LicenseLayout
       title="Licenses"
-      subTitle="All licenses are issued by government, we are only an agent that helps you with the process."
+      subTitle="All licenses are issued by government, we will only do legal stuff that helps you with documents."
       mainContentTitle="Select the type of License(s) we can help you with?"
     >
       {/* Licenses Types */}

@@ -55,12 +55,12 @@ const SearchableSelect = ({
       {label && (
         <label
           htmlFor={name}
-          className="mb-2 block text-sm font-medium text-[#05243F]"
+          className="block text-sm font-medium text-[#05243F]"
         >
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className="relative mt-3">
         <input
           type="text"
           id={name}
@@ -71,9 +71,8 @@ const SearchableSelect = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-                            // className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-          className={`block w-full rounded-md border px-3 py-2 text-sm bg-[#F4F5FC] focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] ${
-            error ? "border-red-500" : "border-gray-300"
+          className={`block w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] disabled:opacity-50 ${
+            error ? "ring-2 ring-red-300" : "border-0"
           }`}
         />
         {isLoading && (
@@ -82,11 +81,11 @@ const SearchableSelect = ({
           </div>
         )}
         {isOpen && filteredOptions.length > 0 && (
-          <div className="ring-opacity-5 absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md bg-white py-1 shadow-lg ring-1 ring-black">
+          <div className="absolute z-10 mt-2 max-h-48 w-full overflow-auto rounded-[10px] border border-[#E1E5EE] bg-white py-1">
             {filteredOptions.map((option) => (
               <div
                 key={option.id}
-                className="cursor-pointer px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                className="cursor-pointer px-4 py-3 text-sm text-[#05243F] hover:bg-[#FFF4DD]/50"
                 onClick={() => handleSelect(option)}
               >
                 {option[filterKey]}
@@ -101,7 +100,7 @@ const SearchableSelect = ({
 };
 
 SearchableSelect.propTypes = {
-  label: PropTypes.string,
+  label: PropTypes.node,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(PropTypes.object).isRequired,

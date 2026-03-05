@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { useState, useEffect } from "react";
 
-export default function PageLayout({ children, title, subTitle }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+export default function PageLayout({ children, title, subTitle, bg = "bg-[#F9FAFC]" }) {
     const [isMobile, setIsMobile] = useState(false)
     const navigate = useNavigate();
   
@@ -46,7 +45,7 @@ export default function PageLayout({ children, title, subTitle }) {
       </div>
 
       {/* Main Content */}
-      <div className="mx-4 max-w-4xl rounded-[20px] bg-[#F9FAFC]  shadow-sm sm:mx-auto ">
+      <div className={`mx-4 max-w-4xl rounded-[20px] shadow-sm sm:mx-auto ${bg}`}>
         {children}
       </div>
     </>

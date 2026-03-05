@@ -12,6 +12,8 @@ import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { ClipLoader } from "react-spinners";
 import toast from "react-hot-toast";
+import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -164,6 +166,18 @@ export default function RenewLicense() {
       checkForExistingPayments();
     }
   }, [selectedSchedules, carDetail?.slug]);
+
+  // Format phone for display: 08012345678 → 080 1234 5678
+  const formatPhoneDisplay = (raw) => {
+    const digits = (raw || "").replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 8) return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+    return `${digits.slice(0, 4)} ${digits.slice(4, 8)} ${digits.slice(8)}`;
+  };
+  const handlePhoneChange = (raw, onDigits) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 11);
+    onDigits(digits);
+  };
 
   const checkForExistingPayments = async () => {
     if (selectedSchedules.length === 0) return;
@@ -547,48 +561,53 @@ export default function RenewLicense() {
               carDetail={carDetail}
               isRenew={false}
               reminderObj={getCarReminder(carDetail?.id)}
+              bg="bg-[linear-gradient(to_bottom_right,#104675_0%,#104675_100%,#E3E3E3_0%,#E3E3E3_100%)]"
+              textColor="text-white"
             />
 
             {/* Document Details */}
             <div className="mt-6">
               <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
 
-              {/* Duplicate Payment Warning */}
+              {/* Already Paid Documents Card */}
               {existingPayments.length > 0 && (
-                <div className="mb-4 rounded-lg border border-[#FDB022] bg-[#FFFCF5] p-4">
-                  <div className="flex items-start">
-                    <div className="mr-3 text-[#FDB022]">
-                      <svg
-                        className="h-5 w-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                <div className="mb-4 overflow-hidden rounded-[16px] border border-[#FDB022]/30 bg-gradient-to-br from-[#FFFBF2] to-[#FFF8E7]">
+                  <div className="flex gap-4 p-4">
+                    <div className="flex shrink-0 items-center justify-center rounded-xl bg-[#FDB022]/15 p-2.5">
+                      <Icon
+                        icon="solar:verified-check-bold"
+                        className="text-[#C98B1A]"
+                        fontSize={22}
+                      />
                     </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-[#FDB022]">
-                        Already Paid Documents
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold text-[#5C3D0B]">
+                        Already paid
                       </h4>
-                      <p className="mt-1 text-sm text-[#5C3D0B]">
-                        You have already paid for:{" "}
-                        {existingPayments
-                          .map((p) => p.payment_head_name)
-                          .join(", ")}
+                      <p className="mt-1.5 text-xs text-[#5C3D0B]/80">
+                        These will be excluded from your payment.
                       </p>
-                      <p className="mt-1 text-xs text-[#5C3D0B]">
-                        These documents will be excluded from your payment.
-                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {existingPayments.map((p) => (
+                          <span
+                            key={p.payment_head_name}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#5C3D0B] shadow-sm ring-1 ring-[#FDB022]/20"
+                          >
+                            <Icon
+                              icon="solar:check-circle-bold"
+                              fontSize={14}
+                              className="text-[#C98B1A]"
+                            />
+                            {p.payment_head_name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3">
                 {loadingPayments ? (
                   <div className="mx-auto my-10 flex items-center justify-center">
                     <div>
@@ -608,15 +627,37 @@ export default function RenewLicense() {
                         type="button"
                         onClick={() => !isAlreadyPaid && handleToggleDoc(doc)}
                         disabled={isAlreadyPaid}
-                        className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
+                        className={`group relative flex w-80 items-center gap-3 rounded-full px-6 py-3 transition-all ${
                           isAlreadyPaid
-                            ? "cursor-not-allowed bg-gray-200 text-gray-500"
-                            : isSelected
-                              ? "bg-[#2284DB] text-white"
-                              : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"
-                        } `}
+                            ? "cursor-not-allowed bg-[#F4F5FC] border border-[#D1D5DB]"
+                            : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
+                        }`}
                       >
-                        {doc}
+                        <div
+                          className={`flex shrink-0 items-center justify-center transition-colors ${
+                            isAlreadyPaid
+                              ? "text-gray-400"
+                              : isSelected
+                                ? "text-[#05243F]"
+                                : "text-[#9CA3AF] group-hover:text-[#697C8C]"
+                          }`}
+                        >
+                          <Icon
+                            icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
+                            fontSize={24}
+                            color={isSelected ? "#2389E3" : "#9CA3AF"}
+                          />
+                        </div>
+                        <span className={`text-sm md:text-base font-normal transition-colors ${
+                          isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
+                        }`}>
+                          {doc}
+                        </span>
+                        {isAlreadyPaid && (
+                          <span className="ml-auto rounded-full bg-gray-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                            Paid
+                          </span>
+                        )}
                       </button>
                     );
                   })
@@ -647,129 +688,187 @@ export default function RenewLicense() {
 
               {/* Delivery Checkbox */}
               <div className="mb-6">
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="group flex w-full cursor-pointer items-center gap-3 rounded-full bg-[#F4F5FC] px-6 py-3 transition-all hover:bg-[#FFF4DD]/50">
                   <input
                     type="checkbox"
                     checked={wantsDelivery}
                     onChange={handleDeliveryCheckboxChange}
-                    className="h-5 w-5 rounded border-[#D1D5DB] text-[#2284DB] focus:ring-2 focus:ring-[#2284DB] focus:ring-offset-0 cursor-pointer"
+                    className="sr-only"
                   />
-                  <span className="text-sm font-medium text-[#05243F]">
-                    Request Delivery
-                  </span>
+                  <div className="flex shrink-0 items-center justify-center text-[#05243F] transition-colors group-hover:text-[#05243F]">
+                    <Icon
+                      icon={wantsDelivery ? "solar:check-square-bold" : "mynaui:square"}
+                      fontSize={24}
+                      color={wantsDelivery ? "#2389E3" : "#9CA3AF"}
+                    />
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Icon icon="solar:delivery-bold" fontSize={20} className="text-[#697C8C]" />
+                    <span className="text-sm font-medium text-[#05243F]">
+                      Request Delivery
+                    </span>
+                  </div>
                 </label>
               </div>
 
               {/* Delivery Fields — only shown when checkbox is checked */}
-              {wantsDelivery && (
-                <>
-                  {/* Delivery Address */}
-                  <div className="mb-6">
-                    <div className="text-sm font-medium text-[#05243F]">
-                      Delivery Address
-                    </div>
-                    <input
-                      type="text"
-                      value={deliveryDetails.address}
-                      onChange={(e) =>
-                        handleDeliveryChange("address", e.target.value)
-                      }
-                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                      placeholder="Enter delivery address"
-                    />
-                  </div>
-
-                  <div className="mb-6 grid grid-cols-2 gap-4">
-                    <div>
-                      <SearchableSelect
-                        label="State"
-                        name="state"
-                        value={deliveryDetails.stateName}
-                        onChange={handleStateChange}
-                        options={
-                          Array.isArray(isState)
-                            ? isState.map((state) => ({
-                                id: state.id,
-                                name: state.state_name,
-                              }))
-                            : []
+              <AnimatePresence>
+                {wantsDelivery && (
+                  <motion.div
+                    key="delivery-fields"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="overflow-hidden"
+                  >
+                    {/* Delivery Address */}
+                    <motion.div
+                      className="mb-6"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.05, duration: 0.25 }}
+                    >
+                      <div className="text-sm font-medium text-[#05243F]">
+                        Delivery Address <span className="text-red-500">*</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={deliveryDetails.address}
+                        onChange={(e) =>
+                          handleDeliveryChange("address", e.target.value)
                         }
-                        placeholder="Select state"
-                        filterKey="name"
-                        isLoading={isGettingState}
-                        className="text-[#05243F] placeholder:text-[#05243F]/40"
+                        className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                        placeholder="Enter delivery address"
                       />
-                    </div>
-                    <div>
-                      <SearchableSelect
-                        label="Local Government"
-                        name="lg"
-                        value={deliveryDetails.lg}
-                        onChange={handleLgaChange}
-                        options={
-                          Array.isArray(lgaOptions)
-                            ? lgaOptions.map((lg) => ({
-                                id: lg.id,
-                                name: lg.lga_name,
-                              }))
-                            : []
-                        }
-                        placeholder="Select LG"
-                        filterKey="name"
-                        isLoading={isGettingLG}
-                        disabled={!deliveryDetails.state}
-                        className="text-[#05243F] placeholder:text-[#05243F]/40"
+                    </motion.div>
+
+                    <motion.div
+                      className="mb-6 grid grid-cols-2 gap-4"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1, duration: 0.25 }}
+                    >
+                      <div>
+                        <SearchableSelect
+                          label={<>State <span className="text-red-500">*</span></>}
+                          name="state"
+                          value={deliveryDetails.stateName}
+                          onChange={handleStateChange}
+                          options={
+                            Array.isArray(isState)
+                              ? isState.map((state) => ({
+                                  id: state.id,
+                                  name: state.state_name,
+                                }))
+                              : []
+                          }
+                          placeholder="Select state"
+                          filterKey="name"
+                          isLoading={isGettingState}
+                          className="text-[#05243F] placeholder:text-[#05243F]/40"
+                        />
+                      </div>
+                      <div>
+                        <SearchableSelect
+                          label={<>Local Government <span className="text-red-500">*</span></>}
+                          name="lg"
+                          value={deliveryDetails.lg}
+                          onChange={handleLgaChange}
+                          options={
+                            Array.isArray(lgaOptions)
+                              ? lgaOptions.map((lg) => ({
+                                  id: lg.id,
+                                  name: lg.lga_name,
+                                }))
+                              : []
+                          }
+                          placeholder="Select LG"
+                          filterKey="name"
+                          isLoading={isGettingLG}
+                          disabled={!deliveryDetails.state}
+                          className="text-[#05243F] placeholder:text-[#05243F]/40"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Delivery Fee */}
+                    <motion.div
+                      className="mb-6"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15, duration: 0.25 }}
+                    >
+                      <div className="text-sm font-medium text-[#05243F]">
+                        Delivery Fee <span className="text-red-500">*</span>
+                      </div>
+                      <input
+                        disabled={true}
+                        type="text"
+                        value={formatCurrency(Number(deliveryDetails.fee) / 100)}
+                        onChange={(e) => handleDeliveryChange("fee", e.target.value)}
+                        className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                        placeholder="Enter delivery fee"
                       />
-                    </div>
-                  </div>
+                    </motion.div>
 
-                  {/* Delivery Fee */}
-                  <div className="mb-6">
-                    <div className="text-sm font-medium text-[#05243F]">
-                      Delivery Fee
-                    </div>
-                    <input
-                      disabled={true}
-                      type="text"
-                      value={formatCurrency(Number(deliveryDetails.fee) / 100)}
-                      onChange={(e) => handleDeliveryChange("fee", e.target.value)}
-                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                      placeholder="Enter delivery fee"
-                    />
-                  </div>
-
-                  {/* Delivery Contact */}
-                  <div className="mb-6">
-                    <div className="text-sm font-medium text-[#05243F]">
-                      Delivery Contact
-                    </div>
-                    <input
-                      type="tel"
-                      value={deliveryDetails.contact}
-                      onChange={(e) =>
-                        handleDeliveryChange("contact", e.target.value)
-                      }
-                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                      placeholder="08012345678"
-                    />
-                  </div>
-                </>
-              )}
+                    {/* Delivery Contact */}
+                    <motion.div
+                      className="mb-6"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.25 }}
+                    >
+                      <div className="text-sm font-medium text-[#05243F] mb-3">
+                        Delivery Contact <span className="text-red-500">*</span>
+                      </div>
+                      <div className="flex items-center gap-3 overflow-hidden rounded-[12px] border border-[#E1E5EE] bg-white transition-colors focus-within:border-[#2389E3] focus-within:ring-2 focus-within:ring-[#2389E3]/20">
+                        <div className="flex shrink-0 items-center gap-2 border-r border-[#E1E5EE] bg-[#F4F5FC] px-4 py-3">
+                          <Icon icon="solar:phone-bold" className="text-[#2389E3]" fontSize={20} />
+                          <span className="text-sm font-medium text-[#697C8C]">+234</span>
+                        </div>
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          maxLength={14}
+                          value={formatPhoneDisplay(deliveryDetails.contact)}
+                          onChange={(e) => handlePhoneChange(e.target.value, (d) => handleDeliveryChange("contact", d))}
+                          className="flex-1 bg-transparent px-4 py-3 text-base tracking-widest text-[#05243F] placeholder:tracking-normal placeholder:text-[#05243F]/40 outline-none"
+                          placeholder="080 1234 5678"
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Phone required (Google OAuth users) — inline input, same Pay Now button */}
               {monicreditPhoneError && (
-                <div className="mb-3 rounded-[12px] border border-blue-200 bg-blue-50 px-4 pt-4 pb-2">
-                  <p className="text-sm font-semibold text-[#05243F] mb-1">Phone number required to continue</p>
-                  <p className="text-xs text-[#05243F]/60 mb-2">
-                    Enter your phone number below — it will be saved to your profile.
-                  </p>
-                  <input
-                    type="tel"
-                    value={inlinePhone}
-                    onChange={(e) => setInlinePhone(e.target.value)}
-                    placeholder="e.g. 08012345678"
-                    className="w-full rounded-[10px] bg-white border border-blue-200 px-3 py-2 text-sm text-[#05243F] focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
-                  />
+                <div className="mb-3 overflow-hidden rounded-[12px] border border-[#2389E3]/30 bg-[#F0F7FF] px-4 pt-4 pb-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2389E3]/15">
+                      <Icon icon="solar:phone-bold" className="text-[#2389E3]" fontSize={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#05243F]">Phone number required</p>
+                      <p className="text-xs text-[#05243F]/60">Saved to your profile for future payments</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 overflow-hidden rounded-[10px] border border-[#2389E3]/30 bg-white transition-colors focus-within:border-[#2389E3] focus-within:ring-2 focus-within:ring-[#2389E3]/20">
+                    <div className="flex shrink-0 items-center gap-2 border-r border-[#E1E5EE] bg-[#F4F5FC] px-4 py-3">
+                      <Icon icon="solar:phone-bold" className="text-[#2389E3]" fontSize={18} />
+                      <span className="text-sm font-medium text-[#697C8C]">+234</span>
+                    </div>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={14}
+                      value={formatPhoneDisplay(inlinePhone)}
+                      onChange={(e) => handlePhoneChange(e.target.value, setInlinePhone)}
+                      className="flex-1 bg-transparent px-4 py-3 text-base tracking-widest text-[#05243F] placeholder:tracking-normal placeholder:text-[#05243F]/40 outline-none"
+                      placeholder="080 1234 5678"
+                    />
+                  </div>
                 </div>
               )}
 
