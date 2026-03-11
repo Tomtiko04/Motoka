@@ -1,10 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { LuUpload } from "react-icons/lu";
 import LicenseLayout from "./components/LicenseLayout";
 import ActionButton from "./components/ActionButton";
 import FormInput from "./components/FormInput";
+import { useDriversLicensePaymentOptions } from "./driverslicense/useDriversLicense";
+import { upsertInternationalDriversLicenseApplication } from "../../services/apiDriversLicense";
 
 export default function InternationalDriversLicense() {
   const navigate = useNavigate();
@@ -28,6 +30,26 @@ export default function InternationalDriversLicense() {
   });
   const [noLicense, setNoLicense] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Load driver license pricing from backend and pick the "new / international" row
+  const { isPaymentOptions } = useDriversLicensePaymentOptions();
+  const internationalPrice = useMemo(() => {
+    const list = Array.isArray(isPaymentOptions?.data)
+      ? isPaymentOptions.data
+      : Array.isArray(isPaymentOptions)
+        ? isPaymentOptions
+        : [];
+
+    if (!Array.isArray(list)) return null;
+
+    const intl = list.find(
+      (opt) =>
+        String(opt.type).toLowerCase() === "new" &&
+        String(opt.duration || "").toLowerCase() === "international",
+    );
+
+    return intl ? Number(intl.amount) : null;
+  }, [isPaymentOptions]);
 
   const handleFileUpload = (e) => {
     e.preventDefault();
@@ -110,25 +132,47 @@ export default function InternationalDriversLicense() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate form
-    if (!noLicense) {
+    // Validate form when the user is filling details (noLicense === true)
+    if (noLicense) {
       if (!validateForm()) return;
-      validateForm();
     }
-    console.log("Confirm and submit clicked");
-    // Navigate to confirm request with form data
-    navigate("/licenses/confirm-request", {
-      state: {
-        type: "drivers-license",
-        items: [
-          { name: "Driver's License", amount: 30000 },
-          { name: "Processing Fee", amount: 2000 },
-        ],
-        formData,
-      },
-    });
+
+    try {
+      // Persist application details for admin visibility when we have them
+      if (noLicense) {
+        await upsertInternationalDriversLicenseApplication(formData);
+      }
+
+      console.log("Confirm and submit clicked");
+
+      // Use backend international driver license price; fall back to 0 if unavailable
+      const licenseAmount = internationalPrice ?? 0;
+
+      // Navigate to confirm request with form data and correct pricing
+      navigate("/licenses/confirm-request", {
+        state: {
+          type: "drivers_license",
+          items: [
+            { name: "International Driver's License", amount: licenseAmount },
+          ],
+          details: {
+            license_type: "new",
+            duration: "international",
+            description: "International driver's license",
+            years: null,
+          },
+          formData,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to save international license application:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to save your application. Please try again.",
+      );
+    }
   };
 
   return (
@@ -136,10 +180,8 @@ export default function InternationalDriversLicense() {
       title="International Drivers License"
       subTitle="All licenses are issued by government, we are only an agent that helps you with the process."
     >
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[170px_1fr_170px]">
-        {/* Side 1 */}
-        <div></div>
-        {/* side 2 */}
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_170px]">
+        {/* Main content */}
         {!noLicense ? (
           <div>
             <label
@@ -373,10 +415,14 @@ export default function InternationalDriversLicense() {
             </div>
           </div>
         )}
-        {/* side 3 */}
-        <div className="flex flex-col">
+        {/* Price column */}
+        <div className="flex flex-col items-start md:items-end">
           <p className="mt-1 text-sm font-normal text-[#05243F]">Price:</p>
-          <p className="text-xl font-semibold text-[#05243F]">₦30,000</p>
+          <p className="text-xl font-semibold text-[#05243F]">
+            {internationalPrice !== null
+              ? `₦${Number(internationalPrice).toLocaleString()}`
+              : "—"}
+          </p>
         </div>
       </div>
     </LicenseLayout>

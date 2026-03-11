@@ -3,22 +3,15 @@ import { BsArrowRight } from "react-icons/bs";
 import LicenseLayout from "./components/LicenseLayout";
 import { useNavigate } from "react-router-dom";
 
- const plateType = [
-   {
-     title: "New Plate Number",
-     description:
-       "Ideal for cars that are new or foreign used, or for cars that have been registered but has changed ownership",
-     icon: <BsArrowRight className="text-2xl text-[#2284DB]" />,
-     link: "new-plate-number",
-   },
-   {
-     title: "Reprint",
-     description:
-       "Ideal for car owners who want to change their vehicle plates due to fading or damage",
-     icon: <BsArrowRight className="text-2xl text-[#2284DB]" />,
-     link: "reprint",
-   },
- ];
+const plateType = [
+  {
+    title: "New Plate Number",
+    description:
+      "Ideal for cars that are new or foreign used, or for cars that have been registered but has changed ownership",
+    icon: <BsArrowRight className="text-2xl text-[#2284DB]" />,
+    link: "new-plate-number",
+  },
+];
 
 
 export default function PlateNumber() {
