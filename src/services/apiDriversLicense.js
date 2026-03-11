@@ -12,6 +12,9 @@ export async function getDriverLicensePrices() {
 /** Alias for getDriverLicensePrices — used by useDriversLicensePaymentOptions */
 export const getDriversLicensePaymentOptions = getDriverLicensePrices;
 
+/** Re-export for useCreateDriverLicense hook */
+export { createDriverLicense as createDriversLicense } from "./apiLicense";
+
 /**
  * Initialize driver license payment — uses /payments/initialize with
  * payment_type: 'driver_license'. No car_slug; backend fetches price from
