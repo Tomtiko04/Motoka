@@ -554,8 +554,9 @@ export default function RenewLicense() {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-4xl rounded-[20px] bg-[#F9FAFC] p-8">
-        <div className="relative grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="mx-auto max-w-4xl relative rounded-[20px] bg-[#ffffff] p-8">
+        <div className="absolute top-0 bottom-0 left-1/2 hidden w-[1px] -translate-x-1/2 bg-[#020202]/10 md:block"></div>
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
           <div className="mt-2">
             <CarDetailsCard
               carDetail={carDetail}
@@ -564,6 +565,9 @@ export default function RenewLicense() {
               bg="bg-[linear-gradient(to_bottom_right,#104675_0%,#104675_100%,#E3E3E3_0%,#E3E3E3_100%)]"
               textColor="text-white"
             />
+
+            {/* Divider */}
+            <div className="my-8 -ml-8 -mr-5 border-b border-[#020202]/10"></div>
 
             {/* Document Details */}
             <div className="mt-6">
@@ -607,9 +611,9 @@ export default function RenewLicense() {
                 </div>
               )}
 
-              <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {loadingPayments ? (
-                  <div className="mx-auto my-10 flex items-center justify-center">
+                  <div className="col-span-1 mx-auto my-10 flex items-center justify-center sm:col-span-2">
                     <div>
                       <ClipLoader color="#2284DB" />
                     </div>
@@ -627,7 +631,7 @@ export default function RenewLicense() {
                         type="button"
                         onClick={() => !isAlreadyPaid && handleToggleDoc(doc)}
                         disabled={isAlreadyPaid}
-                        className={`group relative flex w-80 items-center gap-3 rounded-full px-6 py-3 transition-all ${
+                        className={`group relative flex w-full items-center gap-2 rounded-full px-5 py-3 transition-all ${
                           isAlreadyPaid
                             ? "cursor-not-allowed bg-[#F4F5FC] border border-[#D1D5DB]"
                             : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
@@ -644,18 +648,18 @@ export default function RenewLicense() {
                         >
                           <Icon
                             icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
-                            fontSize={24}
+                            fontSize={22}
                             color={isSelected ? "#2389E3" : "#9CA3AF"}
                           />
                         </div>
-                        <span className={`text-sm md:text-base font-normal transition-colors ${
+                        <span className={`text-[13px] md:text-sm font-normal text-left transition-colors truncate ${
                           isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
                         }`}>
                           {doc}
                         </span>
                         {isAlreadyPaid && (
-                          <span className="ml-auto rounded-full bg-gray-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                            Paid
+                          <span className="ml-auto flex items-center shrink-0">
+                             <Icon icon="solar:check-circle-bold" className="text-[#2389E3]" fontSize={16} />
                           </span>
                         )}
                       </button>
@@ -666,7 +670,7 @@ export default function RenewLicense() {
             </div>
           </div>
 
-          <div className="absolute top-0 left-1/2 hidden h-full w-[1px] -translate-x-1/2 bg-[#e9ecff] md:block"></div>
+
 
           <div className="mt-2">
             <div className="rounded-2xl px-4">
