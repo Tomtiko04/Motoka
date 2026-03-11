@@ -9,6 +9,9 @@ export async function getDriverLicensePrices() {
   return data?.data?.prices || data?.prices || [];
 }
 
+/** Alias for getDriverLicensePrices — used by useDriversLicensePaymentOptions */
+export const getDriversLicensePaymentOptions = getDriverLicensePrices;
+
 /**
  * Initialize driver license payment — uses /payments/initialize with
  * payment_type: 'driver_license'. No car_slug; backend fetches price from

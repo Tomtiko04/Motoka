@@ -293,8 +293,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
               exit={{ opacity: 0, x: -20 }}
               className="w-full overflow-y-auto"
             >
-              <div className="p-6 md:p-8 relative">
-                <div className="absolute top-0 bottom-0 left-1/2 hidden w-[1px] -translate-x-1/2 bg-[#020202]/10 md:block"></div>
+              <div className="p-6 md:p-8">
                 <button
                   onClick={handleBack}
                   className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
@@ -311,7 +310,8 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                   Renew License
                 </h1>
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="relative grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="absolute top-0 bottom-0 left-1/2 hidden w-[1px] -translate-x-1/2 bg-[#020202]/10 md:block" aria-hidden="true"></div>
                   {/* Left — Car card + Document selection */}
                   <div className="md:pb-0 md:pr-3">
                     <CarDetailsCard
