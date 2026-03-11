@@ -517,6 +517,7 @@ export default function PlateDetails() {
                 )}
               </div>
 
+              {/* Reprint plate number - temporarily commented out
               <div className="relative" ref={dropdownRefReprint}>
                 <button
                   type="button"
@@ -564,6 +565,7 @@ export default function PlateDetails() {
                   </div>
                 )}
               </div>
+              */}
             </div>
           </div>
 
