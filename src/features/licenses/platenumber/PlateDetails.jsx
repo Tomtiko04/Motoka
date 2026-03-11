@@ -53,7 +53,9 @@ export default function PlateDetails() {
     nextOfKinNumber: "",
     motherName: "",
     licenseNumber: "",
-    preferredNameNumber: "",
+    preferredName1: "",
+    preferredName2: "",
+    preferredName3: "",
     chassisNumber: "",
     engineNumber: "",
     color: "",
@@ -199,14 +201,22 @@ export default function PlateDetails() {
             files.means_of_identification,
           );
       } else if (backendType === "Customized") {
-        if (!formData.preferredNameNumber) {
-          toast.error("Preferred name is required for customized plates");
+        if (!formData.preferredName1) {
+          toast.error("At least one preferred name is required for customized plates");
           setIsSubmitting(false);
           return;
         }
+        const preferredNames = [
+          formData.preferredName1,
+          formData.preferredName2,
+          formData.preferredName3,
+        ]
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .join(", ");
         payload = {
           type: backendType,
-          preferred_name: formData.preferredNameNumber,
+          preferred_name: preferredNames,
         };
       } else {
         payload = { type: backendType };
@@ -660,15 +670,43 @@ export default function PlateDetails() {
 
             {licenseType === "Customized" && type === "new-plate-number" && (
               <div className="mt-4 space-y-3.5">
-                <FormInput
-                  label="Preferred Name/Number"
-                  name="preferredNameNumber"
-                  value={formData.preferredNameNumber}
-                  onChange={handleInputChange}
-                  placeholder="Jagaban"
-                  error={errors.preferredNameNumber}
-                  required
-                />
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-[#05243F]">
+                    Preferred Name/Number{" "}
+                    <span className="text-red-500">*</span>
+                  </p>
+                  <p className="text-xs text-[#05243F]/50">
+                    Provide up to 3 options in order of preference. Your first
+                    choice will be processed first.
+                  </p>
+                  <div className="space-y-2.5">
+                    <FormInput
+                      label="Preferred Name 1 (First Choice)"
+                      name="preferredName1"
+                      value={formData.preferredName1}
+                      onChange={handleInputChange}
+                      placeholder="e.g. JAGABAN"
+                      error={errors.preferredName1}
+                      required
+                    />
+                    <FormInput
+                      label="Preferred Name 2 (Second Choice)"
+                      name="preferredName2"
+                      value={formData.preferredName2}
+                      onChange={handleInputChange}
+                      placeholder="e.g. BOSS001"
+                      error={errors.preferredName2}
+                    />
+                    <FormInput
+                      label="Preferred Name 3 (Third Choice)"
+                      name="preferredName3"
+                      value={formData.preferredName3}
+                      onChange={handleInputChange}
+                      placeholder="e.g. KILLA1"
+                      error={errors.preferredName3}
+                    />
+                  </div>
+                </div>
                 <FormInput
                   label="Full Name"
                   name="fullName"
