@@ -293,7 +293,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
               exit={{ opacity: 0, x: -20 }}
               className="w-full overflow-y-auto"
             >
-              <div className="p-6 md:p-8 relative">
+              <div className="p-6 md:p-8">
                 <button
                   onClick={handleBack}
                   className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
@@ -310,9 +310,10 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                   Renew License
                 </h1>
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="relative grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="absolute top-0 bottom-0 left-1/2 hidden w-[1px] -translate-x-1/2 bg-[#020202]/10 md:block" aria-hidden="true"></div>
                   {/* Left — Car card + Document selection */}
-                  <div className="border-b border-[#E1E5EE] pb-8 md:border-b-0 md:border-r md:pb-0 md:pr-3">
+                  <div className="md:pb-0 md:pr-3">
                     <CarDetailsCard
                       carDetail={guestCarDetail}
                       isRenew={false}
@@ -321,9 +322,12 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                       textColor="text-white"
                     />
 
+                    {/* Divider */}
+                    <div className="my-8 -ml-6 md:-ml-8 -mr-3 border-b border-[#020202]/10"></div>
+
                     <div className="mt-6">
                       <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
-                      <div className="flex flex-col gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         {HARDCODED_DOCS.map((doc) => {
                           const isSelected = selectedDocs.includes(doc);
                           return (
@@ -331,7 +335,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                               key={doc}
                               type="button"
                               onClick={() => handleToggleDoc(doc)}
-                              className={`group relative flex w-full items-center gap-3 rounded-full px-6 py-3 transition-all ${
+                              className={`group relative flex w-full items-center gap-2 rounded-full px-4 py-3 transition-all ${
                                 isSelected
                                   ? "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
                                   : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
@@ -344,12 +348,12 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                               >
                                 <Icon
                                   icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
-                                  fontSize={24}
+                                  fontSize={22}
                                   color={isSelected ? "#2389E3" : "#9CA3AF"}
                                 />
                               </div>
                               <span
-                                className={`text-sm md:text-base font-normal transition-colors ${
+                                className={`text-[13px] md:text-sm text-left font-normal transition-colors truncate ${
                                   isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
                                 }`}
                               >
