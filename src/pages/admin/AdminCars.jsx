@@ -21,6 +21,7 @@ const AdminCars = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
   const [carTypeFilter, setCarTypeFilter] = useState('all');
+  const [sortFilter, setSortFilter] = useState('recently_added');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
@@ -40,7 +41,7 @@ const AdminCars = () => {
 
   useEffect(() => {
     fetchCars();
-  }, [currentPage, statusFilter, carTypeFilter, searchTerm]);
+  }, [currentPage, statusFilter, carTypeFilter, searchTerm, sortFilter]);
 
   const fetchCars = async () => {
     try {
@@ -58,6 +59,7 @@ const AdminCars = () => {
         status: statusFilter,
         car_type: carTypeFilter,
         search: searchTerm,
+        sort: sortFilter,
       });
 
       const response = await fetch(`${config.getApiBaseUrl()}/admin/cars?${params}`, {
@@ -186,11 +188,23 @@ const AdminCars = () => {
             </select>
           </div>
 
-          {(statusFilter !== 'all' || carTypeFilter !== 'all' || searchTerm) && (
+          <div className="flex items-center gap-2">
+            <select
+              value={sortFilter}
+              onChange={(e) => { setSortFilter(e.target.value); setCurrentPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="recently_added">Recently Added</option>
+              <option value="a_z">A - Z</option>
+            </select>
+          </div>
+
+          {(statusFilter !== 'all' || carTypeFilter !== 'all' || sortFilter !== 'recently_added' || searchTerm) && (
             <button
               onClick={() => {
                 setStatusFilter('all');
                 setCarTypeFilter('all');
+                setSortFilter('recently_added');
                 setSearchInput('');
                 setSearchTerm('');
                 setCurrentPage(1);

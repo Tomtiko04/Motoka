@@ -36,6 +36,7 @@ const AdminPayments = () => {
     { value: 'success', label: 'Successful', color: 'green' },
     { value: 'pending', label: 'Pending', color: 'yellow' },
     { value: 'failed', label: 'Failed', color: 'red' },
+    { value: 'abandoned', label: 'Abandoned', color: 'gray' },
   ];
 
   useEffect(() => {
@@ -350,18 +351,26 @@ const AdminPayments = () => {
                           <EyeIcon className="h-4 w-4" />
                           View
                         </button>
-                        {(transaction.status === 'pending' || transaction.status === 'approved') && (
+                        {(transaction.status === 'pending' || transaction.status === 'approved' || transaction.status === 'abandoned') && (
                           <button
                             onClick={() => handleMarkPaid(transaction.transaction_id)}
                             className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
-                              transaction.status === 'pending'
+                              transaction.status === 'abandoned'
+                                ? 'text-orange-600 hover:text-orange-800 border-orange-300'
+                                : transaction.status === 'pending'
                                 ? 'text-green-600 hover:text-green-800 border-green-300'
                                 : 'text-blue-600 hover:text-blue-800 border-blue-300'
                             }`}
-                            title={transaction.status === 'pending' ? 'Manually mark this payment as received' : 'Create missing order for this payment'}
+                            title={
+                              transaction.status === 'abandoned'
+                                ? 'User paid on this abandoned transaction — recover and create order'
+                                : transaction.status === 'pending'
+                                ? 'Manually mark this payment as received'
+                                : 'Create missing order for this payment'
+                            }
                           >
                             <CheckCircleIcon className="h-3.5 w-3.5" />
-                            {transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
+                            {transaction.status === 'abandoned' ? 'Recover & Create Order' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
                           </button>
                         )}
                       </div>
@@ -427,6 +436,7 @@ const AdminPayments = () => {
                 </div>
               ) : selectedTransaction && (
                 <div className="space-y-4 text-sm">
+                  {/* Core transaction fields */}
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       ['Reference', selectedTransaction.reference],
@@ -444,6 +454,59 @@ const AdminPayments = () => {
                       </div>
                     ))}
                   </div>
+
+                  {/* Form details the user filled in */}
+                  {(selectedTransaction.plate_type || selectedTransaction.license_type || selectedTransaction.renewal_months) && (
+                    <div className="border-t pt-4">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">What the customer ordered</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedTransaction.plate_type && (
+                          <>
+                            <div>
+                              <p className="text-gray-500">Plate Type</p>
+                              <p className="font-medium text-gray-900 capitalize">{selectedTransaction.plate_type.replace(/_/g, ' ')}</p>
+                            </div>
+                            {selectedTransaction.plate_sub_type && (
+                              <div>
+                                <p className="text-gray-500">Sub-Type</p>
+                                <p className="font-medium text-gray-900 capitalize">{selectedTransaction.plate_sub_type.replace(/_/g, ' ')}</p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {selectedTransaction.license_type && (
+                          <>
+                            <div>
+                              <p className="text-gray-500">License Type</p>
+                              <p className="font-medium text-gray-900 capitalize">{selectedTransaction.license_type}</p>
+                            </div>
+                            {selectedTransaction.license_duration && (
+                              <div>
+                                <p className="text-gray-500">Duration</p>
+                                <p className="font-medium text-gray-900">{selectedTransaction.license_duration}</p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {selectedTransaction.renewal_months && (
+                          <div>
+                            <p className="text-gray-500">Renewal Period</p>
+                            <p className="font-medium text-gray-900">{selectedTransaction.renewal_months} month(s)</p>
+                          </div>
+                        )}
+                      </div>
+                      {selectedTransaction.delivery_details && (
+                        <div className="mt-3">
+                          <p className="text-gray-500">Delivery Address</p>
+                          <p className="font-medium text-gray-900">{selectedTransaction.delivery_details.address || '—'}</p>
+                          <p className="text-gray-500">{selectedTransaction.delivery_details.state}{selectedTransaction.delivery_details.lga ? `, ${selectedTransaction.delivery_details.lga}` : ''}</p>
+                          {selectedTransaction.delivery_details.contact && (
+                            <p className="text-gray-500">Contact: {selectedTransaction.delivery_details.contact}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {selectedTransaction.user && (
                     <div className="border-t pt-4">
@@ -466,11 +529,15 @@ const AdminPayments = () => {
                     </div>
                   )}
 
-                  {selectedTransaction.order && (
+                  {selectedTransaction.order ? (
                     <div className="border-t pt-4">
                       <p className="text-gray-500 mb-1">Linked Order</p>
                       <p className="font-medium text-gray-900">{selectedTransaction.order.order_number}</p>
                       <p className="text-gray-500">Status: {selectedTransaction.order.status}</p>
+                    </div>
+                  ) : (
+                    <div className="border-t pt-4">
+                      <p className="text-xs text-orange-600 font-medium">⚠ No order linked to this transaction yet.</p>
                     </div>
                   )}
                 </div>
