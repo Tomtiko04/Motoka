@@ -1,4 +1,5 @@
 import { api } from "./apiClient";
+import { upsertDriverLicenseApplication } from "./apiDriverLicenseApplication";
 
 /**
  * Get driver license prices (new / renew) from backend.
@@ -7,6 +8,13 @@ import { api } from "./apiClient";
 export async function getDriverLicensePrices() {
   const { data } = await api.get("/driver-license-prices");
   return data?.data?.prices || data?.prices || [];
+}
+
+/**
+ * Backwards‑compatible alias used by hooks like `useDriversLicensePaymentOptions`.
+ */
+export async function getDriversLicensePaymentOptions() {
+  return getDriverLicensePrices();
 }
 
 /**
@@ -22,4 +30,22 @@ export async function initializeDriverLicensePayment(payload) {
     payment_gateway: payload.payment_gateway || "monicredit",
   });
   return data;
+}
+
+/**
+ * Placeholder for creating a driver license application.
+ * Currently unused, but exported so imports from `useDriversLicense` succeed.
+ */
+export async function createDriversLicense(payload) {
+  const { data } = await api.post("/driver-licenses", payload);
+  return data;
+}
+
+/**
+ * Upsert international driver's license application.
+ * Currently reuses the same `/driver-license-applications/me` backend endpoint
+ * used for local licenses, so the server can distinguish by payload fields.
+ */
+export async function upsertInternationalDriversLicenseApplication(payload) {
+  return upsertDriverLicenseApplication(payload);
 }
