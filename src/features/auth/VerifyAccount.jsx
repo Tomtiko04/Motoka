@@ -14,7 +14,11 @@ export default function VerifyAccount() {
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem("pendingVerificationEmail");
+    // Guest flow writes to sessionStorage; normal signup writes to localStorage.
+    // Try sessionStorage first so guest flow data is cleaned up on tab close.
+    const storedEmail =
+      sessionStorage.getItem("pendingVerificationEmail") ||
+      localStorage.getItem("pendingVerificationEmail");
     if (storedEmail) {
       setEmail(storedEmail);
     } else {
