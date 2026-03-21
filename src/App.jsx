@@ -57,9 +57,8 @@ import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
-import GuestRenewalCallback from "./pages/guest/GuestRenewalCallback.jsx";
-import GuestRenewalReceipt from "./pages/guest/GuestRenewalReceipt.jsx";
-import GuestRenewalSignup from "./pages/guest/GuestRenewalSignup.jsx";
+import GuestRenewalCallback from "./pages/GuestRenewalCallback.jsx";
+import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -270,14 +269,12 @@ export default function App() {
             <Route path="payment/receipt/:paymentType/:identifier" element={<PaymentReceipt />} />
           </Route>
 
+          {/* Guest renewal flow — public, no auth required */}
+          <Route path="guest/renewal/callback" element={<GuestRenewalCallback />} />
+          <Route path="guest/renewal/receipt" element={<GuestRenewalReceipt />} />
+
           {/* Admin Routes */}
           <Route path="admin/*" element={<AdminRoutes />} />
-
-          {/* Guest renewal routes — no auth required */}
-          <Route path="guest/renewal/callback" element={<GuestRenewalCallback />} />
-          <Route path="guest/renewal/receipt"  element={<GuestRenewalReceipt />} />
-          <Route path="guest/renewal/signup"   element={<GuestRenewalSignup />} />
-
           {/* Not Found */}
           <Route path="*" element={<NotFound404 />} />
         </Routes>

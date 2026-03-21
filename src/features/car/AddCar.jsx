@@ -171,25 +171,26 @@ export default function AddCar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Prefill from guest renewal flow (stored before account creation)
   useEffect(() => {
-    // const fetchCarTypes = async () => {
-    //   setIsLoading(true);
-    //   try {
-    //     const { data } = await api.get("/car-types");
-    //     if (data.success) {
-    //       setCarTypes(data.data);
-    //     } else {
-    //       toast.error("Failed to load car data. Please try again.");
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching car types:", error);
-    //     toast.error("Failed to load car data. Please try again.");
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-
-    // fetchCarTypes();
+    try {
+      const raw = sessionStorage.getItem("guestCarPrefill");
+      if (!raw) return;
+      const prefill = JSON.parse(raw);
+      setFormData((prev) => ({
+        ...prev,
+        ...(prefill.ownerName && { ownerName: prefill.ownerName }),
+        ...(prefill.registrationNo && { registrationNo: prefill.registrationNo }),
+        ...(prefill.expiryDate && { expiryDate: prefill.expiryDate }),
+        ...(prefill.phoneNo && { phoneNo: prefill.phoneNo }),
+        isRegistered: true,
+      }));
+      sessionStorage.removeItem("guestCarPrefill");
+      toast.success("We've pre-filled your vehicle details from your recent renewal.", { duration: 4000 });
+    } catch {
+      sessionStorage.removeItem("guestCarPrefill");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const uniqueMakes = useMemo(

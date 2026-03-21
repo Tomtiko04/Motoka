@@ -180,6 +180,12 @@ export function useVerifyAccount() {
       );
       navigate("/auth/verification-success");
       localStorage.removeItem("pendingVerificationEmail");
+      sessionStorage.removeItem("pendingVerificationEmail");
+      // Clean up all guest-flow session keys so they don't persist after the
+      // guest successfully creates an account and verifies their email.
+      sessionStorage.removeItem("guestOrderId");
+      sessionStorage.removeItem("guestBankDetails");
+      sessionStorage.removeItem("guestCarPrefill");
     },
     onError: (err) => {
       toast.dismiss();
