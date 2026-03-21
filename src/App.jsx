@@ -57,6 +57,9 @@ import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
+import GuestRenewalCallback from "./pages/guest/GuestRenewalCallback.jsx";
+import GuestRenewalReceipt from "./pages/guest/GuestRenewalReceipt.jsx";
+import GuestRenewalSignup from "./pages/guest/GuestRenewalSignup.jsx";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -269,6 +272,12 @@ export default function App() {
 
           {/* Admin Routes */}
           <Route path="admin/*" element={<AdminRoutes />} />
+
+          {/* Guest renewal routes — no auth required */}
+          <Route path="guest/renewal/callback" element={<GuestRenewalCallback />} />
+          <Route path="guest/renewal/receipt"  element={<GuestRenewalReceipt />} />
+          <Route path="guest/renewal/signup"   element={<GuestRenewalSignup />} />
+
           {/* Not Found */}
           <Route path="*" element={<NotFound404 />} />
         </Routes>
