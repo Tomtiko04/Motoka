@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
-import { markTransactionPaid } from '../../services/apiAdminDocument';
+import { markTransactionPaid, markTransactionFailed } from '../../services/apiAdminDocument';
 
 const AdminPayments = () => {
   const [transactions, setTransactions] = useState([]);
@@ -146,8 +146,21 @@ const AdminPayments = () => {
         toast.success('Order created — user notified');
       }
       fetchTransactions();
+      if (selectedTransaction?.reference === reference) setSelectedTransaction(null);
     } catch (err) {
       toast.error(err.message || 'Failed to process transaction');
+    }
+  };
+
+  const handleMarkFailed = async (reference) => {
+    if (!window.confirm(`Mark transaction ${reference} as FAILED? This means no money was received. This cannot be undone.`)) return;
+    try {
+      await markTransactionFailed(reference);
+      toast.success('Transaction marked as failed');
+      fetchTransactions();
+      if (selectedTransaction?.reference === reference) setSelectedTransaction(null);
+    } catch (err) {
+      toast.error(err.message || 'Failed to mark transaction as failed');
     }
   };
 
@@ -213,11 +226,19 @@ const AdminPayments = () => {
           </div>
         </div>
 
-        {/* Make Payment Button */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex items-center justify-center">
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
-            Make Payment
-          </button>
+        {/* Failed Transactions count */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Failed / Abandoned</p>
+              <p className="text-2xl font-bold text-red-600">
+                {summary.failed_transactions}
+              </p>
+            </div>
+            <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
+              <ArrowDownIcon className="h-5 w-5 text-red-600" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -352,26 +373,35 @@ const AdminPayments = () => {
                           View
                         </button>
                         {(transaction.status === 'pending' || transaction.status === 'approved' || transaction.status === 'abandoned') && (
-                          <button
-                            onClick={() => handleMarkPaid(transaction.transaction_id)}
-                            className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
-                              transaction.status === 'abandoned'
-                                ? 'text-orange-600 hover:text-orange-800 border-orange-300'
-                                : transaction.status === 'pending'
-                                ? 'text-green-600 hover:text-green-800 border-green-300'
-                                : 'text-blue-600 hover:text-blue-800 border-blue-300'
-                            }`}
-                            title={
-                              transaction.status === 'abandoned'
-                                ? 'User paid on this abandoned transaction — recover and create order'
-                                : transaction.status === 'pending'
-                                ? 'Manually mark this payment as received'
-                                : 'Create missing order for this payment'
-                            }
-                          >
-                            <CheckCircleIcon className="h-3.5 w-3.5" />
-                            {transaction.status === 'abandoned' ? 'Recover & Create Order' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleMarkPaid(transaction.transaction_id)}
+                              className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
+                                transaction.status === 'abandoned'
+                                  ? 'text-orange-600 hover:text-orange-800 border-orange-300'
+                                  : transaction.status === 'pending'
+                                  ? 'text-green-600 hover:text-green-800 border-green-300'
+                                  : 'text-blue-600 hover:text-blue-800 border-blue-300'
+                              }`}
+                              title={
+                                transaction.status === 'abandoned'
+                                  ? 'User paid on this abandoned transaction — recover and create order'
+                                  : transaction.status === 'pending'
+                                  ? 'Manually mark this payment as received'
+                                  : 'Create missing order for this payment'
+                              }
+                            >
+                              <CheckCircleIcon className="h-3.5 w-3.5" />
+                              {transaction.status === 'abandoned' ? 'Recover & Create Order' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
+                            </button>
+                            <button
+                              onClick={() => handleMarkFailed(transaction.transaction_id)}
+                              className="flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 text-red-600 hover:text-red-800 border-red-300"
+                              title="No money received — mark this transaction as failed"
+                            >
+                              Mark Failed
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>
@@ -537,7 +567,36 @@ const AdminPayments = () => {
                     </div>
                   ) : (
                     <div className="border-t pt-4">
-                      <p className="text-xs text-orange-600 font-medium">⚠ No order linked to this transaction yet.</p>
+                      <p className="text-xs text-orange-600 font-medium mb-3">⚠ No order linked to this transaction yet.</p>
+                    </div>
+                  )}
+
+                  {/* Modal action buttons for pending/abandoned transactions */}
+                  {(selectedTransaction.status === 'pending' || selectedTransaction.status === 'abandoned') && (
+                    <div className="border-t pt-4 flex gap-3">
+                      <button
+                        onClick={() => handleMarkPaid(selectedTransaction.reference)}
+                        className="flex-1 py-2 px-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg"
+                      >
+                        {selectedTransaction.status === 'abandoned' ? 'Recover & Create Order' : 'Mark Paid'}
+                      </button>
+                      <button
+                        onClick={() => handleMarkFailed(selectedTransaction.reference)}
+                        className="flex-1 py-2 px-3 text-sm font-medium text-red-600 border border-red-300 hover:bg-red-50 rounded-lg"
+                      >
+                        Mark Failed
+                      </button>
+                    </div>
+                  )}
+                  {/* Mark Paid for successful-but-no-order case */}
+                  {selectedTransaction.status === 'successful' && !selectedTransaction.order && (
+                    <div className="border-t pt-4">
+                      <button
+                        onClick={() => handleMarkPaid(selectedTransaction.reference)}
+                        className="w-full py-2 px-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                      >
+                        Create Missing Order
+                      </button>
                     </div>
                   )}
                 </div>
