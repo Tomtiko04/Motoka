@@ -38,14 +38,10 @@ export default function PaymentOptions() {
                       paymentSession?.monicredit?.data?.amount || 
                       null;
   
-  // For Paystack:
-  // - For most flows, backend sends amount in kobo → divide by 100
-  // - For driver's license flow, we store amount directly in naira from the UI
-  const paystackAmount = paymentSession?.amount
-    ? (paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE
-        ? Number(paymentSession.amount)
-        : Number(paymentSession.amount) / 100)
-    : null;
+  // Backend always returns amount in kobo — divide by 100 for display
+  const paystackAmount = paymentSession?.paystack?.reference
+    ? Number(paymentSession?.amount || 0) / 100
+    : Number(paymentSession?.price || paymentSession?.amount || 0);
 
   const { verifyMonicredit, verifyPaystack } = usePaymentVerification();
 
@@ -207,24 +203,6 @@ export default function PaymentOptions() {
   const handleConfirmPaymentMethod = async () => {
     setIsInitializing(true);
     try {
-      // ── Driver's license payments are initialized earlier (on ConfirmRequest) ──
-      // At this stage we already have Paystack/Monicredit data in paymentSession.
-      // We only need to confirm the user's chosen method — no car_slug or schedules.
-      if (paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE) {
-        if (selectedMethod === PAYMENT_METHODS.PAYSTACK && !paymentSession?.paystack?.authorization_url) {
-          toast.error('Paystack payment details are missing. Please go back and try again.');
-          return;
-        }
-        if (selectedMethod === PAYMENT_METHODS.MONICREDIT && !paymentSession?.monicredit?.data) {
-          toast.error('Monicredit payment details are missing. Please go back and try again.');
-          return;
-        }
-
-        setIsPaymentMethodConfirmed(true);
-        toast.success('Payment method confirmed. You can proceed with your driver\'s license payment.');
-        return;
-      }
-
       const payload = buildPaymentPayload();
 
       // Driver license: no car_slug or schedule required

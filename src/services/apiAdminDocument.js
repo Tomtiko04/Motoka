@@ -157,3 +157,19 @@ export async function markTransactionPaid(reference) {
   if (!res.ok) throw new Error(data.message || 'Failed to mark transaction as paid');
   return data;
 }
+
+/**
+ * Manually mark a transaction as failed (no money received — closes it out)
+ */
+export async function markTransactionFailed(reference) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/transactions/${reference}/mark-failed`,
+    {
+      method: 'PUT',
+      headers: { ...getAdminHeaders(), 'Content-Type': 'application/json' },
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to mark transaction as failed');
+  return data;
+}

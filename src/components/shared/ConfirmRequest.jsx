@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import LicenseLayout from "../../features/licenses/components/LicenseLayout";
 import OrderList from "./OrderList";
 import { toast } from "react-hot-toast";
+import { PAYMENT_TYPES } from "../../features/payment/config/paymentTypes";
 
 // Configuration for different request types
 const requestConfigs = {
@@ -77,11 +78,26 @@ export default function ConfirmRequest() {
             });
           }
           break;
-        case "drivers_license":
-          // Driver's license now uses DriversLicense -> DriverLicenseOrderSummary -> Payment flow
-          toast.error("Please use the Driver's License flow from the licenses menu.");
-          setIsProcessing(false);
+        case "drivers_license": {
+          // Build a payment session identical to what DriverLicenseOrderSummary produces
+          const paymentData = {
+            type: PAYMENT_TYPES.DRIVERS_LICENSE,
+            license_type: details.license_type || "new",
+            duration: details.duration || null,
+            price: total,
+            amount: total,
+            items: orderItems,
+          };
+          try {
+            sessionStorage.setItem("paymentData", JSON.stringify(paymentData));
+          } catch {
+            /* ignore quota errors */
+          }
+          navigate(`/payment?type=${PAYMENT_TYPES.DRIVERS_LICENSE}`, {
+            state: { paymentData },
+          });
           break;
+        }
 
         default:
           if (config.nextStep) {

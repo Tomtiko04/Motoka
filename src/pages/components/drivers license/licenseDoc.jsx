@@ -18,6 +18,7 @@ function LicenseDoc({
   const [licenseDocs, setLicenseDocs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedYear, setSelectedYear] = useState("2025");
 
   useEffect(() => {
     const loadDocs = async () => {
@@ -89,9 +90,11 @@ function LicenseDoc({
         </label>
         <select
           name="year"
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
           className="h-fit text-gray-600 font-semibold text-sm rounded-lg block w-fit py-2.5 px-0 focus:outline-none bg-transparent cursor-pointer"
         >
-          <option selected value="2025">2025</option>
+          <option value="2025">2025</option>
           <option value="2024">2024</option>
           <option value="2023">2023</option>
           <option value="2022">2022</option>
