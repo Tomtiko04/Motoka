@@ -173,3 +173,58 @@ export async function markTransactionFailed(reference) {
   if (!res.ok) throw new Error(data.message || 'Failed to mark transaction as failed');
   return data;
 }
+
+// ─── Driver License Applications ─────────────────────────────────────────────
+
+/**
+ * List driver license applications with optional filters
+ * @param {Object} params - { page, limit, status, application_type, search }
+ */
+export async function listAdminDriverLicenseApplications(params = {}) {
+  const searchParams = new URLSearchParams();
+  if (params.page) searchParams.set('page', params.page);
+  if (params.limit) searchParams.set('limit', params.limit);
+  if (params.status) searchParams.set('status', params.status);
+  if (params.application_type) searchParams.set('application_type', params.application_type);
+  if (params.search) searchParams.set('search', params.search);
+
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/driver-license-applications?${searchParams}`,
+    { headers: getAdminHeaders() }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch driver license applications');
+  return data;
+}
+
+/**
+ * Get full detail for a single driver license application
+ */
+export async function getAdminDriverLicenseApplication(id) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/driver-license-applications/${id}`,
+    { headers: getAdminHeaders() }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch application');
+  return data;
+}
+
+/**
+ * Update status (and optional notes) for a driver license application
+ * @param {string|number} id
+ * @param {Object} payload - { status, notes? }
+ */
+export async function updateAdminDriverLicenseApplicationStatus(id, payload) {
+  const res = await fetch(
+    `${config.getApiBaseUrl()}/admin/driver-license-applications/${id}/status`,
+    {
+      method: 'PATCH',
+      headers: { ...getAdminHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to update application status');
+  return data;
+}

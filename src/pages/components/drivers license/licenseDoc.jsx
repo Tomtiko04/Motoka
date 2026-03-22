@@ -24,7 +24,7 @@ function LicenseDoc({
     const loadDocs = async () => {
       setIsLoading(true);
       try {
-        const docs = await getDriverLicenseDocuments();
+        const docs = await getDriverLicenseDocuments(selectedYear);
         setLicenseDocs(docs);
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to load documents");
@@ -34,7 +34,7 @@ function LicenseDoc({
       }
     };
     loadDocs();
-  }, []);
+  }, [selectedYear]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
