@@ -9,12 +9,25 @@ import {
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
 import config from '../../config/config';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [chartPeriod, setChartPeriod] = useState('monthly');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,52 +37,91 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      
-      // Fetch all dashboard data in parallel
+
       const [statsResponse, ordersResponse, transactionsResponse] = await Promise.all([
         fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         }),
         fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         }),
         fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        }),
       ]);
 
       const [statsData, ordersData, transactionsData] = await Promise.all([
         statsResponse.json(),
         ordersResponse.json(),
-        transactionsResponse.json()
+        transactionsResponse.json(),
       ]);
 
-      if (statsData.status) {
-        setStats(statsData.data);
-      }
-      
-      if (ordersData.status) {
-        setRecentOrders(ordersData.data);
-      }
-      
-      if (transactionsData.status) {
-        setRecentTransactions(transactionsData.data);
-      }
+      if (statsData.status) setStats(statsData.data);
+      if (ordersData.status) setRecentOrders(ordersData.data);
+      if (transactionsData.status) setRecentTransactions(transactionsData.data);
     } catch (error) {
       toast.error('Failed to fetch dashboard data');
     } finally {
       setLoading(false);
     }
   };
+
+  const buildChartFromOrders = (orders, period) => {
+    if (!orders || orders.length === 0) return [];
+
+    // Exclude declined/cancelled orders
+    const valid = orders.filter(
+      (o) => !['declined', 'cancelled'].includes(o.status?.toLowerCase())
+    );
+
+    const buckets = {};
+    valid.forEach((order) => {
+      const date = new Date(order.created_at);
+      if (isNaN(date)) return;
+      let key;
+      if (period === 'daily') {
+        key = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      } else {
+        key = date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+      }
+      if (!buckets[key]) buckets[key] = { label: key, amount: 0, orders: 0, _date: date };
+      buckets[key].amount += parseFloat(order.amount || 0);
+      buckets[key].orders += 1;
+    });
+
+    return Object.values(buckets)
+      .sort((a, b) => a._date - b._date)
+      .map(({ label, amount, orders }) => ({ label, amount, orders }));
+  };
+
+  useEffect(() => {
+    // Immediately render from already-fetched recentOrders
+    const quick = buildChartFromOrders(recentOrders, chartPeriod);
+    if (quick.length > 0) setChartData(quick);
+
+    // Then try to fetch full orders history
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const params = new URLSearchParams({ page: 1, per_page: 500 });
+        const res = await fetch(
+          `${config.getApiBaseUrl()}/admin/orders?${params}`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        if (!cancelled && data.status) {
+          const allOrders = data.data?.data || data.data || [];
+          const built = buildChartFromOrders(allOrders, chartPeriod);
+          if (built.length > 0) setChartData(built);
+        }
+      } catch {
+        // keep the quick data
+      }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPeriod, recentOrders]);
 
   // Helper function to format order status
   const formatOrderStatus = (status) => {
@@ -197,7 +249,9 @@ const AdminDashboard = () => {
                 {stats ? stats.total_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <ArrowUpIcon className="h-5 w-5 text-green-500" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
+            </div>
           </div>
         </div>
 
@@ -205,16 +259,13 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Agents</p>
+              <p className="text-sm font-medium text-gray-600">Total Users</p>
               <p className="text-2xl font-bold text-blue-600">
-                {stats ? stats.total_agents.toLocaleString() : '0'}
+                {stats ? stats.total_users.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-xs font-bold">+</span>
-              </div>
-              <ArrowDownIcon className="h-5 w-5 text-red-500" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <UsersIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -228,7 +279,9 @@ const AdminDashboard = () => {
                 {stats ? stats.total_cars.toLocaleString() : '0'}
               </p>
             </div>
-            <ArrowDownIcon className="h-5 w-5 text-red-500" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <TruckIcon className="h-5 w-5 text-blue-600" />
+            </div>
           </div>
         </div>
       </div>
@@ -301,24 +354,66 @@ const AdminDashboard = () => {
         {/* Monthly Chart */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Monthly Data</h3>
-            <div className="flex space-x-2">
-              <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md">Monthly</button>
-              <button className="px-3 py-1 text-gray-600 text-sm rounded-md">Daily</button>
+            <h3 className="text-lg font-semibold text-gray-900">Revenue & Orders</h3>
+            <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+              {[
+                { value: 'daily',     label: 'Daily' },
+                { value: 'monthly',   label: 'Monthly' },
+                { value: 'all_time',  label: 'All Time' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setChartPeriod(opt.value)}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                    chartPeriod === opt.value ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
-          
-          {/* Mock Chart */}
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-                </svg>
-              </div>
-              <p className="text-gray-600">Chart visualization would go here</p>
+
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={256}>
+              <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  yAxisId="amount"
+                  orientation="left"
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `₦${(v / 1000).toFixed(0)}k`}
+                />
+                <YAxis
+                  yAxisId="orders"
+                  orientation="right"
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  formatter={(value, name) =>
+                    name === 'Revenue' ? `₦${Number(value).toLocaleString()}` : value
+                  }
+                  contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }}
+                />
+                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2284DB" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="orders" dataKey="orders" name="Orders" fill="#93c5fd" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+              <p className="text-sm text-gray-400">No chart data available</p>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Recent Orders */}

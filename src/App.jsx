@@ -25,8 +25,6 @@ import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
-import DriverLicenseForm from "./features/licenses/driverslicense/DriverLicenseForm.jsx";
-import DriverLicenseRenew from "./features/licenses/driverslicense/DriverLicenseRenew.jsx";
 import DriverLicenseOrderSummary from "./features/licenses/driverslicense/DriverLicenseOrderSummary.jsx";
 import Settings from "./features/settings/Settings.jsx";
 import PlateNumber from "./features/licenses/PlateNumber.jsx";
@@ -222,8 +220,6 @@ export default function App() {
               <Route path="renew" element={<RenewLicense />} />
               <Route path="documents" element={<VehiclePaper />} />
               <Route path="drivers-license" element={<DriversLicense />} />
-              <Route path="drivers-license/new" element={<DriverLicenseForm />} />
-              <Route path="drivers-license/renew" element={<DriverLicenseRenew />} />
               <Route path="drivers-license/order-summary" element={<DriverLicenseOrderSummary />} />
               <Route path="plate-number" element={<PlateNumber />} />
               <Route path="plate-number/order-summary" element={<PlateOrderSummary />} />
