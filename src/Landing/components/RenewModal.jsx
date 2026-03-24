@@ -574,26 +574,42 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                     <div className="my-8 -ml-6 md:-ml-8 -mr-3 border-b border-[#020202]/10"></div>
 
                     <div className="mt-6">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <h3 className="text-sm text-[#697C8C]">Document Details</h3>
-                        {renewalItems.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={handleToggleAllDocs}
-                            className="flex items-center gap-2 rounded-full border border-[#E1E5EE] px-3 py-1 text-xs font-medium text-[#05243F]/70 hover:bg-[#F4F5FC] transition-colors"
-                          >
-                            <span
-                              className={`inline-flex h-4 w-4 items-center justify-center rounded-[4px] border ${
-                                selectAllDocs ? "border-[#2389E3] bg-[#2389E3]" : "border-[#CBD5E1] bg-white"
+                      <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {HARDCODED_DOCS.map((doc) => {
+                          const isSelected = selectedDocs.includes(doc);
+                          return (
+                            <button
+                              key={doc}
+                              type="button"
+                              onClick={() => handleToggleDoc(doc)}
+                              className={`group relative flex w-full items-center gap-2 rounded-full px-4 py-3 transition-all ${
+                                isSelected
+                                  ? "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
+                                  : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
                               }`}
                             >
-                              {selectAllDocs && (
-                                <Icon icon="solar:check-bold" className="text-white" fontSize={10} />
-                              )}
-                            </span>
-                            <span>Select all</span>
-                          </button>
-                        )}
+                              <div
+                                className={`flex shrink-0 items-center justify-center transition-colors ${
+                                  isSelected ? "text-[#05243F]" : "text-[#9CA3AF] group-hover:text-[#697C8C]"
+                                }`}
+                              >
+                                <Icon
+                                  icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
+                                  fontSize={22}
+                                  color={isSelected ? "#2389E3" : "#9CA3AF"}
+                                />
+                              </div>
+                              <span
+                                className={`text-[13px] md:text-sm text-left font-normal transition-colors truncate ${
+                                  isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
+                                }`}
+                              >
+                                {doc}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                       {loadingItems ? (
                         <div className="flex items-center justify-center py-6">
