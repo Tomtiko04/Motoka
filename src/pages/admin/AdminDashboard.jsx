@@ -7,6 +7,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   DocumentTextIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import {
@@ -186,86 +187,43 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Amount</p>
+              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-blue-600">
                 ₦{stats ? parseFloat(stats.total_amount).toLocaleString() : '0'}
               </p>
             </div>
-            <ArrowUpIcon className="h-5 w-5 text-green-500" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <CreditCardIcon className="h-5 w-5 text-blue-600" />
+            </div>
           </div>
         </div>
-
-        {/* Completed Amount */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Completed Amount</p>
-              <p className="text-2xl font-bold text-green-600">
-                ₦{stats ? parseFloat(stats.completed_amount).toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-sm font-bold">✓</span>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Pending Amount */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending Amount</p>
-              <p className="text-2xl font-bold text-orange-600">
-                ₦{stats ? parseFloat(stats.pending_amount).toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-              <span className="text-orange-600 text-sm font-bold">⏳</span>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Declined Amount */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Declined Amount</p>
-              <p className="text-2xl font-bold text-red-600">
-                ₦{stats ? parseFloat(stats.declined_amount).toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-              <span className="text-red-600 text-sm font-bold">✗</span>
-            </div>
-          </div>
-        </div> */}
 
         {/* Total Orders */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-green-600">
                 {stats ? stats.total_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <ClipboardDocumentListIcon className="h-5 w-5 text-green-600" />
             </div>
           </div>
         </div>
 
-        {/* Total Agents */}
+        {/* Total Users */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-purple-600">
                 {stats ? stats.total_users.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <UsersIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <UsersIcon className="h-5 w-5 text-purple-600" />
             </div>
           </div>
         </div>
@@ -275,12 +233,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-orange-600">
                 {stats ? stats.total_cars.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <TruckIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+              <TruckIcon className="h-5 w-5 text-orange-600" />
             </div>
           </div>
         </div>

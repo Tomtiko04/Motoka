@@ -244,7 +244,55 @@ const AdminOrderDetails = () => {
             </div>
           </div>
 
+          {/* Plate / License Information */}
+          {(order.plate_type || order.plate_sub_type || order.car?.preferred_name || order.license_type) && (
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {order.order_type === 'driver_license' ? 'License Details' : 'Plate Details'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {order.plate_type && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Plate Type</label>
+                    <p className="text-sm text-gray-900">
+                      {order.plate_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </p>
+                  </div>
+                )}
+                {order.plate_sub_type && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Sub Type</label>
+                    <p className="text-sm text-gray-900">
+                      {order.plate_sub_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </p>
+                  </div>
+                )}
+                {order.car?.preferred_name && (
+                  <div className="md:col-span-2">
+                    <label className="text-sm font-medium text-gray-500">Preferred Plate Name</label>
+                    <p className="text-sm font-semibold text-gray-900">{order.car.preferred_name}</p>
+                  </div>
+                )}
+                {order.license_type && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">License Type</label>
+                    <p className="text-sm text-gray-900">
+                      {order.license_type.charAt(0).toUpperCase() + order.license_type.slice(1)}
+                    </p>
+                  </div>
+                )}
+                {order.license_duration && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Duration</label>
+                    <p className="text-sm text-gray-900">{order.license_duration}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Delivery Information */}
+          {order.delivery_address && (
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Delivery Information</h3>
             <div className="space-y-4">
@@ -255,12 +303,15 @@ const AdminOrderDetails = () => {
                   <p className="text-sm text-gray-500">{order.state_name || order.state}, {order.lga_name || order.lga}</p>
                 </div>
               </div>
+              {order.delivery_contact && (
               <div className="flex items-center">
                 <PhoneIcon className="h-5 w-5 text-gray-400 mr-3" />
                 <p className="text-sm text-gray-900">{order.delivery_contact}</p>
               </div>
+              )}
             </div>
           </div>
+          )}
 
         </div>
 

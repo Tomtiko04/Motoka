@@ -8,9 +8,13 @@ import FormInput from "./components/FormInput";
 import { useDriversLicensePaymentOptions } from "./driverslicense/useDriversLicense";
 import { upsertInternationalDriversLicenseApplication } from "../../services/apiDriversLicense";
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const LICENSE_YEARS = ["1 year", "2 years", "3 years", "4 years"];
+
 export default function InternationalDriversLicense() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
+  const licenseInputRef = useRef(null);
+  const passportInputRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -20,81 +24,49 @@ export default function InternationalDriversLicense() {
     placeOfBirth: "",
     stateOfOrigin: "",
     localGovernment: "",
+    bloodGroup: BLOOD_GROUPS[0],
     height: "",
     occupation: "",
     nextOfKin: "",
     nextOfKinNumber: "",
     motherName: "",
     licenseNumber: "",
+    licenseYears: LICENSE_YEARS[0],
     driversLicense: null,
+    passportPhoto: null,
   });
   const [noLicense, setNoLicense] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Load driver license pricing from backend and pick the "new / international" row
   const { isPaymentOptions } = useDriversLicensePaymentOptions();
+
+  // isPaymentOptions is already the flat array returned by getDriversLicensePaymentOptions
   const internationalPrice = useMemo(() => {
-    const list = Array.isArray(isPaymentOptions?.data)
-      ? isPaymentOptions.data
-      : Array.isArray(isPaymentOptions)
-        ? isPaymentOptions
-        : [];
-
-    if (!Array.isArray(list)) return null;
-
+    const list = Array.isArray(isPaymentOptions) ? isPaymentOptions : [];
     const intl = list.find(
       (opt) =>
-        String(opt.type).toLowerCase() === "new" &&
+        String(opt.license_type || "").toLowerCase() === "new" &&
         String(opt.duration || "").toLowerCase() === "international",
     );
-
-    return intl ? Number(intl.amount) : null;
+    return intl ? Number(intl.price) : null;
   }, [isPaymentOptions]);
 
-  const handleFileUpload = (e) => {
-    e.preventDefault();
-    const input = fileInputRef.current;
-    if (!input) return;
-
-    // Open file picker
-    input.click();
-
-    const handleChange = () => {
-      if (input.files && input.files.length > 0) {
-        const file = input.files[0];
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error("File size should not exceed 5MB");
-          input.removeEventListener("change", handleChange);
-          return;
-        }
-        setFormData((prev) => ({ ...prev, driversLicense: file }));
-        toast.success(
-          "Existing Nigeria Driver’s license uploaded successfully",
-        );
-      }
-      input.removeEventListener("change", handleChange);
-    };
-
-    input.addEventListener("change", handleChange);
-  };
-
-  const handleFileChange = (e) => {
+  const handleFileChange = (e, fieldName) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size should not exceed 5MB");
-        return;
-      }
-      setFormData((prev) => ({ ...prev, driversLicense: file }));
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size should not exceed 5MB");
+      return;
     }
+    setFormData((prev) => ({ ...prev, [fieldName]: file }));
+    toast.success("File uploaded successfully");
+    // Reset so the same file can be re-selected if needed
+    e.target.value = "";
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const validateForm = () => {
@@ -111,22 +83,16 @@ export default function InternationalDriversLicense() {
       newErrors.phoneNumber = "Invalid phone number";
     }
     if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.dateOfBirth)
-      newErrors.dateOfBirth = "Date of birth is required";
-    if (!formData.placeOfBirth)
-      newErrors.placeOfBirth = "Place of birth is required";
-    if (!formData.stateOfOrigin)
-      newErrors.stateOfOrigin = "State of origin is required";
-    if (!formData.localGovernment)
-      newErrors.localGovernment = "Local government is required";
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+    if (!formData.placeOfBirth) newErrors.placeOfBirth = "Place of birth is required";
+    if (!formData.stateOfOrigin) newErrors.stateOfOrigin = "State of origin is required";
+    if (!formData.localGovernment) newErrors.localGovernment = "Local government is required";
     if (!formData.height) newErrors.height = "Height is required";
     if (!formData.occupation) newErrors.occupation = "Occupation is required";
     if (!formData.nextOfKin) newErrors.nextOfKin = "Next of Kin is required";
-    if (!formData.nextOfKinNumber)
-      newErrors.nextOfKinNumber = "Next of Kin number is required";
+    if (!formData.nextOfKinNumber) newErrors.nextOfKinNumber = "Next of Kin number is required";
     if (!formData.motherName) newErrors.motherName = "Mother name is required";
-    if (!formData.licenseNumber)
-      newErrors.licenseNumber = "License number is required";
+    if (!formData.licenseNumber) newErrors.licenseNumber = "License number is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -134,23 +100,15 @@ export default function InternationalDriversLicense() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate form when the user is filling details (noLicense === true)
-    if (noLicense) {
-      if (!validateForm()) return;
-    }
+    if (noLicense && !validateForm()) return;
 
     try {
-      // Persist application details for admin visibility when we have them
       if (noLicense) {
         await upsertInternationalDriversLicenseApplication(formData);
       }
 
-      console.log("Confirm and submit clicked");
-
-      // Use backend international driver license price; fall back to 0 if unavailable
       const licenseAmount = internationalPrice ?? 0;
 
-      // Navigate to confirm request with form data and correct pricing
       navigate("/licenses/confirm-request", {
         state: {
           type: "drivers_license",
@@ -184,26 +142,25 @@ export default function InternationalDriversLicense() {
         {/* Main content */}
         {!noLicense ? (
           <div>
+            {/* Hidden file input for existing driver's license */}
+            <input
+              id="drivers-license-upload"
+              type="file"
+              accept="image/*,application/pdf"
+              ref={licenseInputRef}
+              onChange={(e) => handleFileChange(e, "driversLicense")}
+              className="hidden"
+            />
             <label
               htmlFor="drivers-license-upload"
               className="block cursor-pointer"
-              onClick={(e) => handleFileUpload(e)}
             >
               <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-12">
-                <input
-                  id="drivers-license-upload"
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  onChange={(e) => handleFileChange(e)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="hidden"
-                />
                 <span>
                   <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
                 </span>
                 <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
-                  Upload Existing Nigeria <br /> Driver’s license
+                  Upload Existing Nigeria <br /> Driver's license
                 </p>
                 {formData.driversLicense && (
                   <p className="mt-2 text-center text-xs text-[#45A1F2]">
@@ -212,20 +169,18 @@ export default function InternationalDriversLicense() {
                 )}
               </div>
             </label>
-            <div>
-              <p className="mt-4 mb-4 text-center text-xs text-[#697B8C]/64">
-                Don't have an Existing Drivers' License?
-                <br />
-                Tap
-                <span
-                  onClick={() => setNoLicense(true)}
-                  className="ml-1 cursor-pointer text-[#2284DB] underline"
-                >
-                  here
-                </span>{" "}
-                to fill a form.
-              </p>
-            </div>
+            <p className="mt-4 mb-4 text-center text-xs text-[#697B8C]/64">
+              Don't have an Existing Drivers' License?
+              <br />
+              Tap
+              <span
+                onClick={() => setNoLicense(true)}
+                className="ml-1 cursor-pointer text-[#2284DB] underline"
+              >
+                here
+              </span>{" "}
+              to fill a form.
+            </p>
             <div className="mt-4 flex justify-center sm:mt-5">
               <ActionButton
                 className="w-full md:w-[60%]"
@@ -237,30 +192,34 @@ export default function InternationalDriversLicense() {
           </div>
         ) : (
           <div className="scrollbar-thin scrollbar-track-[#F5F6FA] scrollbar-thumb-[#2389E3] hover:scrollbar-thumb-[#2389E3]/80 scrollbar-thumb-rounded-full h-[calc(100vh-240px)] overflow-y-auto pr-4">
+            {/* Hidden file input for passport photo */}
+            <input
+              id="passport-photo-upload"
+              type="file"
+              accept="image/*"
+              ref={passportInputRef}
+              onChange={(e) => handleFileChange(e, "passportPhoto")}
+              className="hidden"
+            />
             <label
               htmlFor="passport-photo-upload"
               className="block cursor-pointer"
-              onClick={(e) => handleFileUpload(e, "passportPhoto")}
             >
               <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
-                <input
-                  id="passport-photo-upload"
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  onChange={(e) => handleFileChange(e, "passportPhoto")}
-                  onClick={(e) => e.stopPropagation()}
-                  className="hidden"
-                />
                 <span>
                   <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
                 </span>
                 <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                   Upload Passport Photograph
                 </p>
+                {formData.passportPhoto && (
+                  <p className="mt-2 text-center text-xs text-[#45A1F2]">
+                    {formData.passportPhoto.name}
+                  </p>
+                )}
               </div>
             </label>
-            {/* Form part */}
+
             <div className="mt-4 space-y-3.5">
               <FormInput
                 label="Full Name"
@@ -341,9 +300,15 @@ export default function InternationalDriversLicense() {
                 <p className="mb-1 text-sm font-medium text-[#05243F]">
                   Blood Group
                 </p>
-                <select>
-                  <option>0+</option>
-                  <option>A</option>
+                <select
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleInputChange}
+                  className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none"
+                >
+                  {BLOOD_GROUPS.map((bg) => (
+                    <option key={bg} value={bg}>{bg}</option>
+                  ))}
                 </select>
               </div>
               <FormInput
@@ -353,7 +318,7 @@ export default function InternationalDriversLicense() {
                 value={formData.height}
                 onChange={handleInputChange}
                 error={errors.height}
-                placeholder="1.5m"
+                placeholder="1.5"
                 required
               />
               <FormInput
@@ -381,7 +346,7 @@ export default function InternationalDriversLicense() {
                 value={formData.nextOfKinNumber}
                 onChange={handleInputChange}
                 error={errors.nextOfKinNumber}
-                placeholder="Tomtiko"
+                placeholder="08012345678"
                 required
               />
               <FormInput
@@ -390,18 +355,31 @@ export default function InternationalDriversLicense() {
                 value={formData.motherName}
                 onChange={handleInputChange}
                 error={errors.motherName}
-                placeholder="Tomtiko"
+                placeholder="Adaeze"
+                required
+              />
+              <FormInput
+                label="License Number"
+                name="licenseNumber"
+                value={formData.licenseNumber}
+                onChange={handleInputChange}
+                error={errors.licenseNumber}
+                placeholder="ABC123456789"
                 required
               />
               <div>
                 <p className="mb-1 text-sm font-medium text-[#05243F]">
                   License Years
                 </p>
-                <select className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none">
-                  <option className="text-[#05243F]/40">1 year</option>
-                  <option className="text-[#05243F]/40">2 years</option>
-                  <option className="text-[#05243F]/40">3 years</option>
-                  <option className="text-[#05243F]/40">4 years</option>
+                <select
+                  name="licenseYears"
+                  value={formData.licenseYears}
+                  onChange={handleInputChange}
+                  className="w-full rounded-[10px] bg-[#F4F5FC] px-4 py-3 text-sm font-normal text-[#05243F] transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none"
+                >
+                  {LICENSE_YEARS.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
                 </select>
               </div>
               <div className="sticky bottom-0 mt-4 flex justify-center bg-white sm:mt-5">
@@ -415,6 +393,7 @@ export default function InternationalDriversLicense() {
             </div>
           </div>
         )}
+
         {/* Price column */}
         <div className="flex flex-col items-start md:items-end">
           <p className="mt-1 text-sm font-normal text-[#05243F]">Price:</p>
