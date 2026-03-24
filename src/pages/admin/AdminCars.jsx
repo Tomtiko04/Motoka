@@ -84,18 +84,18 @@ const AdminCars = () => {
     }
   };
 
+  const STATUS_MAP = {
+    active:   { color: 'bg-green-100 text-green-800',  label: 'Registered' },
+    approved: { color: 'bg-green-100 text-green-800',  label: 'Approved' },
+    unpaid:   { color: 'bg-yellow-100 text-yellow-800', label: 'Renewal Due' },
+    expired:  { color: 'bg-red-100 text-red-800',       label: 'Expired' },
+  };
+
   const getStatusBadge = (status) => {
-    const statusConfig = {
-      active: { color: 'bg-green-100 text-green-800' },
-      unpaid: { color: 'bg-yellow-100 text-yellow-800' },
-      expired: { color: 'bg-red-100 text-red-800' },
-    };
-
-    const config = statusConfig[status] || statusConfig.active;
-
+    const cfg = STATUS_MAP[status] || { color: 'bg-gray-100 text-gray-700', label: status };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.color}`}>
-        {status.toUpperCase()}
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.color}`}>
+        {cfg.label}
       </span>
     );
   };
@@ -249,6 +249,9 @@ const AdminCars = () => {
                   Status
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Date Added
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Expiry Date
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -299,6 +302,12 @@ const AdminCars = () => {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {getStatusBadge(car.status)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      {car.created_at ? formatDate(car.created_at) : '—'}
+                    </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">

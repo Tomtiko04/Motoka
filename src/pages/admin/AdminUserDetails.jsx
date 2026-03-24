@@ -367,7 +367,8 @@ const AdminUserDetails = () => {
               {user.cars.map((car) => (
                 <div
                   key={car.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition-colors"
+                  onClick={() => window.location.href = `/admin/cars/${car.slug}`}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 truncate">
