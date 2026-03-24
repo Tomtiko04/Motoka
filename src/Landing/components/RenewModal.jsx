@@ -6,25 +6,11 @@ import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatCurrency } from "../../utils/formatCurrency";
-
-// Hardcoded for guest flow — will add endpoints later
-const HARDCODED_DOCS = ["Vehicle License", "Road Worthiness", "Insurance"];
-const HARDCODED_AMOUNT_PER_DOC = 15000; // in kobo (15000 = ₦150)
-const HARDCODED_DELIVERY_FEE = 5000; // ₦50 in kobo
-const HARDCODED_STATES = [
-  { id: 1, name: "Lagos" },
-  { id: 2, name: "Abuja" },
-  { id: 3, name: "Rivers" },
-  { id: 4, name: "Kano" },
-];
-const HARDCODED_LGAS = {
-  Lagos: [{ id: 1, name: "Ikeja" }, { id: 2, name: "Lagos Island" }],
-  Abuja: [{ id: 1, name: "Abuja Municipal" }, { id: 2, name: "Gwagwalada" }],
-  Rivers: [{ id: 1, name: "Port Harcourt" }, { id: 2, name: "Obio-Akpor" }],
-  Kano: [{ id: 1, name: "Nassarawa" }, { id: 2, name: "Fagge" }],
-};
+import { fetchRenewalItems, fetchStates, fetchLGAs, initGuestRenewal } from "../../services/apiGuest";
+import { useNavigate } from "react-router-dom";
 
 export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [plateNumber, setPlateNumber] = useState(initialPlateNumber || "");
   const [formData, setFormData] = useState({
@@ -35,21 +21,83 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     terms: false,
   });
 
-  // Step 2 — renew state (hardcoded)
-  const [selectedDocs, setSelectedDocs] = useState(HARDCODED_DOCS);
+  // Step 2 — renewal state (loaded from backend)
+  const [renewalItems, setRenewalItems] = useState([]);
+  const [selectedDocs, setSelectedDocs] = useState([]);
+  const [selectAllDocs, setSelectAllDocs] = useState(true);
   const [wantsDelivery, setWantsDelivery] = useState(false);
   const [deliveryDetails, setDeliveryDetails] = useState({
     address: "",
+    stateCode: "",
     stateName: "",
-    lg: "",
-    fee: String(HARDCODED_DELIVERY_FEE),
+    lga: "",
     contact: "",
+    fee: 0,
   });
 
-  useEffect(() => {
-    setPlateNumber(initialPlateNumber);
-  }, [initialPlateNumber]);
+  // Step 3 — gateway selection
+  const [selectedGateway, setSelectedGateway] = useState("monicredit");
 
+  // Location data (loaded from backend)
+  const [states, setStates] = useState([]);
+  const [lgas, setLgas] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(false);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingLgas, setLoadingLgas] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // ── Sync plate number from parent ────────────────────────────────────────
+  useEffect(() => {
+    setPlateNumber(initialPlateNumber || "");
+  }, [initialPlateNumber]);
+  // ── Reset to step 1 when modal closes so it starts fresh on next open ────
+  useEffect(() => {
+    if (!isOpen) setStep(1);
+  }, [isOpen]);
+  // ── Load renewal items when reaching step 2 ──────────────────────────────
+  useEffect(() => {
+    if (step !== 2) return;
+    setLoadingItems(true);
+    fetchRenewalItems()
+      .then((items) => {
+        setRenewalItems(items);
+        // Pre-select all items by default (Select All)
+        const allIds = items.map((i) => i.id);
+        setSelectedDocs(allIds);
+        setSelectAllDocs(true);
+      })
+      .catch(() => toast.error("Failed to load renewal options"))
+      .finally(() => setLoadingItems(false));
+  }, [step]);
+
+  // ── Load states when delivery checkbox is ticked ─────────────────────────
+  useEffect(() => {
+    if (!wantsDelivery || states.length > 0) return;
+    setLoadingStates(true);
+    fetchStates()
+      .then(setStates)
+      .catch(() => toast.error("Failed to load states"))
+      .finally(() => setLoadingStates(false));
+  }, [wantsDelivery]);
+
+  // ── Load LGAs when a state is selected ───────────────────────────────────
+  useEffect(() => {
+    if (!deliveryDetails.stateCode) { setLgas([]); return; }
+    setLoadingLgas(true);
+    fetchLGAs(deliveryDetails.stateCode)
+      .then(setLgas)
+      .catch(() => toast.error("Failed to load local governments"))
+      .finally(() => setLoadingLgas(false));
+  }, [deliveryDetails.stateCode]);
+
+  // ── Pricing calculation ───────────────────────────────────────────────────
+  const renewalAmount = renewalItems
+    .filter((i) => selectedDocs.includes(i.id))
+    .reduce((sum, i) => sum + (i.price || 0), 0);
+
+  const totalAmount = renewalAmount + (wantsDelivery ? (deliveryDetails.fee || 0) : 0);
+
+  // ── Form handlers ─────────────────────────────────────────────────────────
   const handleChange = (e) => {
     const { id, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -71,25 +119,61 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     setStep(2);
   };
 
-  const handleBack = () => setStep(1);
+  const handleBack = () => setStep((s) => s - 1);
 
-  const handleToggleDoc = (doc) => {
-    setSelectedDocs((prev) =>
-      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc]
-    );
+  const handleToggleDoc = (docId) => {
+    const item = renewalItems.find((i) => i.id === docId);
+    if (item?.required) return; // required items can't be deselected
+    setSelectedDocs((prev) => {
+      const next = prev.includes(docId)
+        ? prev.filter((d) => d !== docId)
+        : [...prev, docId];
+
+      // Keep select-all state in sync: true only when every non-required
+      // item is selected.
+      const nonRequiredIds = renewalItems.filter((i) => !i.required).map((i) => i.id);
+      const allNonRequiredSelected =
+        nonRequiredIds.length > 0 &&
+        nonRequiredIds.every((id) => next.includes(id));
+      setSelectAllDocs(allNonRequiredSelected);
+
+      return next;
+    });
   };
 
-  const renewalAmount = selectedDocs.length * HARDCODED_AMOUNT_PER_DOC;
-  const totalAmount =
-    renewalAmount + (wantsDelivery ? HARDCODED_DELIVERY_FEE : 0);
+  const handleToggleAllDocs = () => {
+    if (!renewalItems.length) return;
+    if (selectAllDocs) {
+      // Deselect all optional docs, keep required ones checked
+      const requiredIds = renewalItems.filter((i) => i.required).map((i) => i.id);
+      setSelectedDocs(requiredIds);
+      setSelectAllDocs(false);
+    } else {
+      // Select every document
+      const allIds = renewalItems.map((i) => i.id);
+      setSelectedDocs(allIds);
+      setSelectAllDocs(true);
+    }
+  };
+
+  const handleStateChange = (e) => {
+    const selected = states.find((s) => s.code === e.target.value);
+    setDeliveryDetails((p) => ({
+      ...p,
+      stateCode: selected?.code || "",
+      stateName: selected?.name || "",
+      lga: "",
+      fee: selected?.delivery_fee || 0,
+    }));
+  };
 
   const isFormValid = () => {
     if (selectedDocs.length === 0) return false;
     if (wantsDelivery) {
       return (
         deliveryDetails.address.trim() &&
-        deliveryDetails.stateName &&
-        deliveryDetails.lg &&
+        deliveryDetails.stateCode &&
+        deliveryDetails.lga &&
         deliveryDetails.contact.trim()
       );
     }
@@ -103,14 +187,64 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     return `${digits.slice(0, 4)} ${digits.slice(4, 8)} ${digits.slice(8)}`;
   };
 
-  const handlePhoneChange = (raw, setter) => {
+  const handlePhoneChange = (raw) => {
     const digits = raw.replace(/\D/g, "").slice(0, 11);
-    setter((prev) => ({ ...prev, contact: digits }));
+    setDeliveryDetails((prev) => ({ ...prev, contact: digits }));
   };
 
-  const handlePayNow = () => {
-    toast.success("Payment integration coming soon.");
-    // TODO: Add endpoint when ready
+  // ── Step 2 → Step 3: advance to gateway selection ────────────────────────
+  const handleProceedToPayment = () => {
+    if (!isFormValid()) return;
+    setStep(3);
+  };
+
+  // ── Step 3: confirm and call the API ─────────────────────────────────────
+  const handleConfirmPayment = async () => {
+    setSubmitting(true);
+    try {
+      const result = await initGuestRenewal({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        plate_number: plateNumber.replace(/\s+/g, "").toUpperCase(),
+        expiry_date: formData.expiryDate,
+        selected_items: selectedDocs,
+        wants_delivery: wantsDelivery,
+        delivery_details: wantsDelivery
+          ? {
+              address: deliveryDetails.address,
+              state: deliveryDetails.stateCode,
+              lga: deliveryDetails.lga,
+              contact: deliveryDetails.contact,
+            }
+          : null,
+        payment_gateway: selectedGateway,
+      });
+
+      sessionStorage.setItem("guestOrderId", result.orderId);
+
+      if (result.paymentUrl) {
+        // Paystack — redirect to hosted checkout
+        window.location.href = result.paymentUrl;
+      } else if (result.accountNumber) {
+        // MoniCredit bank transfer — persist bank details to sessionStorage so
+        // the callback page can recover them if the user navigates back
+        sessionStorage.setItem("guestBankDetails", JSON.stringify({
+          accountNumber: result.accountNumber,
+          bankName: result.bankName,
+          accountName: result.accountName,
+          totalAmount: result.totalAmount,
+        }));
+        navigate(`/guest/renewal/callback?orderId=${result.orderId}&gateway=monicredit`);
+      } else {
+        toast.error("Payment could not be initialized. Please try again.");
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err.message || "Failed to initialize payment";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Guest car detail for CarDetailsCard
@@ -123,10 +257,6 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     car_type: "private",
     reminder: null,
   };
-
-  const lgaOptions = deliveryDetails.stateName
-    ? HARDCODED_LGAS[deliveryDetails.stateName] || []
-    : [];
 
   if (!isOpen) return null;
 
@@ -285,6 +415,124 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                 </div>
               </div>
             </motion.div>
+          ) : step === 3 ? (
+            /* ── Step 3: Payment method selection ─────────────────────────── */
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full overflow-y-auto"
+            >
+              <div className="p-6 md:p-8 relative">
+                <button
+                  onClick={handleBack}
+                  className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={onClose}
+                  className="absolute right-4 top-4 z-20 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+
+                <h1 className="text-center text-2xl font-medium text-[#05243F] mb-2 pt-3 md:pt-1">
+                  Payment Options
+                </h1>
+                <p className="text-center text-sm text-[#697C8C] mb-8">
+                  Total: <span className="font-semibold text-[#05243F]">₦{(totalAmount / 100).toLocaleString()}</span>
+                </p>
+
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto_1fr] items-start max-w-2xl mx-auto">
+                  {/* Left — method selector */}
+                  <div className="space-y-3">
+                    {[
+                      { id: "monicredit", label: "Pay Via MoniCredit", sub: "Bank transfer — virtual account" },
+                      { id: "paystack", label: "Pay Via Paystack", sub: "Card, bank or mobile money" },
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => setSelectedGateway(m.id)}
+                        className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${
+                          selectedGateway === m.id
+                            ? "shadow-sm ring-1 ring-[#2389E3]"
+                            : "hover:bg-[#FDF6E8] hover:shadow-sm"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className={`text-sm ${selectedGateway === m.id ? "font-semibold text-[#05243F]" : "font-normal text-[#05243F]/40"}`}>
+                              {m.label}
+                            </span>
+                            <p className={`text-xs mt-0.5 ${selectedGateway === m.id ? "text-[#697C8C]" : "text-[#05243F]/30"}`}>{m.sub}</p>
+                          </div>
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#2389E3]">
+                            {selectedGateway === m.id && <div className="h-2 w-2 rounded-full bg-[#2389E3]" />}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="hidden h-full w-px bg-[#F4F5FC] md:block" />
+
+                  {/* Right — detail panel */}
+                  <div className="space-y-4">
+                    {selectedGateway === "monicredit" ? (
+                      <div className="rounded-[20px] border border-[#697B8C]/11 px-6 py-5 space-y-3">
+                        <p className="text-sm text-[#697C8C]">Bank Transfer Details</p>
+                        <p className="text-xs text-[#05243F]/60">
+                          Click confirm below. We'll generate a dedicated virtual account number for this transaction. Transfer the exact amount to complete your renewal.
+                        </p>
+                        <div className="rounded-[10px] bg-[#F4F5FC] p-3">
+                          <p className="text-xs text-[#697C8C]">
+                            <span className="font-medium text-[#05243F]">Note:</span> Account expires in 30 mins. After payment, you'll be redirected to a status page.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-[20px] border border-[#697B8C]/11 px-6 py-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">💳</span>
+                          <div>
+                            <p className="text-sm font-semibold text-[#05243F]">Secure Payment</p>
+                            <p className="text-xs text-[#697C8C]">Pay with card, bank transfer, or mobile money</p>
+                          </div>
+                        </div>
+                        <div className="rounded-[10px] bg-gray-50 p-3 space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-[#697C8C]">Amount:</span>
+                            <span className="font-semibold text-[#05243F]">₦{(totalAmount / 100).toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-[#697C8C]">Gateway:</span>
+                            <span className="text-[#05243F]">Paystack</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-[#697C8C]">You will be redirected to Paystack's secure checkout page.</p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleConfirmPayment}
+                      disabled={submitting}
+                      className="w-full rounded-full bg-[#2284DB] py-3 text-base font-semibold text-white transition-all hover:bg-[#1B6CB3] disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Initializing...
+                        </>
+                      ) : (
+                        "Confirm Payment Method"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           ) : (
             <motion.div
               key="step2"
@@ -363,10 +611,44 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                           );
                         })}
                       </div>
+                      {loadingItems ? (
+                        <div className="flex items-center justify-center py-6">
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          {renewalItems.map((item) => {
+                            const isSelected = selectedDocs.includes(item.id);
+                            return (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => handleToggleDoc(item.id)}
+                                className="group relative flex w-full items-center gap-3 rounded-full px-6 py-3 transition-all bg-[#F4F5FC] hover:bg-[#EBEEFA]"
+                              >
+                                <div className="flex shrink-0 items-center justify-center transition-colors">
+                                  <Icon
+                                    icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
+                                    fontSize={24}
+                                    color={isSelected ? "#2389E3" : "#9CA3AF"}
+                                  />
+                                </div>
+                                <span className={`text-sm md:text-base font-normal transition-colors flex-1 text-left ${isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"}`}>
+                                  {item.name}
+                                  {item.required && (
+                                    <span className="ml-2 text-xs text-[#2389E3] font-medium">(Required)</span>
+                                  )}
+                                </span>
+                                <span className="text-xs text-[#697C8C]">
+                                  {formatCurrency(item.price / 100)}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  
 
                   {/* Right — Payment details */}
                   <div className="rounded-2xl px-2">
@@ -440,19 +722,14 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                                 State <span className="text-red-500">*</span>
                               </div>
                               <select
-                                value={deliveryDetails.stateName}
-                                onChange={(e) =>
-                                  setDeliveryDetails((p) => ({
-                                    ...p,
-                                    stateName: e.target.value,
-                                    lg: "",
-                                  }))
-                                }
-                                className="mt-2 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                                value={deliveryDetails.stateCode}
+                                onChange={handleStateChange}
+                                disabled={loadingStates}
+                                className="mt-2 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] disabled:opacity-50"
                               >
-                                <option value="">Select state</option>
-                                {HARDCODED_STATES.map((s) => (
-                                  <option key={s.id} value={s.name}>
+                                <option value="">{loadingStates ? "Loading..." : "Select state"}</option>
+                                {states.map((s) => (
+                                  <option key={s.code} value={s.code}>
                                     {s.name}
                                   </option>
                                 ))}
@@ -463,17 +740,19 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                                 Local Government <span className="text-red-500">*</span>
                               </div>
                               <select
-                                value={deliveryDetails.lg}
+                                value={deliveryDetails.lga}
                                 onChange={(e) =>
-                                  setDeliveryDetails((p) => ({ ...p, lg: e.target.value }))
+                                  setDeliveryDetails((p) => ({ ...p, lga: e.target.value }))
                                 }
-                                disabled={!deliveryDetails.stateName}
+                                disabled={!deliveryDetails.stateCode || loadingLgas}
                                 className="mt-2 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] disabled:opacity-50"
                               >
-                                <option value="">Select LG</option>
-                                {lgaOptions.map((lg) => (
-                                  <option key={lg.id} value={lg.name}>
-                                    {lg.name}
+                                <option value="">
+                                  {loadingLgas ? "Loading..." : "Select LG"}
+                                </option>
+                                {lgas.map((lgaName) => (
+                                  <option key={lgaName} value={lgaName}>
+                                    {lgaName}
                                   </option>
                                 ))}
                               </select>
@@ -487,7 +766,9 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                             <input
                               readOnly
                               type="text"
-                              value={formatCurrency(HARDCODED_DELIVERY_FEE / 100)}
+                              value={deliveryDetails.stateCode
+                                ? formatCurrency(deliveryDetails.fee / 100)
+                                : "Select a state first"}
                               className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none"
                             />
                           </div>
@@ -506,9 +787,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                                 inputMode="numeric"
                                 maxLength={14}
                                 value={formatPhoneDisplay(deliveryDetails.contact)}
-                                onChange={(e) =>
-                                  handlePhoneChange(e.target.value, setDeliveryDetails)
-                                }
+                                onChange={(e) => handlePhoneChange(e.target.value)}
                                 className="flex-1 bg-transparent px-4 py-3 text-base tracking-widest text-[#05243F] placeholder:tracking-normal placeholder:text-[#05243F]/40 outline-none"
                                 placeholder="080 1234 5678"
                               />
@@ -519,11 +798,11 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                     </AnimatePresence>
 
                     <button
-                      onClick={handlePayNow}
+                      onClick={handleProceedToPayment}
                       disabled={!isFormValid()}
-                      className="mt-6 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
+                      className="mt-6 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      ₦{(totalAmount / 100).toLocaleString()} Pay Now
+                      {`₦${(totalAmount / 100).toLocaleString()} — Choose Payment`}
                     </button>
                   </div>
                 </div>

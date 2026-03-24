@@ -25,8 +25,6 @@ import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
-import DriverLicenseForm from "./features/licenses/driverslicense/DriverLicenseForm.jsx";
-import DriverLicenseRenew from "./features/licenses/driverslicense/DriverLicenseRenew.jsx";
 import DriverLicenseOrderSummary from "./features/licenses/driverslicense/DriverLicenseOrderSummary.jsx";
 import Settings from "./features/settings/Settings.jsx";
 import PlateNumber from "./features/licenses/PlateNumber.jsx";
@@ -57,6 +55,8 @@ import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
+import GuestRenewalCallback from "./pages/GuestRenewalCallback.jsx";
+import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -222,8 +222,6 @@ export default function App() {
               <Route path="renew" element={<RenewLicense />} />
               <Route path="documents" element={<VehiclePaper />} />
               <Route path="drivers-license" element={<DriversLicense />} />
-              <Route path="drivers-license/new" element={<DriverLicenseForm />} />
-              <Route path="drivers-license/renew" element={<DriverLicenseRenew />} />
               <Route path="drivers-license/order-summary" element={<DriverLicenseOrderSummary />} />
               <Route path="plate-number" element={<PlateNumber />} />
               <Route path="plate-number/order-summary" element={<PlateOrderSummary />} />
@@ -266,6 +264,10 @@ export default function App() {
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
             <Route path="payment/receipt/:paymentType/:identifier" element={<PaymentReceipt />} />
           </Route>
+
+          {/* Guest renewal flow — public, no auth required */}
+          <Route path="guest/renewal/callback" element={<GuestRenewalCallback />} />
+          <Route path="guest/renewal/receipt" element={<GuestRenewalReceipt />} />
 
           {/* Admin Routes */}
           <Route path="admin/*" element={<AdminRoutes />} />

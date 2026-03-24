@@ -1,25 +1,33 @@
-import React,{ useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-hot-toast';
+import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
 
 const AdminUserDetails = () => {
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
-  
-  const userId = window.location.pathname.split('/').pop();
 
-  useEffect(() => {
-    fetchUserDetails();
-  }, [fetchUserDetails]);
+  const getToken = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate('/admin/login');
+      return null;
+    }
+    return session.access_token;
+  };
 
   const fetchUserDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const token = await getToken();
+      if (!token) return;
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}`,
@@ -51,14 +59,17 @@ const AdminUserDetails = () => {
     }
   }, [userId]);
 
-  const handleBack = () => {
-    window.history.back();
-  };
+  useEffect(() => {
+    fetchUserDetails();
+  }, [fetchUserDetails]);
+
+  const handleBack = () => navigate('/admin/users');
 
   const handleSuspend = async () => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const token = await getToken();
+      if (!token) return;
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}/suspend`,
@@ -72,7 +83,6 @@ const AdminUserDetails = () => {
       );
 
       const data = await response.json();
-
       if (data.status) {
         toast.success('User suspended successfully');
         fetchUserDetails();
@@ -80,7 +90,6 @@ const AdminUserDetails = () => {
         toast.error(data.message || 'Failed to suspend user');
       }
     } catch (error) {
-      console.error('Error suspending user:', error);
       toast.error('Failed to suspend user');
     } finally {
       setActionLoading(false);
@@ -90,7 +99,8 @@ const AdminUserDetails = () => {
   const handleActivate = async () => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const token = await getToken();
+      if (!token) return;
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}/activate`,
@@ -104,7 +114,6 @@ const AdminUserDetails = () => {
       );
 
       const data = await response.json();
-
       if (data.status) {
         toast.success('User activated successfully');
         fetchUserDetails();
@@ -112,7 +121,6 @@ const AdminUserDetails = () => {
         toast.error(data.message || 'Failed to activate user');
       }
     } catch (error) {
-      console.error('Error activating user:', error);
       toast.error('Failed to activate user');
     } finally {
       setActionLoading(false);
@@ -122,7 +130,8 @@ const AdminUserDetails = () => {
   const handleDelete = async () => {
     try {
       setActionLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const token = await getToken();
+      if (!token) return;
 
       const response = await fetch(
         `${config.getApiBaseUrl()}/admin/users/${userId}`,
@@ -136,18 +145,14 @@ const AdminUserDetails = () => {
       );
 
       const data = await response.json();
-
       if (data.status) {
         toast.success('User deleted successfully');
         setDeleteModal(false);
-        setTimeout(() => {
-          window.location.href = '/admin/users';
-        }, 1000);
+        setTimeout(() => navigate('/admin/users'), 1000);
       } else {
         toast.error(data.message || 'Failed to delete user');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
       toast.error('Failed to delete user');
     } finally {
       setActionLoading(false);
@@ -156,8 +161,7 @@ const AdminUserDetails = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -166,12 +170,8 @@ const AdminUserDetails = () => {
     });
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-    }).format(amount || 0);
-  };
+  const formatCurrency = (amount) =>
+    new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount || 0);
 
   if (loading) {
     return (
@@ -283,33 +283,23 @@ const AdminUserDetails = () => {
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Phone</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {user.phone || 'Not provided'}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{user.phone || 'Not provided'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Joined</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {formatDate(user.created_at)}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{formatDate(user.created_at)}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">User Type</p>
-                <p className="text-sm font-medium text-gray-900 capitalize">
-                  {user.user_type || 'user'}
-                </p>
+                <p className="text-sm font-medium text-gray-900 capitalize">{user.user_type || 'user'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Last Activity</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {formatDate(stats?.last_activity)}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{formatDate(stats?.last_activity)}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Email Verified</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {user.email_verified_at ? 'Yes' : 'No'}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{user.email_verified_at ? 'Yes' : 'No'}</p>
               </div>
             </div>
           </div>
@@ -322,9 +312,7 @@ const AdminUserDetails = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 mb-1">Total Cars</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {user.cars_count || 0}
-              </p>
+              <p className="text-2xl font-semibold text-gray-900">{user.cars_count || 0}</p>
             </div>
             <div className="rounded-full bg-blue-100 p-2.5">
               <Icon icon="mdi:car" className="h-6 w-6 text-blue-600" />
@@ -336,9 +324,7 @@ const AdminUserDetails = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 mb-1">Total Orders</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {user.orders_count || 0}
-              </p>
+              <p className="text-2xl font-semibold text-gray-900">{user.orders_count || 0}</p>
             </div>
             <div className="rounded-full bg-green-100 p-2.5">
               <Icon icon="mdi:clipboard-list" className="h-6 w-6 text-green-600" />
@@ -350,9 +336,7 @@ const AdminUserDetails = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 mb-1">Pending Orders</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {stats?.pending_orders || 0}
-              </p>
+              <p className="text-2xl font-semibold text-gray-900">{stats?.pending_orders || 0}</p>
             </div>
             <div className="rounded-full bg-orange-100 p-2.5">
               <Icon icon="mdi:clock" className="h-6 w-6 text-orange-600" />
@@ -364,9 +348,7 @@ const AdminUserDetails = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 mb-1">Total Spent</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {formatCurrency(stats?.total_spent)}
-              </p>
+              <p className="text-lg font-semibold text-gray-900">{formatCurrency(stats?.total_spent)}</p>
             </div>
             <div className="rounded-full bg-purple-100 p-2.5">
               <Icon icon="mdi:cash" className="h-6 w-6 text-purple-600" />
@@ -375,7 +357,7 @@ const AdminUserDetails = () => {
         </div>
       </div>
 
-      {/* Recent Activity Sections */}
+      {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Cars */}
         <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
@@ -385,7 +367,8 @@ const AdminUserDetails = () => {
               {user.cars.map((car) => (
                 <div
                   key={car.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition-colors"
+                  onClick={() => window.location.href = `/admin/cars/${car.slug}`}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 truncate">
@@ -396,7 +379,7 @@ const AdminUserDetails = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => window.location.href = `/admin/cars/${car.slug}`}
+                    onClick={() => navigate(`/admin/cars/${car.slug}`)}
                     className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     <Icon icon="mdi:arrow-right" className="h-5 w-5" />
@@ -431,7 +414,7 @@ const AdminUserDetails = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => window.location.href = `/admin/orders/${order.slug}`}
+                    onClick={() => navigate(`/admin/orders/${order.slug}`)}
                     className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     <Icon icon="mdi:arrow-right" className="h-5 w-5" />
@@ -457,13 +440,10 @@ const AdminUserDetails = () => {
                 <Icon icon="mdi:alert" className="h-5 w-5 text-red-600" />
               </div>
             </div>
-            <h3 className="mb-2 text-center text-base font-semibold text-gray-900">
-              Delete User
-            </h3>
+            <h3 className="mb-2 text-center text-base font-semibold text-gray-900">Delete User</h3>
             <p className="mb-5 text-center text-sm text-gray-600">
               Are you sure you want to delete{' '}
-              <span className="font-medium text-gray-900">{user.name}</span>? This action
-              cannot be undone.
+              <span className="font-medium text-gray-900">{user.name}</span>? This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
