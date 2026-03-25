@@ -27,8 +27,8 @@ const AdminCars = () => {
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'unpaid', label: 'Unpaid' },
+    { value: 'active', label: 'Registered' },
+    { value: 'unpaid', label: 'Renewal Due' },
     { value: 'expired', label: 'Expired' },
   ];
 

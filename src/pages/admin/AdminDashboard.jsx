@@ -157,7 +157,7 @@ const AdminDashboard = () => {
       case 'New':
         return 'text-blue-600';
       case 'Done':
-        return 'text-green-600';
+        return 'text-blue-600';
       case 'Declined':
         return 'text-red-600';
       default:
@@ -203,12 +203,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <ClipboardDocumentListIcon className="h-5 w-5 text-green-600" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -218,12 +218,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_users.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <UsersIcon className="h-5 w-5 text-purple-600" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <UsersIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -233,12 +233,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_cars.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-              <TruckIcon className="h-5 w-5 text-orange-600" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <TruckIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -281,12 +281,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {stats ? stats.completed_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-sm font-bold">✓</span>
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 text-sm font-bold">✓</span>
             </div>
           </div>
         </div> */}
