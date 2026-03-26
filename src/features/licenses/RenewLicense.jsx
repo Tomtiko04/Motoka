@@ -85,21 +85,24 @@ export default function RenewLicense() {
           fetchPaymentSchedules(),
         ]);
 
+        const headsArr = Array.isArray(heads) ? heads : [];
+        const schedulesArr = Array.isArray(schedules) ? schedules : [];
+
         const filteredHeads =
           carDetail?.car_type === "private" ||
           carDetail?.car_type === "government"
-            ? heads.filter((h) => h.payment_head_name !== "Hackney Permit")
-            : heads;
+            ? headsArr.filter((h) => h.payment_head_name !== "Hackney Permit")
+            : headsArr;
 
         setPaymentHeads(filteredHeads);
 
         const filteredSchedules =
           carDetail?.car_type === "private" ||
           carDetail?.car_type === "government"
-            ? schedules.filter(
+            ? schedulesArr.filter(
                 (s) => s.payment_head?.payment_head_name !== "Hackney Permit",
               )
-            : schedules;
+            : schedulesArr;
 
         setPaymentSchedules(filteredSchedules);
       } catch (error) {
@@ -206,7 +209,7 @@ export default function RenewLicense() {
   }, [lgaData]);
 
   // Document options from payment heads
-  const docOptions = paymentHeads.map((h) => h.payment_head_name);
+  const docOptions = (Array.isArray(paymentHeads) ? paymentHeads : []).map((h) => h.payment_head_name);
 
   const handleToggleDoc = (doc) => {
     setSelectedDocs((prev) =>
