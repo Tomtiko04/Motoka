@@ -13,6 +13,7 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortFilter, setSortFilter] = useState('recently_added');
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -31,7 +32,7 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, searchTerm, statusFilter]);
+  }, [currentPage, searchTerm, statusFilter, sortFilter]);
 
   const fetchUsers = async () => {
     try {
@@ -47,7 +48,8 @@ const AdminUsers = () => {
         page: currentPage,
         per_page: 15,
         search: searchTerm,
-        status: statusFilter
+        status: statusFilter,
+        sort: sortFilter,
       });
 
       const response = await fetch(
@@ -258,6 +260,17 @@ const AdminUsers = () => {
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
           <option value="deleted">Deleted</option>
+        </select>
+        <select
+          value={sortFilter}
+          onChange={(e) => {
+            setSortFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="recently_added">Recently Added</option>
+          <option value="a_z">A - Z</option>
         </select>
       </div>
 

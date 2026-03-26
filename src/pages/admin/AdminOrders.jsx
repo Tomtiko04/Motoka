@@ -75,16 +75,34 @@ const AdminOrders = () => {
     }
   };
 
+  // Build a human-readable purpose label from order_type + plate/license specifics
+  const getPurpose = (order) => {
+    const type = order.order_type || '';
+    if (type === 'plate_number') {
+      const parts = ['Plate Number'];
+      if (order.plate_type) parts.push(order.plate_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+      if (order.plate_sub_type) parts.push(`(${order.plate_sub_type.replace(/_/g, ' ')})`);
+      return parts.join(' — ');
+    }
+    if (type === 'driver_license') {
+      const parts = ["Driver's License"];
+      if (order.license_type) parts.push(order.license_type.charAt(0).toUpperCase() + order.license_type.slice(1));
+      if (order.license_duration) parts.push(`(${order.license_duration})`);
+      return parts.join(' — ');
+    }
+    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'General Service';
+  };
+
   // Transform orders data to match Figma design
   const transformedOrders = orders.map(order => ({
     id: `#${order.slug?.substring(0, 8) || order.id}`,
     name: order.user?.name || 'Unknown User',
-    purpose: order.order_type?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'General Service',
+    purpose: getPurpose(order),
     amount: `N${parseFloat(order.amount || 0).toLocaleString()}`,
-    location: order.state_name ? `${order.state_name}${order.lga_name ? ', ' + order.lga_name : ''}` : 'Unknown',
-    status: order.status === 'pending' ? 'New' : 
-            order.status === 'in_progress' ? 'Inprogress' : 
-            order.status === 'completed' ? 'Completed' : 
+    location: order.state_name ? `${order.state_name}${order.lga_name ? ', ' + order.lga_name : ''}` : (order.order_type === 'plate_number' || order.order_type === 'driver_license' ? '—' : 'Unknown'),
+    status: order.status === 'pending' ? 'New' :
+            order.status === 'in_progress' ? 'Inprogress' :
+            order.status === 'completed' ? 'Completed' :
             order.status === 'declined' ? 'Declined' : 'New',
     originalOrder: order
   }));

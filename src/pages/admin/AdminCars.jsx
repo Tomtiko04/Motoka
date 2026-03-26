@@ -20,18 +20,28 @@ const AdminCars = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [carTypeFilter, setCarTypeFilter] = useState('all');
+  const [sortFilter, setSortFilter] = useState('recently_added');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   const statusOptions = [
-    { value: 'all', label: 'All Cars', color: 'gray' },
-    { value: 'active', label: 'Active', color: 'green' },
-    { value: 'unpaid', label: 'Unpaid', color: 'yellow' },
-    { value: 'expired', label: 'Expired', color: 'red' },
+    { value: 'all', label: 'All Status' },
+    { value: 'active', label: 'Active' },
+    { value: 'unpaid', label: 'Unpaid' },
+    { value: 'expired', label: 'Expired' },
+  ];
+
+  const carTypeOptions = [
+    { value: 'all', label: 'All Types' },
+    { value: 'private', label: 'Private' },
+    { value: 'commercial', label: 'Commercial' },
+    { value: 'government', label: 'Government' },
   ];
 
   useEffect(() => {
     fetchCars();
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, carTypeFilter, searchTerm, sortFilter]);
 
   const fetchCars = async () => {
     try {
@@ -47,6 +57,9 @@ const AdminCars = () => {
         page: currentPage,
         per_page: 15,
         status: statusFilter,
+        car_type: carTypeFilter,
+        search: searchTerm,
+        sort: sortFilter,
       });
 
       const response = await fetch(`${config.getApiBaseUrl()}/admin/cars?${params}`, {
@@ -71,18 +84,18 @@ const AdminCars = () => {
     }
   };
 
+  const STATUS_MAP = {
+    active:   { color: 'bg-green-100 text-green-800',  label: 'Registered' },
+    approved: { color: 'bg-green-100 text-green-800',  label: 'Approved' },
+    unpaid:   { color: 'bg-yellow-100 text-yellow-800', label: 'Renewal Due' },
+    expired:  { color: 'bg-red-100 text-red-800',       label: 'Expired' },
+  };
+
   const getStatusBadge = (status) => {
-    const statusConfig = {
-      active: { color: 'bg-green-100 text-green-800' },
-      unpaid: { color: 'bg-yellow-100 text-yellow-800' },
-      expired: { color: 'bg-red-100 text-red-800' },
-    };
-
-    const config = statusConfig[status] || statusConfig.active;
-
+    const cfg = STATUS_MAP[status] || { color: 'bg-gray-100 text-gray-700', label: status };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.color}`}>
-        {status.toUpperCase()}
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.color}`}>
+        {cfg.label}
       </span>
     );
   };
@@ -95,20 +108,17 @@ const AdminCars = () => {
     });
   };
 
-  const filteredCars = cars.filter(car =>
-    car.vehicle_make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    car.vehicle_model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    car.registration_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    car.name_of_owner?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    setSearchTerm(searchInput);
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const handleSearchClear = () => {
+    setSearchInput('');
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -121,43 +131,108 @@ const AdminCars = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search cars..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      <div className="bg-white p-4 rounded-lg shadow space-y-3">
+        {/* Search */}
+        <form onSubmit={handleSearchSubmit} className="flex gap-2">
+          <div className="relative flex-1">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by make, model, reg number, or owner..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Search
+          </button>
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={handleSearchClear}
+              className="px-3 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </form>
 
-          {/* Status Filter */}
+        {/* Filters Row */}
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex items-center gap-2">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <FunnelIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={carTypeFilter}
+              onChange={(e) => { setCarTypeFilter(e.target.value); setCurrentPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              {carTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={sortFilter}
+              onChange={(e) => { setSortFilter(e.target.value); setCurrentPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="recently_added">Recently Added</option>
+              <option value="a_z">A - Z</option>
+            </select>
+          </div>
+
+          {(statusFilter !== 'all' || carTypeFilter !== 'all' || sortFilter !== 'recently_added' || searchTerm) && (
+            <button
+              onClick={() => {
+                setStatusFilter('all');
+                setCarTypeFilter('all');
+                setSortFilter('recently_added');
+                setSearchInput('');
+                setSearchTerm('');
+                setCurrentPage(1);
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Reset all filters
+            </button>
+          )}
         </div>
       </div>
 
       {/* Cars Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          </div>
+        ) : cars.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <TruckIcon className="h-12 w-12 text-gray-300 mb-3" />
+            <p className="text-sm font-medium">No cars found</p>
+            {(searchTerm || statusFilter !== 'all' || carTypeFilter !== 'all') && (
+              <p className="text-xs text-gray-400 mt-1">Try adjusting your filters</p>
+            )}
+          </div>
+        ) : null}
+        <div className={`overflow-x-auto${cars.length === 0 || loading ? ' hidden' : ''}`}>
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
@@ -174,6 +249,9 @@ const AdminCars = () => {
                   Status
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Date Added
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Expiry Date
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -182,7 +260,7 @@ const AdminCars = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCars.map((car) => (
+              {cars.map((car) => (
                 <tr key={car.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
@@ -224,6 +302,12 @@ const AdminCars = () => {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {getStatusBadge(car.status)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      {car.created_at ? formatDate(car.created_at) : '—'}
+                    </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
