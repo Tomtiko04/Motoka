@@ -10,6 +10,8 @@ import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
+import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
+import { saveDeferredReminders } from "../../services/apiDeferredReminders";
 import { ClipLoader } from "react-spinners";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
@@ -71,6 +73,9 @@ export default function RenewLicense() {
   const [inlinePhone, setInlinePhone] = useState("");
   const [isSavingPhone, setIsSavingPhone] = useState(false);
   const [phoneStep, setPhoneStep] = useState(""); // "saving" | "initializing"
+  const [showPartialPrompt, setShowPartialPrompt] = useState(false);
+  const [pendingPaymentPayload, setPendingPaymentPayload] = useState(null);
+  const [pendingSkippedDocs, setPendingSkippedDocs] = useState([]);
 
   const isState = state?.data;
 
@@ -368,9 +373,55 @@ export default function RenewLicense() {
       } : {}),
     };
 
+    const unpaidDocs = docOptions.filter(
+      (doc) => !existingPayments.some((p) => p.payment_head_name === doc),
+    );
+    const skippedDocs = unpaidDocs.filter((doc) => !selectedDocs.includes(doc));
+
+    if (skippedDocs.length > 0) {
+      setPendingPaymentPayload(paymentPayload);
+      setPendingSkippedDocs(skippedDocs);
+      setShowPartialPrompt(true);
+      return;
+    }
+
     // Initialize payment for all selected schedules
     if (paymentPayload.payment_schedule_id.length > 0) {
       startPayment(paymentPayload);
+    }
+  };
+
+  const persistDeferred = async (reminders) => {
+    if (!carDetail?.slug || !Array.isArray(reminders) || reminders.length === 0) return;
+    try {
+      await saveDeferredReminders({
+        car_slug: carDetail.slug,
+        reminders,
+      });
+    } catch (error) {
+      toast.error("Could not save reminder preferences. Continuing to payment.");
+    }
+  };
+
+  const handleSkipPartialPrompt = async () => {
+    const reminders = pendingSkippedDocs.map((documentName) => ({
+      document_name: documentName,
+      reason: "skipped",
+      expiry_date: null,
+      custom_reason: null,
+    }));
+    await persistDeferred(reminders);
+    setShowPartialPrompt(false);
+    if (pendingPaymentPayload?.payment_schedule_id?.length > 0) {
+      startPayment(pendingPaymentPayload);
+    }
+  };
+
+  const handleConfirmPartialPrompt = async (reminders) => {
+    await persistDeferred(reminders);
+    setShowPartialPrompt(false);
+    if (pendingPaymentPayload?.payment_schedule_id?.length > 0) {
+      startPayment(pendingPaymentPayload);
     }
   };
 
@@ -922,6 +973,12 @@ export default function RenewLicense() {
           </div>
         </div>
       </div>
+      <PartialRenewalPromptModal
+        isOpen={showPartialPrompt}
+        skippedDocs={pendingSkippedDocs}
+        onSkip={handleSkipPartialPrompt}
+        onConfirm={handleConfirmPartialPrompt}
+      />
     </>
   );
 }
