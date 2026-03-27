@@ -31,6 +31,13 @@ body {
   background-repeat: no-repeat;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 .customscroll::-webkit-scrollbar{
     height: 8px;

@@ -57,7 +57,9 @@ import NotFound404 from "./components/NotFound404.jsx";
 import LandingPage from "./Landing/Landing.jsx";
 import GuestRenewalCallback from "./pages/GuestRenewalCallback.jsx";
 import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
-
+import BlogPage from "./pages/BlogPage.jsx";
+import BlogsPage from "./pages/Blogs.jsx";
+import BlogLayout from "./components/BlogLayout.jsx";
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
@@ -152,8 +154,15 @@ export default function App() {
         <Routes>
           {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
           <Route path="/" element={<LandingPage />} />
+
+
           {/* Auth Routes */}
-          <Route path="auth" element={<AuthLayout />}>
+          <Route element={<BlogLayout />} >
+          <Route path="blogs" element={<BlogsPage />} />
+          <Route path="/blog/:slug" element={<BlogPage />} />
+         </Route> 
+
+         <Route path="auth" element={<AuthLayout />}>
             <Route
               path="login"
               element={
