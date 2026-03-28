@@ -72,7 +72,7 @@ export default function BlogSection() {
                 <p className="text-gray-600 text-sm mb-4">
                   {blog.excerpt}
                 </p>
-                <Link to={computeSlug(blog.title)}>
+                <Link to={`blog/${computeSlug(blog.title)}`}>
                   <button className="text-blue-600 font-medium hover:underline text-sm">
                     Read more →
                   </button>

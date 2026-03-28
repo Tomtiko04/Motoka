@@ -12,7 +12,7 @@ import { logout } from "../services/apiAuth";
 import Logo2 from "../assets/images/Logo.svg";
 import { useNotifications } from "../features/notifications/useNotification";
 import RecentNotificationModal from "./RecentNotification.jsx";
-
+import Footer from "../Landing/components/Footer.jsx";
 const navLinks = [
   { name: "Landing", path: "/" },
   { name: "Blogs", path: "/blogs" },
@@ -160,6 +160,7 @@ export default function BlogLayout() {
       <div className="flex flex-grow flex-col w-full px-0 mt-6 sm:mt-16 sm:items-center sm:justify-center sm:px-6">
         <Outlet />
       </div>
+      <Footer/>
     </div>
   );
 }

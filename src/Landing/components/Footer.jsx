@@ -3,7 +3,7 @@ import logo from "../../assets/images/landing/Group 1171279822.svg";
 import sponsors from '../../assets/images/landing/Group 1171279823.svg'
 
 function Footer() {
-    const scrollToTop = () => {
+  const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
@@ -35,7 +35,7 @@ function Footer() {
           </button>
         </div>
         <div className="py-10 w-full flex items-center">
-        <img src={sponsors} alt="sponsors" className="h-8 w-fit" /></div>
+          <img src={sponsors} alt="sponsors" className="h-8 w-fit" /></div>
       </div>
       <div className="mt-20 sm:mt-40 grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 justify-center justify-items-start">
         <div className="mt-10 flex flex-col items-start gap-6 sm:gap-8 sm:mt-0 col-span">
@@ -66,28 +66,28 @@ function Footer() {
             />
           </div>
           <p className="font-regular text-[13px] text-white/70">
-            &copy; 2025 Motoka Inc
+            &copy; {new Date().getFullYear()} Motoka Inc
           </p>
         </div>
         {
-            [
-                {title: 'Services', links: ['License Auto Renewal', 'License Auto Reminder', 'Vehicle Maintenance', 'Ladipo Car parts', 'Traffic Education']},
-                {title: 'Resources', links: ['Blog & News', 'Driver Guides', 'Community Forum', 'How Motoka Works']},
-                {title: 'Company', links: ['About Motoka', 'Our Mission', 'Careers', 'Partners', 'Contact Us']},
-            ].map((section) => (
-                <div key={section.title}  className="w-full flex justify-start sm:justify-end">
-                <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
-                    <h4 className="text-lg font-semibold text-white">{section.title}</h4>
-                    <div className="flex flex-col items-start gap-4">
-                        {section.links.map((link) => (
-                            <a key={link} href="#" className="text-[15px] font-regular text-white/70 hover:text-white">
-                                {link}
-                            </a>
-                        ))} 
-                    </div>
+          [
+            { title: 'Services', links: ['License Auto Renewal', 'License Auto Reminder', 'Vehicle Maintenance', 'Ladipo Car parts', 'Traffic Education'] },
+            { title: 'Resources', links: ['Blog & News', 'Driver Guides', 'Community Forum', 'How Motoka Works'] },
+            { title: 'Company', links: ['About Motoka', 'Our Mission', 'Careers', 'Partners', 'Contact Us'] },
+          ].map((section) => (
+            <div key={section.title} className="w-full flex justify-start sm:justify-end">
+              <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
+                <h4 className="text-lg font-semibold text-white">{section.title}</h4>
+                <div className="flex flex-col items-start gap-4">
+                  {section.links.map((link) => (
+                    <a key={link} href="#" className="text-[15px] font-regular text-white/70 hover:text-white">
+                      {link}
+                    </a>
+                  ))}
                 </div>
-                </div>
-            ))
+              </div>
+            </div>
+          ))
         }
       </div>
     </div>
