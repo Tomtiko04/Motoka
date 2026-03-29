@@ -10,8 +10,12 @@ import {
   UserIcon,
   CalendarIcon,
   MapPinIcon,
+  PlusIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 import config from '../../config/config';
+import AddCarModal from '../../components/admin/AddCarModal';
+import BulkImportModal from '../../components/admin/BulkImportModal';
 
 const AdminCars = () => {
   const navigate = useNavigate();
@@ -24,6 +28,8 @@ const AdminCars = () => {
   const [sortFilter, setSortFilter] = useState('recently_added');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [showAddCar, setShowAddCar] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -101,7 +107,10 @@ const AdminCars = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return '—';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -127,6 +136,22 @@ const AdminCars = () => {
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Cars</h1>
           <p className="mt-1 text-sm text-gray-500">View and manage all registered vehicles</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowBulkImport(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <ArrowUpTrayIcon className="h-4 w-4" />
+            Bulk Import
+          </button>
+          <button
+            onClick={() => setShowAddCar(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Add Car
+          </button>
         </div>
       </div>
 
@@ -312,7 +337,7 @@ const AdminCars = () => {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
                       <CalendarIcon className="h-4 w-4 mr-2" />
-                      {formatDate(car.expiry_date)}
+                      {car.expiry_date ? formatDate(car.expiry_date) : '—'}
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
@@ -377,6 +402,19 @@ const AdminCars = () => {
           </div>
         )}
       </div>
+      {showAddCar && (
+        <AddCarModal
+          onClose={() => setShowAddCar(false)}
+          onSuccess={() => { setCurrentPage(1); fetchCars(); }}
+        />
+      )}
+
+      {showBulkImport && (
+        <BulkImportModal
+          onClose={() => setShowBulkImport(false)}
+          onSuccess={() => { setCurrentPage(1); fetchCars(); }}
+        />
+      )}
     </div>
   );
 };
