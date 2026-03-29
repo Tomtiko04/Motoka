@@ -7,6 +7,8 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { fetchRenewalItems, fetchStates, fetchLGAs, initGuestRenewal } from "../../services/apiGuest";
+import { saveGuestDeferredReminders } from "../../services/apiDeferredReminders";
+import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
 import { useNavigate } from "react-router-dom";
 
 export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
@@ -37,6 +39,8 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
   // Step 3 — gateway selection
   const [selectedGateway, setSelectedGateway] = useState("monicredit");
+  const [showPartialPrompt, setShowPartialPrompt] = useState(false);
+  const [pendingSkippedDocs, setPendingSkippedDocs] = useState([]);
 
   // Location data (loaded from backend)
   const [states, setStates] = useState([]);
@@ -195,6 +199,45 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   // ── Step 2 → Step 3: advance to gateway selection ────────────────────────
   const handleProceedToPayment = () => {
     if (!isFormValid()) return;
+    const skipped = renewalItems
+      .filter((item) => !item.required && !selectedDocs.includes(item.id))
+      .map((item) => item.name);
+    if (skipped.length > 0) {
+      setPendingSkippedDocs(skipped);
+      setShowPartialPrompt(true);
+      return;
+    }
+    setStep(3);
+  };
+
+  const persistGuestDeferred = async (reminders) => {
+    if (!formData.email || !plateNumber || !Array.isArray(reminders) || reminders.length === 0) return;
+    try {
+      await saveGuestDeferredReminders({
+        guest_email: formData.email,
+        plate_number: plateNumber.replace(/\s+/g, "").toUpperCase(),
+        reminders,
+      });
+    } catch (error) {
+      toast.error("Could not save reminder preferences. Continuing.");
+    }
+  };
+
+  const handleSkipPartialPrompt = async () => {
+    const reminders = pendingSkippedDocs.map((documentName) => ({
+      document_name: documentName,
+      reason: "skipped",
+      expiry_date: null,
+      custom_reason: null,
+    }));
+    await persistGuestDeferred(reminders);
+    setShowPartialPrompt(false);
+    setStep(3);
+  };
+
+  const handleConfirmPartialPrompt = async (reminders) => {
+    await persistGuestDeferred(reminders);
+    setShowPartialPrompt(false);
     setStep(3);
   };
 
@@ -265,6 +308,12 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
+      <PartialRenewalPromptModal
+        isOpen={showPartialPrompt}
+        skippedDocs={pendingSkippedDocs}
+        onSkip={handleSkipPartialPrompt}
+        onConfirm={handleConfirmPartialPrompt}
+      />
       <div
         className="relative flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl flex-col md:flex-row max-h-[90vh] md:h-auto text-left overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
