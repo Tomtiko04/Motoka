@@ -369,18 +369,15 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
                       <div className="relative w-full">
                         <input
-                          type="text"
+                          type="date"
                           id="expiryDate"
                           value={formData.expiryDate}
                           onChange={handleChange}
-                          onFocus={(e) => (e.target.type = "date")}
-                          onBlur={(e) => (e.target.type = "text")}
-                          className="peer block w-full rounded-lg bg-[#F4F5FC] px-4 pb-2.5 pt-5 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 placeholder-transparent"
-                          placeholder="Enter last expiry date"
+                          className="peer block w-full rounded-lg bg-[#F4F5FC] px-4 pb-2.5 pt-5 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5"
                         />
                         <label
                           htmlFor="expiryDate"
-                          className="absolute left-4 top-4 z-10 origin-[0] -translate-y-2.5 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-2.5 peer-focus:scale-75 peer-focus:text-[#2389E3] pointer-events-none"
+                          className="absolute left-4 top-1.5 z-10 text-xs text-gray-500 pointer-events-none"
                         >
                           Enter last expiry date*
                         </label>
@@ -624,42 +621,6 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
                     <div className="mt-6">
                       <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {HARDCODED_DOCS.map((doc) => {
-                          const isSelected = selectedDocs.includes(doc);
-                          return (
-                            <button
-                              key={doc}
-                              type="button"
-                              onClick={() => handleToggleDoc(doc)}
-                              className={`group relative flex w-full items-center gap-2 rounded-full px-4 py-3 transition-all ${
-                                isSelected
-                                  ? "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
-                                  : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
-                              }`}
-                            >
-                              <div
-                                className={`flex shrink-0 items-center justify-center transition-colors ${
-                                  isSelected ? "text-[#05243F]" : "text-[#9CA3AF] group-hover:text-[#697C8C]"
-                                }`}
-                              >
-                                <Icon
-                                  icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
-                                  fontSize={22}
-                                  color={isSelected ? "#2389E3" : "#9CA3AF"}
-                                />
-                              </div>
-                              <span
-                                className={`text-[13px] md:text-sm text-left font-normal transition-colors truncate ${
-                                  isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
-                                }`}
-                              >
-                                {doc}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
                       {loadingItems ? (
                         <div className="flex items-center justify-center py-6">
                           <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
