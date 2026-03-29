@@ -39,9 +39,11 @@ export async function getCarDocuments(carSlug) {
 }
 
 /**
- * Get driver's license documents for the current user
+ * Get driver's license documents for the current user, optionally filtered by year
+ * @param {number|string|null} year - 4-digit year, e.g. 2025
  */
-export async function getDriverLicenseDocuments() {
-  const { data } = await api.get("/documents/driver-license");
+export async function getDriverLicenseDocuments(year = null) {
+  const params = year ? { year } : {};
+  const { data } = await api.get("/documents/driver-license", { params });
   return data?.data?.documents || data?.documents || [];
 }
