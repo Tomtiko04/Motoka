@@ -35,9 +35,8 @@ function Footer() {
             Get Started
           </button>
         </div>
-        <div className="flex items-center w-full py-10">
-          <img src={sponsors} alt="sponsors" className="h-8 w-fit" />
-        </div>
+        <div className="py-10 w-full flex items-center">
+          <img src={sponsors} alt="sponsors" className="h-8 w-fit" /></div>
       </div>
       <div className="grid justify-center w-full grid-cols-1 gap-6 mt-20 justify-items-start sm:mt-40 sm:grid-cols-2 md:grid-cols-4">
         <div className="flex flex-col items-start gap-6 mt-10 col-span sm:mt-0 sm:gap-8">
@@ -83,62 +82,29 @@ function Footer() {
             </a>
           </div>
           <p className="font-regular text-[13px] text-white/70">
-            &copy; 2025 Motoka Inc
+            &copy; {new Date().getFullYear()} Motoka Inc
           </p>
         </div>
-        {[
-          {
-            title: "Services",
-            links: [
-              "License Auto Renewal",
-              "License Auto Reminder",
-              "Vehicle Maintenance",
-              "Ladipo Car parts",
-              "Traffic Education",
-            ],
-          },
-          {
-            title: "Resources",
-            links: [
-              "Blog & News",
-              "Driver Guides",
-              "Community Forum",
-              "How Motoka Works",
-            ],
-          },
-          {
-            title: "Company",
-            links: [
-              "About Motoka",
-              "Our Mission",
-              "Careers",
-              "Partners",
-              "Contact Us",
-            ],
-          },
-        ].map((section) => (
-          <div
-            key={section.title}
-            className="flex justify-start w-full sm:justify-end"
-          >
-            <div className="flex flex-col items-start gap-6 mt-10 w-fit sm:mt-0">
-              <h4 className="text-lg font-semibold text-white">
-                {section.title}
-              </h4>
-              <div className="flex flex-col items-start gap-4">
-                {section.links.map((link) => (
-                  <a
-                    key={link}
-                    href="#"
-                    className="font-regular text-[15px] text-white/70 hover:text-white"
-                  >
-                    {link}
-                  </a>
-                ))}
+        {
+          [
+            { title: 'Services', links: ['License Auto Renewal', 'License Auto Reminder', 'Vehicle Maintenance', 'Ladipo Car parts', 'Traffic Education'] },
+            { title: 'Resources', links: ['Blog & News', 'Driver Guides', 'Community Forum', 'How Motoka Works'] },
+            { title: 'Company', links: ['About Motoka', 'Our Mission', 'Careers', 'Partners', 'Contact Us'] },
+          ].map((section) => (
+            <div key={section.title} className="w-full flex justify-start sm:justify-end">
+              <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
+                <h4 className="text-lg font-semibold text-white">{section.title}</h4>
+                <div className="flex flex-col items-start gap-4">
+                  {section.links.map((link) => (
+                    <a key={link} href="#" className="text-[15px] font-regular text-white/70 hover:text-white">
+                      {link}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
   );
