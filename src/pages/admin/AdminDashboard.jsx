@@ -27,6 +27,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
   const [loading, setLoading] = useState(true);
@@ -38,28 +39,28 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('adminToken');
+      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const [statsResponse, ordersResponse, transactionsResponse] = await Promise.all([
-        fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        }),
-        fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        }),
-        fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        }),
+      // All 4 fetches in parallel — stats, recent orders, transactions, full orders for chart
+      const [statsRes, ordersRes, txRes, allOrdersRes] = await Promise.all([
+        fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers }),
+        fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }),
+        fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }),
+        fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }),
       ]);
 
-      const [statsData, ordersData, transactionsData] = await Promise.all([
-        statsResponse.json(),
-        ordersResponse.json(),
-        transactionsResponse.json(),
+      const [statsData, ordersData, txData, allOrdersData] = await Promise.all([
+        statsRes.json(), ordersRes.json(), txRes.json(), allOrdersRes.json(),
       ]);
 
       if (statsData.status) setStats(statsData.data);
       if (ordersData.status) setRecentOrders(ordersData.data);
-      if (transactionsData.status) setRecentTransactions(transactionsData.data);
+      if (txData.status) setRecentTransactions(txData.data);
+
+      const orders = allOrdersData.status
+        ? (allOrdersData.data?.data || allOrdersData.data || [])
+        : (ordersData.data || []);
+      setAllOrders(orders);
     } catch (error) {
       toast.error('Failed to fetch dashboard data');
     } finally {
@@ -95,34 +96,12 @@ const AdminDashboard = () => {
       .map(({ label, amount, orders }) => ({ label, amount, orders }));
   };
 
+  // Re-bucket whenever orders data or period changes — no extra fetch needed
   useEffect(() => {
-    // Immediately render from already-fetched recentOrders
-    const quick = buildChartFromOrders(recentOrders, chartPeriod);
-    if (quick.length > 0) setChartData(quick);
-
-    // Then try to fetch full orders history
-    let cancelled = false;
-    (async () => {
-      try {
-        const token = localStorage.getItem('adminToken');
-        const params = new URLSearchParams({ page: 1, per_page: 500 });
-        const res = await fetch(
-          `${config.getApiBaseUrl()}/admin/orders?${params}`,
-          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-        );
-        const data = await res.json();
-        if (!cancelled && data.status) {
-          const allOrders = data.data?.data || data.data || [];
-          const built = buildChartFromOrders(allOrders, chartPeriod);
-          if (built.length > 0) setChartData(built);
-        }
-      } catch {
-        // keep the quick data
-      }
-    })();
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartPeriod, recentOrders]);
+    const source = allOrders.length > 0 ? allOrders : recentOrders;
+    const built = buildChartFromOrders(source, chartPeriod);
+    if (built.length > 0) setChartData(built);
+  }, [chartPeriod, allOrders, recentOrders]);
 
   // Helper function to format order status
   const formatOrderStatus = (status) => {
@@ -203,12 +182,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-green-600">
                 {stats ? stats.total_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <ClipboardDocumentListIcon className="h-5 w-5 text-green-600" />
             </div>
           </div>
         </div>
@@ -218,12 +197,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-purple-600">
                 {stats ? stats.total_users.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <UsersIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <UsersIcon className="h-5 w-5 text-purple-600" />
             </div>
           </div>
         </div>
@@ -233,12 +212,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-orange-600">
                 {stats ? stats.total_cars.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <TruckIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+              <TruckIcon className="h-5 w-5 text-orange-600" />
             </div>
           </div>
         </div>
