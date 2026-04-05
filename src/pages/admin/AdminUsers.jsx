@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
+import AddUserModal from '../../components/admin/AddUserModal';
 
 const AdminUsers = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const AdminUsers = () => {
   const [sortFilter, setSortFilter] = useState('recently_added');
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
   const [actionLoading, setActionLoading] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
 
   const mapUser = (row) => ({
     userId: row.user_id || row.id,
@@ -27,6 +29,7 @@ const AdminUsers = () => {
     deleted_at: row.deleted_at || null,
     created_at: row.created_at,
     cars_count: row.cars_count || 0,
+    plates: row.plates || [],
     orders_count: row.orders_count || 0,
   });
 
@@ -228,6 +231,13 @@ const AdminUsers = () => {
           <h1 className="text-xl font-semibold text-gray-900">Users</h1>
           <p className="mt-1 text-sm text-gray-500">Manage all registered users</p>
         </div>
+        <button
+          onClick={() => setShowAddUser(true)}
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+        >
+          <Icon icon="mdi:account-plus" className="h-4 w-4" />
+          Add User
+        </button>
       </div>
 
       {/* Filters */}
@@ -303,10 +313,13 @@ const AdminUsers = () => {
                     Contact
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Plate No.
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Status
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Stats
+                    Cars
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Joined
@@ -345,24 +358,29 @@ const AdminUsers = () => {
                         {user.phone || 'No phone'}
                       </div>
                     </td>
+                    <td className="px-4 py-3">
+                      {user.plates.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {user.plates.slice(0, 2).map((p) => (
+                            <span key={p} className="inline-block rounded bg-gray-100 px-2 py-0.5 text-xs font-mono font-medium text-gray-700">
+                              {p}
+                            </span>
+                          ))}
+                          {user.plates.length > 2 && (
+                            <span className="inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                              +{user.plates.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       {getStatusBadge(user)}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-500">Cars:</span>{' '}
-                          <span className="font-medium text-gray-900">
-                            {user.cars_count || 0}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Orders:</span>{' '}
-                          <span className="font-medium text-gray-900">
-                            {user.orders_count || 0}
-                          </span>
-                        </div>
-                      </div>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm">
+                      <span className="font-medium text-gray-900">{user.cars_count || 0}</span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                       {formatDate(user.created_at)}
@@ -440,6 +458,14 @@ const AdminUsers = () => {
             Next
           </button>
         </div>
+      )}
+
+      {/* Add User Modal */}
+      {showAddUser && (
+        <AddUserModal
+          onClose={() => setShowAddUser(false)}
+          onSuccess={() => fetchUsers()}
+        />
       )}
 
       {/* Delete Confirmation Modal */}
