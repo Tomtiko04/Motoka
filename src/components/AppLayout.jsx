@@ -10,12 +10,14 @@ import { logout } from "../services/apiAuth";
 import Logo2 from "../assets/images/Logo.svg";
 import { useNotifications } from "../features/notifications/useNotification";
 import RecentNotificationModal from "./RecentNotification.jsx";
+import useCartStore, { selectItemCount } from "../store/cartStore";
+import { authStorage } from "../utils/authStorage";
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
-    // { name: "Ladipo", path: "/ladipo" },
+    { name: "Ladipo", path: "/ladipo" },
     // { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Settings", path: "/settings" },
   ];
@@ -28,6 +30,9 @@ export default function AppLayout() {
   const [isDropDownMenuOpen, setIsDropDownMenuOpen] = useState(false);
   const [notificationsModal, setNotificationsModal] = useState(false);
   const { data: notifications } = useNotifications();
+  const itemCount = useCartStore(selectItemCount);
+  const initializeCart = useCartStore((s) => s.initializeCart);
+  const refreshFromBackend = useCartStore((s) => s.refreshFromBackend);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,6 +85,20 @@ export default function AppLayout() {
   }
 
   useEffect(() => {
+    initializeCart();
+  }, [initializeCart]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!authStorage.isAuthenticated()) return;
+      refreshFromBackend();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [refreshFromBackend]);
+
+  useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropDownMenuOpen(false);
@@ -125,8 +144,22 @@ export default function AppLayout() {
                 />
               </div>
 
-              {/* Mobile menu button and notifications */}
+              {/* Mobile menu button and icons */}
               <div className="flex items-center gap-4 md:hidden">
+                <button
+                  onClick={() => navigate("/ladipo/cart-page")}
+                  className="relative flex items-center justify-center text-[#05243F]/60 hover:text-[#05243F]"
+                >
+                  <Icon
+                    icon="solar:bag-4-bold"
+                    fontSize={20}
+                  />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EBB850] text-[10px] font-medium text-white">
+                      {itemCount > 99 ? "99+" : itemCount}
+                    </span>
+                  )}
+                </button>
                 <div
                   className="relative"
                   // onClick={() => navigate("/notifications")}
@@ -177,6 +210,20 @@ export default function AppLayout() {
 
               {/* User Actions */}
               <div className="hidden items-center gap-4 md:flex">
+                <button
+                  onClick={() => navigate("/ladipo/cart-page")}
+                  className="relative flex items-center justify-center text-[#05243F]/60 hover:text-[#05243F]"
+                >
+                  <Icon
+                    icon="solar:bag-4-bold"
+                    fontSize={20}
+                  />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EBB850] text-[10px] font-medium text-white">
+                      {itemCount > 99 ? "99+" : itemCount}
+                    </span>
+                  )}
+                </button>
                 <div
                   className="relative"
                   // onClick={() => navigate("/notifications")}

@@ -110,6 +110,7 @@ const AdminLayout = () => {
     { name: 'Users', href: '/admin/users', current: location.pathname.startsWith('/admin/users') },
     { name: 'Documents', href: '/admin/documents', current: location.pathname.startsWith('/admin/documents') },
     { name: 'Driver Licenses', href: '/admin/driver-license-applications', current: location.pathname.startsWith('/admin/driver-license-applications') },
+    { name: 'Ladipo', href: '/admin/ladipo', current: location.pathname.startsWith('/admin/ladipo') },
   ];
 
   if (!adminUser) {
