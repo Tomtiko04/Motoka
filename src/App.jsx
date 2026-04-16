@@ -45,6 +45,11 @@ import CarDetailsModal from "./components/CarDetailsModal.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
 import ProductModal from "./features/ladipo/components/modal.jsx";
+import LadipoCheckout from "./features/ladipo/LadipoCheckout.jsx";
+import LadipoPaymentCallback from "./features/ladipo/LadipoPaymentCallback.jsx";
+import LadipoOrderSuccess from "./features/ladipo/LadipoOrderSuccess.jsx";
+import LadipoPaymentStatusModals from "./features/ladipo/components/LadipoPaymentStatusModals.jsx";
+import LadipoPaystackReturnHandler from "./features/ladipo/LadipoPaystackReturnHandler.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
 import PaymentReceipt from "./pages/PaymentReceipt.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
@@ -150,6 +155,8 @@ export default function App() {
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
         <ScrollToTop />
+        <LadipoPaystackReturnHandler />
+        <LadipoPaymentStatusModals />
         {isOpen && <CarDetailsModal />}
         <Routes>
           {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
@@ -268,6 +275,9 @@ export default function App() {
               <Route index element={<Ladipo />} />
               <Route path=":slug" element={<ProductModal />} />
               <Route path="cart-page" element={<CartPage />} />
+              <Route path="checkout" element={<LadipoCheckout />} />
+              <Route path="payment/callback" element={<LadipoPaymentCallback />} />
+              <Route path="order-success" element={<LadipoOrderSuccess />} />
             </Route>
             <Route path="payment-success" element={<SuccessPage />} />
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />

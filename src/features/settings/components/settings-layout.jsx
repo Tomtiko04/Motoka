@@ -54,6 +54,8 @@ export default function SettingsLayout({
         return { section: "Settings", page: "Auto Renewal" };
       case "billing":
         return { section: "Settings", page: "Billing Address" };
+      case "ladipo-orders":
+        return { section: "Settings", page: "My Orders" };
       case "push-notification":
         return { section: "Settings", page: "Push Notification" };
       case "custom-notification":
