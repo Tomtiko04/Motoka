@@ -15,8 +15,9 @@ const QUICK_ACTIONS = [
 const PRICE_PREVIEWS = [
   { name: "Vehicle Licence", price: "₦5,000" },
   { name: "Insurance", price: "₦15,000" },
-  { name: "Road Worthiness", price: "₦11,500" },
+  { name: "Road Worthiness + Referral", price: "₦11,500" },
   { name: "Proof of Ownership", price: "₦3,000" },
+  { name: "Hackney Permit", price: "₦4,000" },
 ];
 
 function Bubble({ msg }) {
@@ -24,7 +25,7 @@ function Bubble({ msg }) {
   return (
     <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
       {!isUser && (
-        <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2389E3]">
+        <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EBB950]">
           <Icon icon="solar:stars-bold" className="text-white" fontSize={13} />
         </div>
       )}
@@ -151,7 +152,7 @@ export default function Mo() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#2389E3] px-5 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#1a70c7] hover:shadow-xl"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#EBB950] px-5 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#d4a43e] hover:shadow-xl"
           >
             <Icon icon="solar:stars-bold" fontSize={18} />
             <span className="text-sm font-semibold">Ask Mo</span>
@@ -171,22 +172,22 @@ export default function Mo() {
             style={{ height: "540px" }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between bg-[#05243F] px-4 py-3.5">
+            <div className="flex items-center justify-between bg-[#EBB950] px-4 py-3.5">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2389E3]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/25">
                   <Icon icon="solar:stars-bold" className="text-white" fontSize={17} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white leading-tight">Mo</p>
                   <div className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                    <p className="text-xs text-white/60">Motoka AI · Online</p>
+                    <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                    <p className="text-xs text-white/80">Motoka AI · Online</p>
                   </div>
                 </div>
               </div>
               <button
                 onClick={handleClose}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
               >
                 <Icon icon="solar:close-bold" fontSize={14} />
               </button>
@@ -202,14 +203,18 @@ export default function Mo() {
               {showWelcome && (
                 <div className="pl-9 space-y-3">
                   {/* Price snapshot */}
-                  <div className="rounded-xl border border-[#E8EDF5] bg-[#F8FAFD] p-3">
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#697C8C]">
-                      Renewal Prices
-                    </p>
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                      {PRICE_PREVIEWS.map((p) => (
-                        <div key={p.name} className="flex flex-col">
-                          <span className="text-[10px] text-[#697C8C]">{p.name}</span>
+                  <div className="overflow-hidden rounded-xl border border-[#E8EDF5] bg-white">
+                    <div className="flex items-center gap-2 border-b border-[#E8EDF5] bg-[#FFFBF0] px-3 py-2">
+                      <Icon icon="solar:tag-price-bold" fontSize={13} className="text-[#EBB950]" />
+                      <p className="text-xs font-semibold text-[#05243F]">Renewal Prices</p>
+                    </div>
+                    <div className="divide-y divide-[#F4F5FC]">
+                      {PRICE_PREVIEWS.map((p, i) => (
+                        <div key={p.name} className="flex items-center gap-3 px-3 py-2">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EBB950]/15 text-[10px] font-bold text-[#EBB950]">
+                            {i + 1}
+                          </span>
+                          <span className="flex-1 text-xs text-[#05243F]/80">{p.name}</span>
                           <span className="text-xs font-semibold text-[#05243F]">{p.price}</span>
                         </div>
                       ))}
@@ -235,7 +240,7 @@ export default function Mo() {
               {/* Thinking indicator */}
               {thinking && (
                 <div className="flex items-end gap-2">
-                  <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2389E3]">
+                  <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EBB950]">
                     <Icon icon="solar:stars-bold" className="text-white" fontSize={13} />
                   </div>
                   <div className="flex items-center gap-1 rounded-2xl rounded-bl-none bg-[#F0F4FA] px-4 py-3">
@@ -264,7 +269,7 @@ export default function Mo() {
                 <button
                   onClick={() => send()}
                   disabled={!input.trim() || thinking}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2389E3] text-white transition-all hover:bg-[#1a70c7] disabled:opacity-30"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EBB950] text-white transition-all hover:bg-[#d4a43e] disabled:opacity-30"
                 >
                   <Icon icon="solar:arrow-up-bold" fontSize={14} />
                 </button>
