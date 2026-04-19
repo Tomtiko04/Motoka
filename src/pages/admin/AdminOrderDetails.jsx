@@ -197,6 +197,12 @@ const AdminOrderDetails = () => {
       <div class="item"><label>Registration Status</label><p>${fmt(order?.car?.registration_status?.toUpperCase())}</p></div>
     </div>
 
+    ${order?.renewal_state ? `
+    <h2>Renewal Information</h2>
+    <div class="grid">
+      <div class="item"><label>State of Renewal</label><p>${fmt(order?.renewal_state)}${order?.renewal_state === 'Lagos' ? ' (Physical Inspection Required)' : ''}</p></div>
+    </div>` : ''}
+
     ${order?.delivery_address ? `
     <h2>Delivery Information</h2>
     <div class="grid">
@@ -447,6 +453,26 @@ const AdminOrderDetails = () => {
                 )}
               </div>
             </div>
+          )}
+
+          {/* Renewal State */}
+          {order.renewal_state && (
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Renewal Information</h3>
+            <div className="flex items-center gap-3">
+              <div>
+                <label className="text-sm font-medium text-gray-500">State of Renewal</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm font-semibold text-gray-900">{order.renewal_state}</p>
+                  {order.renewal_state === "Lagos" && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      Physical Inspection Required
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
           )}
 
           {/* Delivery Information */}

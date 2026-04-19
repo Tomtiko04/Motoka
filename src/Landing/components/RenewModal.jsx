@@ -10,6 +10,15 @@ import { fetchRenewalItems, fetchStates, fetchLGAs, initGuestRenewal } from "../
 import { saveGuestDeferredReminders } from "../../services/apiDeferredReminders";
 import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
 import { useNavigate } from "react-router-dom";
+import SearchableSelect from "../../components/shared/SearchableSelect";
+
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+  "FCT (Abuja)", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+  "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo",
+  "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara",
+];
 
 export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   const navigate = useNavigate();
@@ -36,6 +45,9 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     contact: "",
     fee: 0,
   });
+
+  // State of renewal — defaults to Ogun
+  const [renewalState, setRenewalState] = useState("Ogun");
 
   // Step 3 — gateway selection
   const [selectedGateway, setSelectedGateway] = useState("monicredit");
@@ -173,6 +185,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
   const isFormValid = () => {
     if (selectedDocs.length === 0) return false;
+    if (!renewalState) return false;
     if (wantsDelivery) {
       return (
         deliveryDetails.address.trim() &&
@@ -262,6 +275,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
             }
           : null,
         payment_gateway: selectedGateway,
+        renewal_state: renewalState || undefined,
       });
 
       sessionStorage.setItem("guestOrderId", result.orderId);
@@ -675,6 +689,40 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                       <div className="mt-3 w-full rounded-[10px] border border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/90">
                         {formatCurrency(renewalAmount / 100)}
                       </div>
+                    </div>
+
+                    {/* State of Renewal */}
+                    <div className="mb-6">
+                      <div className="relative">
+                        <SearchableSelect
+                          label={<>State of Renewal <span className="text-red-500">*</span></>}
+                          name="renewal_state"
+                          value={renewalState}
+                          onChange={(e) => setRenewalState(e.target.value)}
+                          options={NIGERIAN_STATES.map((s) => ({ id: s, name: s }))}
+                          placeholder="Select state of renewal"
+                          filterKey="name"
+                          allowCustom={false}
+                        />
+                        {renewalState && (
+                          <button
+                            type="button"
+                            onClick={() => setRenewalState("")}
+                            className="absolute right-9 top-[calc(0.75rem+1.25rem)] -translate-y-1/2 text-[#05243F]/30 hover:text-[#05243F]/60 transition-colors"
+                            aria-label="Clear state"
+                          >
+                            <Icon icon="solar:close-circle-bold" fontSize={16} />
+                          </button>
+                        )}
+                      </div>
+                      {renewalState === "Lagos" && (
+                        <div className="mt-3 flex gap-3 rounded-[10px] border border-[#FDB022]/40 bg-[#FFFBF0] p-3">
+                          <Icon icon="solar:info-circle-bold" className="mt-0.5 shrink-0 text-[#C98B1A]" fontSize={18} />
+                          <p className="text-xs text-[#7A5C00]">
+                            Because you have chosen Lagos state you will be required to take your vehicle for inspection which may affect the documents process timeline.
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mb-6">

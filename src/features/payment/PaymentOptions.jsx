@@ -14,6 +14,7 @@ import { abandonPayment } from "../../services/apiPayment";
 import { payLadipoOrder, verifyLadipoPayment } from "../../services/apiLadipo";
 import useCartStore from "../../store/cartStore";
 import { useLadipoPaymentModalStore } from "../../store/ladipoPaymentModalStore";
+import AutoRenewalPrompt from "./components/AutoRenewalPrompt";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
@@ -33,6 +34,7 @@ export default function PaymentOptions() {
   const [isPaymentMethodConfirmed, setIsPaymentMethodConfirmed] = useState(false);
   const [monicreditFallbackError, setMonicreditFallbackError] = useState(null);
   const clearLadipoCart = useCartStore((s) => s.clearCart);
+  const [showAutoRenewal, setShowAutoRenewal] = useState(false);
 
   // For Monicredit
   const customer = paymentSession?.monicredit?.data?.customer;
@@ -599,12 +601,18 @@ export default function PaymentOptions() {
       const result = await verifyMonicredit.mutateAsync(orderId);
       if (result.data.status === "APPROVED") {
         toast.success('Payment successful! Your renewal is being processed.');
-        navigateAfterPayment({
-          paymentSuccess: true,
-          orderId,
-          amount: paymentSession.amount,
-          paymentMethod: "monicredit"
-        });
+        setIsProcessing(false);
+        // Show auto-renewal prompt for bank transfer payments (no card on file)
+        if (paymentSession?.car_slug) {
+          setShowAutoRenewal(true);
+        } else {
+          navigateAfterPayment({
+            paymentSuccess: true,
+            orderId,
+            amount: paymentSession.amount,
+            paymentMethod: "monicredit"
+          });
+        }
       } else {
         toast.error("Payment verification failed");
         setIsProcessing(false);
@@ -698,6 +706,20 @@ export default function PaymentOptions() {
 
   return (
     <>
+      {showAutoRenewal && (
+        <AutoRenewalPrompt
+          carSlug={paymentSession?.car_slug}
+          amount={paymentSession?.amount}
+          selectedItems={(paymentSession?.selectedSchedules || []).map(s => s.id)}
+          onDone={() => {
+            setShowAutoRenewal(false);
+            navigateAfterPayment({
+              paymentSuccess: true,
+              paymentMethod: "monicredit"
+            });
+          }}
+        />
+      )}
       {/* Header */}
       <div className="px-3 sm:px-6 lg:px-8">
         <div className="relative mb-6 flex h-12 items-center sm:h-12">

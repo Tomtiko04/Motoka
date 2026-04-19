@@ -12,6 +12,7 @@ import { useNotifications } from "../features/notifications/useNotification";
 import RecentNotificationModal from "./RecentNotification.jsx";
 import useCartStore, { selectItemCount } from "../store/cartStore";
 import { authStorage } from "../utils/authStorage";
+import Mo from "../features/mo/Mo.jsx";
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
@@ -461,13 +462,8 @@ export default function AppLayout() {
           <Outlet />
         </main>
 
-        {/* Ask Mo Button */}
-        {/* <div className="fixed right-8 bottom-8 z-50">
-          <button className="flex items-center gap-2 rounded-full bg-[#EBB950] px-6 py-3 text-white shadow-lg transition-transform hover:scale-105">
-            <span className="font-semibold">Ask Mo</span>
-            <span role="img" aria-label="sparkles">✨</span>
-          </button>
-        </div> */}
+        {/* Ask Mo */}
+        <Mo />
       </div>
     </div>
   );

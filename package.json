@@ -16,6 +16,7 @@
     "env:production": "node scripts/switch-env.js production"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.1.1",
     "@supabase/supabase-js": "^2.95.3",

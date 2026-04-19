@@ -31,6 +31,10 @@ const AdminDashboard = () => {
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
   const [loading, setLoading] = useState(true);
+  const [expiryReminderState, setExpiryReminderState] = useState('idle');
+  const [expiryReminderResult, setExpiryReminderResult] = useState(null);
+  const [addCarReminderState, setAddCarReminderState] = useState('idle');
+  const [addCarReminderResult, setAddCarReminderResult] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -128,6 +132,50 @@ const AdminDashboard = () => {
         return 'Driver License';
       default:
         return orderType;
+    }
+  };
+
+  const handleTriggerExpiryReminders = async (dryRun = false) => {
+    setExpiryReminderState('loading');
+    setExpiryReminderResult(null);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const url = `${config.getApiBaseUrl()}/admin/notifications/expiry-reminders${dryRun ? '?dry_run=true' : ''}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Failed');
+      setExpiryReminderResult({ success: true, data: json.data });
+      setExpiryReminderState('done');
+      toast.success(json.data?.message || 'Done');
+    } catch (err) {
+      setExpiryReminderResult({ success: false, error: err.message });
+      setExpiryReminderState('error');
+      toast.error(err.message || 'Request failed');
+    }
+  };
+
+  const handleTriggerAddCarReminder = async (dryRun = false) => {
+    setAddCarReminderState('loading');
+    setAddCarReminderResult(null);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const url = `${config.getApiBaseUrl()}/admin/notifications/add-car-reminder${dryRun ? '?dry_run=true' : ''}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Failed');
+      setAddCarReminderResult({ success: true, data: json.data });
+      setAddCarReminderState('done');
+      toast.success(json.data?.message || 'Done');
+    } catch (err) {
+      setAddCarReminderResult({ success: false, error: err.message });
+      setAddCarReminderState('error');
+      toast.error(err.message || 'Request failed');
     }
   };
 
@@ -284,6 +332,103 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div> */}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          {/* Expiry Reminders */}
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3-3-3z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">WhatsApp Expiry Reminders</p>
+                <p className="text-xs text-gray-500 mt-0.5">Send reminders to users with cars expiring in 1, 7, 14, or 30 days.</p>
+              </div>
+            </div>
+
+            {expiryReminderResult && (
+              <div className={`mb-3 rounded-md p-2 text-xs ${expiryReminderResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                {expiryReminderResult.success ? (
+                  <>
+                    <p className="font-medium">{expiryReminderResult.data?.message}</p>
+                    {expiryReminderResult.data?.windows?.map(w => (
+                      <p key={w.days}>{w.days}d window: {w.count} car(s)</p>
+                    ))}
+                  </>
+                ) : (
+                  <p>{expiryReminderResult.error}</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleTriggerExpiryReminders(true)}
+                disabled={expiryReminderState === 'loading'}
+                className="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                {expiryReminderState === 'loading' ? 'Checking...' : 'Dry Run'}
+              </button>
+              <button
+                onClick={() => handleTriggerExpiryReminders(false)}
+                disabled={expiryReminderState === 'loading'}
+                className="flex-1 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                {expiryReminderState === 'loading' ? 'Sending...' : 'Send Now'}
+              </button>
+            </div>
+          </div>
+
+          {/* Add Car Reminder */}
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">WhatsApp Add Car Reminder</p>
+                <p className="text-xs text-gray-500 mt-0.5">Remind users who haven't added a vehicle to their account yet.</p>
+              </div>
+            </div>
+
+            {addCarReminderResult && (
+              <div className={`mb-3 rounded-md p-2 text-xs ${addCarReminderResult.success ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
+                {addCarReminderResult.success ? (
+                  <p className="font-medium">{addCarReminderResult.data?.message}</p>
+                ) : (
+                  <p>{addCarReminderResult.error}</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleTriggerAddCarReminder(true)}
+                disabled={addCarReminderState === 'loading'}
+                className="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                {addCarReminderState === 'loading' ? 'Checking...' : 'Dry Run'}
+              </button>
+              <button
+                onClick={() => handleTriggerAddCarReminder(false)}
+                disabled={addCarReminderState === 'loading'}
+                className="flex-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {addCarReminderState === 'loading' ? 'Sending...' : 'Send Now'}
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Chart and Lists */}

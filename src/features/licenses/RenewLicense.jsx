@@ -17,6 +17,14 @@ import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+  "FCT (Abuja)", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+  "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo",
+  "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara",
+];
+
 export default function RenewLicense() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +53,9 @@ export default function RenewLicense() {
     contact: "",
     amount: "0",
   });
+
+  // State of renewal (which state processes the renewal) — defaults to Ogun
+  const [renewalState, setRenewalState] = useState("Ogun");
 
   // LGA options for the selected state
   const [lgaOptions, setLgaOptions] = useState([]);
@@ -223,14 +234,16 @@ export default function RenewLicense() {
   };
 
   const isFormValid = () => {
-    // Basic validation: require selected schedules and available schedules
-    const hasValidSchedules = 
+    // Basic validation: require selected schedules, available schedules, and renewal state
+    const hasValidSchedules =
       selectedSchedules.length > 0 &&
       getAvailableSchedules().length > 0; // Has available (unpaid) schedules
 
+    if (!renewalState) return false;
+
     // If user wants delivery, all delivery fields must be filled
     if (wantsDelivery) {
-      const hasCompleteDeliveryDetails = 
+      const hasCompleteDeliveryDetails =
         deliveryDetails.address.trim() !== "" &&
         deliveryDetails.state.trim() !== "" &&
         deliveryDetails.lg.trim() !== "" &&
@@ -360,12 +373,13 @@ export default function RenewLicense() {
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
+      renewal_state: renewalState || undefined,
       // payment_gateway will default to 'monicredit' via apiPayment.js
       // Users can select Paystack in PaymentOptions page
       // Delivery details are optional for license renewal - only include if provided
-      ...(deliveryDetails.address.trim() !== "" || 
-          deliveryDetails.contact.trim() !== "" || 
-          deliveryDetails.state.trim() !== "" || 
+      ...(deliveryDetails.address.trim() !== "" ||
+          deliveryDetails.contact.trim() !== "" ||
+          deliveryDetails.state.trim() !== "" ||
           deliveryDetails.lg.trim() !== "" ? {
         delivery_details: {
           ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
@@ -438,6 +452,7 @@ export default function RenewLicense() {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((s) => s.id),
       payment_gateway: 'paystack',
+      renewal_state: renewalState || undefined,
       ...(deliveryDetails.address.trim() !== "" ||
           deliveryDetails.contact.trim() !== "" ||
           deliveryDetails.state.trim() !== "" ||
@@ -471,6 +486,7 @@ export default function RenewLicense() {
         car_slug: carDetail?.slug,
         payment_schedule_id: availableSchedules.map((s) => s.id),
         payment_gateway: 'monicredit',
+        renewal_state: renewalState || undefined,
         ...(deliveryDetails.address.trim() !== "" ||
             deliveryDetails.contact.trim() !== "" ||
             deliveryDetails.state.trim() !== "" ||
@@ -742,6 +758,40 @@ export default function RenewLicense() {
                 <div className="mt-3 w-full rounded-[10px] border-3 border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/40">
                   {formatCurrency(Number(deliveryDetails.amount) / 100)}
                 </div>
+              </div>
+
+              {/* State of Renewal */}
+              <div className="mb-6">
+                <div className="relative">
+                  <SearchableSelect
+                    label={<>State of Renewal <span className="text-red-500">*</span></>}
+                    name="renewal_state"
+                    value={renewalState}
+                    onChange={(e) => setRenewalState(e.target.value)}
+                    options={NIGERIAN_STATES.map((s) => ({ id: s, name: s }))}
+                    placeholder="Select state of renewal"
+                    filterKey="name"
+                    allowCustom={false}
+                  />
+                  {renewalState && (
+                    <button
+                      type="button"
+                      onClick={() => setRenewalState("")}
+                      className="absolute right-9 top-[calc(0.75rem+1.25rem)] -translate-y-1/2 text-[#05243F]/30 hover:text-[#05243F]/60 transition-colors"
+                      aria-label="Clear state"
+                    >
+                      <Icon icon="solar:close-circle-bold" fontSize={16} />
+                    </button>
+                  )}
+                </div>
+                {renewalState === "Lagos" && (
+                  <div className="mt-3 flex gap-3 rounded-[10px] border border-[#FDB022]/40 bg-[#FFFBF0] p-3">
+                    <Icon icon="solar:info-circle-bold" className="mt-0.5 shrink-0 text-[#C98B1A]" fontSize={18} />
+                    <p className="text-xs text-[#7A5C00]">
+                      Because you have chosen Lagos state you will be required to take your vehicle for inspection which may affect the documents process timeline.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Delivery Checkbox */}
