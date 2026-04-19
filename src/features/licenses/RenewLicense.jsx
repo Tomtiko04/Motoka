@@ -681,10 +681,12 @@ export default function RenewLicense() {
                 </div>
               )}
 
-              <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {loadingPayments ? (
-                  <div className="mx-auto my-10 flex items-center justify-center">
-                    <ClipLoader color="#2284DB" />
+                  <div className="col-span-1 mx-auto my-10 flex items-center justify-center sm:col-span-2">
+                    <div>
+                      <ClipLoader color="#2284DB" />
+                    </div>
                   </div>
                 ) : (
                   docOptions.map((doc) => {
@@ -692,10 +694,6 @@ export default function RenewLicense() {
                       (p) => p.payment_head_name === doc,
                     );
                     const isSelected = selectedDocs.includes(doc);
-                    const schedule = paymentSchedules.find(
-                      (s) => s.payment_head?.payment_head_name === doc,
-                    );
-                    const price = schedule ? Number(schedule.amount) / 100 : null;
 
                     return (
                       <button
@@ -703,30 +701,37 @@ export default function RenewLicense() {
                         type="button"
                         onClick={() => !isAlreadyPaid && handleToggleDoc(doc)}
                         disabled={isAlreadyPaid}
-                        className={`group flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all ${
+                        className={`group relative flex w-full items-center gap-2 rounded-full px-5 py-3 transition-all ${
                           isAlreadyPaid
-                            ? "cursor-not-allowed border-[#E1E5EE] bg-[#F8F9FB] opacity-60"
-                            : isSelected
-                              ? "border-[#2389E3] bg-[#EEF5FD]"
-                              : "border-[#E1E5EE] bg-white hover:border-[#2389E3]/40 hover:bg-[#F5F9FF]"
+                            ? "cursor-not-allowed bg-[#F4F5FC] border border-[#D1D5DB]"
+                            : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
                         }`}
                       >
-                        <Icon
-                          icon={isAlreadyPaid ? "solar:check-circle-bold" : isSelected ? "solar:check-square-bold" : "mynaui:square"}
-                          fontSize={20}
-                          color={isAlreadyPaid ? "#9CA3AF" : isSelected ? "#2389E3" : "#C4C9D4"}
-                          className="shrink-0"
-                        />
-                        <span className={`flex-1 text-left text-sm font-medium ${
-                          isAlreadyPaid ? "text-[#9CA3AF]" : isSelected ? "text-[#05243F]" : "text-[#05243F]/80"
+                        <div
+                          className={`flex shrink-0 items-center justify-center transition-colors ${
+                            isAlreadyPaid
+                              ? "text-gray-400"
+                              : isSelected
+                                ? "text-[#05243F]"
+                                : "text-[#9CA3AF] group-hover:text-[#697C8C]"
+                          }`}
+                        >
+                          <Icon
+                            icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
+                            fontSize={22}
+                            color={isSelected ? "#2389E3" : "#9CA3AF"}
+                          />
+                        </div>
+                        <span className={`text-[13px] md:text-sm font-normal text-left transition-colors truncate ${
+                          isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
                         }`}>
                           {doc}
                         </span>
-                        <span className={`shrink-0 text-sm font-semibold ${
-                          isAlreadyPaid ? "text-[#9CA3AF]" : isSelected ? "text-[#2389E3]" : "text-[#05243F]/50"
-                        }`}>
-                          {isAlreadyPaid ? "Paid" : price === 0 ? "Free" : price != null ? `₦${price.toLocaleString()}` : ""}
-                        </span>
+                        {isAlreadyPaid && (
+                          <span className="ml-auto flex items-center shrink-0">
+                             <Icon icon="solar:check-circle-bold" className="text-[#2389E3]" fontSize={16} />
+                          </span>
+                        )}
                       </button>
                     );
                   })
