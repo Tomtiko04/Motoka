@@ -5,29 +5,34 @@ import { useGetCars } from "../car/useCar";
 import config from "../../config/config";
 import { authStorage } from "../../utils/authStorage";
 
-// ── Quick actions shown on open ───────────────────────────────────────────────
 const QUICK_ACTIONS = [
-  { label: "Check expiry date", icon: "solar:calendar-bold" },
+  { label: "Check my expiry", icon: "solar:calendar-bold" },
   { label: "How do I renew?", icon: "solar:refresh-bold" },
-  { label: "Add a new car", icon: "solar:add-circle-bold" },
+  { label: "Renewal prices", icon: "solar:tag-price-bold" },
   { label: "Driver's licence", icon: "solar:card-bold" },
 ];
 
-// ── Message bubble ────────────────────────────────────────────────────────────
+const PRICE_PREVIEWS = [
+  { name: "Vehicle Licence", price: "₦5,000" },
+  { name: "Insurance", price: "₦15,000" },
+  { name: "Road Worthiness", price: "₦11,500" },
+  { name: "Proof of Ownership", price: "₦3,000" },
+];
+
 function Bubble({ msg }) {
   const isUser = msg.role === "user";
   return (
     <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
       {!isUser && (
-        <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EBB950]">
-          <Icon icon="solar:stars-bold" className="text-white" fontSize={14} />
+        <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2389E3]">
+          <Icon icon="solar:stars-bold" className="text-white" fontSize={13} />
         </div>
       )}
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+        className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
           isUser
-            ? "rounded-br-sm bg-[#2389E3] text-white"
-            : "rounded-bl-sm bg-[#F4F5FC] text-[#05243F]"
+            ? "rounded-br-none bg-[#2389E3] text-white"
+            : "rounded-bl-none bg-[#F0F4FA] text-[#05243F]"
         }`}
       >
         {msg.text}
@@ -36,11 +41,10 @@ function Bubble({ msg }) {
   );
 }
 
-// ── Main Mo component ─────────────────────────────────────────────────────────
 export default function Mo() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [history, setHistory] = useState([]); // OpenAI-format message history
+  const [history, setHistory] = useState([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const bottomRef = useRef(null);
@@ -55,25 +59,22 @@ export default function Mo() {
     }
   })();
 
-  // Greeting when Mo opens
   useEffect(() => {
     if (!open) return;
     setMessages([
       {
         role: "mo",
-        text: `Hey ${userName || "there"} 👋, how can I help you today?`,
+        text: `Hi ${userName || "there"} 👋 I'm Mo, your Motoka assistant. What can I help you with?`,
         id: Date.now(),
       },
     ]);
     setHistory([]);
   }, [open]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, thinking]);
 
-  // Focus input when panel opens
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 300);
   }, [open]);
@@ -106,10 +107,7 @@ export default function Mo() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        console.error("[Mo] backend error:", res.status, data);
-        throw new Error(data.message || `Error ${res.status}`);
-      }
+      if (!res.ok) throw new Error(data.message || `Error ${res.status}`);
 
       const reply = data.reply || "I'm not sure how to answer that.";
       setHistory([...newHistory, { role: "assistant", content: reply }]);
@@ -118,14 +116,9 @@ export default function Mo() {
         { role: "mo", text: reply, id: Date.now() + 1 },
       ]);
     } catch (err) {
-      console.error("[Mo] error:", err?.message || err);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "mo",
-          text: "Sorry, I ran into an issue. Please try again.",
-          id: Date.now() + 1,
-        },
+        { role: "mo", text: "Sorry, something went wrong. Please try again.", id: Date.now() + 1 },
       ]);
     } finally {
       setThinking(false);
@@ -145,11 +138,11 @@ export default function Mo() {
     setHistory([]);
   };
 
-  const showQuickActions = messages.length <= 1 && !thinking;
+  const showWelcome = messages.length <= 1 && !thinking;
 
   return (
     <>
-      {/* ── Floating button ── */}
+      {/* Floating button */}
       <AnimatePresence>
         {!open && (
           <motion.button
@@ -158,7 +151,7 @@ export default function Mo() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#EBB950] px-5 py-3 text-white shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#2389E3] px-5 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#1a70c7] hover:shadow-xl"
           >
             <Icon icon="solar:stars-bold" fontSize={18} />
             <span className="text-sm font-semibold">Ask Mo</span>
@@ -166,68 +159,89 @@ export default function Mo() {
         )}
       </AnimatePresence>
 
-      {/* ── Chat panel ── */}
+      {/* Chat panel */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            exit={{ opacity: 0, y: 30, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 320, damping: 30 }}
             className="fixed bottom-6 right-6 z-50 flex w-[360px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
-            style={{ height: "520px" }}
+            style={{ height: "540px" }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between bg-[#EBB950] px-4 py-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/25">
-                  <Icon icon="solar:stars-bold" className="text-white" fontSize={16} />
+            <div className="flex items-center justify-between bg-[#05243F] px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2389E3]">
+                  <Icon icon="solar:stars-bold" className="text-white" fontSize={17} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Ask Mo</p>
-                  <p className="text-xs text-white/75">Motoka AI Assistant</p>
+                  <p className="text-sm font-semibold text-white leading-tight">Mo</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                    <p className="text-xs text-white/60">Motoka AI · Online</p>
+                  </div>
                 </div>
               </div>
               <button
                 onClick={handleClose}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <Icon icon="solar:close-bold" fontSize={14} />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
               {messages.map((msg) => (
                 <Bubble key={msg.id} msg={msg} />
               ))}
 
-              {/* Quick action chips */}
-              {showQuickActions && (
-                <div className="flex flex-wrap gap-2 pl-9">
-                  {QUICK_ACTIONS.map((a) => (
-                    <button
-                      key={a.label}
-                      onClick={() => send(a.label)}
-                      className="flex items-center gap-1.5 rounded-full border border-[#E1E5EE] bg-white px-3 py-1.5 text-xs font-medium text-[#05243F] transition-colors hover:bg-[#F4F5FC]"
-                    >
-                      <Icon icon={a.icon} fontSize={12} className="text-[#2389E3]" />
-                      {a.label}
-                    </button>
-                  ))}
+              {/* Welcome state */}
+              {showWelcome && (
+                <div className="pl-9 space-y-3">
+                  {/* Price snapshot */}
+                  <div className="rounded-xl border border-[#E8EDF5] bg-[#F8FAFD] p-3">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#697C8C]">
+                      Renewal Prices
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                      {PRICE_PREVIEWS.map((p) => (
+                        <div key={p.name} className="flex flex-col">
+                          <span className="text-[10px] text-[#697C8C]">{p.name}</span>
+                          <span className="text-xs font-semibold text-[#05243F]">{p.price}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick actions */}
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_ACTIONS.map((a) => (
+                      <button
+                        key={a.label}
+                        onClick={() => send(a.label)}
+                        className="flex items-center gap-1.5 rounded-full border border-[#E1E5EE] bg-white px-3 py-1.5 text-xs font-medium text-[#05243F] transition-colors hover:border-[#2389E3]/40 hover:bg-[#EEF5FD] hover:text-[#2389E3]"
+                      >
+                        <Icon icon={a.icon} fontSize={11} className="text-[#2389E3]" />
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* Thinking indicator */}
               {thinking && (
                 <div className="flex items-end gap-2">
-                  <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EBB950]">
-                    <Icon icon="solar:stars-bold" className="text-white" fontSize={14} />
+                  <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2389E3]">
+                    <Icon icon="solar:stars-bold" className="text-white" fontSize={13} />
                   </div>
-                  <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-[#F4F5FC] px-4 py-3">
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#05243F]/40 [animation-delay:0ms]" />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#05243F]/40 [animation-delay:150ms]" />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#05243F]/40 [animation-delay:300ms]" />
+                  <div className="flex items-center gap-1 rounded-2xl rounded-bl-none bg-[#F0F4FA] px-4 py-3">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#05243F]/30 [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#05243F]/30 [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#05243F]/30 [animation-delay:300ms]" />
                   </div>
                 </div>
               )}
@@ -235,24 +249,24 @@ export default function Mo() {
             </div>
 
             {/* Input */}
-            <div className="border-t border-[#F4F5FC] px-3 py-3">
-              <div className="flex items-center gap-2 overflow-hidden rounded-full bg-[#F4F5FC] px-4 py-2">
+            <div className="border-t border-[#F0F4FA] px-3 py-3">
+              <div className="flex items-center gap-2 overflow-hidden rounded-full border border-[#E8EDF5] bg-[#F8FAFD] px-4 py-2">
                 <input
                   ref={inputRef}
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKey}
-                  placeholder="Type your question..."
+                  placeholder="Ask me anything…"
                   disabled={thinking}
-                  className="flex-1 bg-transparent text-sm text-[#05243F] outline-none placeholder:text-[#05243F]/40 disabled:opacity-50"
+                  className="flex-1 bg-transparent text-sm text-[#05243F] outline-none placeholder:text-[#9CA3AF] disabled:opacity-50"
                 />
                 <button
                   onClick={() => send()}
                   disabled={!input.trim() || thinking}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EBB950] text-white transition-colors hover:bg-[#d4a43e] disabled:opacity-40"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2389E3] text-white transition-all hover:bg-[#1a70c7] disabled:opacity-30"
                 >
-                  <Icon icon="solar:arrow-up-bold" fontSize={15} />
+                  <Icon icon="solar:arrow-up-bold" fontSize={14} />
                 </button>
               </div>
             </div>
