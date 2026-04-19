@@ -709,7 +709,7 @@ export default function PaymentOptions() {
       {showAutoRenewal && (
         <AutoRenewalPrompt
           carSlug={paymentSession?.car_slug}
-          amount={paymentSession?.amount}
+          amount={Math.round((paymentSession?.amount || 0) * 100)}
           selectedItems={(paymentSession?.selectedSchedules || []).map(s => s.id)}
           onDone={() => {
             setShowAutoRenewal(false);
