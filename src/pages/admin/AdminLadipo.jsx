@@ -3,11 +3,14 @@ import toast from 'react-hot-toast';
 import { Icon } from '@iconify/react';
 import {
   createAdminLadipoProduct,
+  deleteAdminCompatibilityEntry,
   deleteAdminLadipoProduct,
+  getAdminPartCompatibility,
   getAdminLadipoCapabilities,
   getAdminLadipoOrder,
   listAdminLadipoOrders,
   listAdminLadipoProducts,
+  setAdminPartCompatibility,
   updateAdminLadipoOrderAssignee,
   updateAdminLadipoOrderStatus,
   updateAdminLadipoOrderWorkflow,
@@ -48,7 +51,15 @@ const initialProductForm = {
   price_kobo: '',
   stock_qty: '',
   seller_label: 'Motoka',
+  is_universal: false,
   is_active: true,
+};
+
+const emptyCompatibilityEntry = {
+  make: '',
+  model: '',
+  year_min: '',
+  year_max: '',
 };
 
 function formatPrice(kobo) {
@@ -210,6 +221,9 @@ export default function AdminLadipo() {
   const [productImageObjectUrl, setProductImageObjectUrl] = useState(null);
   const [editingProductCoverUrl, setEditingProductCoverUrl] = useState(null);
   const [savingProduct, setSavingProduct] = useState(false);
+  const [compatibilityEntries, setCompatibilityEntries] = useState([]);
+  const [compatibilityDraft, setCompatibilityDraft] = useState(emptyCompatibilityEntry);
+  const [compatibilityLoading, setCompatibilityLoading] = useState(false);
   const productImageInputRef = useRef(null);
   const slugManuallyEdited = useRef(false);
   // 'add' | 'edit' | 'view'
@@ -791,6 +805,23 @@ export default function AdminLadipo() {
     setSelectedOrderLoading(false);
   };
 
+  const loadProductCompatibility = async (productId) => {
+    if (!productId) {
+      setCompatibilityEntries([]);
+      return;
+    }
+    setCompatibilityLoading(true);
+    try {
+      const res = await getAdminPartCompatibility(productId);
+      setCompatibilityEntries(res?.data || []);
+    } catch {
+      setCompatibilityEntries([]);
+      toast.error('Failed to load compatibility entries');
+    } finally {
+      setCompatibilityLoading(false);
+    }
+  };
+
   const resetProductForm = () => {
     setProductForm(initialProductForm);
     setEditingProductId(null);
@@ -798,11 +829,14 @@ export default function AdminLadipo() {
     setEditingProductCoverUrl(null);
     setViewingProduct(null);
     setProductPanelMode('add');
+    setCompatibilityEntries([]);
+    setCompatibilityDraft(emptyCompatibilityEntry);
+    setCompatibilityLoading(false);
     slugManuallyEdited.current = false;
     if (productImageInputRef.current) productImageInputRef.current.value = '';
   };
 
-  const startEditProduct = (product) => {
+  const startEditProduct = async (product) => {
     slugManuallyEdited.current = true;
     setEditingProductId(product.id);
     setEditingProductCoverUrl(resolveAdminProductImageUrl(product));
@@ -817,15 +851,65 @@ export default function AdminLadipo() {
       price_kobo: product.inventory?.price_kobo ?? '',
       stock_qty: product.inventory?.stock_qty ?? '',
       seller_label: product.inventory?.seller_label || 'Motoka',
+      is_universal: product.is_universal ?? false,
       is_active: product.is_active ?? true,
     });
+    setCompatibilityDraft(emptyCompatibilityEntry);
     setProductImageFile(null);
     if (productImageInputRef.current) productImageInputRef.current.value = '';
+    await loadProductCompatibility(product.id);
   };
 
   const clearPendingProductImage = () => {
     setProductImageFile(null);
     if (productImageInputRef.current) productImageInputRef.current.value = '';
+  };
+
+  const addCompatibilityEntry = () => {
+    const make = String(compatibilityDraft.make || '').trim();
+    if (!make) {
+      toast.error('Compatibility make is required');
+      return;
+    }
+
+    const yearMin = compatibilityDraft.year_min === '' ? null : Number(compatibilityDraft.year_min);
+    const yearMax = compatibilityDraft.year_max === '' ? null : Number(compatibilityDraft.year_max);
+
+    if ((yearMin != null && Number.isNaN(yearMin)) || (yearMax != null && Number.isNaN(yearMax))) {
+      toast.error('Compatibility years must be valid numbers');
+      return;
+    }
+    if (yearMin != null && yearMax != null && yearMin > yearMax) {
+      toast.error('Year min cannot be greater than year max');
+      return;
+    }
+
+    setCompatibilityEntries((prev) => [
+      ...prev,
+      {
+        id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        make,
+        model: String(compatibilityDraft.model || '').trim(),
+        year_min: yearMin,
+        year_max: yearMax,
+      },
+    ]);
+    setCompatibilityDraft(emptyCompatibilityEntry);
+  };
+
+  const removeCompatibilityEntry = async (entryId) => {
+    if (!entryId) return;
+    const isServerEntry = !String(entryId).startsWith('local-');
+
+    if (isServerEntry) {
+      try {
+        await deleteAdminCompatibilityEntry(entryId);
+      } catch {
+        // Keep local UX responsive even when delete endpoint fails; save will upsert final set.
+      }
+    }
+
+    setCompatibilityEntries((prev) => prev.filter((entry) => entry.id !== entryId));
   };
 
   const priceNairaPreview = useMemo(() => {
@@ -838,6 +922,16 @@ export default function AdminLadipo() {
     event.preventDefault();
     setSavingProduct(true);
     try {
+      const normalizedCompatibility = (compatibilityEntries || [])
+        .map((entry) => ({
+          ...entry,
+          make: String(entry?.make || '').trim(),
+          model: String(entry?.model || '').trim(),
+          year_min: entry?.year_min === '' || entry?.year_min == null ? null : Number(entry.year_min),
+          year_max: entry?.year_max === '' || entry?.year_max == null ? null : Number(entry.year_max),
+        }))
+        .filter((entry) => entry.make);
+
       const payload = new FormData();
       payload.append('name', productForm.name);
       payload.append('slug', productForm.slug);
@@ -849,6 +943,7 @@ export default function AdminLadipo() {
       payload.append('price_kobo', String(Number(productForm.price_kobo)));
       payload.append('stock_qty', String(Number(productForm.stock_qty)));
       payload.append('seller_label', productForm.seller_label || 'Motoka');
+      payload.append('is_universal', String(Boolean(productForm.is_universal)));
       payload.append('is_active', String(Boolean(productForm.is_active)));
       if (editingProductId) {
         const existing = products.find((item) => item.id === editingProductId);
@@ -861,10 +956,22 @@ export default function AdminLadipo() {
       }
 
       if (editingProductId) {
-        await updateAdminLadipoProduct(editingProductId, payload);
+        const res = await updateAdminLadipoProduct(editingProductId, payload);
+        const targetPartId = res?.data?.id || editingProductId;
+        await setAdminPartCompatibility(
+          targetPartId,
+          productForm.is_universal ? [] : normalizedCompatibility
+        );
         toast.success('Product updated');
       } else {
-        await createAdminLadipoProduct(payload);
+        const res = await createAdminLadipoProduct(payload);
+        const targetPartId = res?.data?.id;
+        if (targetPartId) {
+          await setAdminPartCompatibility(
+            targetPartId,
+            productForm.is_universal ? [] : normalizedCompatibility
+          );
+        }
         toast.success('Product created');
       }
       resetProductForm();
@@ -1833,6 +1940,85 @@ export default function AdminLadipo() {
                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
                   />
                 </div>
+
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={productForm.is_universal}
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, is_universal: e.target.checked }))}
+                    className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                  />
+                  Universal part (shows for all cars)
+                </label>
+
+                {!productForm.is_universal && (
+                  <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        Compatibility entries
+                      </label>
+                      {compatibilityLoading && <span className="text-[11px] text-gray-400">Loading…</span>}
+                    </div>
+
+                    {compatibilityEntries.length === 0 ? (
+                      <p className="text-[11px] text-gray-500">No compatibility rows yet. Add at least one make/model/year range.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {compatibilityEntries.map((entry) => (
+                          <div key={entry.id} className="grid grid-cols-12 gap-2 rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs">
+                            <div className="col-span-3 font-medium text-gray-700">{entry.make || '—'}</div>
+                            <div className="col-span-3 text-gray-600">{entry.model || 'All models'}</div>
+                            <div className="col-span-2 text-gray-600">{entry.year_min ?? 'Any'}</div>
+                            <div className="col-span-2 text-gray-600">{entry.year_max ?? 'Any'}</div>
+                            <button
+                              type="button"
+                              onClick={() => removeCompatibilityEntry(entry.id)}
+                              className="col-span-2 rounded-md border border-rose-200 text-rose-600 hover:bg-rose-50"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-12 gap-2">
+                      <input
+                        value={compatibilityDraft.make}
+                        onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, make: e.target.value }))}
+                        placeholder="Make"
+                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                      />
+                      <input
+                        value={compatibilityDraft.model}
+                        onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, model: e.target.value }))}
+                        placeholder="Model (optional)"
+                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                      />
+                      <input
+                        type="number"
+                        value={compatibilityDraft.year_min}
+                        onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, year_min: e.target.value }))}
+                        placeholder="Year min"
+                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                      />
+                      <input
+                        type="number"
+                        value={compatibilityDraft.year_max}
+                        onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, year_max: e.target.value }))}
+                        placeholder="Year max"
+                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                      />
+                      <button
+                        type="button"
+                        onClick={addCompatibilityEntry}
+                        className="col-span-2 rounded-lg bg-[#2284DB] px-2 py-2 text-xs font-semibold text-white hover:bg-[#1d74c3]"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Image upload */}
                 <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3">

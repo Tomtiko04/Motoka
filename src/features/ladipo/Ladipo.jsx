@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
 import { X } from "lucide-react";
@@ -17,6 +17,7 @@ export default function Ladipo() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   const [selectedCar, setSelectedCar] = useState(null);
+  const hasAutoSelectedSingleCar = useRef(false);
   const [subcategories, setSubcategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // 3 rows on desktop (4 columns), 6 items on mobile (2 columns)
@@ -33,6 +34,13 @@ export default function Ladipo() {
     const carArray = cars?.cars || [];
     return Array.isArray(carArray) ? carArray : Object.values(carArray);
   }, [cars]);
+
+  useEffect(() => {
+    if (garageCars.length === 1 && !selectedCar && !hasAutoSelectedSingleCar.current) {
+      hasAutoSelectedSingleCar.current = true;
+      setSelectedCar(garageCars[0]);
+    }
+  }, [garageCars, selectedCar]);
 
   // Fetch subcategories when main category changes
   useEffect(() => {
@@ -53,29 +61,30 @@ export default function Ladipo() {
     fetchSubcategories();
   }, [selectedMainCategory]);
 
-  const effectiveSearch = useMemo(() => {
-    const terms = [];
-    if (activeSearch) terms.push(activeSearch);
-    if (selectedCar) {
-      terms.push(`${selectedCar.vehicle_make} ${selectedCar.vehicle_model}`);
-    }
-    return terms.join(" ") || undefined;
-  }, [activeSearch, selectedCar]);
-
   // Fetch parts based on category/subcategory
   const { data: partsData, isLoading: partsLoading } = useQuery({
     queryKey: [
       "ladipo-parts",
       selectedMainCategory?.slug,
       selectedSubcategory?.slug,
-      effectiveSearch,
+      activeSearch,
+      selectedCar?.vehicle_make,
+      selectedCar?.vehicle_model,
+      selectedCar?.vehicle_year,
       currentPage,
     ],
     queryFn: async () => {
+      const carParams = {
+        make: selectedCar?.vehicle_make || undefined,
+        model: selectedCar?.vehicle_model || undefined,
+        year: selectedCar?.vehicle_year || undefined,
+      };
+
       // If no category selected, get all parts
       if (!selectedMainCategory) {
         const result = await getLadipoParts({
-          q: effectiveSearch,
+          q: activeSearch || undefined,
+          ...carParams,
           limit: itemsPerPage,
           page: currentPage,
         });
@@ -92,13 +101,27 @@ export default function Ladipo() {
         const result = await getLadipoPartsByCategory(
           selectedMainCategory.slug,
           selectedSubcategory.slug,
-          { page: currentPage, limit: itemsPerPage }
+          {
+            page: currentPage,
+            limit: itemsPerPage,
+            q: activeSearch || undefined,
+            ...carParams,
+          }
         );
         return result;
       }
 
       // If only main category selected
-      const result = await getLadipoPartsByCategory(selectedMainCategory.slug, null, { page: currentPage, limit: itemsPerPage });
+      const result = await getLadipoPartsByCategory(
+        selectedMainCategory.slug,
+        null,
+        {
+          page: currentPage,
+          limit: itemsPerPage,
+          q: activeSearch || undefined,
+          ...carParams,
+        }
+      );
       return result;
     },
     staleTime: 60 * 1000,
@@ -352,7 +375,7 @@ export default function Ladipo() {
             </div>
           ) : (
             <>
-              <ProductsList parts={parts} />
+              <ProductsList parts={parts} selectedCar={selectedCar} garageCars={garageCars} />
               
               {/* Pagination */}
               {totalPages > 1 && (

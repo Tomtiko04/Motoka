@@ -180,12 +180,20 @@ export const getLadipoSubcategoryBySlug = async (mainCategorySlug, subcategorySl
 /**
  * Get parts filtered by main category and/or subcategory
  */
-export const getLadipoPartsByCategory = async (mainCategorySlug, subcategorySlug = null, { page = 1, limit = 12 } = {}) => {
+export const getLadipoPartsByCategory = async (
+  mainCategorySlug,
+  subcategorySlug = null,
+  { page = 1, limit = 12, q, make, model, year } = {}
+) => {
   try {
     const result = await getLadipoParts({
       category_slug: subcategorySlug || mainCategorySlug,
       page,
       limit,
+      q,
+      make,
+      model,
+      year,
     });
 
     const total = result?.total || 0;

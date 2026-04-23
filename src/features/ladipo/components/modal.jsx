@@ -32,6 +32,12 @@ function ProductModal() {
     () => DOMPurify.sanitize(part?.description || ""),
     [part?.description]
   );
+  const publicSpecifications = useMemo(() => {
+    if (!part?.specifications || typeof part.specifications !== "object") return [];
+
+    const hiddenSpecKeys = new Set(["source", "source_url", "vendor", "supplier"]);
+    return Object.entries(part.specifications).filter(([key]) => !hiddenSpecKeys.has(String(key).toLowerCase()));
+  }, [part?.specifications]);
 
   function buildCartItem(quantityToUse) {
     return {
@@ -212,11 +218,11 @@ function ProductModal() {
             {/* Right Side - Details */}
             <div className="flex flex-col gap-6 lg:pl-6 lg:border-l lg:border-[#E1E6F4]">
               {/* Product Specification */}
-              {part.specifications && typeof part.specifications === "object" && Object.keys(part.specifications).length > 0 && (
+              {publicSpecifications.length > 0 && (
                 <div className="pb-6 border-b border-[#E1E6F4]">
                   <h4 className="text-[13px] font-bold text-[#05243F] mb-3 uppercase tracking-wide">Product Specification:</h4>
                   <div className="space-y-2">
-                    {Object.entries(part.specifications).slice(0, 3).map(([key, value]) => (
+                    {publicSpecifications.slice(0, 3).map(([key, value]) => (
                       <div key={key} className="text-[12px]">
                         <span className="text-[#697C8C]">{key.replace(/_/g, " ")}: </span>
                         <span className="text-[#05243F] font-semibold">{value}</span>

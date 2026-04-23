@@ -9,7 +9,34 @@ const CONDITION_LABELS = {
   nigerian_used: { text: "Used", icon: "solar:refresh-bold", color: "bg-[#EBB850] text-white", borderColor: "border-[#EBB850]/40" },
 };
 
-function ProductCard({ part }) {
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isCompatibilityMatch(car, rule) {
+  if (!car || !rule) return false;
+  const carMake = normalize(car.vehicle_make);
+  const carModel = normalize(car.vehicle_model);
+  const carYearRaw = car.vehicle_year;
+  const carYear = carYearRaw === undefined || carYearRaw === null || carYearRaw === ""
+    ? null
+    : Number(carYearRaw);
+
+  const ruleMake = normalize(rule.make);
+  const ruleModel = normalize(rule.model);
+
+  if (!ruleMake || carMake !== ruleMake) return false;
+  if (ruleModel && carModel !== ruleModel) return false;
+
+  if (carYear != null && Number.isFinite(carYear)) {
+    if (rule.year_min != null && carYear < Number(rule.year_min)) return false;
+    if (rule.year_max != null && carYear > Number(rule.year_max)) return false;
+  }
+
+  return true;
+}
+
+function ProductCard({ part, isCarFilterActive = false, selectedCar = null, garageCars = [] }) {
   const addItem = useCartStore((s) => s.addItem);
   const navigate = useNavigate();
 
@@ -42,6 +69,30 @@ function ProductCard({ part }) {
   }
 
   const condition = CONDITION_LABELS[part.condition] || CONDITION_LABELS.new;
+  const showUniversalBadge = part?.is_universal === true;
+  const compatibilityRows = Array.isArray(part?.compatibility) ? part.compatibility : [];
+  const allGarageCars = Array.isArray(garageCars) ? garageCars : [];
+  const matchedGarageCars = allGarageCars.filter((car) =>
+    compatibilityRows.some((rule) => isCompatibilityMatch(car, rule))
+  );
+  const selectedCarMatches = selectedCar
+    ? compatibilityRows.some((rule) => isCompatibilityMatch(selectedCar, rule))
+    : false;
+
+  let fitBadgeText = null;
+  if (!showUniversalBadge) {
+    if (selectedCar && selectedCarMatches) {
+      fitBadgeText = "Fits your car";
+    } else if (!selectedCar && matchedGarageCars.length > 0) {
+      fitBadgeText = matchedGarageCars.length === 1
+        ? "Fits 1 of your cars"
+        : `Fits ${matchedGarageCars.length} of your cars`;
+    } else if (isCarFilterActive) {
+      fitBadgeText = "Fits your car";
+    }
+  }
+
+  const showFitsBadge = !showUniversalBadge && !!fitBadgeText;
 
   return (
     <div className="group relative flex h-full w-full cursor-pointer flex-col rounded-[16px] border border-[#E1E6F4] bg-white p-4 transition-all duration-300 hover:border-[#2389E3]">
@@ -70,6 +121,16 @@ function ProductCard({ part }) {
         )}
 
       </div>
+
+      {(showFitsBadge || showUniversalBadge) && (
+        <span
+          className={`absolute bottom-4 left-4 z-10 rounded-[4px] px-1.5 py-[2px] text-[9px] font-bold ${
+            showUniversalBadge ? "bg-slate-500 text-white" : "bg-emerald-500 text-white"
+          }`}
+        >
+          {showUniversalBadge ? "Universal" : fitBadgeText}
+        </span>
+      )}
 
       <div className="flex flex-1 flex-col">
         <p className="mb-1 min-h-[3.5rem] text-[14px] font-bold leading-snug text-[#05243F] line-clamp-2">
