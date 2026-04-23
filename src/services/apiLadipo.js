@@ -9,6 +9,9 @@ export const getLadipoParts = (params = {}) =>
 export const getLadipoPartBySlug = (slug) =>
   api.get(`/ladipo/parts/${slug}`).then((r) => r.data.data);
 
+export const getPartCompatibility = (partId) =>
+  api.get(`/ladipo/parts/${partId}/compatibility`).then((r) => r.data.data);
+
 export const createLadipoOrder = (data) =>
   api.post('/ladipo/orders', data).then((r) => r.data.data);
 

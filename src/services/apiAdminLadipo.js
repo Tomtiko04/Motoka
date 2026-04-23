@@ -177,3 +177,27 @@ export async function deleteAdminLadipoProduct(productId) {
   });
   return parseJsonResponse(res);
 }
+
+export async function getAdminPartCompatibility(partId) {
+  const res = await fetch(`${config.getApiBaseUrl()}/ladipo/parts/${partId}/compatibility`, {
+    headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function setAdminPartCompatibility(partId, entries = []) {
+  const res = await fetch(`${config.getApiBaseUrl()}/ladipo/parts/${partId}/compatibility`, {
+    method: 'POST',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ entries }),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function deleteAdminCompatibilityEntry(entryId) {
+  const res = await fetch(`${config.getApiBaseUrl()}/ladipo/compatibility/${entryId}`, {
+    method: 'DELETE',
+    headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
