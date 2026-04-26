@@ -1,5 +1,8 @@
 import { api } from "./apiClient";
 import { authStorage } from "../utils/authStorage";
+import { clearLadipoCartOnLogout } from "../store/cartStore";
+import { clearLadipoBrowseStateOnLogout } from "../store/ladipoStore";
+import { useLadipoPaymentModalStore } from "../store/ladipoPaymentModalStore";
 
 export async function login({ email, password }) {
   const { data } = await api.post("/login", { email, password });
@@ -63,20 +66,28 @@ export async function refreshToken() {
   }
 }
 
+function clearClientSessionAfterLogout() {
+  authStorage.removeToken();
+  localStorage.removeItem("userInfo");
+  localStorage.removeItem("rememberedEmail");
+  localStorage.removeItem("refresh_token");
+  clearLadipoCartOnLogout();
+  clearLadipoBrowseStateOnLogout();
+  try {
+    useLadipoPaymentModalStore.getState().close();
+  } catch {
+    /* ignore */
+  }
+}
+
 export async function logout() {
   try {
     const { data } = await api.post("/logout");
 
-    authStorage.removeToken();
-    localStorage.removeItem("userInfo");
-    localStorage.removeItem("rememberedEmail");
-    localStorage.removeItem("refresh_token");
+    clearClientSessionAfterLogout();
     return data;
   } catch (error) {
-    authStorage.removeToken();
-    localStorage.removeItem("userInfo");
-    localStorage.removeItem("rememberedEmail");
-    localStorage.removeItem("refresh_token");
+    clearClientSessionAfterLogout();
     throw new Error(error.response?.data?.message || "Logout failed");
   }
 }

@@ -228,6 +228,20 @@ if (typeof window !== "undefined") {
   useCartStore.getState().initializeCart();
 }
 
+/** Clear persisted Ladipo cart and memory state (call on logout). */
+export function clearLadipoCartOnLogout() {
+  try {
+    useCartStore.persist.clearStorage();
+  } catch {
+    try {
+      localStorage.removeItem("ladipo-cart");
+    } catch {
+      /* ignore */
+    }
+  }
+  useCartStore.setState({ items: [], initialized: false });
+}
+
 export default useCartStore;
 
 // ─── Selectors (use inside components) ───────────────────────────────────────
