@@ -178,4 +178,18 @@ const ladipoStore = create(
   )
 );
 
+/** Reset Ladipo browse filters and drop persisted prefs (call on logout). */
+export function clearLadipoBrowseStateOnLogout() {
+  try {
+    ladipoStore.persist.clearStorage();
+  } catch {
+    try {
+      localStorage.removeItem("ladipo-store");
+    } catch {
+      /* ignore */
+    }
+  }
+  ladipoStore.getState().resetAllFilters();
+}
+
 export default ladipoStore;
