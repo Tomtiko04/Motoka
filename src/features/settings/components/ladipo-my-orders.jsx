@@ -45,7 +45,7 @@ function getUserFacingStatus(order) {
   if (paymentStatus !== "paid") return "awaiting_payment";
   if (orderStatus === "pending_payment") return "confirmed";
   if (orderStatus === "processing") return "processing";
-  if (orderStatus === "out_for_delivery") return "out_for_delivery";
+  if (orderStatus === "out_for_delivery" || orderStatus === "shipped") return "out_for_delivery";
   if (orderStatus === "delivered") return "delivered";
   return "confirmed";
 }
