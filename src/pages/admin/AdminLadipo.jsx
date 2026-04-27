@@ -48,7 +48,7 @@ const initialProductForm = {
   description: '',
   condition: 'new',
   part_type: 'aftermarket',
-  price_kobo: '',
+  price_naira: '',
   stock_qty: '',
   seller_label: 'Motoka',
   is_universal: false,
@@ -648,7 +648,7 @@ export default function AdminLadipo() {
             expectedAdminOpsVersion: ord?.admin_ops_version,
           });
           successCount += 1;
-        } catch (error) {
+        } catch {
           // Keep bulk flow moving even if some orders fail.
         }
       }
@@ -848,7 +848,10 @@ export default function AdminLadipo() {
       description: product.description || '',
       condition: product.condition || 'new',
       part_type: product.part_type || 'aftermarket',
-      price_kobo: product.inventory?.price_kobo ?? '',
+      price_naira:
+        product.inventory?.price_kobo != null
+          ? Number(product.inventory.price_kobo) / 100
+          : '',
       stock_qty: product.inventory?.stock_qty ?? '',
       seller_label: product.inventory?.seller_label || 'Motoka',
       is_universal: product.is_universal ?? false,
@@ -912,11 +915,11 @@ export default function AdminLadipo() {
     setCompatibilityEntries((prev) => prev.filter((entry) => entry.id !== entryId));
   };
 
-  const priceNairaPreview = useMemo(() => {
-    const raw = productForm.price_kobo;
+  const priceKoboPreview = useMemo(() => {
+    const raw = productForm.price_naira;
     if (raw === '' || raw === null || Number.isNaN(Number(raw))) return null;
-    return formatPrice(Number(raw));
-  }, [productForm.price_kobo]);
+    return Math.round(Number(raw) * 100).toLocaleString('en-NG');
+  }, [productForm.price_naira]);
 
   const handleSaveProduct = async (event) => {
     event.preventDefault();
@@ -940,7 +943,7 @@ export default function AdminLadipo() {
       payload.append('description', productForm.description || '');
       payload.append('condition', productForm.condition);
       payload.append('part_type', productForm.part_type);
-      payload.append('price_kobo', String(Number(productForm.price_kobo)));
+      payload.append('price_kobo', String(Math.round(Number(productForm.price_naira) * 100)));
       payload.append('stock_qty', String(Number(productForm.stock_qty)));
       payload.append('seller_label', productForm.seller_label || 'Motoka');
       payload.append('is_universal', String(Boolean(productForm.is_universal)));
@@ -1900,20 +1903,20 @@ export default function AdminLadipo() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wide text-gray-500">Price (kobo)</label>
+                    <label className="text-xs font-medium uppercase tracking-wide text-gray-500">Price (naira)</label>
                     <input
                       type="number"
                       min="0"
-                      step="1"
-                      value={productForm.price_kobo}
-                      onChange={(e) => setProductForm((prev) => ({ ...prev, price_kobo: e.target.value }))}
-                      placeholder="e.g. 1500000"
+                      step="0.01"
+                      value={productForm.price_naira}
+                      onChange={(e) => setProductForm((prev) => ({ ...prev, price_naira: e.target.value }))}
+                      placeholder="e.g. 15000"
                       className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
                       required
                     />
-                    {priceNairaPreview && (
+                    {priceKoboPreview && (
                       <p className="text-[11px] text-gray-500">
-                        → <span className="font-semibold text-[#05243F]">{priceNairaPreview}</span>
+                        → <span className="font-semibold text-[#05243F]">{priceKoboPreview} kobo</span>
                       </p>
                     )}
                   </div>

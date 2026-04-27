@@ -68,6 +68,11 @@ function ProductCard({ part, isCarFilterActive = false, selectedCar = null, gara
     navigate("/ladipo/cart-page");
   }
 
+  function handleCardOpen() {
+    if (!part?.slug) return;
+    navigate(`/ladipo/${part.slug}`);
+  }
+
   const condition = CONDITION_LABELS[part.condition] || CONDITION_LABELS.new;
   const showUniversalBadge = part?.is_universal === true;
   const compatibilityRows = Array.isArray(part?.compatibility) ? part.compatibility : [];
@@ -95,7 +100,19 @@ function ProductCard({ part, isCarFilterActive = false, selectedCar = null, gara
   const showFitsBadge = !showUniversalBadge && !!fitBadgeText;
 
   return (
-    <div className="group relative flex h-full w-full cursor-pointer flex-col rounded-[16px] border border-[#E1E6F4] bg-white p-4 transition-all duration-300 hover:border-[#2389E3]">
+    <div
+      className="group relative flex h-full w-full cursor-pointer flex-col rounded-[16px] border border-[#E1E6F4] bg-white p-4 transition-all duration-300 hover:border-[#2389E3]"
+      onClick={handleCardOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardOpen();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${part?.name || "product"} details`}
+    >
       <button
         onClick={handleAddToCart}
         className="absolute top-4 right-4 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-[#DFE4E8] text-white transition-colors group-hover:bg-[#2389E3]"
