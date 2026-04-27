@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react"
+import { useNavigate, useLocation } from 'react-router-dom';
 import SettingsLayout from "./components/settings-layout"
 import MainSettings from "./components/main-settings"
 import ProfileInformation from "./components/profile-information"
@@ -14,6 +14,7 @@ import AddBankCard from "./components/add-bank-card"
 import TransactionHistory from "./components/transaction-history"
 import AutoRenewalSettings from "./components/auto-renewal-settings"
 import BillingAddress from "./components/billing-address"
+import LadipoMyOrders from "./components/ladipo-my-orders"
 import PushNotification from "./components/push-notification"
 import CustomizedNotification from "./components/customized-notification"
 import LanguageRegion from "./components/language-region"
@@ -36,6 +37,15 @@ export default function SettingsPage() {
   const [expandedSection, setExpandedSection] = useState("account")
   const [activeTab, setActiveTab] = useState("collect")
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.settingsPage === "ladipo-orders") {
+      setActivePage("ladipo-orders")
+      setExpandedSection("payment")
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.state, location.pathname, navigate])
 
   const handleNavigate = (page, tab) => {
     if (page === "login") {
@@ -51,7 +61,8 @@ export default function SettingsPage() {
       page === "add-card" ||
       page === "transaction" ||
       page === "auto-renewal" ||
-      page === "billing"
+      page === "billing" ||
+      page === "ladipo-orders"
     ) {
       setExpandedSection("payment")
     } else if (page === "push-notification" || page === "custom-notification") {
@@ -101,6 +112,7 @@ export default function SettingsPage() {
         {activePage === "transaction" && <TransactionHistory onNavigate={handleNavigate} />}
         {activePage === "auto-renewal" && <AutoRenewalSettings onNavigate={handleNavigate} />}
         {activePage === "billing" && <BillingAddress onNavigate={handleNavigate} />}
+        {activePage === "ladipo-orders" && <LadipoMyOrders onNavigate={handleNavigate} />}
 
         {/* Notifications & Alerts */}
         {activePage === "push-notification" && <PushNotification onNavigate={handleNavigate} />}

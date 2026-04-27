@@ -100,6 +100,7 @@ const AdminOrders = () => {
     purpose: getPurpose(order),
     amount: `N${parseFloat(order.amount || 0).toLocaleString()}`,
     location: order.state_name ? `${order.state_name}${order.lga_name ? ', ' + order.lga_name : ''}` : (order.order_type === 'plate_number' || order.order_type === 'driver_license' ? '—' : 'Unknown'),
+    renewalState: order.renewal_state || null,
     status: order.status === 'pending' ? 'New' :
             order.status === 'in_progress' ? 'Inprogress' :
             order.status === 'completed' ? 'Completed' :
@@ -279,6 +280,9 @@ const AdminOrders = () => {
                   Location
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Renewal State
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -309,6 +313,18 @@ const AdminOrders = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.location}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.renewalState ? (
+                        <span className="flex items-center gap-1.5">
+                          {order.renewalState}
+                          {order.renewalState === "Lagos" && (
+                            <span className="inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
+                              Inspection
+                            </span>
+                          )}
+                        </span>
+                      ) : '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>

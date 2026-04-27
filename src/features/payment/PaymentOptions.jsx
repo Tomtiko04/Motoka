@@ -11,6 +11,10 @@ import { usePaymentVerification } from "./hooks/usePayment";
 import { initializePaystackPayment } from "../../services/apiPaystack";
 import { initiateMonicreditPayment } from "../../services/apiMonicredit";
 import { abandonPayment } from "../../services/apiPayment";
+import { payLadipoOrder, verifyLadipoPayment } from "../../services/apiLadipo";
+import useCartStore from "../../store/cartStore";
+import { useLadipoPaymentModalStore } from "../../store/ladipoPaymentModalStore";
+import AutoRenewalPrompt from "./components/AutoRenewalPrompt";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
@@ -29,14 +33,22 @@ export default function PaymentOptions() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isPaymentMethodConfirmed, setIsPaymentMethodConfirmed] = useState(false);
   const [monicreditFallbackError, setMonicreditFallbackError] = useState(null);
+  const clearLadipoCart = useCartStore((s) => s.clearCart);
+  const [showAutoRenewal, setShowAutoRenewal] = useState(false);
 
   // For Monicredit
   const customer = paymentSession?.monicredit?.data?.customer;
+  const monicreditData = paymentSession?.monicredit?.data;
+  // Account details may be on the root data object OR nested in customer depending on API version
+  const monicreditAccountNumber = customer?.account_number || monicreditData?.account_number;
+  const monicreditBankName      = customer?.bank_name      || monicreditData?.bank_name;
+  const monicreditAccountName   = customer?.account_name   || monicreditData?.account_name;
   // Get total_amount in naira (backend now sends both total_amount and amount in naira for Monicredit)
   // Prefer total_amount, fallback to amount (both should be in naira from backend)
+  // For Ladipo: amount is stored in kobo at paymentSession.amount — convert to naira as fallback
   const totalAmount = paymentSession?.monicredit?.data?.total_amount || 
                       paymentSession?.monicredit?.data?.amount || 
-                      null;
+                      (paymentSession?.amount ? paymentSession.amount / 100 : null);
   
   // Backend always returns amount in kobo — divide by 100 for display
   const paystackAmount = paymentSession?.paystack?.reference
@@ -49,8 +61,20 @@ export default function PaymentOptions() {
   const navigateAfterPayment = useCallback((state) => {
     queryClient.invalidateQueries({ queryKey: ['cars'] });
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+    // Ladipo: success modal on marketplace (not a separate page)
+    if (paymentSession?.type === PAYMENT_TYPES.LADIPO) {
+      clearLadipoCart();
+      useLadipoPaymentModalStore.getState().openSuccess({
+        order: paymentSession?.orderData,
+        amountKobo: paymentSession?.amount,
+      });
+      navigate("/ladipo");
+      return;
+    }
+
     navigate('/dashboard', { state });
-  }, [navigate, queryClient]);
+  }, [navigate, queryClient, paymentSession]);
 
   // Abandon any initialized-but-unpaid transaction when user leaves this page
   useEffect(() => {
@@ -59,7 +83,7 @@ export default function PaymentOptions() {
       const monicreditRef = paymentSession?.monicredit?.data?.reference ||
                             paymentSession?.monicredit?.data?.orderid;
       const ref = paystackRef || monicreditRef;
-      if (ref && isPaymentMethodConfirmed && !isProcessing) {
+      if (ref && isPaymentMethodConfirmed && !isProcessing && paymentSession?.type !== PAYMENT_TYPES.LADIPO) {
         abandonPayment(ref, 'User left payment page');
       }
     };
@@ -203,6 +227,71 @@ export default function PaymentOptions() {
   const handleConfirmPaymentMethod = async () => {
     setIsInitializing(true);
     try {
+      const isLadipo = paymentSession?.type === PAYMENT_TYPES.LADIPO;
+
+      // ── Ladipo orders use their own API ──────────────────────────────────
+      if (isLadipo) {
+        const orderNumber = paymentSession?.order_number;
+        if (!orderNumber) {
+          toast.error('Order information is missing. Please try again.');
+          return;
+        }
+
+        const result = await payLadipoOrder(orderNumber, {
+          payment_gateway: selectedMethod,
+        });
+
+        if (selectedMethod === PAYMENT_METHODS.PAYSTACK) {
+          if (result?.authorization_url) {
+            setPaymentSession(prev => {
+              const updated = {
+                ...prev,
+                paystack: {
+                  authorization_url: result.authorization_url,
+                  reference: result.reference,
+                },
+                amount: result.amount || prev?.amount,
+              };
+              try { sessionStorage.setItem("paymentData", JSON.stringify(updated)); } catch {}
+              return updated;
+            });
+            setIsPaymentMethodConfirmed(true);
+            toast.success('Paystack payment initialized successfully');
+          } else {
+            toast.error('Failed to initialize Paystack payment');
+          }
+        } else {
+          // Monicredit — result already unwrapped by apiLadipo
+          if (result) {
+            setPaymentSession(prev => {
+              const updated = {
+                ...prev,
+                monicredit: {
+                  data: {
+                    ...result,
+                    // Normalize: ensure customer object exists for PaymentOptions UI
+                    customer: result.customer || {
+                      account_number: result.account_number || result.accountNumber,
+                      bank_name: result.bank_name || result.bankName,
+                      account_name: result.account_name || result.accountName,
+                    },
+                    reference: result.reference || result.orderid || orderNumber,
+                  },
+                },
+              };
+              try { sessionStorage.setItem("paymentData", JSON.stringify(updated)); } catch {}
+              return updated;
+            });
+            setIsPaymentMethodConfirmed(true);
+            toast.success('Monicredit payment initialized successfully');
+          } else {
+            toast.error('Failed to initialize Monicredit payment');
+          }
+        }
+        return; // Skip standard flow below
+      }
+
+      // ── Standard flow (plate number, license, renewal) ───────────────────
       const payload = buildPaymentPayload();
 
       // Driver license: no car_slug or schedule required
@@ -363,6 +452,13 @@ export default function PaymentOptions() {
         );
       }
 
+      // Ladipo: direct redirect (backend callback_url goes to /ladipo/payment/callback)
+      if (paymentSession?.type === PAYMENT_TYPES.LADIPO) {
+        clearLadipoCart();
+        window.location.href = paystackUrl;
+        return;
+      }
+
       // Open Paystack in a new tab
       const newWindow = window.open(paystackUrl, '_blank', 'noopener,noreferrer');
       if (!newWindow) {
@@ -412,8 +508,32 @@ export default function PaymentOptions() {
     const reference = paymentSession?.paystack?.reference;
     if (!reference) return;
 
+    const isLadipo = paymentSession?.type === PAYMENT_TYPES.LADIPO;
+
     setIsProcessing(true);
     try {
+      if (isLadipo) {
+        useLadipoPaymentModalStore.getState().openProcessing(paymentSession?.amount || 0);
+        const result = await verifyLadipoPayment(reference);
+        if (result?.status === "success" || result?.status === "paid") {
+          clearLadipoCart();
+          toast.success('Payment successful!');
+          const merged = { ...paymentSession?.orderData, ...result };
+          useLadipoPaymentModalStore.getState().openSuccess({
+            order: merged,
+            amountKobo: merged?.total_kobo ?? paymentSession?.amount,
+          });
+          navigate("/ladipo");
+          setIsProcessing(false);
+          return;
+        } else {
+          useLadipoPaymentModalStore.getState().close();
+          toast.error('Payment verification failed. Please try again.');
+          setIsProcessing(false);
+          return;
+        }
+      }
+
       const result = await verifyPaystack.mutateAsync(reference);
       
       // Handle different response structures
@@ -434,6 +554,9 @@ export default function PaymentOptions() {
         setIsProcessing(false);
       }
     } catch (error) {
+      if (paymentSession?.type === PAYMENT_TYPES.LADIPO) {
+        useLadipoPaymentModalStore.getState().close();
+      }
       toast.error(error.message || 'Failed to verify payment');
       setIsProcessing(false);
     }
@@ -441,9 +564,11 @@ export default function PaymentOptions() {
 
   // Handle Monicredit verification
   const handleVerifyMonicredit = async () => {
-    const orderId = paymentSession?.monicredit?.data?.orderid ||
+    const isLadipo = paymentSession?.type === PAYMENT_TYPES.LADIPO;
+    const orderId = paymentSession?.monicredit?.data?.reference ||
+                    paymentSession?.monicredit?.data?.orderid ||
                     paymentSession?.monicredit?.data?.order_id ||
-                    paymentSession?.monicredit?.data?.reference;
+                    paymentSession?.order_number;
     if (!orderId) {
       toast.error("No payment reference found. Please contact support.");
       return;
@@ -451,20 +576,51 @@ export default function PaymentOptions() {
 
     setIsProcessing(true);
     try {
+      if (isLadipo) {
+        useLadipoPaymentModalStore.getState().openProcessing(paymentSession?.amount || 0);
+        const result = await verifyLadipoPayment(orderId);
+        if (result?.status === "success" || result?.status === "paid") {
+          clearLadipoCart();
+          toast.success('Payment verified successfully!');
+          const merged = { ...paymentSession?.orderData, ...result };
+          useLadipoPaymentModalStore.getState().openSuccess({
+            order: merged,
+            amountKobo: merged?.total_kobo ?? paymentSession?.amount,
+          });
+          navigate("/ladipo");
+          setIsProcessing(false);
+          return;
+        } else {
+          useLadipoPaymentModalStore.getState().close();
+          toast.error("Payment not yet confirmed. Please complete the transfer and try again.");
+          setIsProcessing(false);
+          return;
+        }
+      }
+
       const result = await verifyMonicredit.mutateAsync(orderId);
       if (result.data.status === "APPROVED") {
         toast.success('Payment successful! Your renewal is being processed.');
-        navigateAfterPayment({
-          paymentSuccess: true,
-          orderId,
-          amount: paymentSession.amount,
-          paymentMethod: "monicredit"
-        });
+        setIsProcessing(false);
+        // Show auto-renewal prompt for bank transfer payments (no card on file)
+        if (paymentSession?.car_slug) {
+          setShowAutoRenewal(true);
+        } else {
+          navigateAfterPayment({
+            paymentSuccess: true,
+            orderId,
+            amount: paymentSession.amount,
+            paymentMethod: "monicredit"
+          });
+        }
       } else {
         toast.error("Payment verification failed");
         setIsProcessing(false);
       }
-    } catch (error) {
+    } catch {
+      if (isLadipo) {
+        useLadipoPaymentModalStore.getState().close();
+      }
       setIsProcessing(false);
     }
   };
@@ -550,6 +706,20 @@ export default function PaymentOptions() {
 
   return (
     <>
+      {showAutoRenewal && (
+        <AutoRenewalPrompt
+          carSlug={paymentSession?.car_slug}
+          amount={Math.round((paymentSession?.amount || 0) * 100)}
+          selectedItems={(paymentSession?.selectedSchedules || []).map(s => s.id)}
+          onDone={() => {
+            setShowAutoRenewal(false);
+            navigateAfterPayment({
+              paymentSuccess: true,
+              paymentMethod: "monicredit"
+            });
+          }}
+        />
+      )}
       {/* Header */}
       <div className="px-3 sm:px-6 lg:px-8">
         <div className="relative mb-6 flex h-12 items-center sm:h-12">
@@ -681,7 +851,7 @@ export default function PaymentOptions() {
                     </button>
                   </div>
                 </div>
-              ) : paymentSession?.monicredit?.data?.customer ? (
+              ) : (paymentSession?.monicredit?.data?.customer || monicreditAccountNumber) ? (
                 <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-4">
                   <div className="text-center">
                     <h3 className="text-sm font-normal text-[#05243F]/40">
@@ -704,7 +874,7 @@ export default function PaymentOptions() {
                         Account Number:
                       </span>
                       <span className="text-base font-semibold text-[#05243F]">
-                        {customer.account_number}
+                        {monicreditAccountNumber}
                       </span>
                     </div>
                     <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
@@ -712,7 +882,7 @@ export default function PaymentOptions() {
                         Bank Name:
                       </span>
                       <span className="text-base font-semibold text-[#05243F]">
-                        {customer.bank_name}
+                        {monicreditBankName}
                       </span>
                     </div>
                     <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
@@ -720,7 +890,7 @@ export default function PaymentOptions() {
                         Account Name:
                       </span>
                       <span className="text-right text-base font-semibold text-[#05243F]">
-                        {customer.account_name}
+                        {monicreditAccountName}
                       </span>
                     </div>
                     <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">

@@ -10,10 +10,20 @@ import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
 import CarDetailsCard from "../../components/CarDetailsCard";
 import SearchableSelect from "../../components/shared/SearchableSelect";
+import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
+import { saveDeferredReminders } from "../../services/apiDeferredReminders";
 import { ClipLoader } from "react-spinners";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
+
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+  "FCT (Abuja)", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+  "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo",
+  "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara",
+];
 
 export default function RenewLicense() {
   const navigate = useNavigate();
@@ -44,6 +54,9 @@ export default function RenewLicense() {
     amount: "0",
   });
 
+  // State of renewal (which state processes the renewal) — defaults to Ogun
+  const [renewalState, setRenewalState] = useState("Ogun");
+
   // LGA options for the selected state
   const [lgaOptions, setLgaOptions] = useState([]);
 
@@ -71,6 +84,9 @@ export default function RenewLicense() {
   const [inlinePhone, setInlinePhone] = useState("");
   const [isSavingPhone, setIsSavingPhone] = useState(false);
   const [phoneStep, setPhoneStep] = useState(""); // "saving" | "initializing"
+  const [showPartialPrompt, setShowPartialPrompt] = useState(false);
+  const [pendingPaymentPayload, setPendingPaymentPayload] = useState(null);
+  const [pendingSkippedDocs, setPendingSkippedDocs] = useState([]);
 
   const isState = state?.data;
 
@@ -85,21 +101,24 @@ export default function RenewLicense() {
           fetchPaymentSchedules(),
         ]);
 
+        const headsArr = Array.isArray(heads) ? heads : [];
+        const schedulesArr = Array.isArray(schedules) ? schedules : [];
+
         const filteredHeads =
           carDetail?.car_type === "private" ||
           carDetail?.car_type === "government"
-            ? heads.filter((h) => h.payment_head_name !== "Hackney Permit")
-            : heads;
+            ? headsArr.filter((h) => h.payment_head_name !== "Hackney Permit")
+            : headsArr;
 
         setPaymentHeads(filteredHeads);
 
         const filteredSchedules =
           carDetail?.car_type === "private" ||
           carDetail?.car_type === "government"
-            ? schedules.filter(
+            ? schedulesArr.filter(
                 (s) => s.payment_head?.payment_head_name !== "Hackney Permit",
               )
-            : schedules;
+            : schedulesArr;
 
         setPaymentSchedules(filteredSchedules);
       } catch (error) {
@@ -206,7 +225,7 @@ export default function RenewLicense() {
   }, [lgaData]);
 
   // Document options from payment heads
-  const docOptions = paymentHeads.map((h) => h.payment_head_name);
+  const docOptions = (Array.isArray(paymentHeads) ? paymentHeads : []).map((h) => h.payment_head_name);
 
   const handleToggleDoc = (doc) => {
     setSelectedDocs((prev) =>
@@ -215,14 +234,16 @@ export default function RenewLicense() {
   };
 
   const isFormValid = () => {
-    // Basic validation: require selected schedules and available schedules
-    const hasValidSchedules = 
+    // Basic validation: require selected schedules, available schedules, and renewal state
+    const hasValidSchedules =
       selectedSchedules.length > 0 &&
       getAvailableSchedules().length > 0; // Has available (unpaid) schedules
 
+    if (!renewalState) return false;
+
     // If user wants delivery, all delivery fields must be filled
     if (wantsDelivery) {
-      const hasCompleteDeliveryDetails = 
+      const hasCompleteDeliveryDetails =
         deliveryDetails.address.trim() !== "" &&
         deliveryDetails.state.trim() !== "" &&
         deliveryDetails.lg.trim() !== "" &&
@@ -352,12 +373,13 @@ export default function RenewLicense() {
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
+      renewal_state: renewalState || undefined,
       // payment_gateway will default to 'monicredit' via apiPayment.js
       // Users can select Paystack in PaymentOptions page
       // Delivery details are optional for license renewal - only include if provided
-      ...(deliveryDetails.address.trim() !== "" || 
-          deliveryDetails.contact.trim() !== "" || 
-          deliveryDetails.state.trim() !== "" || 
+      ...(deliveryDetails.address.trim() !== "" ||
+          deliveryDetails.contact.trim() !== "" ||
+          deliveryDetails.state.trim() !== "" ||
           deliveryDetails.lg.trim() !== "" ? {
         delivery_details: {
           ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
@@ -368,9 +390,55 @@ export default function RenewLicense() {
       } : {}),
     };
 
+    const unpaidDocs = docOptions.filter(
+      (doc) => !existingPayments.some((p) => p.payment_head_name === doc),
+    );
+    const skippedDocs = unpaidDocs.filter((doc) => !selectedDocs.includes(doc));
+
+    if (skippedDocs.length > 0) {
+      setPendingPaymentPayload(paymentPayload);
+      setPendingSkippedDocs(skippedDocs);
+      setShowPartialPrompt(true);
+      return;
+    }
+
     // Initialize payment for all selected schedules
     if (paymentPayload.payment_schedule_id.length > 0) {
       startPayment(paymentPayload);
+    }
+  };
+
+  const persistDeferred = async (reminders) => {
+    if (!carDetail?.slug || !Array.isArray(reminders) || reminders.length === 0) return;
+    try {
+      await saveDeferredReminders({
+        car_slug: carDetail.slug,
+        reminders,
+      });
+    } catch (error) {
+      toast.error("Could not save reminder preferences. Continuing to payment.");
+    }
+  };
+
+  const handleSkipPartialPrompt = async () => {
+    const reminders = pendingSkippedDocs.map((documentName) => ({
+      document_name: documentName,
+      reason: "skipped",
+      expiry_date: null,
+      custom_reason: null,
+    }));
+    await persistDeferred(reminders);
+    setShowPartialPrompt(false);
+    if (pendingPaymentPayload?.payment_schedule_id?.length > 0) {
+      startPayment(pendingPaymentPayload);
+    }
+  };
+
+  const handleConfirmPartialPrompt = async (reminders) => {
+    await persistDeferred(reminders);
+    setShowPartialPrompt(false);
+    if (pendingPaymentPayload?.payment_schedule_id?.length > 0) {
+      startPayment(pendingPaymentPayload);
     }
   };
 
@@ -384,6 +452,7 @@ export default function RenewLicense() {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((s) => s.id),
       payment_gateway: 'paystack',
+      renewal_state: renewalState || undefined,
       ...(deliveryDetails.address.trim() !== "" ||
           deliveryDetails.contact.trim() !== "" ||
           deliveryDetails.state.trim() !== "" ||
@@ -417,6 +486,7 @@ export default function RenewLicense() {
         car_slug: carDetail?.slug,
         payment_schedule_id: availableSchedules.map((s) => s.id),
         payment_gateway: 'monicredit',
+        renewal_state: renewalState || undefined,
         ...(deliveryDetails.address.trim() !== "" ||
             deliveryDetails.contact.trim() !== "" ||
             deliveryDetails.state.trim() !== "" ||
@@ -690,6 +760,40 @@ export default function RenewLicense() {
                 </div>
               </div>
 
+              {/* State of Renewal */}
+              <div className="mb-6">
+                <div className="relative">
+                  <SearchableSelect
+                    label={<>State of Renewal <span className="text-red-500">*</span></>}
+                    name="renewal_state"
+                    value={renewalState}
+                    onChange={(e) => setRenewalState(e.target.value)}
+                    options={NIGERIAN_STATES.map((s) => ({ id: s, name: s }))}
+                    placeholder="Select state of renewal"
+                    filterKey="name"
+                    allowCustom={false}
+                  />
+                  {renewalState && (
+                    <button
+                      type="button"
+                      onClick={() => setRenewalState("")}
+                      className="absolute right-9 top-[calc(0.75rem+1.25rem)] -translate-y-1/2 text-[#05243F]/30 hover:text-[#05243F]/60 transition-colors"
+                      aria-label="Clear state"
+                    >
+                      <Icon icon="solar:close-circle-bold" fontSize={16} />
+                    </button>
+                  )}
+                </div>
+                {renewalState === "Lagos" && (
+                  <div className="mt-3 flex gap-3 rounded-[10px] border border-[#FDB022]/40 bg-[#FFFBF0] p-3">
+                    <Icon icon="solar:info-circle-bold" className="mt-0.5 shrink-0 text-[#C98B1A]" fontSize={18} />
+                    <p className="text-xs text-[#7A5C00]">
+                      Because you have chosen Lagos state you will be required to take your vehicle for inspection which may affect the documents process timeline.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Delivery Checkbox */}
               <div className="mb-6">
                 <label className="group flex w-full cursor-pointer items-center gap-3 rounded-full bg-[#F4F5FC] px-6 py-3 transition-all hover:bg-[#FFF4DD]/50">
@@ -922,6 +1026,12 @@ export default function RenewLicense() {
           </div>
         </div>
       </div>
+      <PartialRenewalPromptModal
+        isOpen={showPartialPrompt}
+        skippedDocs={pendingSkippedDocs}
+        onSkip={handleSkipPartialPrompt}
+        onConfirm={handleConfirmPartialPrompt}
+      />
     </>
   );
 }

@@ -104,6 +104,15 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
             </div>
             <div
               className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
+                isActive("ladipo-orders") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
+              }`}
+              onClick={() => onNavigate("ladipo-orders")}
+            >
+              <span className={`text-sm font-semibold ${isActive("ladipo-orders") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>My Orders</span>
+              <ChevronRight className="h-5 w-5" />
+            </div>
+            <div
+              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
                 isActive("transaction") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
               }`}
               onClick={() => onNavigate("transaction")}
