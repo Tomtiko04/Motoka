@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeftIcon,
@@ -9,9 +9,22 @@ import {
   TruckIcon,
   MapPinIcon,
   PhoneIcon,
+  DocumentArrowUpIcon,
+  DocumentIcon,
+  ArrowTopRightOnSquareIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+
+const DOC_CATEGORIES = [
+  { value: 'registration_certificate', label: 'Registration Certificate' },
+  { value: 'insurance', label: 'Insurance' },
+  { value: 'roadworthiness', label: 'Roadworthiness' },
+  { value: 'inspection_report', label: 'Inspection Report' },
+  { value: 'proof_of_ownership', label: 'Proof of Ownership' },
+  { value: 'other', label: 'Other' },
+];
 
 const AdminOrderDetails = () => {
   const { slug } = useParams();
@@ -19,6 +32,14 @@ const AdminOrderDetails = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState(false);
+
+  // Document upload state
+  const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadCategory, setUploadCategory] = useState('registration_certificate');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -36,11 +57,64 @@ const AdminOrderDetails = () => {
         },
       });
       const data = await response.json();
-      if (data.status) setOrder(data.data);
+      if (data.status) {
+        setOrder(data.data);
+        if (data.data?.car?.id) fetchCarDocuments(data.data.car.id);
+      }
     } catch {
       toast.error('Failed to fetch order details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCarDocuments = async (carId) => {
+    if (!carId) return;
+    try {
+      setDocsLoading(true);
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${config.getApiBaseUrl()}/admin/documents?car_id=${carId}&limit=50`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.status) setDocuments(data.data || []);
+    } catch {
+      // non-blocking
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  const handleDocumentUpload = async (e) => {
+    e.preventDefault();
+    if (!uploadFile) return toast.error('Please select a file');
+    if (!order?.car?.slug) return toast.error('No car associated with this order');
+    try {
+      setUploading(true);
+      const token = localStorage.getItem('adminToken');
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      formData.append('car_slug', order.car.slug);
+      formData.append('document_type', 'car');
+      formData.append('document_category', uploadCategory);
+      const res = await fetch(`${config.getApiBaseUrl()}/admin/documents/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.status) {
+        toast.success('Document uploaded successfully');
+        setUploadFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        fetchCarDocuments(order.car.id);
+      } else {
+        toast.error(data.message || 'Upload failed');
+      }
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -68,6 +142,89 @@ const AdminOrderDetails = () => {
     } finally {
       setStatusUpdating(false);
     }
+  };
+
+  const printOrderPDF = () => {
+    const fmt = (v) => v || 'N/A';
+    const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+    const fmtAmt = (n) => n ? `₦${parseFloat(n).toLocaleString()}` : 'N/A';
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Order ${fmt(order?.order_number)}</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 13px; color: #111; margin: 0; padding: 24px; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 24px; }
+      .logo { font-size: 22px; font-weight: 700; color: #2563eb; }
+      .badge { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #1d4ed8; font-weight: 600; }
+      h2 { font-size: 15px; font-weight: 700; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin: 20px 0 12px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+      .item label { display: block; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+      .item p { font-weight: 600; color: #111827; margin: 0; }
+      .footer { margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 12px; font-size: 11px; color: #9ca3af; text-align: center; }
+      @media print { body { padding: 16px; } }
+    </style></head><body>
+    <div class="header">
+      <div class="logo">Motoka</div>
+      <div>
+        <div class="badge">Order ${fmt(order?.order_number)}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;text-align:right">Generated ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
+      </div>
+    </div>
+
+    <h2>Order Information</h2>
+    <div class="grid">
+      <div class="item"><label>Order Type</label><p>${fmt(order?.order_type?.replace(/_/g,' ').toUpperCase())}</p></div>
+      <div class="item"><label>Amount</label><p>${fmtAmt(order?.amount)}</p></div>
+      <div class="item"><label>Status</label><p>${fmt(order?.status?.replace(/_/g,' ').toUpperCase())}</p></div>
+      <div class="item"><label>Date</label><p>${fmtDate(order?.created_at)}</p></div>
+    </div>
+
+    <h2>Customer Information</h2>
+    <div class="grid">
+      <div class="item"><label>Name</label><p>${fmt(order?.user?.name)}</p></div>
+      <div class="item"><label>Email</label><p>${fmt(order?.user?.email)}</p></div>
+      <div class="item"><label>Phone</label><p>${fmt(order?.user?.phone_number)}</p></div>
+    </div>
+
+    <h2>Vehicle Information</h2>
+    <div class="grid">
+      <div class="item"><label>Vehicle</label><p>${fmt(order?.car?.vehicle_make)} ${fmt(order?.car?.vehicle_model)}</p></div>
+      <div class="item"><label>Year</label><p>${fmt(order?.car?.vehicle_year)}</p></div>
+      <div class="item"><label>Plate Number</label><p>${fmt(order?.car?.registration_no || order?.car?.plate_number)}</p></div>
+      <div class="item"><label>Color</label><p>${fmt(order?.car?.vehicle_color)}</p></div>
+      <div class="item"><label>Chassis No.</label><p>${fmt(order?.car?.chasis_no)}</p></div>
+      <div class="item"><label>Engine No.</label><p>${fmt(order?.car?.engine_no)}</p></div>
+      <div class="item"><label>Expiry Date</label><p>${fmtDate(order?.car?.expiry_date)}</p></div>
+      <div class="item"><label>Registration Status</label><p>${fmt(order?.car?.registration_status?.toUpperCase())}</p></div>
+    </div>
+
+    ${order?.renewal_state ? `
+    <h2>Renewal Information</h2>
+    <div class="grid">
+      <div class="item"><label>State of Renewal</label><p>${fmt(order?.renewal_state)}${order?.renewal_state === 'Lagos' ? ' (Physical Inspection Required)' : ''}</p></div>
+    </div>` : ''}
+
+    ${order?.delivery_address ? `
+    <h2>Delivery Information</h2>
+    <div class="grid">
+      <div class="item"><label>Address</label><p>${fmt(order?.delivery_address)}</p></div>
+      <div class="item"><label>State / LGA</label><p>${fmt(order?.state_name || order?.state)}, ${fmt(order?.lga_name || order?.lga)}</p></div>
+      ${order?.delivery_contact ? `<div class="item"><label>Contact</label><p>${fmt(order?.delivery_contact)}</p></div>` : ''}
+    </div>` : ''}
+
+    <h2>Payment Information</h2>
+    <div class="grid">
+      <div class="item"><label>Gateway</label><p>${fmt(order?.payment?.payment_gateway?.toUpperCase())}</p></div>
+      <div class="item"><label>Transaction ID</label><p>${fmt(order?.payment?.transaction_id)}</p></div>
+      <div class="item"><label>Payment Status</label><p>${fmt(order?.payment?.status?.toUpperCase())}</p></div>
+    </div>
+
+    <div class="footer">Motoka &bull; Generated for internal use only</div>
+    </body></html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.print(); };
   };
 
   const getStatusBadge = (status) => {
@@ -145,6 +302,13 @@ const AdminOrderDetails = () => {
           </div>
         </div>
         <div className="flex items-center space-x-3">
+          <button
+            onClick={printOrderPDF}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <ArrowDownTrayIcon className="h-4 w-4" />
+            Download PDF
+          </button>
           {getStatusBadge(order?.status)}
         </div>
       </div>
@@ -291,6 +455,26 @@ const AdminOrderDetails = () => {
             </div>
           )}
 
+          {/* Renewal State */}
+          {order.renewal_state && (
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Renewal Information</h3>
+            <div className="flex items-center gap-3">
+              <div>
+                <label className="text-sm font-medium text-gray-500">State of Renewal</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm font-semibold text-gray-900">{order.renewal_state}</p>
+                  {order.renewal_state === "Lagos" && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      Physical Inspection Required
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
           {/* Delivery Information */}
           {order.delivery_address && (
           <div className="bg-white shadow rounded-lg p-6">
@@ -346,15 +530,67 @@ const AdminOrderDetails = () => {
 
               {order?.status === 'in_progress' && (
                 <>
-                  <p className="text-sm text-gray-500">
-                    Upload the processed documents to the car record in the Cars section, then mark this order as Completed.
-                  </p>
-                  <button
-                    onClick={() => navigate('/admin/cars')}
-                    className="w-full border border-blue-300 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-50 font-medium text-sm"
-                  >
-                    Go to Cars → Upload Documents
-                  </button>
+                  {/* Inline document upload */}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 border-b border-gray-200">
+                      <DocumentArrowUpIcon className="h-4 w-4 text-gray-400" />
+                      <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Upload Document</span>
+                      {documents.length > 0 && (
+                        <span className="ml-auto text-xs text-gray-400">{documents.length} uploaded</span>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-2">
+                      <select
+                        value={uploadCategory}
+                        onChange={(e) => setUploadCategory(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        {DOC_CATEGORIES.map((c) => (
+                          <option key={c.value} value={c.value}>{c.label}</option>
+                        ))}
+                      </select>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={(e) => setUploadFile(e.target.files[0] || null)}
+                        className="w-full text-sm text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                      <button
+                        onClick={handleDocumentUpload}
+                        disabled={uploading || !uploadFile}
+                        className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      >
+                        {uploading ? 'Uploading…' : 'Upload'}
+                      </button>
+                    </div>
+                    {/* Uploaded docs list */}
+                    {docsLoading ? (
+                      <div className="flex justify-center py-3 border-t border-gray-100">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                      </div>
+                    ) : documents.length > 0 && (
+                      <div className="border-t border-gray-100 divide-y divide-gray-50">
+                        {documents.map((doc) => (
+                          <div key={doc.id} className="flex items-center gap-2 px-3 py-2">
+                            <DocumentIcon className="h-4 w-4 text-blue-500 shrink-0" />
+                            <span className="text-xs text-gray-700 flex-1 truncate">
+                              {DOC_CATEGORIES.find((c) => c.value === doc.document_category)?.label || 'Document'}
+                            </span>
+                            <a
+                              href={doc.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     onClick={() => handleStatusUpdate('completed')}
                     disabled={statusUpdating}

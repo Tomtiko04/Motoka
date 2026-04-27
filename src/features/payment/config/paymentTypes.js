@@ -3,6 +3,7 @@ export const PAYMENT_TYPES = {
   VEHICLE_PAPER: 'vehicle_paper',
   LICENSE_RENEWAL: 'license_renewal',
   PLATE_NUMBER: 'plate_number',
+  LADIPO: 'ladipo',
 };
 
 export const PAYMENT_METHODS = {
@@ -26,5 +27,10 @@ export const PAYMENT_CONFIG = {
     label: "License Renewal",
     methods: [PAYMENT_METHODS.PAYSTACK, PAYMENT_METHODS.MONICREDIT],
     requiredFields: ['license_id', 'renewal_details'],
+  },
+  [PAYMENT_TYPES.LADIPO]: {
+    label: "Ladipo Market",
+    methods: [PAYMENT_METHODS.PAYSTACK, PAYMENT_METHODS.MONICREDIT],
+    requiredFields: ['order_number'],
   },
 };

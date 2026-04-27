@@ -7,7 +7,18 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { fetchRenewalItems, fetchStates, fetchLGAs, initGuestRenewal } from "../../services/apiGuest";
+import { saveGuestDeferredReminders } from "../../services/apiDeferredReminders";
+import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
 import { useNavigate } from "react-router-dom";
+import SearchableSelect from "../../components/shared/SearchableSelect";
+
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+  "FCT (Abuja)", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+  "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo",
+  "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara",
+];
 
 export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   const navigate = useNavigate();
@@ -35,8 +46,13 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     fee: 0,
   });
 
+  // State of renewal — defaults to Ogun
+  const [renewalState, setRenewalState] = useState("Ogun");
+
   // Step 3 — gateway selection
   const [selectedGateway, setSelectedGateway] = useState("monicredit");
+  const [showPartialPrompt, setShowPartialPrompt] = useState(false);
+  const [pendingSkippedDocs, setPendingSkippedDocs] = useState([]);
 
   // Location data (loaded from backend)
   const [states, setStates] = useState([]);
@@ -169,6 +185,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
   const isFormValid = () => {
     if (selectedDocs.length === 0) return false;
+    if (!renewalState) return false;
     if (wantsDelivery) {
       return (
         deliveryDetails.address.trim() &&
@@ -195,6 +212,45 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   // ── Step 2 → Step 3: advance to gateway selection ────────────────────────
   const handleProceedToPayment = () => {
     if (!isFormValid()) return;
+    const skipped = renewalItems
+      .filter((item) => !item.required && !selectedDocs.includes(item.id))
+      .map((item) => item.name);
+    if (skipped.length > 0) {
+      setPendingSkippedDocs(skipped);
+      setShowPartialPrompt(true);
+      return;
+    }
+    setStep(3);
+  };
+
+  const persistGuestDeferred = async (reminders) => {
+    if (!formData.email || !plateNumber || !Array.isArray(reminders) || reminders.length === 0) return;
+    try {
+      await saveGuestDeferredReminders({
+        guest_email: formData.email,
+        plate_number: plateNumber.replace(/\s+/g, "").toUpperCase(),
+        reminders,
+      });
+    } catch (error) {
+      toast.error("Could not save reminder preferences. Continuing.");
+    }
+  };
+
+  const handleSkipPartialPrompt = async () => {
+    const reminders = pendingSkippedDocs.map((documentName) => ({
+      document_name: documentName,
+      reason: "skipped",
+      expiry_date: null,
+      custom_reason: null,
+    }));
+    await persistGuestDeferred(reminders);
+    setShowPartialPrompt(false);
+    setStep(3);
+  };
+
+  const handleConfirmPartialPrompt = async (reminders) => {
+    await persistGuestDeferred(reminders);
+    setShowPartialPrompt(false);
     setStep(3);
   };
 
@@ -219,6 +275,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
             }
           : null,
         payment_gateway: selectedGateway,
+        renewal_state: renewalState || undefined,
       });
 
       sessionStorage.setItem("guestOrderId", result.orderId);
@@ -265,6 +322,12 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
+      <PartialRenewalPromptModal
+        isOpen={showPartialPrompt}
+        skippedDocs={pendingSkippedDocs}
+        onSkip={handleSkipPartialPrompt}
+        onConfirm={handleConfirmPartialPrompt}
+      />
       <div
         className="relative flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl flex-col md:flex-row max-h-[90vh] md:h-auto text-left overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
@@ -320,18 +383,15 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
                       <div className="relative w-full">
                         <input
-                          type="text"
+                          type="date"
                           id="expiryDate"
                           value={formData.expiryDate}
                           onChange={handleChange}
-                          onFocus={(e) => (e.target.type = "date")}
-                          onBlur={(e) => (e.target.type = "text")}
-                          className="peer block w-full rounded-lg bg-[#F4F5FC] px-4 pb-2.5 pt-5 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 placeholder-transparent"
-                          placeholder="Enter last expiry date"
+                          className="peer block w-full rounded-lg bg-[#F4F5FC] px-4 pb-2.5 pt-5 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5"
                         />
                         <label
                           htmlFor="expiryDate"
-                          className="absolute left-4 top-4 z-10 origin-[0] -translate-y-2.5 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-2.5 peer-focus:scale-75 peer-focus:text-[#2389E3] pointer-events-none"
+                          className="absolute left-4 top-1.5 z-10 text-xs text-gray-500 pointer-events-none"
                         >
                           Enter last expiry date*
                         </label>
@@ -575,42 +635,6 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
                     <div className="mt-6">
                       <h3 className="mb-4 text-sm text-[#697C8C]">Document Details</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {HARDCODED_DOCS.map((doc) => {
-                          const isSelected = selectedDocs.includes(doc);
-                          return (
-                            <button
-                              key={doc}
-                              type="button"
-                              onClick={() => handleToggleDoc(doc)}
-                              className={`group relative flex w-full items-center gap-2 rounded-full px-4 py-3 transition-all ${
-                                isSelected
-                                  ? "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
-                                  : "bg-[#F4F5FC] hover:bg-[#EBEEFA]"
-                              }`}
-                            >
-                              <div
-                                className={`flex shrink-0 items-center justify-center transition-colors ${
-                                  isSelected ? "text-[#05243F]" : "text-[#9CA3AF] group-hover:text-[#697C8C]"
-                                }`}
-                              >
-                                <Icon
-                                  icon={isSelected ? "solar:check-square-bold" : "mynaui:square"}
-                                  fontSize={22}
-                                  color={isSelected ? "#2389E3" : "#9CA3AF"}
-                                />
-                              </div>
-                              <span
-                                className={`text-[13px] md:text-sm text-left font-normal transition-colors truncate ${
-                                  isSelected ? "text-[#05243F]" : "text-[#05243F]/60 group-hover:text-[#05243F]/80"
-                                }`}
-                              >
-                                {doc}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
                       {loadingItems ? (
                         <div className="flex items-center justify-center py-6">
                           <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
@@ -665,6 +689,40 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                       <div className="mt-3 w-full rounded-[10px] border border-[#F4F5FC] p-4 text-[16px] font-semibold text-[#05243F]/90">
                         {formatCurrency(renewalAmount / 100)}
                       </div>
+                    </div>
+
+                    {/* State of Renewal */}
+                    <div className="mb-6">
+                      <div className="relative">
+                        <SearchableSelect
+                          label={<>State of Renewal <span className="text-red-500">*</span></>}
+                          name="renewal_state"
+                          value={renewalState}
+                          onChange={(e) => setRenewalState(e.target.value)}
+                          options={NIGERIAN_STATES.map((s) => ({ id: s, name: s }))}
+                          placeholder="Select state of renewal"
+                          filterKey="name"
+                          allowCustom={false}
+                        />
+                        {renewalState && (
+                          <button
+                            type="button"
+                            onClick={() => setRenewalState("")}
+                            className="absolute right-9 top-[calc(0.75rem+1.25rem)] -translate-y-1/2 text-[#05243F]/30 hover:text-[#05243F]/60 transition-colors"
+                            aria-label="Clear state"
+                          >
+                            <Icon icon="solar:close-circle-bold" fontSize={16} />
+                          </button>
+                        )}
+                      </div>
+                      {renewalState === "Lagos" && (
+                        <div className="mt-3 flex gap-3 rounded-[10px] border border-[#FDB022]/40 bg-[#FFFBF0] p-3">
+                          <Icon icon="solar:info-circle-bold" className="mt-0.5 shrink-0 text-[#C98B1A]" fontSize={18} />
+                          <p className="text-xs text-[#7A5C00]">
+                            Because you have chosen Lagos state you will be required to take your vehicle for inspection which may affect the documents process timeline.
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mb-6">

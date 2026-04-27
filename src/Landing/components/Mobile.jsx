@@ -2,7 +2,7 @@ import phone from "../../assets/images/landing/Artboard.png";
 import Download from "../../assets/images/landing/Group 1171279833.svg"
 function Mobile() {
   return (
-    <div className="relative  mt-10 grid grid-cols-1 place-items-center gap-10 sm:gap-0 bg-gradient-to-b from-[#DAECFC] to-[#ffffff] p-20 px-0 sm:px-20 sm:pe-0 pb-0 lg:grid-cols-2 min-h-screen items-end">
+    <div className="relative grid grid-cols-1 place-items-center gap-10 sm:gap-0 bg-gradient-to-b from-[#DAECFC] to-[#ffffff] p-20 px-0 sm:px-20 sm:pe-0 pb-0 lg:grid-cols-2 min-h-screen items-end">
       <div className="relatize z-10 flex h-full flex-col justify-between text-[56px] text-[#2389E3] px-10 sm:px-0">
         <div>
           {" "}
