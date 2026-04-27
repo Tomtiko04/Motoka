@@ -47,6 +47,22 @@ export default function SearchBar({
     handleSearch("");
   }
 
+  function handleAskMo() {
+    const carLabel = selectedCar
+      ? `${selectedCar.vehicle_make || ""} ${selectedCar.vehicle_model || ""} ${selectedCar.vehicle_year || ""}`.trim()
+      : null;
+
+    const prefill = carLabel
+      ? `Help me choose the right parts for my ${carLabel}.`
+      : "Help me choose the right parts to buy.";
+
+    window.dispatchEvent(
+      new CustomEvent("motoka:open-mo", {
+        detail: { prefill },
+      })
+    );
+  }
+
   return (
     <div ref={dropdownRef} className="relative">
       {/* Top row: Search input + car selector + Ask Mo */}
@@ -211,21 +227,14 @@ export default function SearchBar({
         {/* Ask Mo button */}
         <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
           <span className="text-[12px] text-[#8A9EB0] whitespace-nowrap">Don&apos;t know what to buy?</span>
-          <div className="group relative">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Coming soon"
-              className="flex items-center gap-1.5 rounded-full bg-[#EBB850]/50 px-4 py-2.5 text-[13px] font-bold text-[#05243F]/40 cursor-not-allowed whitespace-nowrap"
-            >
-              <Icon icon="solar:stars-minimalistic-bold" width="15" />
-              Ask Mo
-            </button>
-            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#05243F] px-3 py-1.5 text-[11px] text-white shadow-lg group-hover:block">
-              Coming soon
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={handleAskMo}
+            className="flex items-center gap-1.5 rounded-full bg-[#EBB850] px-4 py-2.5 text-[13px] font-bold text-[#05243F] hover:bg-[#d8a93f] transition-colors cursor-pointer whitespace-nowrap"
+          >
+            <Icon icon="solar:stars-minimalistic-bold" width="15" />
+            Ask Mo
+          </button>
         </div>
       </div>
     </div>

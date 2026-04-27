@@ -80,6 +80,19 @@ export default function Mo() {
     if (open) setTimeout(() => inputRef.current?.focus(), 300);
   }, [open]);
 
+  useEffect(() => {
+    function handleOpenMo(event) {
+      const prefill = event?.detail?.prefill;
+      setOpen(true);
+      if (typeof prefill === "string" && prefill.trim()) {
+        setInput(prefill.trim());
+      }
+    }
+
+    window.addEventListener("motoka:open-mo", handleOpenMo);
+    return () => window.removeEventListener("motoka:open-mo", handleOpenMo);
+  }, []);
+
   const send = async (text) => {
     const content = (text || input).trim();
     if (!content || thinking) return;
