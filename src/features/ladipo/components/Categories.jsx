@@ -12,6 +12,7 @@ function Categories() {
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollContainerRef = useRef(null);
@@ -21,10 +22,11 @@ function Categories() {
     const fetchCategories = async () => {
       try {
         setLoading(true);
+        setError("");
         const data = await getLadipoMainCategories();
         setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+      } catch {
+        setError("Unable to load categories right now.");
       } finally {
         setLoading(false);
       }
@@ -71,6 +73,14 @@ function Categories() {
             <div className="h-3 w-12 bg-[#F4F5FC] animate-pulse rounded" />
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full rounded-xl border border-[#F2D3D3] bg-[#FFF7F7] px-4 py-3 text-[13px] text-[#A33A3A]">
+        {error}
       </div>
     );
   }

@@ -211,23 +211,11 @@ export const getLadipoPartsByCategory = async (
 };
 
 /**
- * Link a part to a subcategory
- */
-export const linkPartToSubcategory = async (_partId, _subcategoryId) => {
-  throw new Error("Linking parts to legacy Ladipo subcategories is no longer supported.");
-};
-
-/**
- * Unlink a part from a subcategory
- */
-export const unlinkPartFromSubcategory = async (_partId, _subcategoryId) => {
-  throw new Error("Unlinking parts from legacy Ladipo subcategories is no longer supported.");
-};
-
-/**
  * Get all subcategories for a part
  */
-export const getPartSubcategories = async (_partId) => {
-  const categories = await fetchCategories();
-  return categories.filter((category) => category.parent_id != null);
+export const getPartSubcategories = async (partId) => {
+  if (!partId) return [];
+  // No dedicated backend endpoint exists for part → subcategory mapping.
+  // Return an empty list so callers don't accidentally consume unrelated subcategories.
+  return [];
 };

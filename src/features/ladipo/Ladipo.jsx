@@ -26,7 +26,6 @@ export default function Ladipo() {
   const {
     selectedMainCategory,
     selectedSubcategory,
-    filters,
   } = ladipoStore();
 
   const { cars } = useGetCars();
@@ -62,7 +61,7 @@ export default function Ladipo() {
   }, [selectedMainCategory]);
 
   // Fetch parts based on category/subcategory
-  const { data: partsData, isLoading: partsLoading } = useQuery({
+  const { data: partsData, isLoading: partsLoading, isError: partsError } = useQuery({
     queryKey: [
       "ladipo-parts",
       selectedMainCategory?.slug,
@@ -323,6 +322,13 @@ export default function Ladipo() {
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
+            </div>
+          ) : partsError ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-2xl border border-[#E1E6F4]">
+              <p className="text-[16px] font-semibold text-[#05243F]">Failed to load parts</p>
+              <p className="text-[13px] text-[#697C8C] text-center max-w-xs">
+                Please check your connection and try again.
+              </p>
             </div>
           ) : parts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4 bg-white rounded-2xl">

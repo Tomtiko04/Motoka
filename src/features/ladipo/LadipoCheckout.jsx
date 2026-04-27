@@ -11,15 +11,9 @@ import LadipoLayout from "./components/LadipoLayout";
 
 const DELIVERY_OPTIONS = [
   {
-    label: "Pickup",
-    description: "Lagos Island warehouse",
-    value: "pickup",
-    icon: "solar:shop-bold-duotone",
-  },
-  {
-    label: "Lagos Delivery",
+    label: "World wide",
     description: "Fee is calculated by your delivery location",
-    value: "lagos",
+    value: "standard",
     icon: "solar:scooter-bold-duotone",
   },
 ];
@@ -29,7 +23,7 @@ export default function LadipoCheckout() {
   const items = useCartStore((s) => s.items);
   const subtotalKobo = useCartStore(selectTotalKobo);
 
-  const [deliveryOption, setDeliveryOption] = useState(DELIVERY_OPTIONS[0]);
+  const deliveryOption = DELIVERY_OPTIONS[0];
   const [form, setForm] = useState({
     contact_name: "",
     phone: "",
@@ -52,18 +46,23 @@ export default function LadipoCheckout() {
     }
   }, [items.length, navigate]);
 
-  if (items.length === 0) {
-    return null;
-  }
-
-  const isPickup = deliveryOption.value === "pickup";
   const isState = state?.data;
   const selectedState = useMemo(
     () => (Array.isArray(isState) ? isState.find((s) => s.code === form.state) : null),
     [isState, form.state],
   );
-  const deliveryFeeKobo = isPickup ? 0 : Number(selectedState?.delivery_fee || 0);
+  const deliveryFeeKobo = Number(selectedState?.delivery_fee || 0);
   const totalKobo = subtotalKobo + deliveryFeeKobo;
+  const isCheckoutReady =
+    form.contact_name.trim() &&
+    form.phone.trim() &&
+    form.address.trim() &&
+    form.state &&
+    form.lga;
+
+  if (items.length === 0) {
+    return null;
+  }
 
   function handleFormChange(e) {
     const { name, value } = e.target;
@@ -136,12 +135,11 @@ export default function LadipoCheckout() {
   async function handleProceedToPayment(e) {
     e.preventDefault();
 
-    const requiresAddress = deliveryOption.value !== "pickup";
     if (!form.contact_name.trim()) return toast.error("Please enter your name");
     if (!form.phone.trim()) return toast.error("Please enter your phone number");
-    if (requiresAddress && !form.address.trim()) return toast.error("Please enter a delivery address");
-    if (requiresAddress && !form.state) return toast.error("Please select a state");
-    if (requiresAddress && !form.lga) return toast.error("Please select a local government");
+    if (!form.address.trim()) return toast.error("Please enter a delivery address");
+    if (!form.state) return toast.error("Please select a state");
+    if (!form.lga) return toast.error("Please select a local government");
 
     setLoading(true);
     try {
@@ -156,7 +154,7 @@ export default function LadipoCheckout() {
           address: form.address,
           state: form.state,
           lga: form.lga,
-          method: deliveryOption.value === "pickup" ? "pickup" : "standard",
+          method: "standard",
         },
       };
 
@@ -258,7 +256,7 @@ export default function LadipoCheckout() {
               </div>
 
               {/* Delivery method */}
-              <div className={`py-6 ${deliveryOption.value !== "pickup" ? "border-b border-[#E1E6F4]" : ""}`}>
+              <div className="py-6 border-b border-[#E1E6F4]">
                 <h3 className="text-[15px] font-bold text-[#05243F] mb-4 flex items-center gap-2">
                   <Icon icon="solar:delivery-bold-duotone" width="19" className="text-[#2389E3]" />
                   Delivery Method
@@ -267,8 +265,7 @@ export default function LadipoCheckout() {
                   {DELIVERY_OPTIONS.map((opt) => (
                     <label
                       key={opt.value}
-                      onClick={() => setDeliveryOption(opt)}
-                      className={`flex items-center gap-3 p-3.5 rounded-[12px] border-2 cursor-pointer transition-all ${
+                      className={`flex items-center gap-3 p-3.5 rounded-[12px] border-2 transition-all ${
                         deliveryOption.value === opt.value
                           ? "border-[#2389E3] bg-[#2389E3]/5"
                           : "border-[#E1E6F4] hover:border-[#2389E3]/30"
@@ -286,8 +283,8 @@ export default function LadipoCheckout() {
                         <p className="text-[14px] font-semibold text-[#05243F]">{opt.label}</p>
                         <p className="text-[12px] text-[#697C8C]">{opt.description}</p>
                       </div>
-                      <span className={`text-[13px] font-bold flex-shrink-0 ${opt.value === "pickup" ? "text-emerald-600" : "text-[#05243F]"}`}>
-                        {opt.value === "pickup" ? "Free" : "Calculated"}
+                      <span className="text-[13px] font-bold flex-shrink-0 text-[#05243F]">
+                        Calculated
                       </span>
                     </label>
                   ))}
@@ -295,73 +292,71 @@ export default function LadipoCheckout() {
               </div>
 
               {/* Delivery address */}
-              {deliveryOption.value !== "pickup" && (
-                <div className="pt-6">
-                  <h3 className="text-[15px] font-bold text-[#05243F] mb-4 flex items-center gap-2">
-                    <Icon icon="solar:map-point-bold-duotone" width="19" className="text-[#2389E3]" />
-                    Delivery Address
-                  </h3>
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <div className="text-sm font-medium text-[#05243F]">
-                        Delivery Address <span className="text-red-500">*</span>
-                      </div>
-                      <input
-                        type="text"
-                        name="address"
-                        placeholder="Street address"
-                        value={form.address}
-                        onChange={handleFormChange}
-                        className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
-                      />
+              <div className="pt-6">
+                <h3 className="text-[15px] font-bold text-[#05243F] mb-4 flex items-center gap-2">
+                  <Icon icon="solar:map-point-bold-duotone" width="19" className="text-[#2389E3]" />
+                  Delivery Address
+                </h3>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Address <span className="text-red-500">*</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <SearchableSelect
-                        label={<>State <span className="text-red-500">*</span></>}
-                        name="state"
-                        value={form.stateName}
-                        onChange={handleStateChange}
-                        options={
-                          Array.isArray(isState)
-                            ? isState.map((entry) => ({ id: entry.id, name: entry.state_name }))
-                            : []
-                        }
-                        placeholder="Select state"
-                        filterKey="name"
-                        isLoading={isGettingState}
-                        allowCustom={true}
-                      />
-                      <SearchableSelect
-                        label={<>Local Government <span className="text-red-500">*</span></>}
-                        name="lga"
-                        value={form.lga}
-                        onChange={handleLgaChange}
-                        options={
-                          Array.isArray(lgaOptions)
-                            ? lgaOptions.map((entry) => ({ id: entry.id, name: entry.lga_name }))
-                            : []
-                        }
-                        placeholder="Select local government"
-                        filterKey="name"
-                        isLoading={isGettingLG}
-                        disabled={!form.state}
-                        allowCustom={true}
-                      />
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Street address"
+                      value={form.address}
+                      onChange={handleFormChange}
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <SearchableSelect
+                      label={<>State <span className="text-red-500">*</span></>}
+                      name="state"
+                      value={form.stateName}
+                      onChange={handleStateChange}
+                      options={
+                        Array.isArray(isState)
+                          ? isState.map((entry) => ({ id: entry.id, name: entry.state_name }))
+                          : []
+                      }
+                      placeholder="Select state"
+                      filterKey="name"
+                      isLoading={isGettingState}
+                      allowCustom={true}
+                    />
+                    <SearchableSelect
+                      label={<>Local Government <span className="text-red-500">*</span></>}
+                      name="lga"
+                      value={form.lga}
+                      onChange={handleLgaChange}
+                      options={
+                        Array.isArray(lgaOptions)
+                          ? lgaOptions.map((entry) => ({ id: entry.id, name: entry.lga_name }))
+                          : []
+                      }
+                      placeholder="Select local government"
+                      filterKey="name"
+                      isLoading={isGettingLG}
+                      disabled={!form.state}
+                      allowCustom={true}
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-[#05243F]">
+                      Delivery Fee <span className="text-red-500">*</span>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium text-[#05243F]">
-                        Delivery Fee <span className="text-red-500">*</span>
-                      </div>
-                      <input
-                        readOnly
-                        type="text"
-                        value={form.state ? `₦${(deliveryFeeKobo / 100).toLocaleString()}` : "Select a state first"}
-                        className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none"
-                      />
-                    </div>
+                    <input
+                      readOnly
+                      type="text"
+                      value={form.state ? `₦${(deliveryFeeKobo / 100).toLocaleString()}` : "Select a state first"}
+                      className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none"
+                    />
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Right column - Order summary */}
@@ -388,8 +383,8 @@ export default function LadipoCheckout() {
                   </div>
                   <div className="flex justify-between text-[13px]">
                     <span className="text-[#697C8C]">Delivery</span>
-                    <span className={`font-semibold ${isPickup ? "text-emerald-600" : "text-[#05243F]"}`}>
-                      {isPickup ? "Free" : (form.state ? `₦${(deliveryFeeKobo / 100).toLocaleString()}` : "Select state")}
+                    <span className="font-semibold text-[#05243F]">
+                      {form.state ? `₦${(deliveryFeeKobo / 100).toLocaleString()}` : "Select state"}
                     </span>
                   </div>
                   <div className="border-t border-[#E1E6F4] pt-2 mt-2 flex justify-between items-baseline">
@@ -400,7 +395,7 @@ export default function LadipoCheckout() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !isCheckoutReady}
                   className="w-full mt-4 bg-[#2389E3] py-3.5 rounded-[12px] text-white font-semibold text-[15px] hover:bg-[#1a7acf] transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (

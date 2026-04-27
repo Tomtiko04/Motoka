@@ -18,7 +18,6 @@ function ProductModal() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [qty, setQty] = useState(1);
   const [touchStart, setTouchStart] = useState(null);
 
   const addItem = useCartStore((s) => s.addItem);
@@ -153,7 +152,7 @@ function ProductModal() {
     : [part.primary_image_url].filter(Boolean);
 
   const keyFeatures = Array.isArray(part.key_features) ? part.key_features : [];
-  const displayQty = Math.max(1, qty);
+  const displayQty = 1;
   return (
     <LadipoLayout
       title={part.name}
@@ -191,15 +190,13 @@ function ProductModal() {
 
               {/* Thumbnails */}
               <div className="mt-5 flex justify-between">
-                {[...Array(4)].map((_, i) => {
-                  // If we don't have enough unique images, just repeat the available ones
-                  const imgToShow = images[i % images.length];
+                {images.map((imgToShow, i) => {
                   return (
                     <button
                       key={i}
-                      onClick={() => setSelectedImage(i % images.length)}
+                      onClick={() => setSelectedImage(i)}
                       className={`flex-shrink-0 h-[70px] sm:h-[80px] w-[70px] sm:w-[80px] rounded-[16px] border overflow-hidden p-2 transition-all cursor-pointer ${
-                        selectedImage === (i % images.length) && i < images.length
+                        selectedImage === i
                           ? "border-[#2389E3] ring-1 ring-[#2389E3] bg-[#2389E3]/5"
                           : "border-[#E1E6F4] bg-[#F4F5FC] hover:border-[#2389E3]/50"
                       }`}

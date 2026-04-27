@@ -14,10 +14,11 @@ const useCartStore = create(
     (set, get) => ({
       items: [],
       initialized: false,
+      syncError: false,
 
       initializeCart: async () => {
         if (!authStorage.isAuthenticated()) {
-          set({ initialized: true });
+          set({ initialized: true, syncError: false });
           return;
         }
 
@@ -56,10 +57,10 @@ const useCartStore = create(
             })
             .filter(Boolean);
 
-          set({ items: mappedItems, initialized: true });
-        } catch (error) {
+          set({ items: mappedItems, initialized: true, syncError: false });
+        } catch {
           // Keep UI resilient: if backend sync fails, do not wipe local cart.
-          set({ initialized: true });
+          set({ initialized: true, syncError: true });
         }
       },
 
