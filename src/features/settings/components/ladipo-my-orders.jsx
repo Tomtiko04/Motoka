@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { ClipLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
 import { getUserLadipoOrders } from "../../../services/apiLadipo";
 
 function formatDate(iso) {
@@ -78,7 +79,7 @@ function getStatusDescription(statusKey, order) {
       : "Your order is on the way to your delivery address.",
     delivered: "Order delivered successfully.",
     cancelled: "This order has been cancelled.",
-    payment_failed: "Payment was not successful. Start checkout again.",
+    payment_failed: "Payment was not successful. Retry payment to continue this order.",
   };
   return descriptions[statusKey] || "";
 }
@@ -101,9 +102,27 @@ const TIMELINE_STEPS = [
 ];
 
 export default function LadipoMyOrders({ onNavigate }) {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleRetryPayment = (order) => {
+    if (!order?.order_number) return;
+    const paymentData = {
+      type: "ladipo",
+      order_number: order.order_number,
+      amount: order.total_kobo,
+      price: order.total_kobo,
+      orderData: order,
+    };
+    try {
+      sessionStorage.setItem("paymentData", JSON.stringify(paymentData));
+    } catch {
+      // ignore sessionStorage failures and continue with navigation state
+    }
+    navigate("/payment?type=ladipo", { state: { paymentData } });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -257,15 +276,13 @@ export default function LadipoMyOrders({ onNavigate }) {
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {statusKey === "awaiting_payment" && (
+                  {(statusKey === "awaiting_payment" || statusKey === "payment_failed") && (
                     <button
                       type="button"
-                      onClick={() => {
-                        window.location.href = "/ladipo/cart-page";
-                      }}
+                      onClick={() => handleRetryPayment(order)}
                       className="rounded-full bg-[#2284DB] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1A73C2]"
                     >
-                      Pay now
+                      {statusKey === "payment_failed" ? "Retry payment" : "Pay now"}
                     </button>
                   )}
                   {(statusKey === "out_for_delivery" || statusKey === "processing") && (
