@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { useNavigate } from "react-router-dom";
 import { useGetCars } from "../car/useCar";
 import config from "../../config/config";
 import { authStorage } from "../../utils/authStorage";
@@ -8,19 +9,11 @@ import { authStorage } from "../../utils/authStorage";
 const QUICK_ACTIONS = [
   { label: "Check my expiry", icon: "solar:calendar-bold" },
   { label: "How do I renew?", icon: "solar:refresh-bold" },
-  { label: "Renewal prices", icon: "solar:tag-price-bold" },
+  { label: "Add a car", icon: "solar:car-bold" },
   { label: "Driver's licence", icon: "solar:card-bold" },
 ];
 
-const PRICE_PREVIEWS = [
-  { name: "Vehicle Licence", price: "₦5,000" },
-  { name: "Insurance", price: "₦15,000" },
-  { name: "Road Worthiness + Referral", price: "₦11,500" },
-  { name: "Proof of Ownership", price: "₦3,000" },
-  { name: "Hackney Permit", price: "₦4,000" },
-];
-
-function Bubble({ msg }) {
+function Bubble({ msg, onAction }) {
   const isUser = msg.role === "user";
   return (
     <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
@@ -29,14 +22,25 @@ function Bubble({ msg }) {
           <Icon icon="solar:stars-bold" className="text-white" fontSize={13} />
         </div>
       )}
-      <div
-        className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-          isUser
-            ? "rounded-br-none bg-[#2389E3] text-white"
-            : "rounded-bl-none bg-[#F0F4FA] text-[#05243F]"
-        }`}
-      >
-        {msg.text}
+      <div className={`flex max-w-[78%] flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}>
+        <div
+          className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+            isUser
+              ? "rounded-br-none bg-[#2389E3] text-white"
+              : "rounded-bl-none bg-[#F0F4FA] text-[#05243F]"
+          }`}
+        >
+          {msg.text}
+        </div>
+        {msg.action && onAction && (
+          <button
+            onClick={() => onAction(msg.action.route)}
+            className="flex items-center gap-1.5 rounded-full bg-[#EBB950] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#d4a43e] hover:shadow-md active:scale-95"
+          >
+            {msg.action.label}
+            <Icon icon="solar:arrow-right-bold" fontSize={11} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -50,26 +54,28 @@ export default function Mo() {
   const [thinking, setThinking] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const navigate = useNavigate();
+  // Tracks whether the greeting has been shown — prevents resetting on re-open
+  const hasGreeted = useRef(false);
 
   const { cars } = useGetCars();
-  const userName = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("userInfo"))?.name?.split(" ")[0];
-    } catch {
-      return "";
-    }
+  const userInfo = (() => {
+    try { return JSON.parse(localStorage.getItem("userInfo")) || {}; }
+    catch { return {}; }
   })();
+  const userName = userInfo?.name?.split(" ")[0] || userInfo?.first_name || "";
 
+  // Only greet once — subsequent opens restore the existing conversation
   useEffect(() => {
-    if (!open) return;
+    if (!open || hasGreeted.current) return;
+    hasGreeted.current = true;
     setMessages([
       {
         role: "mo",
-        text: `Hi ${userName || "there"} 👋 I'm Mo, your Motoka assistant. What can I help you with?`,
+        text: `Hey ${userName || "there"} 👋 I'm Mo, your Motoka assistant. What do you need help with?`,
         id: Date.now(),
       },
     ]);
-    setHistory([]);
   }, [open]);
 
   useEffect(() => {
@@ -93,6 +99,11 @@ export default function Mo() {
     return () => window.removeEventListener("motoka:open-mo", handleOpenMo);
   }, []);
 
+  const handleAction = (route) => {
+    navigate(route);
+    setOpen(false);
+  };
+
   const send = async (text) => {
     const content = (text || input).trim();
     if (!content || thinking) return;
@@ -115,24 +126,30 @@ export default function Mo() {
         body: JSON.stringify({
           messages: newHistory,
           userName,
+          userProfile: {
+            email: userInfo?.email,
+            phone: userInfo?.phone_number,
+            memberSince: userInfo?.created_at,
+          },
           cars: cars?.cars || [],
         }),
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || `Error ${res.status}`);
 
-      const reply = data.reply || "I'm not sure how to answer that.";
+      const reply = data.reply || "I'm not sure how to help with that.";
+      const action = data.action || null;
+
       setHistory([...newHistory, { role: "assistant", content: reply }]);
       setMessages((prev) => [
         ...prev,
-        { role: "mo", text: reply, id: Date.now() + 1 },
+        { role: "mo", text: reply, action, id: Date.now() + 1 },
       ]);
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "mo", text: "Sorry, something went wrong. Please try again.", id: Date.now() + 1 },
+        { role: "mo", text: "Something went wrong, try again in a sec.", id: Date.now() + 1 },
       ]);
     } finally {
       setThinking(false);
@@ -148,8 +165,20 @@ export default function Mo() {
 
   const handleClose = () => {
     setOpen(false);
-    setMessages([]);
+    // Conversation is preserved — user can re-open and continue
+  };
+
+  const handleNewChat = () => {
+    hasGreeted.current = false;
     setHistory([]);
+    setMessages([]);
+    // Trigger fresh greeting
+    hasGreeted.current = true;
+    setMessages([{
+      role: "mo",
+      text: `Starting fresh 👋 What can I help you with?`,
+      id: Date.now(),
+    }]);
   };
 
   const showWelcome = messages.length <= 1 && !thinking;
@@ -198,43 +227,32 @@ export default function Mo() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={handleClose}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
-              >
-                <Icon icon="solar:close-bold" fontSize={14} />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleNewChat}
+                  title="New conversation"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                >
+                  <Icon icon="solar:restart-bold" fontSize={13} />
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                >
+                  <Icon icon="solar:close-bold" fontSize={14} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
               {messages.map((msg) => (
-                <Bubble key={msg.id} msg={msg} />
+                <Bubble key={msg.id} msg={msg} onAction={handleAction} />
               ))}
 
-              {/* Welcome state */}
+              {/* Welcome quick actions */}
               {showWelcome && (
-                <div className="pl-9 space-y-3">
-                  {/* Price snapshot */}
-                  <div className="overflow-hidden rounded-xl border border-[#E8EDF5] bg-white">
-                    <div className="flex items-center gap-2 border-b border-[#E8EDF5] bg-[#FFFBF0] px-3 py-2">
-                      <Icon icon="solar:tag-price-bold" fontSize={13} className="text-[#EBB950]" />
-                      <p className="text-xs font-semibold text-[#05243F]">Renewal Prices</p>
-                    </div>
-                    <div className="divide-y divide-[#F4F5FC]">
-                      {PRICE_PREVIEWS.map((p, i) => (
-                        <div key={p.name} className="flex items-center gap-3 px-3 py-2">
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EBB950]/15 text-[10px] font-bold text-[#EBB950]">
-                            {i + 1}
-                          </span>
-                          <span className="flex-1 text-xs text-[#05243F]/80">{p.name}</span>
-                          <span className="text-xs font-semibold text-[#05243F]">{p.price}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Quick actions */}
+                <div className="pl-9">
                   <div className="flex flex-wrap gap-2">
                     {QUICK_ACTIONS.map((a) => (
                       <button
