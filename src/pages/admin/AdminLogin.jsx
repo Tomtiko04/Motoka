@@ -15,14 +15,22 @@ const AdminLogin = () => {
   const [showOtp, setShowOtp] = useState(false);
   const navigate = useNavigate();
 
+  const ALLOWED_ADMIN_EMAILS = ['rasak@motokaapp.ng'];
+
   const handleSendOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    if (!ALLOWED_ADMIN_EMAILS.includes(email.trim().toLowerCase())) {
+      setError('Access denied: Unauthorized email address');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Use Supabase OTP authentication
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
           shouldCreateUser: false, // Don't create new users for admin login

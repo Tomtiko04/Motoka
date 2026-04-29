@@ -54,3 +54,21 @@ export async function resumeSubscription(subscriptionId) {
   const { data } = await api.put(`/subscriptions/${subscriptionId}/resume`);
   return data;
 }
+
+/**
+ * Set up auto-renewal for a car whose papers are already valid.
+ * Creates a deferred subscription + ₦50 tokenization (card-save, refunded).
+ * @param {Object} payload - { car_slug, selected_items }
+ */
+export async function setupAutoRenewal(payload) {
+  const { data } = await api.post('/subscriptions/card-setup', payload);
+  return data;
+}
+
+/**
+ * Fetch available renewal items and their prices.
+ */
+export async function getRenewalSchedule() {
+  const { data } = await api.get('/payment-schedule');
+  return data;
+}
