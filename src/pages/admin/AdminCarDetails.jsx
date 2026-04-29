@@ -337,17 +337,17 @@ const AdminCarDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-px bg-gray-100 sm:grid-cols-3">
-          <div className="bg-white px-6 py-4">
+          <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Plate Number</p>
             <p className="mt-1 text-lg font-bold text-gray-900">{car.registration_no || 'N/A'}</p>
           </div>
-          <div className="bg-white px-6 py-4">
+          <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Expiry Date</p>
             <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-600' : isUrgent ? 'text-yellow-600' : 'text-gray-900'}`}>
               {formatDate(car.expiry_date)}
             </p>
           </div>
-          <div className="bg-white px-6 py-4">
+          <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Registered</p>
             <p className="mt-1 text-lg font-bold text-gray-900">{formatDate(car.created_at)}</p>
           </div>
@@ -410,7 +410,7 @@ const AdminCarDetails = () => {
 
       {/* Orders History */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <ClipboardDocumentListIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Order History</h3>
         </div>
@@ -419,7 +419,7 @@ const AdminCarDetails = () => {
             {car.orders.map((order) => (
               <div
                 key={order.id}
-                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={() => navigate(`/admin/orders/${order.order_number}`)}
               >
                 <div>
@@ -454,14 +454,14 @@ const AdminCarDetails = () => {
 
       {/* Transaction History */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <CreditCardIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Payment Transactions</h3>
         </div>
         {car.transactions?.length > 0 ? (
           <div className="divide-y divide-gray-50">
             {car.transactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between px-6 py-4">
+              <div key={tx.id} className="flex items-center justify-between px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-gray-900">{tx.reference}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -485,14 +485,14 @@ const AdminCarDetails = () => {
 
       {/* Car Documents */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <DocumentArrowUpIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Car Documents</h3>
           <span className="ml-auto text-xs text-gray-400">{documents.length} file{documents.length !== 1 ? 's' : ''}</span>
         </div>
 
         {/* Upload Form */}
-        <div className="border-b border-gray-100 px-6 py-4 bg-gray-50/50">
+        <div className="border-b border-gray-100 px-4 py-3 bg-gray-50/50">
           <p className="mb-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Upload Document</p>
           <form onSubmit={handleDocumentUpload} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
@@ -535,7 +535,7 @@ const AdminCarDetails = () => {
         ) : documents.length > 0 ? (
           <div className="divide-y divide-gray-50">
             {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between gap-4 px-6 py-4">
+              <div key={doc.id} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
                     <DocumentIcon className="h-5 w-5 text-blue-600" />

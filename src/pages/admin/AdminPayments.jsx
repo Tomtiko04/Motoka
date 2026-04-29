@@ -286,28 +286,28 @@ const AdminPayments = () => {
 
         {/* Transactions Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Transaction ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -316,25 +316,25 @@ const AdminPayments = () => {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-24"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-32"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-40"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-6 bg-gray-200 rounded-full w-16"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-8 bg-gray-200 rounded w-16"></div>
                     </td>
                   </tr>
@@ -342,41 +342,39 @@ const AdminPayments = () => {
               ) : transactions.length > 0 ? (
                 transactions.map((transaction) => (
                   <tr key={transaction.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-gray-700">
                       {transaction.transaction_id}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>
-                        <div className="font-medium">{transaction.user?.name || 'N/A'}</div>
-                        <div className="text-gray-500">{transaction.user?.email || 'N/A'}</div>
-                      </div>
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-900">
+                      <div className="font-medium text-xs">{transaction.user?.name || 'N/A'}</div>
+                      <div className="text-gray-400 text-xs">{transaction.user?.email || 'N/A'}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-700">
                       {transaction.payment_description || 'Transaction'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
                       {formatCurrency(transaction.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {getStatusBadge(transaction.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-500 text-xs">
                       {formatDate(transaction.created_at)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleViewTransaction(transaction.transaction_id)}
-                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1 text-xs font-medium"
                         >
-                          <EyeIcon className="h-4 w-4" />
+                          <EyeIcon className="h-3.5 w-3.5" />
                           View
                         </button>
                         {(transaction.status === 'pending' || transaction.status === 'approved' || transaction.status === 'abandoned') && (
                           <>
                             <button
                               onClick={() => handleMarkPaid(transaction.transaction_id)}
-                              className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
+                              className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-0.5 ${
                                 transaction.status === 'abandoned'
                                   ? 'text-orange-600 hover:text-orange-800 border-orange-300'
                                   : transaction.status === 'pending'
@@ -391,15 +389,15 @@ const AdminPayments = () => {
                                   : 'Create missing order for this payment'
                               }
                             >
-                              <CheckCircleIcon className="h-3.5 w-3.5" />
-                              {transaction.status === 'abandoned' ? 'Recover & Create Order' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
+                              <CheckCircleIcon className="h-3 w-3" />
+                              {transaction.status === 'abandoned' ? 'Recover' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
                             </button>
                             <button
                               onClick={() => handleMarkFailed(transaction.transaction_id)}
-                              className="flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 text-red-600 hover:text-red-800 border-red-300"
+                              className="flex items-center gap-1 text-xs font-medium border rounded px-2 py-0.5 text-red-600 hover:text-red-800 border-red-300"
                               title="No money received — mark this transaction as failed"
                             >
-                              Mark Failed
+                              Failed
                             </button>
                           </>
                         )}
@@ -409,7 +407,7 @@ const AdminPayments = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center">
+                  <td colSpan="7" className="px-4 py-12 text-center">
                     <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">No transactions found</p>
                   </td>
