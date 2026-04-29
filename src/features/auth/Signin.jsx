@@ -500,7 +500,7 @@ export default function Signin() {
         <div className="w-full">
           <div className="w-full overflow-hidden p-0 sm:p-8 flex flex-col h-full flex-1">
             <div className="animate-slideDown mb-8 sm:mb-4 flex flex-col space-y-1 sm:mb-8 sm:space-y-1 md:mt-3">
-              <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">
+              <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl pt-1">
                 Login
               </h2>
               <div className="flex items-center">

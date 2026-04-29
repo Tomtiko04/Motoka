@@ -143,7 +143,7 @@ export default function SettingsLayout({
                 <SearchBar />
               </div>
               {/* <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] min-h-full overflow-y-auto customScroll px-6 sm:px-4"> */}
-                              <div className="max-h-[calc(100vh-330px)] overflow-y-auto customScroll px-6 sm:px-4">
+                              <div className="max-h-[calc(100vh-330px)] overflow-y-auto customscroll px-6 sm:px-4">
                 {/* max-h-[calc(100vh-380px)] removed this and added flex-1 */}
                 <SettingsSidebar
                   activePage={activePage}
