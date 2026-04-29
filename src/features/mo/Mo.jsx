@@ -60,7 +60,6 @@ function renderMessageText(text, isUser) {
 
   return elements;
 }
-
 function Bubble({ msg, onAction }) {
   const isUser = msg.role === "user";
   return (
@@ -146,7 +145,6 @@ export default function Mo() {
     window.addEventListener("motoka:open-mo", handleOpenMo);
     return () => window.removeEventListener("motoka:open-mo", handleOpenMo);
   }, []);
-
   const handleAction = (route) => {
     navigate(route);
     setOpen(false);
