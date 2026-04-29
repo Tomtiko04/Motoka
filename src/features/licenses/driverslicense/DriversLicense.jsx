@@ -56,8 +56,9 @@ export default function DriversLicense() {
   const [selectedRenewDuration, setSelectedRenewDuration] = useState(null);
 
   const { prices } = useDriverLicensePrices();
-  const newPrices = (prices || []).filter((p) => p.license_type === "new");
-  const renewPrices = (prices || []).filter((p) => p.license_type === "renew");
+  const pricesArr = Array.isArray(prices) ? prices : [];
+  const newPrices = pricesArr.filter((p) => p.license_type === "new");
+  const renewPrices = pricesArr.filter((p) => p.license_type === "renew");
 
   useEffect(() => {
     if (newPrices.length && !selectedNewDuration) {

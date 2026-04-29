@@ -10,6 +10,7 @@ import Testimonials from "./components/Testimonials";
 import Whyus from "./components/Whyus";
 import { useEffect, useState } from "react";
 import Action from "./components/Actions";
+import BlogSection from "./components/Blogs";
 
 function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -59,6 +60,7 @@ function LandingPage() {
             <Testimonials/>
             <CtaSection/>
             <FaqsSection/>
+            <BlogSection/>
             <Mobile/>
             <Footer/>
             <ScrollToTopButton />
