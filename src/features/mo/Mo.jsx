@@ -9,10 +9,57 @@ import { authStorage } from "../../utils/authStorage";
 const QUICK_ACTIONS = [
   { label: "Check my expiry", icon: "solar:calendar-bold" },
   { label: "How do I renew?", icon: "solar:refresh-bold" },
-  { label: "Add a car", icon: "solar:car-bold" },
+  { label: "Traffic fines in Nigeria", icon: "solar:danger-bold" },
+  { label: "Car maintenance tips", icon: "solar:settings-bold" },
+  { label: "Documents I need", icon: "solar:document-bold" },
   { label: "Driver's licence", icon: "solar:card-bold" },
 ];
 
+function renderMessageText(text, isUser) {
+  const segments = text.split(/\n+/);
+  const elements = [];
+  let listItems = [];
+
+  const flushList = (key) => {
+    if (listItems.length === 0) return;
+    elements.push(
+      <div key={`list-${key}`} className="flex flex-col gap-1.5 mt-1">
+        {listItems.map((item) => (
+          <div key={item.n} className="flex items-start gap-2">
+            <span
+              className={`shrink-0 min-w-[18px] text-xs font-bold mt-0.5 ${
+                isUser ? "text-white/70" : "text-[#2389E3]"
+              }`}
+            >
+              {item.n}.
+            </span>
+            <span className="leading-snug">{item.text}</span>
+          </div>
+        ))}
+      </div>
+    );
+    listItems = [];
+  };
+
+  segments.forEach((seg, i) => {
+    const trimmed = seg.trim();
+    if (!trimmed) return;
+    const listMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
+    if (listMatch) {
+      listItems.push({ n: listMatch[1], text: listMatch[2] });
+    } else {
+      flushList(i);
+      elements.push(
+        <p key={i} className={elements.length > 0 || listItems.length > 0 ? "mt-2" : ""}>
+          {trimmed}
+        </p>
+      );
+    }
+  });
+  flushList("end");
+
+  return elements;
+}
 function Bubble({ msg, onAction }) {
   const isUser = msg.role === "user";
   return (
@@ -22,15 +69,15 @@ function Bubble({ msg, onAction }) {
           <Icon icon="solar:stars-bold" className="text-white" fontSize={13} />
         </div>
       )}
-      <div className={`flex max-w-[78%] flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}>
+      <div className={`flex max-w-[80%] flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}>
         <div
-          className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+          className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
               ? "rounded-br-none bg-[#2389E3] text-white"
               : "rounded-bl-none bg-[#F0F4FA] text-[#05243F]"
           }`}
         >
-          {msg.text}
+          {renderMessageText(msg.text, isUser)}
         </div>
         {msg.action && onAction && (
           <button
@@ -72,7 +119,7 @@ export default function Mo() {
     setMessages([
       {
         role: "mo",
-        text: `Hey ${userName || "there"} 👋 I'm Mo, your Motoka assistant. What do you need help with?`,
+        text: `Hey ${userName || "there"} 👋 I'm Mo, your Motoka AI. I know cars, Nigerian traffic rules, road fines, maintenance, and all your vehicle docs. What do you need?`,
         id: Date.now(),
       },
     ]);
@@ -98,7 +145,6 @@ export default function Mo() {
     window.addEventListener("motoka:open-mo", handleOpenMo);
     return () => window.removeEventListener("motoka:open-mo", handleOpenMo);
   }, []);
-
   const handleAction = (route) => {
     navigate(route);
     setOpen(false);

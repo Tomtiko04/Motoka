@@ -7,12 +7,15 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useGetCars } from "../../car/useCar"
 import AutoModeIcon from "../../../assets/images/ic_round-auto-mode.png"
+import CardSetupModal from "./CardSetupModal"
 import {
   pauseSubscription,
   resumeSubscription,
   cancelSubscription,
   initiateTokenization
 } from "../../../services/apiSubscription"
+
+const PAPERS_VALID_THRESHOLD_DAYS = 45
 
 function Toggle({ checked, disabled, onChange, busy }) {
   return (
@@ -34,6 +37,7 @@ export default function AutoRenewalSettings({ onNavigate }) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [loadingId, setLoadingId] = useState(null)
+  const [setupModalCar, setSetupModalCar] = useState(null)
 
   const allCars = Object.values(carsData?.cars || {})
 
@@ -99,8 +103,14 @@ export default function AutoRenewalSettings({ onNavigate }) {
   }
 
   const handleEnableForCar = (car) => {
-    // Send them to the renewal flow for this car — auto-renewal gets set up after payment
-    navigate("/licenses/renew", { state: { carSlug: car.slug, enableAutoRenewal: true } })
+    const daysLeft = car.expiry_status?.days_left
+    // Papers are valid and far from expiry — use card-only setup flow
+    if (daysLeft != null && daysLeft > PAPERS_VALID_THRESHOLD_DAYS) {
+      setSetupModalCar(car)
+    } else {
+      // Papers expiring soon or no expiry on record — go through renewal payment
+      navigate("/licenses/renew", { state: { carSlug: car.slug, enableAutoRenewal: true } })
+    }
   }
 
   return (
@@ -129,6 +139,17 @@ export default function AutoRenewalSettings({ onNavigate }) {
           </button>
         </div>
       ) : (
+        <>
+        {setupModalCar && (
+          <CardSetupModal
+            car={setupModalCar}
+            onClose={() => setSetupModalCar(null)}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["cars"] })
+              toast.success("Auto-renewal enabled!")
+            }}
+          />
+        )}
         <div className="space-y-3">
           {allCars.map(car => {
             const sub = car.active_subscription
@@ -182,12 +203,16 @@ export default function AutoRenewalSettings({ onNavigate }) {
                       Paused
                     </span>
                   )}
-                  {!hasSub && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-                      Not set up — renew to enable
-                    </span>
-                  )}
+                  {!hasSub && (() => {
+                    const daysLeft = car.expiry_status?.days_left
+                    const papersValid = daysLeft != null && daysLeft > PAPERS_VALID_THRESHOLD_DAYS
+                    return (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500">
+                        <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+                        {papersValid ? "Add card to enable" : "Renew documents to enable"}
+                      </span>
+                    )
+                  })()}
                 </div>
 
                 {/* Card on file */}
@@ -234,6 +259,7 @@ export default function AutoRenewalSettings({ onNavigate }) {
             )
           })}
         </div>
+      </>
       )}
     </div>
   )
