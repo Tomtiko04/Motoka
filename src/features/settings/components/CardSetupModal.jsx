@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast"
 import { setupAutoRenewal, getRenewalSchedule } from "../../../services/apiSubscription"
 
 function formatNaira(kobo) {
+  if (kobo == null || isNaN(kobo)) return "—"
   return `₦${(kobo / 100).toLocaleString("en-NG")}`
 }
 
@@ -32,7 +33,11 @@ export default function CardSetupModal({ car, onClose, onSuccess }) {
   useEffect(() => {
     getRenewalSchedule()
       .then((data) => {
-        const fetched = data?.data || data?.items || []
+        // API returns `amount` (kobo) — normalise to `price` for this component
+        const fetched = (data?.data || data?.items || []).map((i) => ({
+          ...i,
+          price: i.amount ?? i.price,
+        }))
         setItems(fetched)
         // Default: select all items
         setSelectedIds(fetched.map((i) => i.id))
@@ -47,7 +52,7 @@ export default function CardSetupModal({ car, onClose, onSuccess }) {
 
   const total = items
     .filter((i) => selectedIds.includes(i.id))
-    .reduce((sum, i) => sum + i.price, 0)
+    .reduce((sum, i) => sum + (i.price || 0), 0)
 
   const toggleItem = (id, required) => {
     if (required) return // can't deselect required items
