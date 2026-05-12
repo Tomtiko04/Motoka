@@ -60,39 +60,6 @@ function renderMessageText(text, isUser) {
 
   return elements;
 }
-function formatNaira(kobo) {
-  if (kobo == null) return null;
-  return "₦" + (kobo / 100).toLocaleString("en-NG");
-}
-
-function LadipoPartCard({ part, onNavigate }) {
-  const searchQ = encodeURIComponent(part.name.split(" ").slice(0, 4).join(" "));
-  return (
-    <button
-      onClick={() => onNavigate(`/ladipo?q=${searchQ}`)}
-      className="flex items-center gap-2.5 rounded-xl border border-[#E1E5EE] bg-white p-2.5 text-left shadow-sm transition-all hover:border-[#2389E3]/40 hover:shadow-md active:scale-95 w-full"
-    >
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#F0F4FA]">
-        {part.image ? (
-          <img src={part.image} alt={part.name} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Icon icon="solar:box-bold" className="text-[#9CA3AF]" fontSize={20} />
-          </div>
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-[#05243F] leading-tight">{part.name}</p>
-        {part.brand && <p className="text-[10px] text-[#6B7280] mt-0.5">{part.brand}</p>}
-        {part.price_kobo != null && (
-          <p className="text-xs font-bold text-[#2389E3] mt-1">{formatNaira(part.price_kobo)}</p>
-        )}
-      </div>
-      <Icon icon="solar:arrow-right-bold" className="shrink-0 text-[#9CA3AF]" fontSize={12} />
-    </button>
-  );
-}
-
 function Bubble({ msg, onAction }) {
   const isUser = msg.role === "user";
   return (

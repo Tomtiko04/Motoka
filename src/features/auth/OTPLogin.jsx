@@ -6,8 +6,7 @@ import * as yup from "yup";
 import toast from "react-hot-toast";
 import { FaArrowLeft, FaEnvelope, FaKey } from "react-icons/fa";
 import { useOTPLogin } from "./useOTPAuth";
-import ImageSlider from "../../components/ImageSlider";
-
+import LoginImage from "../../components/LoginImage";
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email format").required("Email is required"),
 });
@@ -175,27 +174,16 @@ export default function OTPLogin() {
   try {
     return (
       <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-4xl flex-col-reverse justify-between overflow-hidden rounded-[20px] bg-white shadow-lg">
-        {/* Left side - Image Slider */}
-        {/* <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 relative overflow-hidden">
-          <div className="flex items-center justify-center w-full h-full">
-            <div className="text-white text-center">
-              <h2 className="text-2xl font-bold mb-4">Welcome to Motoka</h2>
-              <p className="text-lg">Your vehicle document management solution</p>
-            </div>
-          </div>
-        </div> */}
+      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row p-4 sm:p-0 sm:px-0">
+        <div className="hidden w-full md:block sm:w-1/2 shrink-0 border-r border-[#F2F2F2] " >
+                  <LoginImage />
+                </div>
 
       {/* Right side - Login Form */}
       <div className="w-full flex items-center justify-center lg:px-8 p-3 py-6 pt-10 px-4 sm:px-9 sm:py-8 sm:p-4 sm:pt-12">
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-6">
-              <div className="bg-[#2389E3] p-3 rounded-full">
-                <FaKey className="h-8 w-8 text-white" />
-              </div>
-            </div>
+          <div className="">
             <h2 className="text-2xl font-medium text-gray-900">
               {step === "email" ? "Login with OTP" : "Enter OTP Code"}
             </h2>
@@ -222,10 +210,8 @@ export default function OTPLogin() {
           {step === "email" && (
             <form onSubmit={handleEmailSubmit(handleSendOTP)} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <div className="mt-1 relative">
+                
+                {/* <div className="mt-2 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                     <FaEnvelope className="h-5 w-5 text-gray-400" />
                   </div>
@@ -245,13 +231,32 @@ export default function OTPLogin() {
                 </div>
                 {emailErrors.email && (
                   <p className="mt-2 text-sm text-red-600">{emailErrors.email.message}</p>
-                )}
+                    )} */}
+                    
+                <div className="w-full">
+                  <input
+                    
+                        {...registerEmail("email")}
+                        type="email"
+                    placeholder="Enter your Email*"
+                    disabled={isVerifyingOTP || isSendingOTP}
+                    className={`mt-1 block w-full rounded-[8px] bg-[#F4F5FC] px-3 py-3 sm:px-4 sm:py-5 !text-sm sm:text-sm placeholder:text-[#05243F66] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none  ${isVerifyingOTP || isSendingOTP
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
+                      }`}
+                  />
+                  {emailErrors.email && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {emailErrors.email.message}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSendingOTP}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#2389E3] hover:bg-[#3795e7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-lg font-medium rounded-3xl text-white bg-[#2389E3] hover:bg-[#3795e7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSendingOTP ? (
                   <div className="flex items-center">
@@ -339,13 +344,13 @@ export default function OTPLogin() {
 
           {/* Footer Links */}
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               Don't have an account?{" "}
               <Link to="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
                 Sign up
               </Link>
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               Or?{" "}
               <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
                 Sign in with password
