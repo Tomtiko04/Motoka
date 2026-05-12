@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { X } from "lucide-react";
 import { getLadipoParts } from "../../services/apiLadipo";
@@ -14,8 +15,10 @@ import Searchbar from "./components/Searchbar";
 import ladipoStore from "../../store/ladipoStore";
 
 export default function Ladipo() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeSearch, setActiveSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialQ = searchParams.get("q") || "";
+  const [searchTerm, setSearchTerm] = useState(initialQ);
+  const [activeSearch, setActiveSearch] = useState(initialQ);
   const [selectedCar, setSelectedCar] = useState(null);
   const hasAutoSelectedSingleCar = useRef(false);
   const [subcategories, setSubcategories] = useState([]);
@@ -133,6 +136,11 @@ export default function Ladipo() {
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedMainCategory, selectedSubcategory, activeSearch, selectedCar]);
+
+  function handlePageChange(page) {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   function handleSearch(overrideTerm) {
     setActiveSearch(typeof overrideTerm === "string" ? overrideTerm : searchTerm);
@@ -389,19 +397,19 @@ export default function Ladipo() {
                   {/* Mobile: Show compact pagination (< 5/20 >) */}
                   <div className="md:hidden flex items-center gap-2">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Icon icon="solar:arrow-left-linear" width="16" />
                     </button>
-                    
+
                     <span className="text-[13px] font-medium text-[#697C8C] whitespace-nowrap">
                       {currentPage} / {totalPages}
                     </span>
-                    
+
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
@@ -412,13 +420,13 @@ export default function Ladipo() {
                   {/* Desktop: Show full pagination */}
                   <div className="hidden md:flex items-center gap-2">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Icon icon="solar:arrow-left-linear" width="16" />
                     </button>
-                    
+
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
                       if (totalPages <= 5) {
@@ -433,7 +441,7 @@ export default function Ladipo() {
                       return (
                         <button
                           key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
+                          onClick={() => handlePageChange(pageNum)}
                           className={`flex h-9 w-9 items-center justify-center rounded-lg font-medium text-sm transition-colors ${
                             pageNum === currentPage
                               ? "bg-[#2389E3] text-white"
@@ -444,18 +452,18 @@ export default function Ladipo() {
                         </button>
                       );
                     })}
-                    
+
                     {totalPages > 5 && currentPage <= totalPages - 3 && (
                       <span className="text-[#697C8C] text-sm">...</span>
                     )}
-                    
+
                     {totalPages > 5 && currentPage > 3 && (
                       <span className="text-[#697C8C] text-sm">...</span>
                     )}
-                    
+
                     {totalPages > 5 && (
                       <button
-                        onClick={() => setCurrentPage(totalPages)}
+                        onClick={() => handlePageChange(totalPages)}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg font-medium text-sm transition-colors ${
                           totalPages === currentPage
                             ? "bg-[#2389E3] text-white"
@@ -465,9 +473,9 @@ export default function Ladipo() {
                         {totalPages}
                       </button>
                     )}
-                    
+
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >

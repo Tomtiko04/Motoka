@@ -79,6 +79,19 @@ function Bubble({ msg, onAction }) {
         >
           {renderMessageText(msg.text, isUser)}
         </div>
+
+        {/* Ladipo part suggestions — only shown on Mo messages */}
+        {!isUser && msg.ladipoSuggestions?.length > 0 && onAction && (
+          <div className="w-full space-y-1.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-[#9CA3AF] pl-0.5">
+              Available on Ladipo
+            </p>
+            {msg.ladipoSuggestions.map((part) => (
+              <LadipoPartCard key={part.id} part={part} onNavigate={onAction} />
+            ))}
+          </div>
+        )}
+
         {msg.action && onAction && (
           <button
             onClick={() => onAction(msg.action.route)}
@@ -186,11 +199,12 @@ export default function Mo() {
 
       const reply = data.reply || "I'm not sure how to help with that.";
       const action = data.action || null;
+      const ladipoSuggestions = data.ladipoSuggestions || null;
 
       setHistory([...newHistory, { role: "assistant", content: reply }]);
       setMessages((prev) => [
         ...prev,
-        { role: "mo", text: reply, action, id: Date.now() + 1 },
+        { role: "mo", text: reply, action, ladipoSuggestions, id: Date.now() + 1 },
       ]);
     } catch {
       setMessages((prev) => [
