@@ -322,7 +322,7 @@ export const getLadipoSubcategoryBySlug = async (mainCategorySlug, subcategorySl
 export const getLadipoPartsByCategory = async (
   mainCategorySlug,
   subcategorySlug = null,
-  { page = 1, limit = 12, q, make, model, year } = {}
+  { page = 1, limit = 12, q, make, model, year, ...extra } = {}
 ) => {
   try {
     const result = await getLadipoParts({
@@ -333,6 +333,7 @@ export const getLadipoPartsByCategory = async (
       make,
       model,
       year,
+      ...extra,
     });
 
     const total = result?.total || 0;

@@ -44,7 +44,7 @@ const StatusPill = ({ status }) => {
     expired:   { bg: 'bg-red-100 text-red-800',       label: 'Expired' },
     pending:   { bg: 'bg-blue-100 text-blue-800',     label: 'Pending' },
     completed: { bg: 'bg-green-100 text-green-800',   label: 'Completed' },
-    in_progress:{ bg: 'bg-orange-100 text-orange-800',label: 'In Progress' },
+    processing:{ bg: 'bg-orange-100 text-orange-800',label: 'In Progress' },
     cancelled: { bg: 'bg-gray-100 text-gray-600',     label: 'Cancelled' },
     successful:{ bg: 'bg-green-100 text-green-800',   label: 'Successful' },
     failed:    { bg: 'bg-red-100 text-red-800',       label: 'Failed' },
@@ -299,7 +299,7 @@ const AdminCarDetails = () => {
 
       {/* Hero Card */}
       <div className="overflow-hidden rounded-xl shadow">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-6">
+        <div className="bg-[#05243F] px-6 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/20 text-white">
@@ -313,7 +313,7 @@ const AdminCarDetails = () => {
                 <h2 className="text-2xl font-bold text-white">
                   {car.vehicle_make} {car.vehicle_model}
                 </h2>
-                <p className="text-blue-100 text-sm">
+                <p className="text-white/60 text-sm">
                   {car.vehicle_year} &bull; {car.vehicle_color} &bull; {car.car_type?.toUpperCase() || 'N/A'}
                 </p>
               </div>
@@ -343,7 +343,7 @@ const AdminCarDetails = () => {
           </div>
           <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Expiry Date</p>
-            <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-600' : isUrgent ? 'text-yellow-600' : 'text-gray-900'}`}>
+            <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-700' : isUrgent ? 'text-yellow-600' : 'text-gray-900'}`}>
               {formatDate(car.expiry_date)}
             </p>
           </div>

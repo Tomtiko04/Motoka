@@ -106,9 +106,20 @@ export default function PaymentOptions() {
         }
 
         setPaymentSession(sessionData);
-        // Default method selection: prefer provided method, else default to Monicredit
         const defaultMethod = sessionData.method || PAYMENT_METHODS.MONICREDIT;
         setSelectedMethod(defaultMethod);
+
+        // FIX 1: If Monicredit account details already exist (e.g. the user
+        // came from RenewLicense which already called /payments/initialize),
+        // skip re-initialization. Showing "Confirm Payment Method" here would
+        // create a second transaction and immediately abandon the first one.
+        const monicreditData = sessionData.monicredit?.data;
+        const alreadyInitialized =
+          monicreditData?.account_number ||
+          monicreditData?.customer?.account_number;
+        if (alreadyInitialized && defaultMethod === PAYMENT_METHODS.MONICREDIT) {
+          setIsPaymentMethodConfirmed(true);
+        }
       } catch (err) {
         console.error("Payment initialization error:", err);
         toast.error("Failed to initialize payment. Please try again.");
@@ -122,8 +133,18 @@ export default function PaymentOptions() {
   // Handle payment method selection
   const handleMethodSelect = (method) => {
     setSelectedMethod(method);
-    setIsPaymentMethodConfirmed(false);
     setMonicreditFallbackError(null);
+    // Auto-confirm Monicredit if account details already exist in the session
+    // (e.g. user switches back from Paystack after a prior Monicredit init)
+    const monicreditData = paymentSession?.monicredit?.data;
+    const alreadyInitialized =
+      monicreditData?.account_number ||
+      monicreditData?.customer?.account_number;
+    if (method === PAYMENT_METHODS.MONICREDIT && alreadyInitialized) {
+      setIsPaymentMethodConfirmed(true);
+    } else {
+      setIsPaymentMethodConfirmed(false);
+    }
   };
 
   // Helper function to build payment payload
@@ -460,7 +481,9 @@ export default function PaymentOptions() {
       }
 
       // Open Paystack in a new tab
-      const newWindow = window.open(paystackUrl, '_blank', 'noopener,noreferrer');
+      // FIX 2: Do not pass 'noopener' — the callback page needs window.opener
+      // to postMessage success back to this tab.
+      const newWindow = window.open(paystackUrl, '_blank');
       if (!newWindow) {
         toast.error('Please allow popups for this site to proceed with payment');
         return;
@@ -471,8 +494,11 @@ export default function PaymentOptions() {
       const checkPopup = setInterval(() => {
         if (newWindow.closed) {
           clearInterval(checkPopup);
-          // When the popup is closed, check payment status
-          checkPaystackStatus();
+          // FIX 4: Wait 3 seconds before polling — gives the callback page time
+          // to verify and send a PAYMENT_SUCCESS message first. Also covers the
+          // case where the user closes the tab a split-second before Paystack
+          // finishes its redirect.
+          setTimeout(checkPaystackStatus, 3000);
         }
       }, 1000);
     } catch (err) {
@@ -614,13 +640,16 @@ export default function PaymentOptions() {
           });
         }
       } else {
-        toast.error("Payment verification failed");
+        // FIX 3: Bank transfers can take a few minutes to clear. "failed" is
+        // misleading — tell the user to wait and try again instead.
+        toast.error("Transfer not yet confirmed. Please allow a few minutes and try again.");
         setIsProcessing(false);
       }
-    } catch {
+    } catch (err) {
       if (isLadipo) {
         useLadipoPaymentModalStore.getState().close();
       }
+      toast.error(err?.response?.data?.message || err?.message || "Verification failed. Please try again.");
       setIsProcessing(false);
     }
   };

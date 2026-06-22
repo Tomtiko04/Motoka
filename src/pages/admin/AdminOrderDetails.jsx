@@ -239,10 +239,10 @@ const AdminOrderDetails = () => {
     }
 
     const statusConfig = {
-      pending: { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon },
-      in_progress: { color: 'bg-blue-100 text-blue-800', icon: ClockIcon },
-      completed: { color: 'bg-green-100 text-green-800', icon: CheckCircleIcon },
-      declined: { color: 'bg-red-100 text-red-800', icon: XCircleIcon },
+      pending:    { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon,        label: 'NEW' },
+      processing: { color: 'bg-blue-100 text-blue-800',     icon: ClockIcon,        label: 'IN PROGRESS' },
+      completed:  { color: 'bg-green-100 text-green-800',   icon: CheckCircleIcon,  label: 'COMPLETED' },
+      cancelled:  { color: 'bg-red-100 text-red-800',       icon: XCircleIcon,      label: 'CANCELLED' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -251,7 +251,7 @@ const AdminOrderDetails = () => {
     return (
       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
         <Icon className="w-4 h-4 mr-2" />
-        {status.replace('_', ' ').toUpperCase()}
+        {config.label}
       </span>
     );
   };
@@ -512,14 +512,14 @@ const AdminOrderDetails = () => {
                     Mark this order as In Progress when you start processing it.
                   </p>
                   <button
-                    onClick={() => handleStatusUpdate('in_progress')}
+                    onClick={() => handleStatusUpdate('processing')}
                     disabled={statusUpdating}
                     className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
                   >
                     {statusUpdating ? 'Updating...' : 'Mark In Progress'}
                   </button>
                   <button
-                    onClick={() => handleStatusUpdate('declined')}
+                    onClick={() => handleStatusUpdate('cancelled')}
                     disabled={statusUpdating}
                     className="w-full border border-red-300 text-red-600 py-2 px-4 rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium text-sm"
                   >
@@ -528,7 +528,7 @@ const AdminOrderDetails = () => {
                 </>
               )}
 
-              {order?.status === 'in_progress' && (
+              {order?.status === 'processing' && (
                 <>
                   {/* Inline document upload */}
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -599,7 +599,7 @@ const AdminOrderDetails = () => {
                     {statusUpdating ? 'Updating...' : 'Mark as Completed'}
                   </button>
                   <button
-                    onClick={() => handleStatusUpdate('declined')}
+                    onClick={() => handleStatusUpdate('cancelled')}
                     disabled={statusUpdating}
                     className="w-full border border-red-300 text-red-600 py-2 px-4 rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium text-sm"
                   >
@@ -608,11 +608,11 @@ const AdminOrderDetails = () => {
                 </>
               )}
 
-              {(order?.status === 'completed' || order?.status === 'declined') && (
+              {(order?.status === 'completed' || order?.status === 'cancelled') && (
                 <div className={`text-center py-3 rounded-lg text-sm font-medium ${
                   order.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
                 }`}>
-                  Order {order.status === 'completed' ? 'Completed' : 'Declined'}
+                  Order {order.status === 'completed' ? 'Completed' : 'Cancelled'}
                 </div>
               )}
             </div>

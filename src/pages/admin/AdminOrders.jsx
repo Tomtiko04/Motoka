@@ -9,10 +9,33 @@ import {
 import toast from 'react-hot-toast';
 import config from '../../config/config';
 
+// Canonical status values mirror the DB enum. Display labels (incl. "New"
+// for pending) live only here; the API never sees the labels and the UI
+// never sees the raw status without going through this map.
+const STATUS_FILTERS = [
+  { value: 'all',        label: 'All' },
+  { value: 'pending',    label: 'New' },
+  { value: 'processing', label: 'In Progress' },
+  { value: 'completed',  label: 'Completed' },
+  { value: 'cancelled',  label: 'Cancelled' },
+];
+const STATUS_LABEL = {
+  pending:    'New',
+  processing: 'In Progress',
+  completed:  'Completed',
+  cancelled:  'Cancelled',
+};
+const STATUS_COLOR = {
+  pending:    'text-blue-600',
+  processing: 'text-orange-600',
+  completed:  'text-green-600',
+  cancelled:  'text-red-600',
+};
+
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -33,17 +56,9 @@ const AdminOrders = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      
-      // Map display labels to backend status values
-      const filterStatusMap = {
-        'All': 'all',
-        'New': 'pending',
-        'In Progress': 'in_progress',
-        'Completed': 'completed',
-        'Declined': 'declined',
-      };
+
       const params = new URLSearchParams({
-        status: filterStatusMap[activeFilter] || 'all',
+        status: activeFilter,
         page: currentPage,
         per_page: perPage,
       });
@@ -93,7 +108,8 @@ const AdminOrders = () => {
     return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'General Service';
   };
 
-  // Transform orders data to match Figma design
+  // Transform orders data for display. `status` stays canonical (DB shape);
+  // the table cell looks up STATUS_LABEL when rendering.
   const transformedOrders = orders.map(order => ({
     id: `#${order.slug?.substring(0, 8) || order.id}`,
     name: order.user?.name || 'Unknown User',
@@ -101,29 +117,9 @@ const AdminOrders = () => {
     amount: `N${parseFloat(order.amount || 0).toLocaleString()}`,
     location: order.state_name ? `${order.state_name}${order.lga_name ? ', ' + order.lga_name : ''}` : (order.order_type === 'plate_number' || order.order_type === 'driver_license' ? '—' : 'Unknown'),
     renewalState: order.renewal_state || null,
-    status: order.status === 'pending' ? 'New' :
-            order.status === 'in_progress' ? 'Inprogress' :
-            order.status === 'completed' ? 'Completed' :
-            order.status === 'declined' ? 'Declined' : 'New',
+    status: order.status,
     originalOrder: order
   }));
-
-  const filters = ['All', 'New', 'In Progress', 'Completed', 'Declined'];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'New':
-        return 'text-blue-600';
-      case 'Completed':
-        return 'text-green-600';
-      case 'Inprogress':
-        return 'text-orange-600';
-      case 'Declined':
-        return 'text-red-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
 
   const handleViewOrder = (order) => {
     window.location.href = `/admin/orders/${order.originalOrder.slug}`;
@@ -231,9 +227,9 @@ const AdminOrders = () => {
               onChange={(e) => handleFilterChange(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
-              {filters.map((filter) => (
-                <option key={filter} value={filter}>
-                  {filter === 'All' ? 'All Orders' : filter}
+              {STATUS_FILTERS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.value === 'all' ? 'All Orders' : f.label}
                 </option>
               ))}
             </select>
@@ -243,17 +239,17 @@ const AdminOrders = () => {
 
       {/* Filter Tabs */}
       <div className="flex space-x-2 overflow-x-auto">
-        {filters.map((filter) => (
+        {STATUS_FILTERS.map((f) => (
           <button
-            key={filter}
-            onClick={() => handleFilterChange(filter)}
+            key={f.value}
+            onClick={() => handleFilterChange(f.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-              activeFilter === filter
+              activeFilter === f.value
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {filter}
+            {f.value === 'all' ? 'All' : f.label}
           </button>
         ))}
       </div>
@@ -327,8 +323,8 @@ const AdminOrders = () => {
                       ) : '—'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
-                        {order.status}
+                      <span className={`text-sm font-medium ${STATUS_COLOR[order.status] || 'text-gray-600'}`}>
+                        {STATUS_LABEL[order.status] || order.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
