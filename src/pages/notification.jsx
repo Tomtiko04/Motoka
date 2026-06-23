@@ -167,9 +167,15 @@
 // }
     
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import PageLayout from "./components/PageLayout";
 import NotificationList from "./components/notificationList";
 import { useNotifications, useNotificationsByType } from "../features/notifications/useNotification";
+import {
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "../services/apiNotification";
 
 function isToday(date) {
   const d = new Date(date);
@@ -234,6 +240,7 @@ const normalizeNotification = (n) => {
     message: n.message,
     time: created.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     dateLabel: labelForDate(created),
+    isRead: Boolean(n.is_read),
   };
 };
 
@@ -252,10 +259,55 @@ const flattenNotifications = (source) => {
 
 export default function Notification() {
   const [notificationsCategory, setNotificationsCategory] = useState("All");
+  const queryClient = useQueryClient();
 
   const isAll = notificationsCategory === "All";
-  const { data: allData } = useNotifications({ enabled: isAll });
+  const { data: allData } = useNotifications({ unreadOnly: false, enabled: isAll });
   const { data: typeData } = useNotificationsByType(notificationsCategory, { enabled: !isAll });
+
+  const markAllMutation = useMutation({
+    mutationFn: markAllNotificationsAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
+      toast.success("All notifications marked as read");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || "Unable to mark all notifications as read");
+    },
+    retry: false,
+  });
+
+  const markSingleMutation = useMutation({
+    mutationFn: markNotificationAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
+      toast.success("Notification marked as read");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || "Unable to mark notification as read");
+    },
+    retry: false,
+  });
+
+  const hasUnreadNotifications = () => {
+    const source = allData?.data ?? allData;
+    if (!source || typeof source !== "object") return false;
+    return Object.values(source).some(
+      (arr) => Array.isArray(arr) && arr.some((notification) => notification?.is_read === false),
+    );
+  };
+
+  const handleMarkAllRead = () => {
+    if (!markAllMutation.isLoading) {
+      markAllMutation.mutate();
+    }
+  };
+
+  const handleMarkRead = (id) => {
+    if (!markSingleMutation.isLoading) {
+      markSingleMutation.mutate(id);
+    }
+  };
 
   const source = isAll ? allData : typeData;
   const notificationData = flattenNotifications(source);
@@ -263,7 +315,7 @@ export default function Notification() {
   return (
     <PageLayout title={"Notifications"}>
       <div className="px-5 py-5 pt-8">
-        <div>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <ul className="items-center gap-3 hidden sm:flex">
             {["All", "Warning", "Payments", "Licenses Added", "Successful"].map((category, index) => (
               <li
@@ -279,11 +331,23 @@ export default function Notification() {
               </li>
             ))}
           </ul>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={!hasUnreadNotifications() || markAllMutation.isLoading}
+              className="inline-flex items-center justify-center rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1b6dbb] disabled:bg-[#CBD5E1] disabled:text-[#6B7280]"
+            >
+              {markAllMutation.isLoading ? "Marking read..." : "Mark all as read"}
+            </button>
+          </div>
         </div>
 
         <NotificationList
           notificationsCategory={notificationsCategory}
           notificationData={notificationData}
+          onMarkRead={handleMarkRead}
         />
       </div>
     </PageLayout>

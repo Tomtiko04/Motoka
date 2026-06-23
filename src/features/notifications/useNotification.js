@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { getNotifications, getNotificationsByType } from "../../services/apiNotification";
 
-export function useNotifications(options = {}) {
+export function useNotifications({ unreadOnly = false, ...options } = {}) {
   return useQuery({
-    queryKey: ["notifications"],
-    queryFn: getNotifications,
+    queryKey: ["notifications", unreadOnly ? "unread" : "all"],
+    queryFn: () => getNotifications(unreadOnly),
     retry: false,
     ...options,
   });

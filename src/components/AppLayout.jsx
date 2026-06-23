@@ -30,7 +30,7 @@ export default function AppLayout() {
    const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropDownMenuOpen, setIsDropDownMenuOpen] = useState(false);
   const [notificationsModal, setNotificationsModal] = useState(false);
-  const { data: notifications } = useNotifications();
+  const { data: notifications } = useNotifications({ unreadOnly: true });
   const itemCount = useCartStore(selectItemCount);
   const initializeCart = useCartStore((s) => s.initializeCart);
   const refreshFromBackend = useCartStore((s) => s.refreshFromBackend);
