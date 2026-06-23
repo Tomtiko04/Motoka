@@ -34,6 +34,40 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
     ? new Date(expiryDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : "Not available";
 
+  const isDataUrl = (value) => typeof value === 'string' && value.startsWith('data:');
+
+  const getBlobFromDataUrl = async (dataUrl) => {
+    const [header, base64Data] = dataUrl.split(',');
+    const mime = header.match(/data:([^;]+);/)?.[1] || 'application/octet-stream';
+    const binary = atob(base64Data);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: mime });
+  };
+
+  const getFileFromDocument = async () => {
+    if (!selectedDocument) return null;
+
+    try {
+      if (isDataUrl(selectedDocument)) {
+        const blob = await getBlobFromDataUrl(selectedDocument);
+        const extension = blob.type.split('/')[1] || 'png';
+        return new File([blob], `${docTitle}.${extension}`, { type: blob.type });
+      }
+
+      const response = await fetch(selectedDocument);
+      const blob = await response.blob();
+      const urlParts = selectedDocument.split('?')[0].split('/');
+      const filename = urlParts[urlParts.length - 1] || `${docTitle}.png`;
+      return new File([blob], filename, { type: blob.type || 'application/octet-stream' });
+    } catch (err) {
+      console.warn('Could not fetch document file for sharing', err);
+      return null;
+    }
+  };
+
   const handleDownload = async () => {
     if (!selectedDocument) return;
 
@@ -73,25 +107,37 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
   const handleShare = async () => {
     if (!selectedDocument) return;
 
+    const file = await getFileFromDocument();
+    const shareText = `Check out this document for ${car?.plate_number || "my vehicle"}.`;
+
     if (navigator.share) {
       setIsSharing(true);
       try {
-        await navigator.share({
-          title: `Motoka - ${docTitle}`,
-          text: `Check out this document for ${car?.plate_number || "my vehicle"}.`,
-          url: selectedDocument.startsWith('data:') ? undefined : selectedDocument,
-        });
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `Motoka - ${docTitle}`,
+            text: shareText,
+            files: [file],
+          });
+        } else {
+          await navigator.share({
+            title: `Motoka - ${docTitle}`,
+            text: shareText,
+            url: isDataUrl(selectedDocument) ? undefined : selectedDocument,
+          });
+        }
         toast.success("Shared successfully");
       } catch (error) {
         if (error.name !== "AbortError") {
           toast.error("Sharing failed");
+          console.error(error);
         }
       } finally {
         setIsSharing(false);
       }
     } else {
       // Fallback: Copy to clipboard if it's a URL
-      if (!selectedDocument.startsWith('data:')) {
+      if (!isDataUrl(selectedDocument)) {
         try {
           await navigator.clipboard.writeText(selectedDocument);
           toast.success("Link copied to clipboard");
