@@ -1,5 +1,5 @@
 import Licensesample2 from "../../assets/images/6fe45ed589cd8efebdda471557ad5d41b9a94c27.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import drivers from "../../assets/images/license-sample.png";
 import { Icon } from "@iconify/react";
 import { toast } from "react-hot-toast";
@@ -9,6 +9,7 @@ const driversLicense = drivers;
 function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
   const [aspect, setAspect] = useState("portrait");
   const [isSharing, setIsSharing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleLoad = (e) => {
     const { naturalWidth: w, naturalHeight: h } = e.target;
@@ -23,6 +24,11 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
   const imageSrc = selectedDocument || (docType === "MyCar" ? Licensesample2 : driversLicense);
   const docTitle = docType === "MyCar" ? "Vehicle Document" : "Driver's License";
   const expiryDate = car?.expiry_date || car?.expiryDate || "";
+
+  const isPdfDocument = !!selectedDocument && (
+    selectedDocument.startsWith?.('data:application/pdf') ||
+    (typeof selectedDocument === 'string' && selectedDocument.toLowerCase().endsWith('.pdf'))
+  );
 
   const formattedExpiry = expiryDate 
     ? new Date(expiryDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -98,6 +104,17 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
     }
   };
 
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        setShowModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
   return (
     <div className="flex flex-col items-center h-full min-h-150">
       <div className="flex justify-start w-full py-2 sm:hidden">
@@ -115,17 +132,33 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
           Expires on {formattedExpiry}
         </p> */}
       </div>
-      <div className="w-full px-16 py-4 flex flex-1 h-64 items-center justify-center overflow-hidden">
+      <div className="w-full px-4 sm:px-8 py-4 flex-1 flex items-center justify-center overflow-hidden min-h-[220px] lg:min-h-[64vh]">
         {selectedDocument ? (
-          <img
-            src={imageSrc}
-            alt={docTitle}
-            onLoad={docType === "MyCar" ? handleLoad : Normal}
-            className="h-100 w-full"
-            style={{
-              transition: "transform 0.3s ease",
-            }}
-          />
+          isPdfDocument ? (
+            <object
+              data={imageSrc}
+              type="application/pdf"
+              className="w-full h-full max-h-[72vh] rounded-xl border border-slate-200"
+              aria-label={docTitle}
+            >
+              <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">
+                <Icon icon="mdi:file-pdf-box" width="56" className="text-slate-400" />
+                <p>PDF preview is not available in this browser.</p>
+                <a href={imageSrc} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                  Open PDF in a new tab
+                </a>
+              </div>
+            </object>
+          ) : (
+            <img
+              src={imageSrc}
+              alt={docTitle}
+              onLoad={docType === "MyCar" ? handleLoad : Normal}
+              className="max-w-full max-h-[72vh] object-contain rounded-xl shadow-md cursor-pointer"
+              style={{ transition: "transform 0.3s ease" }}
+              onClick={() => setShowModal(true)}
+            />
+          )
         ) : (
           <div className="flex flex-col items-center text-[#05243F]/40 text-sm italic">
              <Icon icon="solar:document-bold-duotone" width="64" className="mb-2 opacity-20" />
@@ -151,6 +184,40 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
           <span>Download</span>
         </button>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+          <div className="relative w-full max-w-[95vw] max-h-[95vh]" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-3 right-3 z-20 rounded-full bg-white/90 p-2 text-slate-700 shadow"
+              aria-label="Close preview"
+            >
+              <Icon icon="mdi:close" width={20} />
+            </button>
+            {!isPdfDocument ? (
+              <img
+                src={imageSrc}
+                alt={docTitle}
+                className="w-full h-full max-h-[95vh] object-contain rounded-xl shadow-2xl"
+              />
+            ) : (
+              <object
+                data={imageSrc}
+                type="application/pdf"
+                className="w-full h-full max-h-[95vh] rounded-xl border border-slate-200 bg-white"
+              >
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
+                  <Icon icon="mdi:file-pdf-box" width="56" className="text-slate-400" />
+                  <p>PDF preview is not available in this browser.</p>
+                  <a href={imageSrc} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                    Open PDF in a new tab
+                  </a>
+                </div>
+              </object>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
