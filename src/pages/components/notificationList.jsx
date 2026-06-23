@@ -68,7 +68,7 @@
 import { Icon } from "@iconify/react";
 import NotificationCard from "./notificationCard";
 import { useState } from "react";
-export default function NotificationList({ notificationsCategory, notificationData }) {
+export default function NotificationList({ notificationsCategory, notificationData, onMarkRead }) {
   const groups = ["Today", "Yesterday", "Last week", "Others"];
 
   const formatHeaderDate = (label) => {
@@ -95,7 +95,15 @@ export default function NotificationList({ notificationsCategory, notificationDa
   };
 
   let hasAnyVisible = false;
- const [expandedGroups, setExpandedGroups] = useState({});
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const toggleGroup = (label) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
   return (
     <div>
       {groups.map((label) => {
@@ -113,7 +121,11 @@ export default function NotificationList({ notificationsCategory, notificationDa
             </div>
             <div className="flex flex-col gap-3">
               {visibleItems.map((n) => (
-                <NotificationCard key={n.id} notification={n} />
+                <NotificationCard
+                  key={n.id}
+                  notification={n}
+                  onMarkRead={() => onMarkRead?.(n.id)}
+                />
               ))}
             </div>
             {items.length > 5 && (

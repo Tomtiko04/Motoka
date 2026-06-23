@@ -41,35 +41,39 @@ const AdminDashboard = () => {
   }, []);
 
   const fetchDashboardData = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('adminToken');
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      // All 4 fetches in parallel — stats, recent orders, transactions, full orders for chart
-      const [statsRes, ordersRes, txRes, allOrdersRes] = await Promise.all([
-        fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers }),
-        fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }),
-        fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }),
-        fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }),
-      ]);
+    const safeJson = async (res) => {
+      try { return await res.json(); } catch { return null; }
+    };
 
-      const [statsData, ordersData, txData, allOrdersData] = await Promise.all([
-        statsRes.json(), ordersRes.json(), txRes.json(), allOrdersRes.json(),
-      ]);
+    const [statsResult, ordersResult, txResult, allOrdersResult] = await Promise.allSettled([
+      fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers }).then(safeJson),
+      fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson),
+      fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson),
+      fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson),
+    ]);
 
-      if (statsData.status) setStats(statsData.data);
-      if (ordersData.status) setRecentOrders(ordersData.data);
-      if (txData.status) setRecentTransactions(txData.data);
+    const statsData     = statsResult.status     === 'fulfilled' ? statsResult.value     : null;
+    const ordersData    = ordersResult.status     === 'fulfilled' ? ordersResult.value    : null;
+    const txData        = txResult.status         === 'fulfilled' ? txResult.value        : null;
+    const allOrdersData = allOrdersResult.status  === 'fulfilled' ? allOrdersResult.value : null;
 
-      const orders = allOrdersData.status
-        ? (allOrdersData.data?.data || allOrdersData.data || [])
-        : (ordersData.data || []);
-      setAllOrders(orders);
-    } catch (error) {
-      toast.error('Failed to fetch dashboard data');
-    } finally {
-      setLoading(false);
-    }
+    if (statsData?.status)  setStats(statsData.data);
+    if (ordersData?.status) setRecentOrders(ordersData.data);
+    if (txData?.status)     setRecentTransactions(txData.data);
+
+    const orders = allOrdersData?.status
+      ? (allOrdersData.data?.data || allOrdersData.data || [])
+      : (ordersData?.data || []);
+    setAllOrders(orders);
+
+    const allFailed = [statsResult, ordersResult, txResult, allOrdersResult]
+      .every(r => r.status === 'rejected' || !r.value);
+    if (allFailed) toast.error('Failed to fetch dashboard data');
+
+    setLoading(false);
   };
 
   const buildChartFromOrders = (orders, period) => {
@@ -107,17 +111,21 @@ const AdminDashboard = () => {
     if (built.length > 0) setChartData(built);
   }, [chartPeriod, allOrders, recentOrders]);
 
-  // Helper function to format order status
+  // Helper function to format order status. Accepts canonical DB values
+  // (pending|processing|completed|cancelled) and legacy aliases for
+  // transitional safety.
   const formatOrderStatus = (status) => {
     switch (status) {
       case 'pending':
         return 'New';
+      case 'processing':
       case 'in_progress':
         return 'In Progress';
       case 'completed':
         return 'Done';
+      case 'cancelled':
       case 'declined':
-        return 'Declined';
+        return 'Cancelled';
       default:
         return status;
     }

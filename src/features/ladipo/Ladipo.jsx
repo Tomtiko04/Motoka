@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { X } from "lucide-react";
 import { getLadipoParts } from "../../services/apiLadipo";
@@ -11,15 +12,48 @@ import SubcategoriesNav from "./components/SubcategoriesNav";
 import ProductsList from "./components/productsList";
 import ProductSkeleton from "./components/ProductSkeleton";
 import Searchbar from "./components/Searchbar";
+import AllCategoriesModal from "./components/AllCategoriesModal";
+import FilterSidebar from "./components/FilterSidebar";
 import ladipoStore from "../../store/ladipoStore";
 
 export default function Ladipo() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeSearch, setActiveSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialQ = searchParams.get("q") || "";
+  const [searchTerm, setSearchTerm] = useState(initialQ);
+  const [activeSearch, setActiveSearch] = useState(initialQ);
   const [selectedCar, setSelectedCar] = useState(null);
   const hasAutoSelectedSingleCar = useRef(false);
   const [subcategories, setSubcategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [sidebarFilters, setSidebarFilters] = useState({
+    brand: [],
+    condition: [],
+    part_type: [],
+    minPriceNgn: null,
+    maxPriceNgn: null,
+    sort: "newest",
+  });
+
+  const sidebarQueryParams = useMemo(() => {
+    const p = {};
+    if (sidebarFilters.brand?.length) p.brand = sidebarFilters.brand.join(",");
+    if (sidebarFilters.condition?.length) p.condition = sidebarFilters.condition.join(",");
+    if (sidebarFilters.part_type?.length) p.part_type = sidebarFilters.part_type.join(",");
+    if (sidebarFilters.minPriceNgn != null) p.min_price_kobo = sidebarFilters.minPriceNgn * 100;
+    if (sidebarFilters.maxPriceNgn != null) p.max_price_kobo = sidebarFilters.maxPriceNgn * 100;
+    if (sidebarFilters.sort && sidebarFilters.sort !== "newest") p.sort = sidebarFilters.sort;
+    return p;
+  }, [sidebarFilters]);
+
+  const hasSidebarFilters =
+    sidebarFilters.brand?.length > 0 ||
+    sidebarFilters.condition?.length > 0 ||
+    sidebarFilters.part_type?.length > 0 ||
+    sidebarFilters.minPriceNgn != null ||
+    sidebarFilters.maxPriceNgn != null ||
+    (sidebarFilters.sort && sidebarFilters.sort !== "newest");
   const itemsPerPage = 12; // 3 rows on desktop (4 columns), 6 items on mobile (2 columns)
 
   // Get store state and actions
@@ -71,6 +105,7 @@ export default function Ladipo() {
       selectedCar?.vehicle_model,
       selectedCar?.vehicle_year,
       currentPage,
+      sidebarQueryParams,
     ],
     queryFn: async () => {
       const carParams = {
@@ -84,6 +119,7 @@ export default function Ladipo() {
         const result = await getLadipoParts({
           q: activeSearch || undefined,
           ...carParams,
+          ...sidebarQueryParams,
           limit: itemsPerPage,
           page: currentPage,
         });
@@ -105,6 +141,7 @@ export default function Ladipo() {
             limit: itemsPerPage,
             q: activeSearch || undefined,
             ...carParams,
+            ...sidebarQueryParams,
           }
         );
         return result;
@@ -119,6 +156,7 @@ export default function Ladipo() {
           limit: itemsPerPage,
           q: activeSearch || undefined,
           ...carParams,
+          ...sidebarQueryParams,
         }
       );
       return result;
@@ -127,21 +165,39 @@ export default function Ladipo() {
   });
 
   const parts = partsData?.parts ?? [];
+  const totalParts = partsData?.total ?? parts.length;
   const totalPages = partsData?.totalPages ?? 1;
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedMainCategory, selectedSubcategory, activeSearch, selectedCar]);
+  }, [selectedMainCategory, selectedSubcategory, activeSearch, selectedCar, sidebarQueryParams]);
+
+  function handlePageChange(page) {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   function handleSearch(overrideTerm) {
     setActiveSearch(typeof overrideTerm === "string" ? overrideTerm : searchTerm);
+  }
+
+  function resetSidebarFilters() {
+    setSidebarFilters({
+      brand: [],
+      condition: [],
+      part_type: [],
+      minPriceNgn: null,
+      maxPriceNgn: null,
+      sort: "newest",
+    });
   }
 
   function clearAllFilters() {
     setSelectedCar(null);
     setActiveSearch("");
     setSearchTerm("");
+    resetSidebarFilters();
     ladipoStore.setState({
       selectedMainCategory: null,
       selectedMainCategoryId: null,
@@ -151,7 +207,7 @@ export default function Ladipo() {
   }
 
   const hasFilters =
-    selectedMainCategory || selectedSubcategory || selectedCar || activeSearch;
+    selectedMainCategory || selectedSubcategory || selectedCar || activeSearch || hasSidebarFilters;
 
   return (
     <LadipoLayout
@@ -181,7 +237,7 @@ export default function Ladipo() {
                 )}
               </p>
               <button
-                onClick={() => ladipoStore.getState().clearCategoryFilters()}
+                onClick={() => setShowAllCategories(true)}
                 className="text-[13px] font-semibold text-[#8B98A5] hover:text-[#05243F] transition-colors"
               >
                 See All
@@ -298,19 +354,50 @@ export default function Ladipo() {
           </>
         )}
 
-        {/* Results */}
-        <div className="border-t border-[#E1E6F4] pt-6 mt-6">
+        {/* Results + sidebar */}
+        <div className="border-t border-[#E1E6F4] pt-6 mt-6 flex flex-col lg:flex-row gap-6">
+          {/* Sidebar — desktop static, mobile drawer */}
+          <div className="hidden lg:block">
+            <FilterSidebar
+              filters={sidebarFilters}
+              onFiltersChange={(patch) => setSidebarFilters((f) => ({ ...f, ...patch }))}
+              categorySlug={selectedSubcategory?.slug || selectedMainCategory?.slug}
+              onClear={resetSidebarFilters}
+              hasActiveFilters={hasSidebarFilters}
+            />
+          </div>
+
+          {/* Mobile filter trigger */}
+          <div className="lg:hidden flex items-center justify-between">
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#E1E6F4] bg-white px-3 py-2 text-[13px] font-semibold text-[#05243F]"
+            >
+              <Icon icon="solar:filter-bold-duotone" width="16" />
+              Filters
+              {hasSidebarFilters && (
+                <span className="ml-1 rounded-full bg-[#1A7ACF] px-2 py-0.5 text-[10px] text-white">
+                  on
+                </span>
+              )}
+            </button>
+            <p className="text-[12px] text-[#697C8C]">
+              {partsLoading ? "Searching..." : `${totalParts} ${totalParts === 1 ? "part" : "parts"}`}
+            </p>
+          </div>
+
+          <div className="flex-1 min-w-0">
           {hasFilters && (
-            <div className="flex items-center justify-between mb-3">
+            <div className="hidden lg:flex items-center justify-between mb-3">
               <p className="text-[13px] text-[#697C8C]">
                 {partsLoading ? (
                   "Searching..."
                 ) : (
                   <>
                     <span className="font-bold text-[#05243F] text-[15px]">
-                      {parts.length}
+                      {totalParts}
                     </span>{" "}
-                    {parts.length === 1 ? "part" : "parts"} found
+                    {totalParts === 1 ? "part" : "parts"} found
                   </>
                 )}
               </p>
@@ -389,19 +476,19 @@ export default function Ladipo() {
                   {/* Mobile: Show compact pagination (< 5/20 >) */}
                   <div className="md:hidden flex items-center gap-2">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Icon icon="solar:arrow-left-linear" width="16" />
                     </button>
-                    
+
                     <span className="text-[13px] font-medium text-[#697C8C] whitespace-nowrap">
                       {currentPage} / {totalPages}
                     </span>
-                    
+
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
@@ -412,13 +499,13 @@ export default function Ladipo() {
                   {/* Desktop: Show full pagination */}
                   <div className="hidden md:flex items-center gap-2">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Icon icon="solar:arrow-left-linear" width="16" />
                     </button>
-                    
+
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
                       if (totalPages <= 5) {
@@ -433,7 +520,7 @@ export default function Ladipo() {
                       return (
                         <button
                           key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
+                          onClick={() => handlePageChange(pageNum)}
                           className={`flex h-9 w-9 items-center justify-center rounded-lg font-medium text-sm transition-colors ${
                             pageNum === currentPage
                               ? "bg-[#2389E3] text-white"
@@ -444,18 +531,18 @@ export default function Ladipo() {
                         </button>
                       );
                     })}
-                    
+
                     {totalPages > 5 && currentPage <= totalPages - 3 && (
                       <span className="text-[#697C8C] text-sm">...</span>
                     )}
-                    
+
                     {totalPages > 5 && currentPage > 3 && (
                       <span className="text-[#697C8C] text-sm">...</span>
                     )}
-                    
+
                     {totalPages > 5 && (
                       <button
-                        onClick={() => setCurrentPage(totalPages)}
+                        onClick={() => handlePageChange(totalPages)}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg font-medium text-sm transition-colors ${
                           totalPages === currentPage
                             ? "bg-[#2389E3] text-white"
@@ -465,9 +552,9 @@ export default function Ladipo() {
                         {totalPages}
                       </button>
                     )}
-                    
+
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-[#697C8C] hover:bg-[#F4F5FC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
@@ -478,9 +565,42 @@ export default function Ladipo() {
               )}
             </>
           )}
+          </div>
         </div>
         </div>
       </div>
+      <AllCategoriesModal
+        open={showAllCategories}
+        onClose={() => setShowAllCategories(false)}
+      />
+      {showMobileFilters && (
+        <div
+          className="fixed inset-0 z-50 flex items-end bg-black/40 lg:hidden"
+          onClick={() => setShowMobileFilters(false)}
+        >
+          <div
+            className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-[#F9FAFC] p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-[15px] font-bold text-[#05243F]">Filters</h3>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="text-[13px] font-semibold text-[#2389E3]"
+              >
+                Done
+              </button>
+            </div>
+            <FilterSidebar
+              filters={sidebarFilters}
+              onFiltersChange={(patch) => setSidebarFilters((f) => ({ ...f, ...patch }))}
+              categorySlug={selectedSubcategory?.slug || selectedMainCategory?.slug}
+              onClear={resetSidebarFilters}
+              hasActiveFilters={hasSidebarFilters}
+            />
+          </div>
+        </div>
+      )}
     </LadipoLayout>
   );
 }

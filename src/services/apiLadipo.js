@@ -6,6 +6,9 @@ export const getLadipoCategories = () =>
 export const getLadipoParts = (params = {}) =>
   api.get('/ladipo/parts', { params }).then((r) => r.data.data);
 
+export const getLadipoPartFacets = (params = {}) =>
+  api.get('/ladipo/parts/facets', { params }).then((r) => r.data.data);
+
 export const getLadipoPartBySlug = (slug) =>
   api.get(`/ladipo/parts/${slug}`).then((r) => r.data.data);
 
