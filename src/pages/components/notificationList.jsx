@@ -67,7 +67,7 @@
 // export default NotificationList;
 import { Icon } from "@iconify/react";
 import NotificationCard from "./notificationCard";
-import { useState } from "react";
+
 export default function NotificationList({ notificationsCategory, notificationData, onMarkRead }) {
   const groups = ["Today", "Yesterday", "Last week", "Others"];
 
@@ -95,32 +95,24 @@ export default function NotificationList({ notificationsCategory, notificationDa
   };
 
   let hasAnyVisible = false;
-  const [expandedGroups, setExpandedGroups] = useState({});
-
-  const toggleGroup = (label) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
-  };
 
   return (
-    <div>
+    <div className="space-y-4">
       {groups.map((label) => {
         const items = getItemsFor(label);
         if (!items.length) return null;
         hasAnyVisible = true;
-        const isExpanded = expandedGroups[label];
-        const visibleItems = isExpanded ? items : items.slice(0, 5);
 
         return (
           <div key={label}>
-            <div className="flex justify-between py-3 text-[14px] text-[#05243F66]">
-              <p>{label}</p>
-              <p>{formatHeaderDate(label)}</p>
+            <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#697C8C]">
+                {label}
+              </p>
+              <p className="text-[11px] text-[#94A3B8]">{formatHeaderDate(label)}</p>
             </div>
-            <div className="flex flex-col gap-3">
-              {visibleItems.map((n) => (
+            <div className="space-y-2.5">
+              {items.map((n) => (
                 <NotificationCard
                   key={n.id}
                   notification={n}
@@ -128,14 +120,6 @@ export default function NotificationList({ notificationsCategory, notificationDa
                 />
               ))}
             </div>
-            {items.length > 5 && (
-              <button
-                onClick={() => toggleGroup(label)}
-                className="text-blue-500 text-sm mt-2 hover:underline self-start"
-              >
-                {isExpanded ? "See less" : "See more"}
-              </button>
-            )}
           </div>
         );
       })}

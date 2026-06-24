@@ -171,11 +171,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import PageLayout from "./components/PageLayout";
 import NotificationList from "./components/notificationList";
-import { useNotifications, useNotificationsByType } from "../features/notifications/useNotification";
+import {
+  updateNotificationsCache,
+  useNotifications,
+  useNotificationsByType,
+} from "../features/notifications/useNotification";
 import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../services/apiNotification";
+
+const markNotificationReadCache = (cacheData, notificationId) =>
+  updateNotificationsCache(cacheData, (notification) =>
+    notification.id === notificationId ? { ...notification, is_read: true } : notification,
+  );
 
 function isToday(date) {
   const d = new Date(date);
@@ -267,24 +276,60 @@ export default function Notification() {
 
   const markAllMutation = useMutation({
     mutationFn: markAllNotificationsAsRead,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["notifications"], exact: false });
+      const previousQueries = queryClient.getQueriesData({ queryKey: ["notifications"], exact: false });
+
+      queryClient.setQueriesData({ queryKey: ["notifications"], exact: false }, (prev) =>
+        updateNotificationsCache(prev, (notification) => ({ ...notification, is_read: true })),
+      );
+
+      return { previousQueries };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
       toast.success("All notifications marked as read");
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      context?.previousQueries?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       toast.error(error.response?.data?.message || error.message || "Unable to mark all notifications as read");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
     },
     retry: false,
   });
 
   const markSingleMutation = useMutation({
     mutationFn: markNotificationAsRead,
+    onMutate: async (notificationId) => {
+      await queryClient.cancelQueries({ queryKey: ["notifications"], exact: false });
+      const previousQueries = queryClient.getQueriesData({ queryKey: ["notifications"], exact: false });
+
+      queryClient.setQueryData(["notifications", "unread"], (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+      queryClient.setQueryData(["notifications", "all"], (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+      queryClient.setQueriesData({ queryKey: ["notifications"], exact: false }, (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+
+      return { previousQueries };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
       toast.success("Notification marked as read");
     },
-    onError: (error) => {
+    onError: (error, _notificationId, context) => {
+      context?.previousQueries?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       toast.error(error.response?.data?.message || error.message || "Unable to mark notification as read");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
     },
     retry: false,
   });
@@ -311,37 +356,42 @@ export default function Notification() {
 
   const source = isAll ? allData : typeData;
   const notificationData = flattenNotifications(source);
+  const visibleUnreadCount = notificationData.filter((notification) => !notification.isRead).length;
 
   return (
     <PageLayout title={"Notifications"}>
-      <div className="px-5 py-5 pt-8">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <ul className="items-center gap-3 hidden sm:flex">
-            {["All", "Warning", "Payments", "Licenses Added", "Successful"].map((category, index) => (
-              <li
-                key={index}
-                className={`rounded-full transition-[.3s] px-6 py-1.5 text-[14px] cursor-pointer ${
-                  notificationsCategory === category
-                    ? "bg-[#2389E3] text-white hover:bg-[#1b6dbb]"
-                    : "bg-[#F0F2F4] text-[#697C8C] hover:bg-[#dcddde]"
-                }`}
-                onClick={() => setNotificationsCategory(category)}
-              >
-                {category}
-              </li>
-            ))}
-          </ul>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={handleMarkAllRead}
-              disabled={!hasUnreadNotifications() || markAllMutation.isLoading}
-              className="inline-flex items-center justify-center rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1b6dbb] disabled:bg-[#CBD5E1] disabled:text-[#6B7280]"
-            >
-              {markAllMutation.isLoading ? "Marking read..." : "Mark all as read"}
-            </button>
+      <div className="px-4 py-4 sm:px-6 sm:py-5">
+        <div className="flex items-start justify-between gap-3 pb-3">
+          <div>
+            <p className="text-sm font-medium text-[#697C8C]">
+              {visibleUnreadCount} unread
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={handleMarkAllRead}
+            disabled={!visibleUnreadCount || markAllMutation.isLoading}
+            className="text-sm font-semibold text-[#2389E3] transition-colors hover:text-[#1b6dbb] disabled:text-[#94A3B8]"
+          >
+            {markAllMutation.isLoading ? "Marking read..." : "Mark all read"}
+          </button>
+        </div>
+
+        <div className="mb-4 flex flex-wrap gap-2">
+          {["All", "Warning", "Payments", "Licenses Added", "Successful"].map((category, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                notificationsCategory === category
+                  ? "bg-[#2389E3] text-white"
+                  : "bg-[#F3F5F8] text-[#697C8C] hover:bg-[#E9EEF4]"
+              }`}
+              onClick={() => setNotificationsCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
         </div>
 
         <NotificationList

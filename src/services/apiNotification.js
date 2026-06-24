@@ -2,12 +2,12 @@ import { api } from "./apiClient";
 
 export async function getNotifications(unreadOnly = false) {
   const params = unreadOnly ? { unread_only: 'true' } : {};
-  const { data } = await api.get("/notifications", { params });
+  const { data } = await api.get("/notifications", { params, cache: false });
   return data.data; // Extract { notifications: [] } from response wrapper
 }
 
 export async function getNotificationsByType(type) {
-  const { data } = await api.get(`/notifications/type/${encodeURIComponent(type)}`);
+  const { data } = await api.get(`/notifications/type/${encodeURIComponent(type)}`, { cache: false });
   return data;
 }
 
