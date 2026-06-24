@@ -27,6 +27,7 @@ export default function Ladipo() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showDesktopFilters, setShowDesktopFilters] = useState(false);
   const [sidebarFilters, setSidebarFilters] = useState({
     brand: [],
     condition: [],
@@ -55,6 +56,33 @@ export default function Ladipo() {
     sidebarFilters.maxPriceNgn != null ||
     (sidebarFilters.sort && sidebarFilters.sort !== "newest");
   const itemsPerPage = 12; // 3 rows on desktop (4 columns), 6 items on mobile (2 columns)
+
+  function normalizeFilterValue(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function isCompatibilityMatch(car, rule) {
+    if (!car || !rule) return false;
+    const carMake = normalizeFilterValue(car.vehicle_make);
+    const carModel = normalizeFilterValue(car.vehicle_model);
+    const carYearRaw = car.vehicle_year;
+    const carYear = carYearRaw === undefined || carYearRaw === null || carYearRaw === ""
+      ? null
+      : Number(carYearRaw);
+
+    const ruleMake = normalizeFilterValue(rule.make);
+    const ruleModel = normalizeFilterValue(rule.model);
+
+    if (!ruleMake || carMake !== ruleMake) return false;
+    if (ruleModel && carModel !== ruleModel) return false;
+
+    if (carYear != null && Number.isFinite(carYear)) {
+      if (rule.year_min != null && carYear < Number(rule.year_min)) return false;
+      if (rule.year_max != null && carYear > Number(rule.year_max)) return false;
+    }
+
+    return true;
+  }
 
   // Get store state and actions
   const {
@@ -165,8 +193,63 @@ export default function Ladipo() {
   });
 
   const parts = partsData?.parts ?? [];
+  const visibleParts = useMemo(() => {
+    if (!selectedCar) return parts;
+    return parts.filter((part) => {
+      if (part?.is_universal) return true;
+      const compatibilityRows = Array.isArray(part?.compatibility) ? part.compatibility : [];
+      if (compatibilityRows.length === 0) return false;
+      return compatibilityRows.some((rule) => isCompatibilityMatch(selectedCar, rule));
+    });
+  }, [parts, selectedCar]);
+
   const totalParts = partsData?.total ?? parts.length;
-  const totalPages = partsData?.totalPages ?? 1;
+  const displayedPartsCount = selectedCar ? visibleParts.length : totalParts;
+  const totalPages = (partsData?.totalPages ?? Math.ceil(totalParts / itemsPerPage)) || 1;
+
+  const { data: fallbackData } = useQuery({
+    queryKey: [
+      "ladipo-parts",
+      selectedMainCategory?.slug,
+      selectedSubcategory?.slug,
+      activeSearch,
+      "fallback-no-car",
+      sidebarQueryParams,
+    ],
+    queryFn: async () => {
+      if (!selectedMainCategory) {
+        return getLadipoParts({
+          q: activeSearch || undefined,
+          ...sidebarQueryParams,
+          limit: itemsPerPage,
+          page: currentPage,
+        });
+      }
+
+      if (selectedSubcategory) {
+        return getLadipoPartsByCategory(selectedMainCategory.slug, selectedSubcategory.slug, {
+          page: currentPage,
+          limit: itemsPerPage,
+          q: activeSearch || undefined,
+          ...sidebarQueryParams,
+        });
+      }
+
+      return getLadipoPartsByCategory(selectedMainCategory.slug, null, {
+        page: currentPage,
+        limit: itemsPerPage,
+        q: activeSearch || undefined,
+        ...sidebarQueryParams,
+      });
+    },
+    enabled: Boolean(selectedCar && activeSearch),
+    staleTime: 60 * 1000,
+  });
+
+  const fallbackCount = fallbackData?.total ?? fallbackData?.parts?.length ?? 0;
+  const partsCountLabel = partsLoading
+    ? "Searching..."
+    : `${displayedPartsCount} ${displayedPartsCount === 1 ? "part" : "parts"}`;
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -355,22 +438,18 @@ export default function Ladipo() {
         )}
 
         {/* Results + sidebar */}
-        <div className="border-t border-[#E1E6F4] pt-6 mt-6 flex flex-col lg:flex-row gap-6">
-          {/* Sidebar — desktop static, mobile drawer */}
-          <div className="hidden lg:block">
-            <FilterSidebar
-              filters={sidebarFilters}
-              onFiltersChange={(patch) => setSidebarFilters((f) => ({ ...f, ...patch }))}
-              categorySlug={selectedSubcategory?.slug || selectedMainCategory?.slug}
-              onClear={resetSidebarFilters}
-              hasActiveFilters={hasSidebarFilters}
-            />
-          </div>
-
-          {/* Mobile filter trigger */}
-          <div className="lg:hidden flex items-center justify-between">
+        <div className="border-t border-[#E1E6F4] pt-6 mt-6 flex flex-col gap-6">
+          <div className="flex items-center justify-between gap-3 lg:justify-start">
             <button
-              onClick={() => setShowMobileFilters(true)}
+              onClick={() => {
+                if (window.innerWidth >= 1024) {
+                  setShowDesktopFilters((v) => !v);
+                  setShowMobileFilters(false);
+                } else {
+                  setShowMobileFilters(true);
+                  setShowDesktopFilters(false);
+                }
+              }}
               className="inline-flex items-center gap-2 rounded-lg border border-[#E1E6F4] bg-white px-3 py-2 text-[13px] font-semibold text-[#05243F]"
             >
               <Icon icon="solar:filter-bold-duotone" width="16" />
@@ -382,24 +461,32 @@ export default function Ladipo() {
               )}
             </button>
             <p className="text-[12px] text-[#697C8C]">
-              {partsLoading ? "Searching..." : `${totalParts} ${totalParts === 1 ? "part" : "parts"}`}
+              {partsCountLabel}
             </p>
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div
+              className={`hidden lg:block overflow-hidden transition-[width,opacity] duration-300 ease-out ${
+                showDesktopFilters ? "w-64 opacity-100" : "w-0 opacity-0"
+              }`}
+            >
+              <div className="rounded-2xl border border-[#E1E6F4] bg-[#F9FAFC] p-3 sm:p-4 shadow-sm">
+                <FilterSidebar
+                  filters={sidebarFilters}
+                  onFiltersChange={(patch) => setSidebarFilters((f) => ({ ...f, ...patch }))}
+                  categorySlug={selectedSubcategory?.slug || selectedMainCategory?.slug}
+                  onClear={resetSidebarFilters}
+                  hasActiveFilters={hasSidebarFilters}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 min-w-0">
           {hasFilters && (
             <div className="hidden lg:flex items-center justify-between mb-3">
               <p className="text-[13px] text-[#697C8C]">
-                {partsLoading ? (
-                  "Searching..."
-                ) : (
-                  <>
-                    <span className="font-bold text-[#05243F] text-[15px]">
-                      {totalParts}
-                    </span>{" "}
-                    {totalParts === 1 ? "part" : "parts"} found
-                  </>
-                )}
+                {partsCountLabel}
               </p>
             </div>
           )}
@@ -430,10 +517,21 @@ export default function Ladipo() {
                 No parts found
               </p>
               {activeSearch && selectedCar && (
-                <p className="text-[13px] text-[#697C8C] text-center max-w-xs">
-                  No parts match "{activeSearch}" for {selectedCar.vehicle_make}{" "}
-                  {selectedCar.vehicle_model}. Try a different search.
-                </p>
+                <>
+                  <p className="text-[13px] text-[#697C8C] text-center max-w-xs">
+                    No parts match "{activeSearch}" for {selectedCar.vehicle_make}{" "}
+                    {selectedCar.vehicle_model}.
+                  </p>
+                  {fallbackCount > 0 ? (
+                    <p className="text-[13px] text-[#697C8C] text-center max-w-xs">
+                      We found {fallbackCount} matching {fallbackCount === 1 ? "part" : "parts"} for "{activeSearch}" across all cars. Remove the selected car filter to broaden results.
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-[#697C8C] text-center max-w-xs">
+                      Try a different search or clear the selected car filter.
+                    </p>
+                  )}
+                </>
               )}
               {activeSearch && !selectedCar && (
                 <p className="text-[13px] text-[#697C8C] text-center max-w-xs">
@@ -458,17 +556,27 @@ export default function Ladipo() {
                 </p>
               )}
               {hasFilters && (
-                <button
-                  onClick={clearAllFilters}
-                  className="text-[14px] text-white bg-[#2389E3] hover:bg-[#1a7acf] font-semibold px-4 py-2 rounded-[10px] cursor-pointer transition-colors"
-                >
-                  Clear all filters
-                </button>
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-[14px] text-white bg-[#2389E3] hover:bg-[#1a7acf] font-semibold px-4 py-2 rounded-[10px] cursor-pointer transition-colors"
+                  >
+                    Clear all filters
+                  </button>
+                  {activeSearch && selectedCar && fallbackCount > 0 && (
+                    <button
+                      onClick={() => setSelectedCar(null)}
+                      className="text-[14px] text-[#2389E3] bg-white border border-[#2389E3] hover:bg-[#EFF7FF] font-semibold px-4 py-2 rounded-[10px] cursor-pointer transition-colors"
+                    >
+                      Show matching parts for all cars
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ) : (
             <>
-              <ProductsList parts={parts} selectedCar={selectedCar} garageCars={garageCars} />
+              <ProductsList parts={visibleParts} selectedCar={selectedCar} garageCars={garageCars} />
               
               {/* Pagination */}
               {totalPages > 1 && (
@@ -565,9 +673,10 @@ export default function Ladipo() {
               )}
             </>
           )}
+            </div>
           </div>
         </div>
-        </div>
+      </div>
       </div>
       <AllCategoriesModal
         open={showAllCategories}
@@ -575,11 +684,11 @@ export default function Ladipo() {
       />
       {showMobileFilters && (
         <div
-          className="fixed inset-0 z-50 flex items-end bg-black/40 lg:hidden"
+          className="fixed inset-0 z-50 flex items-end justify-end bg-black/40"
           onClick={() => setShowMobileFilters(false)}
         >
           <div
-            className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-[#F9FAFC] p-4"
+            className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-[#F9FAFC] p-4 lg:max-h-full lg:w-[420px] lg:rounded-l-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">

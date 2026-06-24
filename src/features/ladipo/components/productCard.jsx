@@ -86,14 +86,14 @@ function ProductCard({ part, isCarFilterActive = false, selectedCar = null, gara
 
   let fitBadgeText = null;
   if (!showUniversalBadge) {
-    if (selectedCar && selectedCarMatches) {
-      fitBadgeText = "Fits your car";
-    } else if (!selectedCar && matchedGarageCars.length > 0) {
+    if (selectedCar) {
+      if (selectedCarMatches) {
+        fitBadgeText = "Fits your car";
+      }
+    } else if (matchedGarageCars.length > 0) {
       fitBadgeText = matchedGarageCars.length === 1
         ? "Fits 1 of your cars"
         : `Fits ${matchedGarageCars.length} of your cars`;
-    } else if (isCarFilterActive) {
-      fitBadgeText = "Fits your car";
     }
   }
 
