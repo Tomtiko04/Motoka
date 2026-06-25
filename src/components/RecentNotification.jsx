@@ -1,11 +1,16 @@
 import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { useNotifications } from "../features/notifications/useNotification";
+import { updateNotificationsCache, useNotifications } from "../features/notifications/useNotification";
 import NotificationCard from "../pages/components/notificationCard";
 import { useNavigate } from "react-router-dom";
 import { markNotificationAsRead } from "../services/apiNotification";
 import { FaTimes } from "react-icons/fa";
+
+const markNotificationReadCache = (cacheData, notificationId) =>
+  updateNotificationsCache(cacheData, (notification) =>
+    notification.id === notificationId ? { ...notification, is_read: true } : notification,
+  );
 
 export default function RecentNotificationModal({ setNotificationsModal }) {
   const { data } = useNotifications({ unreadOnly: true, enabled: true });
@@ -58,12 +63,33 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
   const queryClient = useQueryClient();
   const markSingleMutation = useMutation({
     mutationFn: markNotificationAsRead,
+    onMutate: async (notificationId) => {
+      await queryClient.cancelQueries({ queryKey: ["notifications"], exact: false });
+      const previousQueries = queryClient.getQueriesData({ queryKey: ["notifications"], exact: false });
+
+      queryClient.setQueryData(["notifications", "unread"], (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+      queryClient.setQueryData(["notifications", "all"], (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+      queryClient.setQueriesData({ queryKey: ["notifications"], exact: false }, (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+
+      return { previousQueries };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
       toast.success("Notification marked as read");
     },
-    onError: (error) => {
+    onError: (error, _notificationId, context) => {
+      context?.previousQueries?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       toast.error(error.response?.data?.message || error.message || "Unable to mark notification as read");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
     },
     retry: false,
   });

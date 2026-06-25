@@ -99,25 +99,26 @@ api.interceptors.response.use(
 // Create a wrapper for the API to handle caching
 const apiWithCache = {
   get: async (url, config = {}) => {
+    if (config.cache === false) {
+      return api.get(url, config)
+    }
+
     const cacheKey = `get:${url}:${JSON.stringify(config)}`
 
-  
     if (requestCache.has(cacheKey)) {
       const cachedData = requestCache.get(cacheKey)
       if (cachedData.expiry > Date.now()) {
         return cachedData.response
       }
-      
       requestCache.delete(cacheKey)
     }
 
     // Make the actual request
     const response = await api.get(url, config)
 
-    
     requestCache.set(cacheKey, {
       response,
-      expiry: Date.now() + 30000, 
+      expiry: Date.now() + 30000,
     })
 
     return response
