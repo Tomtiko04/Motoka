@@ -440,7 +440,7 @@ export default function Ladipo() {
         )}
 
         {/* Results + sidebar */}
-        <div className="border-t border-[#E1E6F4] pt-6 mt-6 flex flex-col gap-6">
+        <div className="pt-6 mt-6 flex flex-col gap-6">
           <div className="flex items-center justify-between gap-3 lg:justify-start">
             <button
               onClick={() => {
