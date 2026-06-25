@@ -13,6 +13,7 @@ import ProductsList from "./components/productsList";
 import ProductSkeleton from "./components/ProductSkeleton";
 import Searchbar from "./components/Searchbar";
 import AllCategoriesModal from "./components/AllCategoriesModal";
+import SelectCarModal from "./components/SelectCarModal";
 import FilterSidebar from "./components/FilterSidebar";
 import ladipoStore from "../../store/ladipoStore";
 
@@ -22,7 +23,8 @@ export default function Ladipo() {
   const [searchTerm, setSearchTerm] = useState(initialQ);
   const [activeSearch, setActiveSearch] = useState(initialQ);
   const [selectedCar, setSelectedCar] = useState(null);
-  const hasAutoSelectedSingleCar = useRef(false);
+  const [showCarModal, setShowCarModal] = useState(false);
+  const hasPromptedCarModal = useRef(false);
   const [subcategories, setSubcategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -97,9 +99,9 @@ export default function Ladipo() {
   }, [cars]);
 
   useEffect(() => {
-    if (garageCars.length === 1 && !selectedCar && !hasAutoSelectedSingleCar.current) {
-      hasAutoSelectedSingleCar.current = true;
-      setSelectedCar(garageCars[0]);
+    if (garageCars.length > 0 && !selectedCar && !hasPromptedCarModal.current) {
+      hasPromptedCarModal.current = true;
+      setShowCarModal(true);
     }
   }, [garageCars, selectedCar]);
 
@@ -681,6 +683,16 @@ export default function Ladipo() {
       <AllCategoriesModal
         open={showAllCategories}
         onClose={() => setShowAllCategories(false)}
+      />
+      <SelectCarModal
+        open={showCarModal}
+        onClose={() => setShowCarModal(false)}
+        garageCars={garageCars}
+        selectedCar={selectedCar}
+        onProceed={(car) => {
+          setSelectedCar(car);
+          setShowCarModal(false);
+        }}
       />
       {showMobileFilters && (
         <div
