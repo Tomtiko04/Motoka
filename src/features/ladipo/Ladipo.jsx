@@ -99,8 +99,14 @@ export default function Ladipo() {
   }, [cars]);
 
   useEffect(() => {
-    if (garageCars.length > 0 && !selectedCar && !hasPromptedCarModal.current) {
+    if (
+      garageCars.length > 0 &&
+      !selectedCar &&
+      !hasPromptedCarModal.current &&
+      !sessionStorage.getItem("ladipo_car_modal_shown")
+    ) {
       hasPromptedCarModal.current = true;
+      sessionStorage.setItem("ladipo_car_modal_shown", "1");
       setShowCarModal(true);
     }
   }, [garageCars, selectedCar]);
