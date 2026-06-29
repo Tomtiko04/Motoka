@@ -13,6 +13,7 @@ import ProductsList from "./components/productsList";
 import ProductSkeleton from "./components/ProductSkeleton";
 import Searchbar from "./components/Searchbar";
 import AllCategoriesModal from "./components/AllCategoriesModal";
+import SelectCarModal from "./components/SelectCarModal";
 import FilterSidebar from "./components/FilterSidebar";
 import ladipoStore from "../../store/ladipoStore";
 
@@ -22,7 +23,8 @@ export default function Ladipo() {
   const [searchTerm, setSearchTerm] = useState(initialQ);
   const [activeSearch, setActiveSearch] = useState(initialQ);
   const [selectedCar, setSelectedCar] = useState(null);
-  const hasAutoSelectedSingleCar = useRef(false);
+  const [showCarModal, setShowCarModal] = useState(false);
+  const hasPromptedCarModal = useRef(false);
   const [subcategories, setSubcategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -97,9 +99,15 @@ export default function Ladipo() {
   }, [cars]);
 
   useEffect(() => {
-    if (garageCars.length === 1 && !selectedCar && !hasAutoSelectedSingleCar.current) {
-      hasAutoSelectedSingleCar.current = true;
-      setSelectedCar(garageCars[0]);
+    if (
+      garageCars.length > 0 &&
+      !selectedCar &&
+      !hasPromptedCarModal.current &&
+      !sessionStorage.getItem("ladipo_car_modal_shown")
+    ) {
+      hasPromptedCarModal.current = true;
+      sessionStorage.setItem("ladipo_car_modal_shown", "1");
+      setShowCarModal(true);
     }
   }, [garageCars, selectedCar]);
 
@@ -438,7 +446,7 @@ export default function Ladipo() {
         )}
 
         {/* Results + sidebar */}
-        <div className="border-t border-[#E1E6F4] pt-6 mt-6 flex flex-col gap-6">
+        <div className="pt-6 mt-6 flex flex-col gap-6">
           <div className="flex items-center justify-between gap-3 lg:justify-start">
             <button
               onClick={() => {
@@ -492,7 +500,11 @@ export default function Ladipo() {
           )}
 
           {partsLoading ? (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-3">
+            <div
+              className={`grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3 ${
+                showDesktopFilters ? "lg:grid-cols-3" : "lg:grid-cols-4"
+              }`}
+            >
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
@@ -576,7 +588,7 @@ export default function Ladipo() {
             </div>
           ) : (
             <>
-              <ProductsList parts={visibleParts} selectedCar={selectedCar} garageCars={garageCars} />
+              <ProductsList parts={visibleParts} selectedCar={selectedCar} garageCars={garageCars} compact={showDesktopFilters} />
               
               {/* Pagination */}
               {totalPages > 1 && (
@@ -681,6 +693,16 @@ export default function Ladipo() {
       <AllCategoriesModal
         open={showAllCategories}
         onClose={() => setShowAllCategories(false)}
+      />
+      <SelectCarModal
+        open={showCarModal}
+        onClose={() => setShowCarModal(false)}
+        garageCars={garageCars}
+        selectedCar={selectedCar}
+        onProceed={(car) => {
+          setSelectedCar(car);
+          setShowCarModal(false);
+        }}
       />
       {showMobileFilters && (
         <div

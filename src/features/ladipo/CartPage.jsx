@@ -109,8 +109,8 @@ function CartPage() {
 
             {/* Subtotal bar */}
             <div className="flex items-center justify-between px-5 py-4 bg-[#CBE1FC]">
-              <span className="text-[14px] font-bold text-white">Subtotal</span>
-              <span className="text-[14px] font-bold text-white">
+              <span className="text-[14px] font-bold text-[#05243F]">Subtotal</span>
+              <span className="text-[14px] font-bold text-[#05243F]">
                 ₦{(totalKobo / 100).toLocaleString("en-NG")}
               </span>
             </div>

@@ -224,19 +224,16 @@ export default function SearchBar({
           </div>
         )}
 
-        {/* Ask Mo button */}
-        <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
-          <span className="text-[12px] text-[#8A9EB0] whitespace-nowrap">Don&apos;t know what to buy?</span>
-          <button
-            type="button"
-            onClick={handleAskMo}
-            className="flex items-center gap-1.5 rounded-full bg-[#EBB850] px-4 py-2.5 text-[13px] font-bold text-[#05243F] hover:bg-[#d8a93f] transition-colors cursor-pointer whitespace-nowrap"
-          >
-            <Icon icon="solar:stars-minimalistic-bold" width="15" />
-            Ask Mo
-          </button>
-        </div>
       </div>
+
+      {/* Hint for the global Mo button — desktop only, sits just above it */}
+      <button
+        type="button"
+        onClick={handleAskMo}
+        className="hidden lg:block fixed bottom-24 right-6 z-40 text-[12px] text-[#8A9EB0] whitespace-nowrap bg-white rounded-full px-3 py-1.5 shadow-md cursor-pointer hover:text-[#05243F] transition-colors"
+      >
+        Don&apos;t know what to buy?
+      </button>
     </div>
   );
 }
