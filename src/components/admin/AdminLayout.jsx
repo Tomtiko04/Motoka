@@ -17,6 +17,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ChevronRightIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { name: 'Documents',       href: '/admin/documents',                    icon: DocumentTextIcon,          exact: false },
   { name: 'Driver Licences', href: '/admin/driver-license-applications',  icon: IdentificationIcon,        exact: false },
   { name: 'Ladipo',          href: '/admin/ladipo',                       icon: ShoppingBagIcon,           exact: false },
+  { name: 'Doc Prices',      href: '/admin/vehicle-doc-prices',           icon: CurrencyDollarIcon,        exact: false },
 ];
 
 function NavItem({ item, active, onClick }) {

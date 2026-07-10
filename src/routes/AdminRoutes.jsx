@@ -16,6 +16,7 @@ import AdminUserDetails from '../pages/admin/AdminUserDetails.jsx';
 import AdminDocuments from '../pages/admin/AdminDocuments.jsx';
 import AdminDriverLicenseApplications from '../pages/admin/AdminDriverLicenseApplications.jsx';
 import AdminLadipo from '../pages/admin/AdminLadipo.jsx';
+import AdminVehicleDocs from '../pages/admin/AdminVehicleDocs.jsx';
 
 const AdminRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -93,6 +94,7 @@ const AdminRoutes = () => {
                 <Route path="documents" element={<AdminDocuments />} />
                 <Route path="driver-license-applications" element={<AdminDriverLicenseApplications />} />
                 <Route path="ladipo" element={<AdminLadipo />} />
+                <Route path="vehicle-doc-prices" element={<AdminVehicleDocs />} />
       </Route>
     </Routes>
   );
