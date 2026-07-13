@@ -15,6 +15,8 @@ import {
   updateAdminLadipoOrderStatus,
   updateAdminLadipoOrderWorkflow,
   updateAdminLadipoProduct,
+  listAdminLadipoCategories,
+  updateAdminLadipoCategoryImage,
 } from '../../services/apiAdminLadipo';
 import { getLadipoCategories } from '../../services/apiLadipo';
 
@@ -52,6 +54,8 @@ const initialProductForm = {
   stock_qty: '',
   seller_label: 'Motoka',
   is_universal: false,
+  is_essential: false,
+  is_must_have: false,
   is_active: true,
 };
 
@@ -230,6 +234,12 @@ export default function AdminLadipo() {
   const [productPanelMode, setProductPanelMode] = useState('add');
   const [viewingProduct, setViewingProduct] = useState(null);
 
+  const [adminCategories, setAdminCategories] = useState([]);
+  const [adminCategoriesLoading, setAdminCategoriesLoading] = useState(false);
+  const [categoryImageUploading, setCategoryImageUploading] = useState(null);
+  const [categoryUrlInputId, setCategoryUrlInputId] = useState(null);
+  const [categoryUrlDraft, setCategoryUrlDraft] = useState('');
+
   const loadOrders = useCallback(async () => {
     setOrdersLoading(true);
     try {
@@ -284,6 +294,18 @@ export default function AdminLadipo() {
     }
   }, [debouncedProductQuery, productsPage, productsMeta.per_page]);
 
+  const loadAdminCategories = useCallback(async () => {
+    setAdminCategoriesLoading(true);
+    try {
+      const res = await listAdminLadipoCategories();
+      setAdminCategories(res.data || []);
+    } catch (error) {
+      toast.error(error.message || 'Failed to load categories');
+    } finally {
+      setAdminCategoriesLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'orders') loadOrders();
   }, [activeTab, loadOrders]);
@@ -314,6 +336,10 @@ export default function AdminLadipo() {
   useEffect(() => {
     if (activeTab === 'products') loadProducts();
   }, [activeTab, loadProducts]);
+
+  useEffect(() => {
+    if (activeTab === 'categories') loadAdminCategories();
+  }, [activeTab, loadAdminCategories]);
 
   useEffect(() => {
     getLadipoCategories()
@@ -855,6 +881,8 @@ export default function AdminLadipo() {
       stock_qty: product.inventory?.stock_qty ?? '',
       seller_label: product.inventory?.seller_label || 'Motoka',
       is_universal: product.is_universal ?? false,
+      is_essential: product.is_essential ?? false,
+      is_must_have: product.is_must_have ?? false,
       is_active: product.is_active ?? true,
     });
     setCompatibilityDraft(emptyCompatibilityEntry);
@@ -947,6 +975,8 @@ export default function AdminLadipo() {
       payload.append('stock_qty', String(Number(productForm.stock_qty)));
       payload.append('seller_label', productForm.seller_label || 'Motoka');
       payload.append('is_universal', String(Boolean(productForm.is_universal)));
+      payload.append('is_essential', String(Boolean(productForm.is_essential)));
+      payload.append('is_must_have', String(Boolean(productForm.is_must_have)));
       payload.append('is_active', String(Boolean(productForm.is_active)));
       if (editingProductId) {
         const existing = products.find((item) => item.id === editingProductId);
@@ -997,6 +1027,44 @@ export default function AdminLadipo() {
     }
   };
 
+  const handleCategoryImageUpload = async (categoryId, file) => {
+    setCategoryImageUploading(categoryId);
+    try {
+      const formData = new FormData();
+      formData.append('image_file', file);
+      const res = await updateAdminLadipoCategoryImage(categoryId, formData);
+      setAdminCategories((prev) =>
+        prev.map((cat) => (cat.id === categoryId ? { ...cat, image_url: res.data?.image_url } : cat))
+      );
+      toast.success('Category image updated');
+    } catch (error) {
+      toast.error(error.message || 'Failed to upload image');
+    } finally {
+      setCategoryImageUploading(null);
+    }
+  };
+
+  const handleCategoryUrlSave = async (categoryId) => {
+    const url = categoryUrlDraft.trim();
+    if (!url) return;
+    setCategoryImageUploading(categoryId);
+    try {
+      const formData = new FormData();
+      formData.append('image_url', url);
+      const res = await updateAdminLadipoCategoryImage(categoryId, formData);
+      setAdminCategories((prev) =>
+        prev.map((cat) => (cat.id === categoryId ? { ...cat, image_url: res.data?.image_url } : cat))
+      );
+      setCategoryUrlInputId(null);
+      setCategoryUrlDraft('');
+      toast.success('Category image updated');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update image');
+    } finally {
+      setCategoryImageUploading(null);
+    }
+  };
+
   const openAdminNameModal = () => {
     setAdminNameDraft(adminDisplayName || '');
     setShowAdminNameModal(true);
@@ -1027,7 +1095,7 @@ export default function AdminLadipo() {
       </div>
 
       <div className="flex gap-2">
-        {['orders', 'products'].map((tab) => (
+        {['orders', 'products', 'categories'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -1035,7 +1103,7 @@ export default function AdminLadipo() {
               activeTab === tab ? 'bg-[#2284DB] text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
-            {tab === 'orders' ? 'Orders' : 'Products'}
+            {tab === 'orders' ? 'Orders' : tab === 'products' ? 'Products' : 'Categories'}
           </button>
         ))}
       </div>
@@ -1954,6 +2022,27 @@ export default function AdminLadipo() {
                   Universal part (shows for all cars)
                 </label>
 
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={productForm.is_essential}
+                      onChange={(e) => setProductForm((prev) => ({ ...prev, is_essential: e.target.checked }))}
+                      className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                    />
+                    Feature in &quot;Essential Products&quot;
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={productForm.is_must_have}
+                      onChange={(e) => setProductForm((prev) => ({ ...prev, is_must_have: e.target.checked }))}
+                      className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                    />
+                    Feature in &quot;Must Have&quot;
+                  </label>
+                </div>
+
                 {!productForm.is_universal && (
                   <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 space-y-3">
                     <div className="flex items-center justify-between">
@@ -2096,6 +2185,130 @@ export default function AdminLadipo() {
               </form>
             )}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'categories' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Set images for each category. Images saved here appear on the Ladipo marketplace for users.
+            </p>
+            <button
+              onClick={loadAdminCategories}
+              disabled={adminCategoriesLoading}
+              className="inline-flex items-center gap-1 rounded-lg bg-[#2284DB] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1d74c3] disabled:opacity-60"
+            >
+              <Icon icon="solar:refresh-linear" className="h-3.5 w-3.5" />
+              Refresh
+            </button>
+          </div>
+
+          {adminCategoriesLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+            </div>
+          ) : (
+            (() => {
+              // Only main categories get images — subcategories render as
+              // text-only pills on the user side (see SubcategoriesNav.jsx)
+              // and have no image slot to fill.
+              const mainCats = adminCategories.filter((c) => !c.parent_id);
+
+              const renderCategoryCard = (cat) => {
+                const isUploading = categoryImageUploading === cat.id;
+                const showUrlInput = categoryUrlInputId === cat.id;
+
+                return (
+                  <div key={cat.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
+                    <div className="h-28 w-full overflow-hidden rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center">
+                      {cat.image_url ? (
+                        <img src={cat.image_url} alt={cat.name} className="h-full w-full object-contain" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-gray-300">
+                          <Icon icon="solar:gallery-add-bold-duotone" className="h-8 w-8" />
+                          <span className="text-[11px]">No image</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#05243F] truncate">{cat.name}</p>
+                      <p className="text-[10px] text-gray-300 font-mono truncate mt-0.5">{cat.slug}</p>
+                    </div>
+
+                    {showUrlInput && (
+                      <div className="flex gap-1.5">
+                        <input
+                          value={categoryUrlDraft}
+                          onChange={(e) => setCategoryUrlDraft(e.target.value)}
+                          placeholder="https://..."
+                          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#2284DB]"
+                        />
+                        <button
+                          onClick={() => handleCategoryUrlSave(cat.id)}
+                          disabled={isUploading || !categoryUrlDraft.trim()}
+                          className="rounded-lg bg-[#2284DB] px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-[#1d74c3] disabled:opacity-50"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => { setCategoryUrlInputId(null); setCategoryUrlDraft(''); }}
+                          className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-50"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
+                    {!showUrlInput && (
+                      <div className="flex gap-1.5">
+                        <label className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-[#2284DB] px-3 py-1.5 text-xs font-semibold text-[#2284DB] hover:bg-[#2284DB]/5 cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                          {isUploading ? (
+                            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+                          ) : (
+                            <Icon icon="solar:upload-linear" className="h-3.5 w-3.5" />
+                          )}
+                          {isUploading ? 'Uploading…' : 'Upload'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleCategoryImageUpload(cat.id, file);
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                        <button
+                          onClick={() => { setCategoryUrlInputId(cat.id); setCategoryUrlDraft(cat.image_url || ''); }}
+                          className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                          title="Use image URL"
+                        >
+                          URL
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
+              return (
+                <div className="space-y-6">
+                  {mainCats.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                      {mainCats.map(renderCategoryCard)}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-gray-200 bg-white py-12 text-center text-sm text-gray-400">
+                      No categories found.
+                    </div>
+                  )}
+                </div>
+              );
+            })()
+          )}
         </div>
       )}
 

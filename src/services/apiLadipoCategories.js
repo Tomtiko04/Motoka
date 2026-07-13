@@ -198,16 +198,24 @@ const CATEGORY_VISUALS = {
   },
 };
 
-const withVisuals = (category) => ({
-  ...category,
-  ...(CATEGORY_VISUALS[category.slug] || {
+const withVisuals = (category) => {
+  const visuals = CATEGORY_VISUALS[category.slug] || {
     image: null,
     eyebrow: "Category",
     blurb: "Browse parts in this section.",
     accentFrom: "#12324C",
     accentTo: "#2389E3",
-  }),
-});
+  };
+  return {
+    ...category,
+    ...visuals,
+    // Only the DB-stored image_url is used. No hardcoded fallback —
+    // categories without an admin-uploaded image show a clean
+    // placeholder icon instead (see Categories.jsx) rather than
+    // reusing old hotlinked autofactorng.com images.
+    image: category.image_url || null,
+  };
+};
 
 async function fetchCategories() {
   const categories = await getLadipoCategories();

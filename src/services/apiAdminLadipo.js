@@ -201,3 +201,20 @@ export async function deleteAdminCompatibilityEntry(entryId) {
   });
   return parseJsonResponse(res);
 }
+
+export async function listAdminLadipoCategories() {
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/categories`, {
+    headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function updateAdminLadipoCategoryImage(categoryId, formData) {
+  const token = localStorage.getItem('adminToken');
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/categories/${categoryId}/image`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  return parseJsonResponse(res);
+}

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { X } from "lucide-react";
-import { getLadipoParts } from "../../services/apiLadipo";
+import { getLadipoParts, getLadipoSections } from "../../services/apiLadipo";
 import { getLadipoSubcategoriesByMainId, getLadipoPartsByCategory } from "../../services/apiLadipoCategories";
 import { useGetCars } from "../car/useCar";
 import LadipoLayout from "./components/LadipoLayout";
@@ -30,6 +30,9 @@ export default function Ladipo() {
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showDesktopFilters, setShowDesktopFilters] = useState(false);
+  // 'essential' | 'must_have' | null — set when user clicks "See All" on a
+  // curated landing section, to browse the full tagged collection (paginated)
+  const [activeCollection, setActiveCollection] = useState(null);
   const [sidebarFilters, setSidebarFilters] = useState({
     brand: [],
     condition: [],
@@ -134,6 +137,7 @@ export default function Ladipo() {
   const { data: partsData, isLoading: partsLoading, isError: partsError } = useQuery({
     queryKey: [
       "ladipo-parts",
+      activeCollection,
       selectedMainCategory?.slug,
       selectedSubcategory?.slug,
       activeSearch,
@@ -149,6 +153,21 @@ export default function Ladipo() {
         model: selectedCar?.vehicle_model || undefined,
         year: selectedCar?.vehicle_year || undefined,
       };
+
+      // "See All" on a curated landing section — browse the full tagged
+      // collection, independent of category/search filters.
+      if (activeCollection) {
+        const result = await getLadipoParts({
+          tag: activeCollection,
+          limit: itemsPerPage,
+          page: currentPage,
+        });
+        const total = result?.total || 0;
+        return {
+          ...result,
+          totalPages: total > 0 ? Math.ceil(total / itemsPerPage) : 0,
+        };
+      }
 
       // If no category selected, get all parts
       if (!selectedMainCategory) {
@@ -288,6 +307,7 @@ export default function Ladipo() {
     setSelectedCar(null);
     setActiveSearch("");
     setSearchTerm("");
+    setActiveCollection(null);
     resetSidebarFilters();
     ladipoStore.setState({
       selectedMainCategory: null,
@@ -299,6 +319,43 @@ export default function Ladipo() {
 
   const hasFilters =
     selectedMainCategory || selectedSubcategory || selectedCar || activeSearch || hasSidebarFilters;
+
+  // A real filter (category, search, car, sidebar) always wins over
+  // collection-browsing — drop out of "See All" mode the moment one is applied.
+  useEffect(() => {
+    if (hasFilters && activeCollection) setActiveCollection(null);
+  }, [hasFilters, activeCollection]);
+
+  // Admin-curated sections shown only on the default "All" landing view —
+  // membership comes straight from is_essential/is_must_have flags an
+  // admin sets per product, never inferred.
+  const { data: sectionsData, isLoading: sectionsLoading } = useQuery({
+    queryKey: ["ladipo-sections"],
+    queryFn: getLadipoSections,
+    enabled: !hasFilters && !activeCollection,
+    staleTime: 5 * 60 * 1000,
+  });
+  const essentialProducts = sectionsData?.essentials ?? [];
+  const mustHaveProducts = sectionsData?.mustHaves ?? [];
+  const hasCuratedContent = essentialProducts.length > 0 || mustHaveProducts.length > 0;
+
+  // True landing state: no filters, no collection drill-in, AND there's
+  // curated content to show instead of the full catalog. If an admin
+  // hasn't tagged anything yet, fall back to the full grid below rather
+  // than showing a blank page under Categories.
+  const isCuratedLanding = !hasFilters && !activeCollection && (sectionsLoading || hasCuratedContent);
+
+  function openCollection(tag) {
+    setActiveCollection(tag);
+    setCurrentPage(1);
+  }
+
+  function exitCollection() {
+    setActiveCollection(null);
+    setCurrentPage(1);
+  }
+
+  const collectionLabel = activeCollection === "essential" ? "Essential Products" : "Must Have";
 
   return (
     <LadipoLayout
@@ -347,34 +404,93 @@ export default function Ladipo() {
           </div>
         )}
 
-        {/* Active filters — only shown when filtering */}
-        {hasFilters && (
+        {/* Admin-curated sections — only on the default "All" landing view.
+            If nothing has been tagged yet, isCuratedLanding is false and we
+            fall through to the full catalog below instead of a blank page. */}
+        {isCuratedLanding && sectionsLoading && (
+          <div className="pt-6">
+            <div className="h-5 w-40 bg-[#F4F5FC] rounded animate-pulse mb-3" />
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isCuratedLanding && !sectionsLoading && essentialProducts.length > 0 && (
+          <div className="pt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[15px] font-bold text-[#2389E3]">Essential Products</h2>
+              <button
+                type="button"
+                onClick={() => openCollection("essential")}
+                className="text-[13px] font-semibold text-[#8B98A5] hover:text-[#05243F] transition-colors cursor-pointer"
+              >
+                See All
+              </button>
+            </div>
+            <ProductsList parts={essentialProducts} selectedCar={selectedCar} garageCars={garageCars} />
+          </div>
+        )}
+
+        {isCuratedLanding && !sectionsLoading && mustHaveProducts.length > 0 && (
+          <div className="pt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[15px] font-bold text-[#2389E3]">Must Have</h2>
+              <button
+                type="button"
+                onClick={() => openCollection("must_have")}
+                className="text-[13px] font-semibold text-[#8B98A5] hover:text-[#05243F] transition-colors cursor-pointer"
+              >
+                See All
+              </button>
+            </div>
+            <ProductsList parts={mustHaveProducts} selectedCar={selectedCar} garageCars={garageCars} />
+          </div>
+        )}
+
+        {/* Active filters / active collection — only shown when filtering or browsing a curated collection */}
+        {(hasFilters || activeCollection) && (
           <>
             {/* Mobile: Compact filter summary */}
             <div className="md:hidden flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-[12px] text-[#697C8C] font-medium">
-                  {(() => {
-                    let count = 0;
-                    if (selectedCar) count++;
-                    if (selectedMainCategory) count++;
-                    if (selectedSubcategory) count++;
-                    if (activeSearch) count++;
-                    return `${count} filter${count !== 1 ? "s" : ""} active`;
-                  })()}
+                  {activeCollection
+                    ? collectionLabel
+                    : (() => {
+                        let count = 0;
+                        if (selectedCar) count++;
+                        if (selectedMainCategory) count++;
+                        if (selectedSubcategory) count++;
+                        if (activeSearch) count++;
+                        return `${count} filter${count !== 1 ? "s" : ""} active`;
+                      })()}
                 </span>
               </div>
               <button
-                onClick={clearAllFilters}
+                onClick={activeCollection ? exitCollection : clearAllFilters}
                 className="text-[11px] text-[#2389E3] hover:text-[#1a7acf] font-semibold cursor-pointer whitespace-nowrap"
               >
-                Clear all
+                {activeCollection ? "Back" : "Clear all"}
               </button>
             </div>
 
             {/* Desktop: Detailed filter chips */}
             <div className="hidden md:flex items-center gap-2 flex-wrap">
               <span className="text-[12px] text-[#697C8C] font-medium">Showing:</span>
+              {activeCollection && (
+                <span className="inline-flex items-center gap-1.5 bg-[#2389E3]/8 text-[#2389E3] text-[12px] font-semibold px-3 py-1.5 rounded-[10px]">
+                  {collectionLabel}
+                  <button
+                    onClick={exitCollection}
+                    className="ml-0.5 hover:opacity-70 cursor-pointer"
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              )}
               {selectedCar && (
                 <span className="inline-flex items-center gap-1.5 bg-[#2389E3]/8 text-[#2389E3] text-[12px] font-semibold px-3 py-1.5 rounded-[10px]">
                   <Icon icon="ion:car-sport-sharp" width="13" />
@@ -445,7 +561,11 @@ export default function Ladipo() {
           </>
         )}
 
-        {/* Results + sidebar */}
+        {/* Results + sidebar — hidden on the curated landing view so it
+            doesn't duplicate the Essential/Must Have rows above. Shown
+            whenever a real filter or a collection ("See All") is active,
+            or as a fallback if nothing has been curated yet. */}
+        {!isCuratedLanding && (
         <div className="pt-6 mt-6 flex flex-col gap-6">
           <div className="flex items-center justify-between gap-3 lg:justify-start">
             <button
@@ -688,6 +808,7 @@ export default function Ladipo() {
             </div>
           </div>
         </div>
+        )}
       </div>
       </div>
       <AllCategoriesModal
