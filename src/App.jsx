@@ -20,7 +20,6 @@ import RenewLicense from "./features/licenses/RenewLicense";
 import Garage from "./features/garage/Garage.jsx";
 import Licenses from "./features/licenses/Licenses.jsx";
 import PaymentOptions from "./features/payment/PaymentOptions.jsx";
-import PaystackPayment from "./features/payment/PaystackPayment.jsx";
 import PaystackCallback from "./pages/PaystackCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
@@ -263,7 +262,6 @@ export default function App() {
                 <PaymentOptions availableBalance={3000} renewalCost={1000} />
               }
             />
-            <Route path="payment/paystack" element={<PaystackPayment />} />
             <Route
               path="payment/paystack/callback"
               element={<PaystackCallback />}

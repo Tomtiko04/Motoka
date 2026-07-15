@@ -516,7 +516,11 @@ export default function PaymentOptions() {
       // to postMessage success back to this tab.
       const newWindow = window.open(paystackUrl, '_blank');
       if (!newWindow) {
-        toast.error('Please allow popups for this site to proceed with payment');
+        // Popup blocked — don't dead-end the user. Redirect this tab instead;
+        // the callback page now handles the no-opener case and routes the user
+        // back to the dashboard after verifying.
+        toast.success('Redirecting to Paystack...');
+        window.location.href = paystackUrl;
         return;
       } else {
         toast.success("Redirecting to Paystack...");
