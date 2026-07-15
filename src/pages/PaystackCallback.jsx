@@ -12,80 +12,71 @@ export default function PaystackCallback() {
     const reference = searchParams.get('reference');
     const status = searchParams.get('status');
 
+    // This page can be reached two ways:
+    //   1. As a popup opened by PaymentOptions — window.opener exists, so we
+    //      postMessage the result back and close the popup.
+    //   2. As a full-tab redirect (popup blocked, or Paystack redirected the
+    //      same tab) — window.opener is null, so we must navigate the user
+    //      ourselves. Previously this case left the user stranded on the
+    //      spinner forever.
+    const hasOpener = !!window.opener;
+
+    // Resolve the flow: message the opener + close, OR navigate this tab.
+    const finish = (ok, ref) => {
+      if (hasOpener) {
+        window.opener.postMessage(
+          ok
+            ? { type: 'PAYMENT_SUCCESS', reference: ref, ordersCreated: true }
+            : { type: 'PAYMENT_ERROR' },
+          '*'
+        );
+        setTimeout(() => window.close(), 1500);
+      } else {
+        setTimeout(() => {
+          navigate(ok ? '/dashboard' : '/payment', {
+            replace: true,
+            state: ok ? { paymentSuccess: true, reference: ref } : undefined,
+          });
+        }, 1500);
+      }
+    };
+
     if (!reference) {
       toast.error('No payment reference found');
-      if (window.opener) {
-        window.opener.postMessage({ type: 'PAYMENT_ERROR' }, '*');
-        window.close();
-      }
+      setIsProcessing(false);
+      finish(false);
       return;
     }
 
     if (status === 'cancelled') {
       toast.error('Payment was cancelled');
-      if (window.opener) {
-        window.opener.postMessage({ type: 'PAYMENT_ERROR' }, '*');
-        window.close();
-      }
+      setIsProcessing(false);
+      finish(false, reference);
       return;
     }
 
     // Verify the payment
-    if (reference) {
-      verifyPaystackPayment(reference)
-        .then((response) => {
-          const data = response.data || response;
-          const responseData = data.data || data;
-          
-          if (responseData.status === 'success' || data.status === true) {
-            setIsProcessing(false);
-            toast.success('Payment verified successfully!');
-            
-            // Send success message to parent window with more details
-            if (window.opener) {
-              window.opener.postMessage({ 
-                type: 'PAYMENT_SUCCESS', 
-                reference,
-                paymentData: data,
-                ordersCreated: true
-              }, '*');
-            }
-            
-            // Close the window after a short delay
-            setTimeout(() => {
-              window.close();
-            }, 2000);
-          } else {
-            setIsProcessing(false);
-            toast.error('Payment verification failed');
-            
-            // Send error message to parent window
-            if (window.opener) {
-              window.opener.postMessage({ type: 'PAYMENT_ERROR' }, '*');
-            }
-            
-            // Close the window after a short delay
-            setTimeout(() => {
-              window.close();
-            }, 2000);
-          }
-        })
-        .catch((error) => {
+    verifyPaystackPayment(reference)
+      .then((response) => {
+        const data = response.data || response;
+        const responseData = data.data || data;
+
+        if (responseData.status === 'success' || data.status === true) {
           setIsProcessing(false);
-          const errorMessage = error.response?.data?.message || error.message || 'Payment verification failed';
-          toast.error(errorMessage);
-          
-          // Send error message to parent window
-          if (window.opener) {
-            window.opener.postMessage({ type: 'PAYMENT_ERROR' }, '*');
-          }
-          
-          // Close the window after a short delay
-          setTimeout(() => {
-            window.close();
-          }, 2000);
-        });
-    }
+          toast.success('Payment verified successfully!');
+          finish(true, reference);
+        } else {
+          setIsProcessing(false);
+          toast.error('Payment verification failed');
+          finish(false, reference);
+        }
+      })
+      .catch((error) => {
+        setIsProcessing(false);
+        const errorMessage = error.response?.data?.message || error.message || 'Payment verification failed';
+        toast.error(errorMessage);
+        finish(false, reference);
+      });
   }, [searchParams, navigate]);
 
   return (
