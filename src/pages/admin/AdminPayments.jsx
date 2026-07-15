@@ -114,13 +114,13 @@ const AdminPayments = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      successful: { color: 'bg-green-100 text-green-800', label: 'Success' },
-      approved: { color: 'bg-green-100 text-green-800', label: 'Success' },
-      success: { color: 'bg-green-100 text-green-800', label: 'Success' },
-      pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      failed: { color: 'bg-red-100 text-red-800', label: 'Failed' },
-      declined: { color: 'bg-red-100 text-red-800', label: 'Failed' },
-      abandoned: { color: 'bg-gray-100 text-gray-700', label: 'Abandoned' },
+      successful: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
+      approved: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
+      success: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
+      pending: { color: 'bg-blue-100 text-blue-800', label: 'Pending' },
+      failed: { color: 'bg-blue-100 text-blue-800', label: 'Failed' },
+      declined: { color: 'bg-blue-100 text-blue-800', label: 'Failed' },
+      abandoned: { color: 'bg-blue-100 text-blue-800', label: 'Abandoned' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -211,15 +211,15 @@ const AdminPayments = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Received</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {formatCurrency(summary.amounts?.received ?? 0)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {summary.counts?.successful ?? 0} successful
               </p>
             </div>
-            <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-              <ArrowUpIcon className="h-5 w-5 text-green-600" />
+            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <ArrowUpIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -229,15 +229,15 @@ const AdminPayments = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {formatCurrency(summary.amounts?.pending ?? 0)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {summary.counts?.pending ?? 0} awaiting payment
               </p>
             </div>
-            <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-yellow-600" />
+            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <ArrowDownIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -247,15 +247,15 @@ const AdminPayments = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Failed / Abandoned</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {(summary.counts?.failed ?? 0) + (summary.counts?.abandoned ?? 0)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {summary.counts?.failed ?? 0} failed · {summary.counts?.abandoned ?? 0} abandoned
               </p>
             </div>
-            <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-red-600" />
+            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <ArrowDownIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
