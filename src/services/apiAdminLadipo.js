@@ -139,8 +139,18 @@ export async function listAdminLadipoProducts(params = {}) {
   if (params.page) searchParams.set('page', params.page);
   if (params.per_page) searchParams.set('per_page', params.per_page);
   if (params.search) searchParams.set('search', params.search);
+  if (params.collection) searchParams.set('collection', params.collection);
+  if (params.brand) searchParams.set('brand', params.brand);
+  if (params.make) searchParams.set('make', params.make);
 
   const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/products?${searchParams.toString()}`, {
+    headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function getAdminLadipoProductFilters() {
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/products/filters`, {
     headers: getAdminHeaders(),
   });
   return parseJsonResponse(res);

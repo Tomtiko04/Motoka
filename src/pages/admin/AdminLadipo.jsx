@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Icon } from '@iconify/react';
+import { useSearchParams } from 'react-router-dom';
 import {
   createAdminLadipoProduct,
   deleteAdminCompatibilityEntry,
   deleteAdminLadipoProduct,
   getAdminPartCompatibility,
   getAdminLadipoCapabilities,
+  getAdminLadipoProductFilters,
   getAdminLadipoOrder,
   listAdminLadipoOrders,
   listAdminLadipoProducts,
@@ -41,6 +43,7 @@ const QUICK_ORDER_VIEWS = [
   { key: 'cancelled', label: 'Cancelled' },
 ];
 const BULK_ACTION_STATUSES = ['processing', 'out_for_delivery', 'delivered'];
+const LADIPO_TABS = ['orders', 'products', 'collections', 'categories'];
 
 const initialProductForm = {
   name: '',
@@ -182,6 +185,18 @@ function slaBadgeForOrder(order, adminName) {
 
 export default function AdminLadipo() {
   const [activeTab, setActiveTab] = useState('orders');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const selectTab = useCallback((tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const nextTab = LADIPO_TABS.includes(tab) ? tab : 'orders';
+    if (nextTab !== activeTab) setActiveTab(nextTab);
+  }, [activeTab, searchParams]);
 
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -215,9 +230,15 @@ export default function AdminLadipo() {
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productQuery, setProductQuery] = useState('');
+  const [productBrand, setProductBrand] = useState('');
+  const [productMake, setProductMake] = useState('');
+  const [productFilters, setProductFilters] = useState({ brands: [], makes: [] });
+  const [productFiltersLoading, setProductFiltersLoading] = useState(false);
   const debouncedProductQuery = useDebouncedValue(productQuery, 320);
   const [productsPage, setProductsPage] = useState(1);
   const [productsMeta, setProductsMeta] = useState({ current_page: 1, per_page: 20, total: 0, last_page: 1 });
+  const [curatedProducts, setCuratedProducts] = useState({ essential: [], mustHave: [] });
+  const [curatedLoading, setCuratedLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [productForm, setProductForm] = useState(initialProductForm);
   const [editingProductId, setEditingProductId] = useState(null);
@@ -278,6 +299,8 @@ export default function AdminLadipo() {
         page: productsPage,
         per_page: productsMeta.per_page,
         search: debouncedProductQuery.trim() || undefined,
+        brand: productBrand || undefined,
+        make: productMake || undefined,
       });
       setProducts(res.data?.data || []);
       setProductsMeta((prev) => ({
@@ -292,7 +315,40 @@ export default function AdminLadipo() {
     } finally {
       setProductsLoading(false);
     }
-  }, [debouncedProductQuery, productsPage, productsMeta.per_page]);
+  }, [debouncedProductQuery, productBrand, productMake, productsPage, productsMeta.per_page]);
+
+  const loadProductFilters = useCallback(async () => {
+    setProductFiltersLoading(true);
+    try {
+      const res = await getAdminLadipoProductFilters();
+      setProductFilters({
+        brands: res.data?.brands || [],
+        makes: res.data?.makes || [],
+      });
+    } catch (error) {
+      toast.error(error.message || 'Failed to load product filters');
+    } finally {
+      setProductFiltersLoading(false);
+    }
+  }, []);
+
+  const loadCuratedProducts = useCallback(async () => {
+    setCuratedLoading(true);
+    try {
+      const [essential, mustHave] = await Promise.all([
+        listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'essential' }),
+        listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'must_have' }),
+      ]);
+      setCuratedProducts({
+        essential: essential.data?.data || [],
+        mustHave: mustHave.data?.data || [],
+      });
+    } catch (error) {
+      toast.error(error.message || 'Failed to load curated collections');
+    } finally {
+      setCuratedLoading(false);
+    }
+  }, []);
 
   const loadAdminCategories = useCallback(async () => {
     setAdminCategoriesLoading(true);
@@ -338,8 +394,16 @@ export default function AdminLadipo() {
   }, [activeTab, loadProducts]);
 
   useEffect(() => {
+    if (activeTab === 'products') loadProductFilters();
+  }, [activeTab, loadProductFilters]);
+
+  useEffect(() => {
     if (activeTab === 'categories') loadAdminCategories();
   }, [activeTab, loadAdminCategories]);
+
+  useEffect(() => {
+    if (activeTab === 'collections') loadCuratedProducts();
+  }, [activeTab, loadCuratedProducts]);
 
   useEffect(() => {
     getLadipoCategories()
@@ -360,6 +424,10 @@ export default function AdminLadipo() {
   useEffect(() => {
     setOrdersPage(1);
   }, [orderSearch, orderStatus, quickOrderView]);
+
+  useEffect(() => {
+    setProductsPage(1);
+  }, [debouncedProductQuery, productBrand, productMake]);
 
   useEffect(() => {
     if (selectedOrder?.block_reason) {
@@ -963,6 +1031,11 @@ export default function AdminLadipo() {
         }))
         .filter((entry) => entry.make);
 
+      if (!productForm.is_universal && normalizedCompatibility.length === 0) {
+        toast.error('Add at least one verified compatibility entry, or mark this product as universal');
+        return;
+      }
+
       const payload = new FormData();
       payload.append('name', productForm.name);
       payload.append('slug', productForm.slug);
@@ -1092,20 +1165,6 @@ export default function AdminLadipo() {
           <h1 className="text-2xl font-bold text-[#05243F]">Ladipo Admin</h1>
           <p className="text-sm text-gray-500">Manage Ladipo orders and products in one place.</p>
         </div>
-      </div>
-
-      <div className="flex gap-2">
-        {['orders', 'products', 'categories'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`rounded-full px-4 py-2 text-sm font-medium ${
-              activeTab === tab ? 'bg-[#2284DB] text-white' : 'bg-gray-100 text-gray-700'
-            }`}
-          >
-            {tab === 'orders' ? 'Orders' : tab === 'products' ? 'Products' : 'Categories'}
-          </button>
-        ))}
       </div>
 
       {activeTab === 'orders' && (
@@ -1524,11 +1583,45 @@ export default function AdminLadipo() {
                 <input
                   value={productQuery}
                   onChange={(e) => setProductQuery(e.target.value)}
-                  placeholder="Search name, slug, brand…"
+                  placeholder="Search name, slug, product brand…"
                   className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
                   aria-label="Search products"
                 />
               </div>
+              <select
+                value={productBrand}
+                onChange={(e) => setProductBrand(e.target.value)}
+                disabled={productFiltersLoading}
+                aria-label="Filter products by brand"
+                className="min-w-[150px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20 disabled:opacity-50"
+              >
+                <option value="">All product brands</option>
+                {productFilters.brands.map((brand) => <option key={brand} value={brand}>{brand}</option>)}
+              </select>
+              <select
+                value={productMake}
+                onChange={(e) => setProductMake(e.target.value)}
+                disabled={productFiltersLoading}
+                aria-label="Filter products by compatible vehicle make"
+                className="min-w-[170px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20 disabled:opacity-50"
+              >
+                <option value="">All compatible vehicle makes</option>
+                {productFilters.makes.map((make) => <option key={make} value={make}>{make}</option>)}
+              </select>
+              {(productQuery || productBrand || productMake) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductQuery('');
+                    setProductBrand('');
+                    setProductMake('');
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <Icon icon="solar:eraser-linear" className="h-3.5 w-3.5" />
+                  Clear
+                </button>
+              )}
               <button
                 type="button"
                 onClick={loadProducts}
@@ -2184,6 +2277,51 @@ export default function AdminLadipo() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'collections' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div>
+              <h2 className="text-base font-bold text-[#05243F]">Manual storefront collections</h2>
+              <p className="mt-1 text-xs text-gray-500">Products appear here only when an admin enables Essential Products or Must Have in the product editor.</p>
+            </div>
+            <button type="button" onClick={loadCuratedProducts} disabled={curatedLoading} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+              {curatedLoading ? 'Loading…' : 'Refresh'}
+            </button>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {[
+              { key: 'essential', title: 'Essential Products', items: curatedProducts.essential, tone: 'text-[#2284DB]' },
+              { key: 'mustHave', title: 'Must Have', items: curatedProducts.mustHave, tone: 'text-violet-700' },
+            ].map(({ key, title, items, tone }) => (
+              <section key={key} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className={`font-bold ${tone}`}>{title}</h3>
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">{items.length}</span>
+                </div>
+                {curatedLoading ? <p className="py-6 text-center text-sm text-gray-400">Loading collection…</p> : items.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-gray-400">No products manually selected yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {items.map((product) => (
+                      <div key={product.id} className="flex items-center gap-3 rounded-lg border border-gray-100 p-2">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-gray-50">
+                          {resolveAdminProductImageUrl(product) ? <img src={resolveAdminProductImageUrl(product)} alt="" className="h-full w-full object-contain" /> : null}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-[#05243F]">{product.name}</p>
+                          <p className="text-xs text-gray-500">{formatPrice(product.inventory?.price_kobo)} · Stock {product.inventory?.stock_qty ?? 0}</p>
+                        </div>
+                        <button type="button" onClick={() => { selectTab('products'); startEditProduct(product); setProductPanelMode('edit'); }} className="text-xs font-semibold text-[#2284DB] hover:underline">Edit</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
           </div>
         </div>
       )}

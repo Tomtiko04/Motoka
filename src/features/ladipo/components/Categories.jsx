@@ -93,7 +93,7 @@ function Categories() {
         <div
           ref={scrollContainerRef}
           onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
+          className="flex gap-8 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
         >
           {/* All Categories Button */}
           <button

@@ -63,19 +63,26 @@ export default function Ladipo() {
   const itemsPerPage = 12; // 3 rows on desktop (4 columns), 6 items on mobile (2 columns)
 
   function normalizeFilterValue(value) {
-    return String(value || "").trim().toLowerCase();
+    return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+
+  function normalizeMake(value) {
+    const normalized = normalizeFilterValue(value);
+    if (normalized === "mercedes" || normalized === "benz") return "mercedesbenz";
+    if (normalized === "vw") return "volkswagen";
+    return normalized;
   }
 
   function isCompatibilityMatch(car, rule) {
     if (!car || !rule) return false;
-    const carMake = normalizeFilterValue(car.vehicle_make);
+    const carMake = normalizeMake(car.vehicle_make);
     const carModel = normalizeFilterValue(car.vehicle_model);
     const carYearRaw = car.vehicle_year;
     const carYear = carYearRaw === undefined || carYearRaw === null || carYearRaw === ""
       ? null
       : Number(carYearRaw);
 
-    const ruleMake = normalizeFilterValue(rule.make);
+    const ruleMake = normalizeMake(rule.make);
     const ruleModel = normalizeFilterValue(rule.model);
 
     if (!ruleMake || carMake !== ruleMake) return false;
@@ -159,6 +166,7 @@ export default function Ladipo() {
       if (activeCollection) {
         const result = await getLadipoParts({
           tag: activeCollection,
+          ...carParams,
           limit: itemsPerPage,
           page: currentPage,
         });
