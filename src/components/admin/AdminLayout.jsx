@@ -16,6 +16,7 @@ import {
   ShoppingBagIcon,
   Bars3Icon,
   XMarkIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
@@ -29,6 +30,13 @@ const NAV_ITEMS = [
   { name: 'Users',           href: '/admin/users',                        icon: UsersIcon,                 exact: false },
   { name: 'Documents',       href: '/admin/documents',                    icon: DocumentTextIcon,          exact: false },
   { name: 'Driver Licences', href: '/admin/driver-license-applications',  icon: IdentificationIcon,        exact: false },
+];
+
+const LADIPO_ITEMS = [
+  { name: 'Orders', href: '/admin/ladipo?tab=orders' },
+  { name: 'Products', href: '/admin/ladipo?tab=products' },
+  { name: 'Collections', href: '/admin/ladipo?tab=collections' },
+  { name: 'Categories', href: '/admin/ladipo?tab=categories' },
   { name: 'Ladipo',          href: '/admin/ladipo',                       icon: ShoppingBagIcon,           exact: false },
   { name: 'Doc Prices',      href: '/admin/vehicle-doc-prices',           icon: CurrencyDollarIcon,        exact: false },
 ];
@@ -51,11 +59,60 @@ function NavItem({ item, active, onClick }) {
   );
 }
 
+function LadipoNavGroup({ expanded, onToggle, activeHref, onNavigate }) {
+  const active = activeHref.startsWith('/admin/ladipo');
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className={`group w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 text-left ${
+          active
+            ? 'bg-[#EBB950]/15 text-[#EBB950]'
+            : 'text-white/55 hover:text-white hover:bg-white/6'
+        }`}
+      >
+        <ShoppingBagIcon className={`shrink-0 ${active ? 'text-[#EBB950]' : 'text-white/40 group-hover:text-white/70'}`} style={{ width: 18, height: 18 }} />
+        <span className="flex-1 truncate">Ladipo</span>
+        <ChevronDownIcon
+          className={`shrink-0 transition-transform duration-150 ${active ? 'text-[#EBB950]/60' : 'text-white/40'} ${expanded ? 'rotate-180' : ''}`}
+          style={{ width: 16, height: 16 }}
+        />
+      </button>
+
+      {expanded && (
+        <div className="mt-1 ml-5 border-l border-white/10 pl-2 space-y-0.5">
+          {LADIPO_ITEMS.map((item) => {
+            const itemActive = activeHref === item.href;
+            return (
+              <button
+                key={item.href}
+                type="button"
+                onClick={() => onNavigate(item.href)}
+                className={`w-full rounded-md px-3 py-2 text-left text-xs font-medium transition-colors ${
+                  itemActive
+                    ? 'bg-[#EBB950]/10 text-[#EBB950]'
+                    : 'text-white/50 hover:bg-white/6 hover:text-white'
+                }`}
+              >
+                {item.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const AdminLayout = () => {
-  const [adminUser, setAdminUser] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [adminUser, setAdminUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ladipoOpen, setLadipoOpen] = useState(() => location.pathname.startsWith('/admin/ladipo'));
 
   useEffect(() => {
     const applySession = async (session) => {
@@ -143,6 +200,12 @@ const AdminLayout = () => {
     setSidebarOpen(false);
   };
 
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin/ladipo')) setLadipoOpen(true);
+  }, [location.pathname]);
+
+  const activeHref = `${location.pathname}${location.search}`;
+
   if (!adminUser) {
     return (
       <div className="min-h-screen bg-[#05243F] flex items-center justify-center">
@@ -181,6 +244,12 @@ const AdminLayout = () => {
             onClick={() => handleNav(item.href)}
           />
         ))}
+        <LadipoNavGroup
+          expanded={ladipoOpen}
+          onToggle={() => setLadipoOpen((open) => !open)}
+          activeHref={activeHref}
+          onNavigate={handleNav}
+        />
       </nav>
 
       {/* User + Logout */}

@@ -139,8 +139,18 @@ export async function listAdminLadipoProducts(params = {}) {
   if (params.page) searchParams.set('page', params.page);
   if (params.per_page) searchParams.set('per_page', params.per_page);
   if (params.search) searchParams.set('search', params.search);
+  if (params.collection) searchParams.set('collection', params.collection);
+  if (params.brand) searchParams.set('brand', params.brand);
+  if (params.make) searchParams.set('make', params.make);
 
   const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/products?${searchParams.toString()}`, {
+    headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function getAdminLadipoProductFilters() {
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/products/filters`, {
     headers: getAdminHeaders(),
   });
   return parseJsonResponse(res);
@@ -198,6 +208,23 @@ export async function deleteAdminCompatibilityEntry(entryId) {
   const res = await fetch(`${config.getApiBaseUrl()}/ladipo/compatibility/${entryId}`, {
     method: 'DELETE',
     headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function listAdminLadipoCategories() {
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/categories`, {
+    headers: getAdminHeaders(),
+  });
+  return parseJsonResponse(res);
+}
+
+export async function updateAdminLadipoCategoryImage(categoryId, formData) {
+  const token = localStorage.getItem('adminToken');
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/ladipo/categories/${categoryId}/image`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
   });
   return parseJsonResponse(res);
 }
