@@ -604,10 +604,10 @@ export default function Ladipo() {
           <div className="flex flex-col lg:flex-row gap-6">
             <div
               className={`hidden lg:block overflow-hidden transition-[width,opacity] duration-300 ease-out ${
-                showDesktopFilters ? "w-64 opacity-100" : "w-0 opacity-0"
+                showDesktopFilters ? "w-[300px] opacity-100" : "w-0 opacity-0"
               }`}
             >
-              <div className="rounded-2xl border border-[#E1E6F4] bg-[#F9FAFC] p-3 sm:p-4 shadow-sm">
+              <div className="flex h-full w-full items-start justify-center rounded-2xl border border-[#E1E6F4] bg-[#F9FAFC] px-4 py-5 shadow-sm">
                 <FilterSidebar
                   filters={sidebarFilters}
                   onFiltersChange={(patch) => setSidebarFilters((f) => ({ ...f, ...patch }))}
@@ -839,10 +839,10 @@ export default function Ladipo() {
           onClick={() => setShowMobileFilters(false)}
         >
           <div
-            className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-[#F9FAFC] p-4 lg:max-h-full lg:w-[420px] lg:rounded-l-2xl"
+            className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-[#F9FAFC] px-4 py-5 lg:max-h-full lg:w-[420px] lg:rounded-l-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mx-auto mb-4 flex w-full max-w-[280px] items-center justify-between">
               <h3 className="text-[15px] font-bold text-[#05243F]">Filters</h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
