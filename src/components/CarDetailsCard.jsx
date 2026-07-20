@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import MercedesLogo from "../assets/images/mercedes-logo.png";
+import AutoModeIcon from "../assets/images/ic_round-auto-mode.png";
 import useModalStore from "../store/modalStore";
 
 const defaultLogo = MercedesLogo;
@@ -17,10 +18,10 @@ const formatDate = (dateString) => {
 // Helper function to determine status based on backend expiry_status
 const getExpiryStatusStyle = (expiryStatus) => {
   if (!expiryStatus || !expiryStatus.status) {
-    return { 
-      bgColor: "#E8F5E8", 
+    return {
+      bgColor: "#E8F5E8",
       dotColor: "#4CAF50",
-      message: "No reminder available" 
+      message: "Up to date"
     };
   }
 
@@ -67,10 +68,10 @@ const getExpiryStatusStyle = (expiryStatus) => {
     };
   } else {
     // status === "no_reminder"
-    return { 
-      bgColor: "#E8F5E8", 
+    return {
+      bgColor: "#E8F5E8",
       dotColor: "#4CAF50",
-      message: effectiveLabel || "No reminder available"
+      message: effectiveLabel || "Up to date"
     };
   }
 };
@@ -115,6 +116,8 @@ export default function CarDetailsCard({
   //   loadCarLogo();
   // }, [carDetail?.vehicle_make]);
 
+  const hasActiveSubscription = carDetail?.active_subscription?.status === 'active';
+
   // Use expiry_status from backend (new format), with graceful fallback to legacy "reminder"
   const expiryStatusData = carDetail?.expiry_status || carDetail?.reminder;
   const statusStyle = getExpiryStatusStyle(expiryStatusData);
@@ -144,6 +147,14 @@ export default function CarDetailsCard({
             >
               {carDetail?.vehicle_model || "-"}
             </h3>
+            {hasActiveSubscription && (
+              <img
+                src={AutoModeIcon}
+                alt="Auto-renewal active"
+                title="Auto-renewal is active"
+                className="h-5 w-5 object-contain"
+              />
+            )}
           </div>
           <div>
             {/* <Icon icon="ion:car-sport-sharp" fontSize={30} color="#2389E3" /> */}

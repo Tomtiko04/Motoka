@@ -1,124 +1,101 @@
-/**
- * Top car brands and their most common models in Nigeria.
- * Ordered by market prevalence (Toyota is dominant, followed by Honda, etc.)
- */
-export const CAR_MAKES_MODELS = {
-  Toyota: [
-    'Camry', 'Corolla', 'Highlander', 'Venza', 'Avalon',
-    'Land Cruiser', 'Prado', 'RAV4', 'Fortuner', 'Hilux',
-    'Yaris', 'Sienna', 'Sequoia', '4Runner', 'Prius', 'C-HR',
-  ],
-  Honda: [
-    'Accord', 'Civic', 'CR-V', 'Pilot', 'HR-V',
-    'Odyssey', 'Fit', 'Passport', 'Ridgeline', 'Element',
-  ],
-  Lexus: [
-    'RX 350', 'ES 350', 'GX 460', 'LX 570', 'LX 600',
-    'IS 250', 'IS 350', 'NX 300', 'UX 200', 'LS 460',
-  ],
-  Mercedes: [
-    'C-Class', 'E-Class', 'S-Class', 'GLE', 'GLC',
-    'GLS', 'A-Class', 'CLA', 'GLA', 'G-Class', 'ML',
-  ],
-  BMW: [
-    '3 Series', '5 Series', '7 Series', 'X1', 'X3',
-    'X5', 'X6', 'X7', '1 Series', 'M3', 'M5',
-  ],
-  Hyundai: [
-    'Sonata', 'Elantra', 'Tucson', 'Santa Fe', 'Accent',
-    'Creta', 'Azera', 'i10', 'i20', 'Palisade',
-  ],
-  Kia: [
-    'Sportage', 'Sorento', 'Cerato', 'Optima', 'Picanto',
-    'Telluride', 'Carnival', 'Stinger', 'Seltos', 'EV6',
-  ],
-  Ford: [
-    'Explorer', 'Edge', 'Escape', 'Expedition', 'F-150',
-    'Ranger', 'Fusion', 'Focus', 'Mustang', 'Bronco',
-  ],
-  Nissan: [
-    'Pathfinder', 'Altima', 'Sentra', 'X-Trail', 'Murano',
-    'Frontier', 'Armada', 'Kicks', 'Rogue', 'Maxima', 'Titan',
-  ],
-  Peugeot: [
-    '406', '407', '508', '3008', '2008', '5008',
-    '307', '308', '206', '208', '504', '505',
-  ],
-  Volkswagen: [
-    'Passat', 'Golf', 'Tiguan', 'Polo', 'Jetta',
-    'Touareg', 'Atlas', 'T-Cross', 'ID.4', 'Amarok',
-  ],
-  Chevrolet: [
-    'Traverse', 'Equinox', 'Cruze', 'Malibu', 'Silverado',
-    'Tahoe', 'Suburban', 'Trax', 'Blazer', 'Spark',
-  ],
-  Audi: [
-    'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7', 'Q8',
-    'A3', 'A5', 'TT', 'e-tron',
-  ],
-  Mitsubishi: [
-    'Pajero', 'L200', 'Outlander', 'Eclipse Cross',
-    'Galant', 'Lancer', 'ASX', 'Montero',
-  ],
-  Jeep: [
-    'Grand Cherokee', 'Wrangler', 'Cherokee', 'Compass',
-    'Commander', 'Renegade', 'Gladiator',
-  ],
-  'Land Rover': [
-    'Range Rover', 'Range Rover Sport', 'Discovery',
-    'Defender', 'Freelander', 'Evoque', 'Velar',
-  ],
-  Porsche: [
-    'Cayenne', 'Panamera', 'Macan', '911', 'Taycan', 'Boxster',
-  ],
-  Mazda: [
-    'Mazda 3', 'Mazda 6', 'CX-5', 'CX-9', 'CX-30',
-    'MX-5', 'CX-3', 'BT-50',
-  ],
-  Infiniti: [
-    'QX56', 'QX80', 'QX60', 'FX35', 'FX45',
-    'Q50', 'Q70', 'QX50', 'G37',
-  ],
-  Subaru: [
-    'Forester', 'Outback', 'Impreza', 'Legacy',
-    'Crosstrek', 'Ascent', 'WRX',
-  ],
-  Innoson: [
-    'IVM G80', 'IVM G40', 'IVM Fox', 'IVM Carrier',
-    'IVM Caris', 'IVM Umu', 'IVM Bus',
-  ],
-  Volvo: [
-    'XC90', 'XC60', 'XC40', 'S60', 'S90',
-    'V40', 'V60', 'C40',
-  ],
-  Acura: [
-    'MDX', 'RDX', 'TLX', 'ILX', 'ZDX', 'TSX', 'TL',
-  ],
-  Cadillac: [
-    'Escalade', 'XT5', 'XT6', 'CT5', 'CT6', 'SRX', 'ATS',
-  ],
-  Dodge: [
-    'Durango', 'Charger', 'Challenger', 'Journey', 'Grand Caravan',
-  ],
-  Buick: [
-    'Enclave', 'Encore', 'LaCrosse', 'Envision', 'Verano',
-  ],
-  GMC: [
-    'Yukon', 'Terrain', 'Envoy', 'Acadia', 'Sierra', 'Canyon',
-  ],
-  Haval: [
-    'H6', 'H9', 'Jolion', 'F7', 'Big Dog',
-  ],
-  'Great Wall': [
-    'Wingle', 'Steed', 'Cannon',
-  ],
-  Chery: [
-    'Tiggo 4', 'Tiggo 7', 'Tiggo 8', 'Arrizo 5',
-  ],
+// Common car makes and models — focused on Nigerian market vehicles
+
+export const CAR_MAKES = [
+  'Acura', 'Audi', 'BMW', 'Bentley', 'Buick', 'Cadillac', 'Chevrolet',
+  'Chrysler', 'Citroen', 'Dacia', 'Daewoo', 'Dodge', 'Ferrari', 'Fiat',
+  'Ford', 'GAC', 'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Isuzu', 'Jaguar',
+  'Jeep', 'Kia', 'Lada', 'Lamborghini', 'Land Rover', 'Lexus', 'Lincoln',
+  'Maserati', 'Mazda', 'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Nissan',
+  'Opel', 'Peugeot', 'Pontiac', 'Porsche', 'RAM', 'Range Rover', 'Renault',
+  'Rolls-Royce', 'SAIC', 'Subaru', 'Suzuki', 'Toyota', 'Volkswagen', 'Volvo',
+  'Bajaj', 'Hero', 'Yamaha', 'Honda Motorcycle', 'TVS', 'Innoson',
+];
+
+const MODELS = {
+  'Acura':         ['MDX', 'RDX', 'TLX', 'ILX', 'NSX'],
+  'Audi':          ['A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS6'],
+  'BMW':           ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series',
+                    '8 Series', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'M3', 'M5', 'M8', 'Z4'],
+  'Bentley':       ['Bentayga', 'Continental GT', 'Flying Spur', 'Mulsanne'],
+  'Buick':         ['Enclave', 'Encore', 'Envision', 'LaCrosse', 'Regal'],
+  'Cadillac':      ['ATS', 'CT4', 'CT5', 'CT6', 'Escalade', 'XT4', 'XT5', 'XT6'],
+  'Chevrolet':     ['Blazer', 'Captiva', 'Colorado', 'Corvette', 'Cruze', 'Equinox', 'Malibu',
+                    'Silverado', 'Spark', 'Suburban', 'Tahoe', 'Trailblazer', 'Traverse'],
+  'Chrysler':      ['300', 'Pacifica', 'Voyager'],
+  'Citroen':       ['C3', 'C4', 'C5', 'Berlingo', 'Dispatch', 'Jumper', 'Picasso'],
+  'Dacia':         ['Duster', 'Logan', 'Sandero', 'Spring'],
+  'Daewoo':        ['Lanos', 'Matiz', 'Nubira', 'Lacetti'],
+  'Dodge':         ['Challenger', 'Charger', 'Durango', 'Journey', 'RAM 1500'],
+  'Ferrari':       ['488', '458', 'F8', 'Roma', 'Portofino', 'SF90', '812'],
+  'Fiat':          ['500', 'Bravo', 'Doblo', 'Palio', 'Punto', 'Siena', 'Tipo'],
+  'Ford':          ['Edge', 'Escape', 'Expedition', 'Explorer', 'F-150', 'Fiesta', 'Focus',
+                    'Fusion', 'Mustang', 'Ranger', 'Taurus', 'Transit'],
+  'GAC':           ['GS3', 'GS4', 'GS5', 'GS8', 'Trumpchi'],
+  'GMC':           ['Acadia', 'Canyon', 'Envoy', 'Sierra', 'Terrain', 'Yukon'],
+  'Honda':         ['Accord', 'Civic', 'CR-V', 'CR-Z', 'Element', 'Fit', 'HR-V', 'Insight',
+                    'Legend', 'Odyssey', 'Passport', 'Pilot', 'Ridgeline'],
+  'Hyundai':       ['Accent', 'Azera', 'Creta', 'Elantra', 'Equus', 'Genesis', 'i10', 'i20', 'i30',
+                    'ix35', 'Palisade', 'Santa Fe', 'Sonata', 'Terracan', 'Tucson', 'Veloster'],
+  'Infiniti':      ['FX', 'G37', 'JX', 'Q50', 'Q60', 'Q70', 'QX50', 'QX56', 'QX60', 'QX80'],
+  'Isuzu':         ['Dmax', 'Elf', 'Forward', 'MUX', 'Trooper'],
+  'Jaguar':        ['E-Pace', 'F-Pace', 'F-Type', 'I-Pace', 'XE', 'XF', 'XJ'],
+  'Jeep':          ['Cherokee', 'Commander', 'Compass', 'Gladiator', 'Grand Cherokee',
+                    'Patriot', 'Renegade', 'Wrangler'],
+  'Kia':           ['Carnival', 'Cerato', 'EV6', 'K5', 'Optima', 'Picanto', 'Rio',
+                    'Seltos', 'Sorento', 'Soul', 'Sportage', 'Stinger', 'Telluride'],
+  'Lada':          ['Granta', 'Kalina', 'Niva', 'Priora', 'Vesta'],
+  'Lamborghini':   ['Aventador', 'Huracan', 'Urus'],
+  'Land Rover':    ['Defender', 'Discovery', 'Discovery Sport', 'Freelander',
+                    'Range Rover', 'Range Rover Evoque', 'Range Rover Sport', 'Range Rover Velar'],
+  'Lexus':         ['ES', 'GS', 'GX', 'IS', 'LC', 'LS', 'LX', 'NX', 'RC', 'RX', 'UX'],
+  'Lincoln':       ['Aviator', 'Corsair', 'MKC', 'MKT', 'MKX', 'MKZ', 'Navigator'],
+  'Maserati':      ['Ghibli', 'GranTurismo', 'Levante', 'Quattroporte'],
+  'Mazda':         ['CX-3', 'CX-5', 'CX-7', 'CX-9', 'Mazda2', 'Mazda3', 'Mazda6',
+                    'MX-5', 'RX-8', 'Tribute'],
+  'Mercedes-Benz': ['A-Class', 'B-Class', 'C-Class', 'CLA', 'CLS', 'E-Class', 'G-Class',
+                    'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'S-Class', 'SL', 'SLC', 'AMG GT',
+                    'Vito', 'Sprinter', 'ML-Class'],
+  'Mini':          ['Clubman', 'Convertible', 'Cooper', 'Countryman', 'Paceman'],
+  'Mitsubishi':    ['ASX', 'Eclipse Cross', 'Galant', 'L200', 'Lancer', 'Outlander',
+                    'Pajero', 'Space Star'],
+  'Nissan':        ['Almera', 'Altima', 'Armada', 'Frontier', 'GT-R', 'Kicks', 'Leaf',
+                    'Maxima', 'Murano', 'Patrol', 'Pathfinder', 'Qashqai', 'Rogue',
+                    'Sentra', 'Teana', 'Terra', 'Titan', 'X-Trail', 'Xterra', '370Z'],
+  'Opel':          ['Astra', 'Corsa', 'Insignia', 'Mokka', 'Vectra', 'Zafira'],
+  'Peugeot':       ['106', '206', '207', '208', '307', '308', '406', '407', '408',
+                    '508', '2008', '3008', '5008', 'Expert', 'Partner'],
+  'Pontiac':       ['Aztek', 'Bonneville', 'G6', 'Grand Am', 'Grand Prix', 'Solstice', 'Vibe'],
+  'Porsche':       ['718', '911', 'Cayenne', 'Cayman', 'Macan', 'Panamera', 'Taycan'],
+  'RAM':           ['1500', '2500', '3500', 'ProMaster'],
+  'Range Rover':   ['Autobiography', 'Evoque', 'Sport', 'Vogue'],
+  'Renault':       ['Clio', 'Duster', 'Kadjar', 'Koleos', 'Laguna', 'Logan',
+                    'Megane', 'Sandero', 'Scenic', 'Symbol'],
+  'Rolls-Royce':   ['Cullinan', 'Dawn', 'Ghost', 'Phantom', 'Silver Shadow', 'Wraith'],
+  'SAIC':          ['MG3', 'MG5', 'MG6', 'MG ZS', 'MG HS', 'MG RX5'],
+  'Subaru':        ['BRZ', 'Crosstrek', 'Forester', 'Impreza', 'Legacy', 'Outback', 'WRX'],
+  'Suzuki':        ['Alto', 'Baleno', 'Celerio', 'Ciaz', 'Ertiga', 'Grand Vitara',
+                    'Ignis', 'Jimny', 'Kizashi', 'Swift', 'Vitara', 'Wagon R'],
+  'Toyota':        ['4Runner', 'Avalon', 'Avanza', 'Camry', 'Corolla', 'Corona', 'C-HR',
+                    'FJ Cruiser', 'Fortuner', 'Hiace', 'Highlander', 'Hilux', 'Land Cruiser',
+                    'Matrix', 'Prado', 'Prius', 'RAV4', 'Rush', 'Sequoia', 'Sienna',
+                    'Tacoma', 'Tundra', 'Venza', 'Verso', 'Yaris'],
+  'Volkswagen':    ['Amarok', 'Arteon', 'Atlas', 'Beetle', 'Caddy', 'Golf', 'ID.4',
+                    'Jetta', 'Passat', 'Polo', 'Sharan', 'Tiguan', 'Touareg', 'Transporter'],
+  'Volvo':         ['C30', 'S40', 'S60', 'S80', 'S90', 'V40', 'V60', 'V90',
+                    'XC40', 'XC60', 'XC70', 'XC90'],
+  'Bajaj':         ['Boxer', 'Discover', 'Platina', 'Pulsar', 'V15'],
+  'Hero':          ['HF Deluxe', 'Passion', 'Splendor', 'Xtreme'],
+  'Yamaha':        ['FZ', 'MT-15', 'R15', 'NMAX', 'Aerox'],
+  'Honda Motorcycle': ['CB series', 'CBR', 'CG125', 'PCX', 'Wave'],
+  'TVS':           ['Apache', 'King', 'Ntorq', 'Star City'],
+  'Innoson':       ['G5', 'G6', 'G80', 'IVM Fox', 'IVM Metro'],
 };
 
-export const CAR_MAKES = Object.keys(CAR_MAKES_MODELS).sort();
-
+/**
+ * Returns model list for a given make.
+ * Falls back to empty array if make is unknown.
+ */
 export function getModelsForMake(make) {
-  return CAR_MAKES_MODELS[make] || [];
+  if (!make) return [];
+  return MODELS[make] || [];
 }

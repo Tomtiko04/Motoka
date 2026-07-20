@@ -66,16 +66,12 @@ import { verifyPayment, verifyPaystackPayment } from '../../../services/apiPayme
 import { toast } from 'react-hot-toast';
 
 export function usePaymentVerification() {
+  // Toast handling is done by the caller (handleVerifyMonicredit in PaymentOptions)
+  // so we do not add onSuccess/onError here — that would cause duplicate toasts.
   const verifyMonicredit = useMutation({
     mutationFn: async (orderId) => {
       const response = await verifyPayment(orderId);
       return response;
-    },
-    onSuccess: (data) => {
-      toast.success(data?.message || 'Payment verified successfully!');
-    },
-    onError: (error) => {
-      toast.error(error.response.data.message ||error.message || 'Failed to verify payment');
     }
   });
 

@@ -27,44 +27,53 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
   const [loading, setLoading] = useState(true);
+  const [expiryReminderState, setExpiryReminderState] = useState('idle');
+  const [expiryReminderResult, setExpiryReminderResult] = useState(null);
+  const [addCarReminderState, setAddCarReminderState] = useState('idle');
+  const [addCarReminderResult, setAddCarReminderResult] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('adminToken');
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const [statsResponse, ordersResponse, transactionsResponse] = await Promise.all([
-        fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        }),
-        fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        }),
-        fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        }),
-      ]);
+    const safeJson = async (res) => {
+      try { return await res.json(); } catch { return null; }
+    };
 
-      const [statsData, ordersData, transactionsData] = await Promise.all([
-        statsResponse.json(),
-        ordersResponse.json(),
-        transactionsResponse.json(),
-      ]);
+    const [statsResult, ordersResult, txResult, allOrdersResult] = await Promise.allSettled([
+      fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers }).then(safeJson),
+      fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson),
+      fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson),
+      fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson),
+    ]);
 
-      if (statsData.status) setStats(statsData.data);
-      if (ordersData.status) setRecentOrders(ordersData.data);
-      if (transactionsData.status) setRecentTransactions(transactionsData.data);
-    } catch (error) {
-      toast.error('Failed to fetch dashboard data');
-    } finally {
-      setLoading(false);
-    }
+    const statsData     = statsResult.status     === 'fulfilled' ? statsResult.value     : null;
+    const ordersData    = ordersResult.status     === 'fulfilled' ? ordersResult.value    : null;
+    const txData        = txResult.status         === 'fulfilled' ? txResult.value        : null;
+    const allOrdersData = allOrdersResult.status  === 'fulfilled' ? allOrdersResult.value : null;
+
+    if (statsData?.status)  setStats(statsData.data);
+    if (ordersData?.status) setRecentOrders(ordersData.data);
+    if (txData?.status)     setRecentTransactions(txData.data);
+
+    const orders = allOrdersData?.status
+      ? (allOrdersData.data?.data || allOrdersData.data || [])
+      : (ordersData?.data || []);
+    setAllOrders(orders);
+
+    const allFailed = [statsResult, ordersResult, txResult, allOrdersResult]
+      .every(r => r.status === 'rejected' || !r.value);
+    if (allFailed) toast.error('Failed to fetch dashboard data');
+
+    setLoading(false);
   };
 
   const buildChartFromOrders = (orders, period) => {
@@ -95,46 +104,28 @@ const AdminDashboard = () => {
       .map(({ label, amount, orders }) => ({ label, amount, orders }));
   };
 
+  // Re-bucket whenever orders data or period changes — no extra fetch needed
   useEffect(() => {
-    // Immediately render from already-fetched recentOrders
-    const quick = buildChartFromOrders(recentOrders, chartPeriod);
-    if (quick.length > 0) setChartData(quick);
+    const source = allOrders.length > 0 ? allOrders : recentOrders;
+    const built = buildChartFromOrders(source, chartPeriod);
+    if (built.length > 0) setChartData(built);
+  }, [chartPeriod, allOrders, recentOrders]);
 
-    // Then try to fetch full orders history
-    let cancelled = false;
-    (async () => {
-      try {
-        const token = localStorage.getItem('adminToken');
-        const params = new URLSearchParams({ page: 1, per_page: 500 });
-        const res = await fetch(
-          `${config.getApiBaseUrl()}/admin/orders?${params}`,
-          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-        );
-        const data = await res.json();
-        if (!cancelled && data.status) {
-          const allOrders = data.data?.data || data.data || [];
-          const built = buildChartFromOrders(allOrders, chartPeriod);
-          if (built.length > 0) setChartData(built);
-        }
-      } catch {
-        // keep the quick data
-      }
-    })();
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartPeriod, recentOrders]);
-
-  // Helper function to format order status
+  // Helper function to format order status. Accepts canonical DB values
+  // (pending|processing|completed|cancelled) and legacy aliases for
+  // transitional safety.
   const formatOrderStatus = (status) => {
     switch (status) {
       case 'pending':
         return 'New';
+      case 'processing':
       case 'in_progress':
         return 'In Progress';
       case 'completed':
         return 'Done';
+      case 'cancelled':
       case 'declined':
-        return 'Declined';
+        return 'Cancelled';
       default:
         return status;
     }
@@ -149,6 +140,50 @@ const AdminDashboard = () => {
         return 'Driver License';
       default:
         return orderType;
+    }
+  };
+
+  const handleTriggerExpiryReminders = async (dryRun = false) => {
+    setExpiryReminderState('loading');
+    setExpiryReminderResult(null);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const url = `${config.getApiBaseUrl()}/admin/notifications/expiry-reminders${dryRun ? '?dry_run=true' : ''}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Failed');
+      setExpiryReminderResult({ success: true, data: json.data });
+      setExpiryReminderState('done');
+      toast.success(json.data?.message || 'Done');
+    } catch (err) {
+      setExpiryReminderResult({ success: false, error: err.message });
+      setExpiryReminderState('error');
+      toast.error(err.message || 'Request failed');
+    }
+  };
+
+  const handleTriggerAddCarReminder = async (dryRun = false) => {
+    setAddCarReminderState('loading');
+    setAddCarReminderResult(null);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const url = `${config.getApiBaseUrl()}/admin/notifications/add-car-reminder${dryRun ? '?dry_run=true' : ''}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Failed');
+      setAddCarReminderResult({ success: true, data: json.data });
+      setAddCarReminderState('done');
+      toast.success(json.data?.message || 'Done');
+    } catch (err) {
+      setAddCarReminderResult({ success: false, error: err.message });
+      setAddCarReminderState('error');
+      toast.error(err.message || 'Request failed');
     }
   };
 
@@ -305,6 +340,109 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div> */}
+      </div>
+
+      {/* WhatsApp Communications */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        {/* Panel header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-green-600" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.524 5.843L.057 23.272a.75.75 0 00.916.916l5.43-1.467A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.7-.504-5.25-1.385l-.376-.214-3.892 1.052 1.053-3.892-.214-.376A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">WhatsApp Communications</p>
+            <p className="text-xs text-gray-400">Trigger or preview WhatsApp messages to users</p>
+          </div>
+        </div>
+
+        {/* Command list — add new commands here */}
+        <div className="divide-y divide-gray-100">
+
+          {/* ── Expiry Reminders ── */}
+          <div className="px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-green-500" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900">Expiry Reminders</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Message users whose cars expire in 1, 7, 14, or 30 days.</p>
+                  {expiryReminderResult && (
+                    <div className={`mt-2 rounded-md px-3 py-2 text-xs ${expiryReminderResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {expiryReminderResult.success ? (
+                        <>
+                          <p className="font-medium">{expiryReminderResult.data?.message}</p>
+                          {expiryReminderResult.data?.windows?.map(w => (
+                            <p key={w.days}>{w.days}d window: {w.count} car(s)</p>
+                          ))}
+                        </>
+                      ) : (
+                        <p>{expiryReminderResult.error}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-2 sm:ml-4">
+                <button
+                  onClick={() => handleTriggerExpiryReminders(true)}
+                  disabled={expiryReminderState === 'loading'}
+                  className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                >
+                  {expiryReminderState === 'loading' ? 'Checking…' : 'Dry Run'}
+                </button>
+                <button
+                  onClick={() => handleTriggerExpiryReminders(false)}
+                  disabled={expiryReminderState === 'loading'}
+                  className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+                >
+                  {expiryReminderState === 'loading' ? 'Sending…' : 'Send Now'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Add Car Reminder ── */}
+          <div className="px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900">Add Car Reminder</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Nudge users who haven't added a vehicle to their account yet.</p>
+                  {addCarReminderResult && (
+                    <div className={`mt-2 rounded-md px-3 py-2 text-xs ${addCarReminderResult.success ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
+                      {addCarReminderResult.success ? (
+                        <p className="font-medium">{addCarReminderResult.data?.message}</p>
+                      ) : (
+                        <p>{addCarReminderResult.error}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-2 sm:ml-4">
+                <button
+                  onClick={() => handleTriggerAddCarReminder(true)}
+                  disabled={addCarReminderState === 'loading'}
+                  className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                >
+                  {addCarReminderState === 'loading' ? 'Checking…' : 'Dry Run'}
+                </button>
+                <button
+                  onClick={() => handleTriggerAddCarReminder(false)}
+                  disabled={addCarReminderState === 'loading'}
+                  className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {addCarReminderState === 'loading' ? 'Sending…' : 'Send Now'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Chart and Lists */}

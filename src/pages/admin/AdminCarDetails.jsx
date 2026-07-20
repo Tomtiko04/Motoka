@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import config from '../../config/config';
+import EditCarModal from '../../components/admin/EditCarModal';
 
 const formatAmount = (n) =>
   `₦${parseFloat(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -43,7 +44,7 @@ const StatusPill = ({ status }) => {
     expired:   { bg: 'bg-red-100 text-red-800',       label: 'Expired' },
     pending:   { bg: 'bg-blue-100 text-blue-800',     label: 'Pending' },
     completed: { bg: 'bg-green-100 text-green-800',   label: 'Completed' },
-    in_progress:{ bg: 'bg-orange-100 text-orange-800',label: 'In Progress' },
+    processing:{ bg: 'bg-orange-100 text-orange-800',label: 'In Progress' },
     cancelled: { bg: 'bg-gray-100 text-gray-600',     label: 'Cancelled' },
     successful:{ bg: 'bg-green-100 text-green-800',   label: 'Successful' },
     failed:    { bg: 'bg-red-100 text-red-800',       label: 'Failed' },
@@ -86,6 +87,7 @@ const AdminCarDetails = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Documents state
   const [documents, setDocuments] = useState([]);
@@ -274,18 +276,30 @@ const AdminCarDetails = () => {
             <p className="text-sm text-gray-500">{car.registration_no || car.slug}</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowDeleteModal(true)}
-          className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
-        >
-          <TrashIcon className="h-4 w-4" />
-          Delete Car
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            Edit Car
+          </button>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
+          >
+            <TrashIcon className="h-4 w-4" />
+            Delete Car
+          </button>
+        </div>
       </div>
 
       {/* Hero Card */}
       <div className="overflow-hidden rounded-xl shadow">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-6">
+        <div className="bg-[#05243F] px-6 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/20 text-white">
@@ -299,7 +313,7 @@ const AdminCarDetails = () => {
                 <h2 className="text-2xl font-bold text-white">
                   {car.vehicle_make} {car.vehicle_model}
                 </h2>
-                <p className="text-blue-100 text-sm">
+                <p className="text-white/60 text-sm">
                   {car.vehicle_year} &bull; {car.vehicle_color} &bull; {car.car_type?.toUpperCase() || 'N/A'}
                 </p>
               </div>
@@ -323,17 +337,17 @@ const AdminCarDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-px bg-gray-100 sm:grid-cols-3">
-          <div className="bg-white px-6 py-4">
+          <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Plate Number</p>
             <p className="mt-1 text-lg font-bold text-gray-900">{car.registration_no || 'N/A'}</p>
           </div>
-          <div className="bg-white px-6 py-4">
+          <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Expiry Date</p>
-            <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-600' : isUrgent ? 'text-yellow-600' : 'text-gray-900'}`}>
+            <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-700' : isUrgent ? 'text-yellow-600' : 'text-gray-900'}`}>
               {formatDate(car.expiry_date)}
             </p>
           </div>
-          <div className="bg-white px-6 py-4">
+          <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Registered</p>
             <p className="mt-1 text-lg font-bold text-gray-900">{formatDate(car.created_at)}</p>
           </div>
@@ -396,7 +410,7 @@ const AdminCarDetails = () => {
 
       {/* Orders History */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <ClipboardDocumentListIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Order History</h3>
         </div>
@@ -405,7 +419,7 @@ const AdminCarDetails = () => {
             {car.orders.map((order) => (
               <div
                 key={order.id}
-                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={() => navigate(`/admin/orders/${order.order_number}`)}
               >
                 <div>
@@ -440,14 +454,14 @@ const AdminCarDetails = () => {
 
       {/* Transaction History */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <CreditCardIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Payment Transactions</h3>
         </div>
         {car.transactions?.length > 0 ? (
           <div className="divide-y divide-gray-50">
             {car.transactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between px-6 py-4">
+              <div key={tx.id} className="flex items-center justify-between px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-gray-900">{tx.reference}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -471,14 +485,14 @@ const AdminCarDetails = () => {
 
       {/* Car Documents */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <DocumentArrowUpIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Car Documents</h3>
           <span className="ml-auto text-xs text-gray-400">{documents.length} file{documents.length !== 1 ? 's' : ''}</span>
         </div>
 
         {/* Upload Form */}
-        <div className="border-b border-gray-100 px-6 py-4 bg-gray-50/50">
+        <div className="border-b border-gray-100 px-4 py-3 bg-gray-50/50">
           <p className="mb-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Upload Document</p>
           <form onSubmit={handleDocumentUpload} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
@@ -521,7 +535,7 @@ const AdminCarDetails = () => {
         ) : documents.length > 0 ? (
           <div className="divide-y divide-gray-50">
             {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between gap-4 px-6 py-4">
+              <div key={doc.id} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
                     <DocumentIcon className="h-5 w-5 text-blue-600" />
@@ -579,6 +593,18 @@ const AdminCarDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <EditCarModal
+          car={car}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={() => {
+            setShowEditModal(false);
+            fetchCarDetails();
+          }}
+        />
+      )}
 
       {/* Delete Modal */}
       {showDeleteModal && (

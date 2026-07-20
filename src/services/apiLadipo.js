@@ -3,8 +3,14 @@ import { api } from './apiClient';
 export const getLadipoCategories = () =>
   api.get('/ladipo/categories').then((r) => r.data.data);
 
+export const getLadipoSections = () =>
+  api.get('/ladipo/sections').then((r) => r.data.data);
+
 export const getLadipoParts = (params = {}) =>
   api.get('/ladipo/parts', { params }).then((r) => r.data.data);
+
+export const getLadipoPartFacets = (params = {}) =>
+  api.get('/ladipo/parts/facets', { params }).then((r) => r.data.data);
 
 export const getLadipoPartBySlug = (slug) =>
   api.get(`/ladipo/parts/${slug}`).then((r) => r.data.data);

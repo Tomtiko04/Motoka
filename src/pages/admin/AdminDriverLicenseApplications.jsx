@@ -86,7 +86,7 @@ function DetailPanel({ applicationId, onClose, onStatusUpdated }) {
         className="relative h-full w-full max-w-xl bg-white shadow-2xl overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between bg-white border-b border-gray-200 px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3">
           <h2 className="text-lg font-semibold text-[#05243F]">Application Detail</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-gray-100">
             <XMarkIcon className="h-5 w-5 text-gray-500" />

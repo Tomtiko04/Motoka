@@ -17,10 +17,10 @@ const formatDate = (dateString) => {
 // Helper function to determine status based on backend expiry_status
 const getExpiryStatusStyle = (expiryStatus) => {
   if (!expiryStatus || !expiryStatus.status) {
-    return { 
-      bgColor: "#E8F5E8", 
+    return {
+      bgColor: "#E8F5E8",
       dotColor: "#4CAF50",
-      message: "No reminder available" 
+      message: "Up to date"
     };
   }
 
@@ -58,10 +58,10 @@ const getExpiryStatusStyle = (expiryStatus) => {
     };
   } else {
     // status === "no_reminder"
-    return { 
-      bgColor: "#E8F5E8", 
+    return {
+      bgColor: "#E8F5E8",
       dotColor: "#4CAF50",
-      message: effectiveLabel || "No reminder available"
+      message: effectiveLabel || "Up to date"
     };
   }
 };

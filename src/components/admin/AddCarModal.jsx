@@ -24,7 +24,6 @@ const EMPTY_FORM = {
   vehicle_color: '',
   car_type: 'private',
   registration_status: 'unregistered',
-  registration_no: '',
   chasis_no: '',
   engine_no: '',
   date_issued: '',
@@ -220,18 +219,22 @@ function ModelSelect({ make, value, onChange, error }) {
 }
 
 // ─── Main modal ───────────────────────────────────────────────────────────────
-export default function AddCarModal({ onClose, onSuccess }) {
-  const [step, setStep] = useState(1);
+export default function AddCarModal({ onClose, onSuccess, preselectedUser = null }) {
+  const [step, setStep] = useState(preselectedUser ? 2 : 1);
 
   // User search
   const [userQuery, setUserQuery] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [userLoading, setUserLoading] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(preselectedUser);
   const searchTimer = useRef(null);
 
   // Car form
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(
+    preselectedUser
+      ? { ...EMPTY_FORM, name_of_owner: preselectedUser.name || '', phone_number: preselectedUser.phone_number || '' }
+      : EMPTY_FORM
+  );
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -281,9 +284,11 @@ export default function AddCarModal({ onClose, onSuccess }) {
     if (!form.vehicle_make.trim()) e.vehicle_make = 'Required';
     if (!form.vehicle_model.trim()) e.vehicle_model = 'Required';
     if (!form.vehicle_color.trim()) e.vehicle_color = 'Required';
-    const yr = parseInt(form.vehicle_year, 10);
-    if (!form.vehicle_year || isNaN(yr) || yr < 1900 || yr > CURRENT_YEAR + 1)
-      e.vehicle_year = `Enter a year between 1900 and ${CURRENT_YEAR + 1}`;
+    if (form.vehicle_year) {
+      const yr = parseInt(form.vehicle_year, 10);
+      if (isNaN(yr) || yr < 1900 || yr > CURRENT_YEAR + 1)
+        e.vehicle_year = `Enter a year between 1900 and ${CURRENT_YEAR + 1}`;
+    }
     if (form.registration_status === 'registered' && !form.expiry_date)
       e.expiry_date = 'Required for registered vehicles';
     if (form.date_issued && form.expiry_date &&
@@ -339,7 +344,7 @@ export default function AddCarModal({ onClose, onSuccess }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            {step === 2 && (
+            {step === 2 && !preselectedUser && (
               <button
                 onClick={() => { setErrors({}); setStep(1); }}
                 className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
@@ -361,8 +366,8 @@ export default function AddCarModal({ onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Step indicator */}
-        <div className="px-6 pt-3 pb-0">
+        {/* Step indicator — hidden when user is preselected */}
+        {!preselectedUser && <div className="px-6 pt-3 pb-0">
           <div className="flex items-center gap-2">
             {[1, 2].map((s) => (
               <React.Fragment key={s}>
@@ -378,7 +383,7 @@ export default function AddCarModal({ onClose, onSuccess }) {
               </React.Fragment>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-6 py-4">
@@ -518,7 +523,7 @@ export default function AddCarModal({ onClose, onSuccess }) {
                     error={errors.vehicle_model}
                   />
                 </Field>
-                <Field label="Year" id="vehicle_year" required error={errors.vehicle_year}>
+                <Field label="Year" id="vehicle_year" error={errors.vehicle_year}>
                   <input
                     id="vehicle_year"
                     type="number"
@@ -565,20 +570,9 @@ export default function AddCarModal({ onClose, onSuccess }) {
               </div>
 
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider pt-1">
-                Registration Documents{' '}
-                <span className="text-gray-400 font-normal normal-case">(optional)</span>
+                Registration Documents
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Registration No." id="registration_no" error={errors.registration_no}>
-                  <input
-                    id="registration_no"
-                    value={form.registration_no}
-                    onChange={(e) => setField('registration_no')(e.target.value.toUpperCase())}
-                    className={`${inputCls(errors.registration_no)} uppercase`}
-                    placeholder="e.g. ABC-123DE"
-                    maxLength={20}
-                  />
-                </Field>
                 <Field label="Plate Number" id="plate_number" error={errors.plate_number}>
                   <input
                     id="plate_number"

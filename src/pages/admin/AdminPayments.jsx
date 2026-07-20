@@ -14,17 +14,24 @@ import toast from 'react-hot-toast';
 import config from '../../config/config';
 import { markTransactionPaid, markTransactionFailed } from '../../services/apiAdminDocument';
 
+const EMPTY_SUMMARY = {
+  counts: { total: 0, successful: 0, pending: 0, failed: 0, abandoned: 0 },
+  amounts: { received: 0, received_kobo: 0, pending: 0, pending_kobo: 0 },
+  by_gateway: { paystack: 0, monicredit: 0 },
+};
+
+const GATEWAY_FILTERS = [
+  { value: 'all',        label: 'All Gateways' },
+  { value: 'monicredit', label: 'Monicredit' },
+  { value: 'paystack',   label: 'Paystack' },
+];
+
 const AdminPayments = () => {
   const [transactions, setTransactions] = useState([]);
-  const [summary, setSummary] = useState({
-    total_amount: 0,
-    total_transactions: 0,
-    successful_transactions: 0,
-    failed_transactions: 0,
-    pending_transactions: 0,
-  });
+  const [summary, setSummary] = useState(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [activeGateway, setActiveGateway] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -47,17 +54,18 @@ const AdminPayments = () => {
       return;
     }
     fetchTransactions();
-  }, [activeFilter, currentPage, searchTerm]);
+  }, [activeFilter, activeGateway, currentPage, searchTerm]);
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      
+
       const params = new URLSearchParams({
         page: currentPage,
         per_page: 15,
         status: activeFilter === 'All' ? 'all' : activeFilter.toLowerCase(),
+        gateway: activeGateway,
         search: searchTerm,
       });
 
@@ -194,15 +202,18 @@ const AdminPayments = () => {
         <h1 className="text-xl font-semibold text-gray-900">Transaction</h1>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Cards — real "money received" view, broken out by state */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Amount Entered */}
+        {/* Received */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Amount Entered</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(summary.total_amount)}
+              <p className="text-sm font-medium text-gray-600">Received</p>
+              <p className="text-2xl font-bold text-green-600">
+                {formatCurrency(summary.amounts?.received ?? 0)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {summary.counts?.successful ?? 0} successful
               </p>
             </div>
             <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -211,13 +222,34 @@ const AdminPayments = () => {
           </div>
         </div>
 
-        {/* Amount Spent */}
+        {/* Pending — money that should be coming in but hasn't settled */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Amount Spent</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(summary.successful_transactions > 0 ? summary.total_amount : 0)}
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {formatCurrency(summary.amounts?.pending ?? 0)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {summary.counts?.pending ?? 0} awaiting payment
+              </p>
+            </div>
+            <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+              <ArrowDownIcon className="h-5 w-5 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Failed / Abandoned (counts, not amounts) */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Failed / Abandoned</p>
+              <p className="text-2xl font-bold text-red-600">
+                {(summary.counts?.failed ?? 0) + (summary.counts?.abandoned ?? 0)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {summary.counts?.failed ?? 0} failed · {summary.counts?.abandoned ?? 0} abandoned
               </p>
             </div>
             <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -225,20 +257,17 @@ const AdminPayments = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Failed Transactions count */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Failed / Abandoned</p>
-              <p className="text-2xl font-bold text-red-600">
-                {summary.failed_transactions}
-              </p>
-            </div>
-            <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-red-600" />
-            </div>
-          </div>
+      {/* Gateway sub-tiles */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm">
+          <p className="text-gray-500">Monicredit</p>
+          <p className="text-lg font-semibold text-gray-900">{summary.by_gateway?.monicredit ?? 0} txns</p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm">
+          <p className="text-gray-500">Paystack</p>
+          <p className="text-lg font-semibold text-gray-900">{summary.by_gateway?.paystack ?? 0} txns</p>
         </div>
       </div>
 
@@ -282,32 +311,53 @@ const AdminPayments = () => {
               </div>
             </div>
           </div>
+
+          {/* Gateway filter — separate row, less common toggle */}
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <span className="text-gray-500">Gateway:</span>
+            {GATEWAY_FILTERS.map((g) => (
+              <button
+                key={g.value}
+                onClick={() => { setActiveGateway(g.value); setCurrentPage(1); }}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  activeGateway === g.value
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Transactions Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Transaction ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Gateway
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -316,25 +366,28 @@ const AdminPayments = () => {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-24"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-32"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-40"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="animate-pulse h-5 bg-gray-200 rounded w-20"></div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-6 bg-gray-200 rounded-full w-16"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-4 bg-gray-200 rounded w-20"></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="animate-pulse h-8 bg-gray-200 rounded w-16"></div>
                     </td>
                   </tr>
@@ -342,41 +395,48 @@ const AdminPayments = () => {
               ) : transactions.length > 0 ? (
                 transactions.map((transaction) => (
                   <tr key={transaction.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-gray-700">
                       {transaction.transaction_id}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>
-                        <div className="font-medium">{transaction.user?.name || 'N/A'}</div>
-                        <div className="text-gray-500">{transaction.user?.email || 'N/A'}</div>
-                      </div>
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-900">
+                      <div className="font-medium text-xs">{transaction.user?.name || 'N/A'}</div>
+                      <div className="text-gray-400 text-xs">{transaction.user?.email || 'N/A'}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-700">
                       {transaction.payment_description || 'Transaction'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
                       {formatCurrency(transaction.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        transaction.payment_gateway === 'monicredit'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-indigo-100 text-indigo-800'
+                      }`}>
+                        {transaction.payment_gateway || 'paystack'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {getStatusBadge(transaction.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-3 whitespace-nowrap text-gray-500 text-xs">
                       {formatDate(transaction.created_at)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleViewTransaction(transaction.transaction_id)}
-                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1 text-xs font-medium"
                         >
-                          <EyeIcon className="h-4 w-4" />
+                          <EyeIcon className="h-3.5 w-3.5" />
                           View
                         </button>
                         {(transaction.status === 'pending' || transaction.status === 'approved' || transaction.status === 'abandoned') && (
                           <>
                             <button
                               onClick={() => handleMarkPaid(transaction.transaction_id)}
-                              className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 ${
+                              className={`flex items-center gap-1 text-xs font-medium border rounded px-2 py-0.5 ${
                                 transaction.status === 'abandoned'
                                   ? 'text-orange-600 hover:text-orange-800 border-orange-300'
                                   : transaction.status === 'pending'
@@ -391,15 +451,15 @@ const AdminPayments = () => {
                                   : 'Create missing order for this payment'
                               }
                             >
-                              <CheckCircleIcon className="h-3.5 w-3.5" />
-                              {transaction.status === 'abandoned' ? 'Recover & Create Order' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
+                              <CheckCircleIcon className="h-3 w-3" />
+                              {transaction.status === 'abandoned' ? 'Recover' : transaction.status === 'pending' ? 'Mark Paid' : 'Create Order'}
                             </button>
                             <button
                               onClick={() => handleMarkFailed(transaction.transaction_id)}
-                              className="flex items-center gap-1 text-xs font-medium border rounded px-2 py-1 text-red-600 hover:text-red-800 border-red-300"
+                              className="flex items-center gap-1 text-xs font-medium border rounded px-2 py-0.5 text-red-600 hover:text-red-800 border-red-300"
                               title="No money received — mark this transaction as failed"
                             >
-                              Mark Failed
+                              Failed
                             </button>
                           </>
                         )}
@@ -409,7 +469,7 @@ const AdminPayments = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center">
+                  <td colSpan="8" className="px-4 py-12 text-center">
                     <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">No transactions found</p>
                   </td>

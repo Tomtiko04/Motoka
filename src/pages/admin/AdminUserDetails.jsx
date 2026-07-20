@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
+import AddCarModal from '../../components/admin/AddCarModal';
 
 const AdminUserDetails = () => {
   const { userId } = useParams();
@@ -13,6 +14,7 @@ const AdminUserDetails = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [showAddCarModal, setShowAddCarModal] = useState(false);
 
   const getToken = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -361,7 +363,16 @@ const AdminUserDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Cars */}
         <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Recent Cars</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-gray-900">Recent Cars</h2>
+            <button
+              onClick={() => setShowAddCarModal(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+            >
+              <Icon icon="mdi:plus" className="h-3.5 w-3.5" />
+              Add Car
+            </button>
+          </div>
           {user.cars && user.cars.length > 0 ? (
             <div className="space-y-2">
               {user.cars.map((car) => (
@@ -430,6 +441,23 @@ const AdminUserDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Add Car Modal */}
+      {showAddCarModal && (
+        <AddCarModal
+          preselectedUser={{
+            id: userId,
+            name: user.name,
+            email: user.email,
+            phone_number: user.phone,
+          }}
+          onClose={() => setShowAddCarModal(false)}
+          onSuccess={() => {
+            setShowAddCarModal(false);
+            fetchUserDetails();
+          }}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteModal && (

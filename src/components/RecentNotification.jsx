@@ -1,11 +1,19 @@
 import { useMemo } from "react";
-import { useNotifications } from "../features/notifications/useNotification";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import { updateNotificationsCache, useNotifications } from "../features/notifications/useNotification";
 import NotificationCard from "../pages/components/notificationCard";
 import { useNavigate } from "react-router-dom";
+import { markNotificationAsRead } from "../services/apiNotification";
 import { FaTimes } from "react-icons/fa";
 
+const markNotificationReadCache = (cacheData, notificationId) =>
+  updateNotificationsCache(cacheData, (notification) =>
+    notification.id === notificationId ? { ...notification, is_read: true } : notification,
+  );
+
 export default function RecentNotificationModal({ setNotificationsModal }) {
-  const { data } = useNotifications({ enabled: true });
+  const { data } = useNotifications({ unreadOnly: true, enabled: true });
   const navigate = useNavigate();
   function mapUiCategory(type, action) {
     const t = (type || "").toLowerCase();
@@ -34,6 +42,7 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
         hour: "2-digit",
         minute: "2-digit",
       }),
+      isRead: Boolean(n.is_read),
     };
   };
 
@@ -50,6 +59,47 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
 
     return all;
   };
+
+  const queryClient = useQueryClient();
+  const markSingleMutation = useMutation({
+    mutationFn: markNotificationAsRead,
+    onMutate: async (notificationId) => {
+      await queryClient.cancelQueries({ queryKey: ["notifications"], exact: false });
+      const previousQueries = queryClient.getQueriesData({ queryKey: ["notifications"], exact: false });
+
+      queryClient.setQueryData(["notifications", "unread"], (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+      queryClient.setQueryData(["notifications", "all"], (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+      queryClient.setQueriesData({ queryKey: ["notifications"], exact: false }, (prev) =>
+        markNotificationReadCache(prev, notificationId),
+      );
+
+      return { previousQueries };
+    },
+    onSuccess: () => {
+      toast.success("Notification marked as read");
+    },
+    onError: (error, _notificationId, context) => {
+      context?.previousQueries?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+      toast.error(error.response?.data?.message || error.message || "Unable to mark notification as read");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"], exact: false });
+    },
+    retry: false,
+  });
+
+  const handleMarkRead = (id) => {
+    if (!markSingleMutation.isLoading) {
+      markSingleMutation.mutate(id);
+    }
+  };
+
   const lastFive = useMemo(() => {
     if (!data) return [];
     const allNotifications = flattenNotifications(data);
@@ -66,19 +116,12 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
         <ul className="flex h-fit flex-col items-center space-y-3">
           {lastFive.length > 0 ? (
             lastFive.map((n) => (
-              // <li
-              //   key={n.id}
-              //   className="flex flex-col gap-1 border-b pb-2 last:border-0"
-              // >
-              //   <span className="text-sm text-gray-800">{n.message}</span>
-              //   <span className="text-xs text-gray-500">
-              //     {new Date(n.created_at).toLocaleTimeString([], {
-              //       hour: "2-digit",
-              //       minute: "2-digit",
-              //     })}
-              //   </span>
-              // </li>
-              <NotificationCard key={n.id} notification={n} />
+              <NotificationCard
+                key={n.id}
+                notification={n}
+                onMarkRead={() => handleMarkRead(n.id)}
+                markReadButtonType="icon"
+              />
             ))
           ) : (
             <li className="text-sm text-gray-500">No notifications</li>
