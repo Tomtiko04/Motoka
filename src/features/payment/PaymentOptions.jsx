@@ -130,21 +130,43 @@ export default function PaymentOptions() {
     initializePaymentSession();
   }, [location, navigate]);
 
-  // Handle payment method selection
+  // Handle payment method selection.
+  //
+  // If the user has an active (confirmed but unpaid) init on the current
+  // method, switching means abandoning that pending transaction. Require an
+  // explicit confirm + send a clear cancellation_reason to the backend so the
+  // abandoned row is tagged correctly. Without this, a user clicking Pay,
+  // glancing at the bank details, and switching gateways used to silently
+  // double-init — which is how we ended up with 100+ abandoned rows that look
+  // like gateway failures but are actually user-driven gateway switches.
   const handleMethodSelect = (method) => {
+    if (method === selectedMethod) return;
+    if (isInitializing) return; // a confirm-button click is in-flight; don't race
+
+    const currentRef =
+      paymentSession?.monicredit?.data?.reference ||
+      paymentSession?.monicredit?.data?.orderid ||
+      paymentSession?.paystack?.reference;
+    if (isPaymentMethodConfirmed && currentRef) {
+      const ok = window.confirm(
+        'Switching payment method will cancel your current pending payment. Are you sure?'
+      );
+      if (!ok) return;
+      // Fire-and-forget: backend marks the prior txn abandoned with this reason.
+      abandonPayment(currentRef, 'User switched payment method');
+    }
+
     setSelectedMethod(method);
     setMonicreditFallbackError(null);
-    // Auto-confirm Monicredit if account details already exist in the session
-    // (e.g. user switches back from Paystack after a prior Monicredit init)
+
+    // Auto-confirm Monicredit if account details still exist in the session
+    // (e.g. user switches back from Paystack after a prior Monicredit init).
     const monicreditData = paymentSession?.monicredit?.data;
     const alreadyInitialized =
-      monicreditData?.account_number ||
-      monicreditData?.customer?.account_number;
-    if (method === PAYMENT_METHODS.MONICREDIT && alreadyInitialized) {
-      setIsPaymentMethodConfirmed(true);
-    } else {
-      setIsPaymentMethodConfirmed(false);
-    }
+      monicreditData?.account_number || monicreditData?.customer?.account_number;
+    setIsPaymentMethodConfirmed(
+      method === PAYMENT_METHODS.MONICREDIT && alreadyInitialized
+    );
   };
 
   // Helper function to build payment payload
@@ -412,8 +434,17 @@ export default function PaymentOptions() {
     }
   };
 
-  // Switch to Paystack after Monicredit failure
+  // Switch to Paystack after Monicredit init failure. Abandon any prior
+  // Monicredit reference explicitly so the row gets a clean reason rather
+  // than the implicit "abandoned because re-init landed" cleanup the backend
+  // does. Makes admin Payments noise filterable.
   const handleSwitchToPaystack = () => {
+    const monicreditRef =
+      paymentSession?.monicredit?.data?.reference ||
+      paymentSession?.monicredit?.data?.orderid;
+    if (monicreditRef) {
+      abandonPayment(monicreditRef, 'Monicredit init failed, user switched to Paystack');
+    }
     setMonicreditFallbackError(null);
     setSelectedMethod(PAYMENT_METHODS.PAYSTACK);
     setIsPaymentMethodConfirmed(false);
@@ -485,7 +516,11 @@ export default function PaymentOptions() {
       // to postMessage success back to this tab.
       const newWindow = window.open(paystackUrl, '_blank');
       if (!newWindow) {
-        toast.error('Please allow popups for this site to proceed with payment');
+        // Popup blocked — don't dead-end the user. Redirect this tab instead;
+        // the callback page now handles the no-opener case and routes the user
+        // back to the dashboard after verifying.
+        toast.success('Redirecting to Paystack...');
+        window.location.href = paystackUrl;
         return;
       } else {
         toast.success("Redirecting to Paystack...");
@@ -772,7 +807,8 @@ export default function PaymentOptions() {
               <button
                 key={method.id}
                 onClick={() => handleMethodSelect(method.id)}
-                className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all ${selectedMethod === method.id
+                disabled={isInitializing}
+                className={`w-full rounded-[10px] bg-[#F4F5FC] p-4 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedMethod === method.id
                   ? "shadow-sm ring-1 ring-[#2389E3]"
                   : "hover:bg-[#FDF6E8] hover:shadow-sm"
                   }`}

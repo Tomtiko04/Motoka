@@ -18,6 +18,7 @@ import {
   XMarkIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
@@ -36,6 +37,8 @@ const LADIPO_ITEMS = [
   { name: 'Products', href: '/admin/ladipo?tab=products' },
   { name: 'Collections', href: '/admin/ladipo?tab=collections' },
   { name: 'Categories', href: '/admin/ladipo?tab=categories' },
+  { name: 'Ladipo',          href: '/admin/ladipo',                       icon: ShoppingBagIcon,           exact: false },
+  { name: 'Doc Prices',      href: '/admin/vehicle-doc-prices',           icon: CurrencyDollarIcon,        exact: false },
 ];
 
 function NavItem({ item, active, onClick }) {
