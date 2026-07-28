@@ -304,9 +304,6 @@ const AdminUsers = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    No
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                     User
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -330,11 +327,8 @@ const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {users.map((user, index) => (
+                {users.map((user) => (
                   <tr key={user.userId} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-900">
-                      {(currentPage - 1) * 15 + (index + 1)}
-                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center">
                         <div className="h-9 w-9 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">

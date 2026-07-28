@@ -92,8 +92,8 @@ export default function FilterSidebar({
   };
 
   return (
-    <aside className="w-full lg:w-64 lg:flex-shrink-0">
-      <div className="rounded-2xl border border-[#E1E6F4] bg-white px-5 py-4">
+    <aside className="mx-auto w-full max-w-[280px]">
+      <div className="rounded-2xl border border-[#E1E6F4] bg-white px-5 py-4 shadow-sm">
         <div className="flex items-center justify-between border-b border-[#E1E6F4] pb-3">
           <h3 className="text-[15px] font-bold text-[#05243F]">Filters</h3>
           {hasActiveFilters && (

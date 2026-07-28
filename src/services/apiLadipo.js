@@ -3,6 +3,9 @@ import { api } from './apiClient';
 export const getLadipoCategories = () =>
   api.get('/ladipo/categories').then((r) => r.data.data);
 
+export const getLadipoSections = () =>
+  api.get('/ladipo/sections').then((r) => r.data.data);
+
 export const getLadipoParts = (params = {}) =>
   api.get('/ladipo/parts', { params }).then((r) => r.data.data);
 

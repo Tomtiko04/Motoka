@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import ladipoStore from "../../../store/ladipoStore";
 import { getLadipoMainCategories } from "../../../services/apiLadipoCategories";
 
@@ -92,14 +93,14 @@ function Categories() {
         <div
           ref={scrollContainerRef}
           onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
+          className="flex gap-8 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
         >
           {/* All Categories Button */}
           <button
             onClick={() => clearCategoryFilters()}
             className="flex flex-col items-center gap-2.5 transition-all duration-200 cursor-pointer flex-shrink-0 group"
           >
-            <div className={`h-16 w-16 rounded-full flex items-center justify-center text-base font-bold transition-all ${!selectedMainCategory ? "bg-[#1A7ACF] text-white" : "bg-[#F4F5FC] text-[#05243F] group-hover:bg-[#E8EDFA]"
+            <div className={`h-[60px] w-[84px] rounded-[90px] border flex items-center justify-center text-base font-bold transition-all ${!selectedMainCategory ? "bg-[#1A7ACF] text-white border-[#2284DB]" : "bg-[#F4F5FC] text-[#05243F] border-[#D3D9DE4D] group-hover:bg-[#E8EDFA]"
               }`}>
               All
             </div>
@@ -116,18 +117,19 @@ function Categories() {
                 className="flex flex-col items-center gap-2.5 transition-all duration-200 cursor-pointer flex-shrink-0 group"
               >
                 <div
-                  className={`h-16 w-16 rounded-full overflow-hidden flex-shrink-0 transition-all ${isActive ? "ring-2 ring-[#1A7ACF] ring-offset-1" : "group-hover:shadow-md"
+                  className={`relative h-[60px] w-[84px] rounded-[90px] overflow-hidden flex-shrink-0 bg-[#F4F5FC] transition-all border ${isActive ? "border-[#2284DB]" : "border-[#D3D9DE4D] group-hover:shadow-md"
                     }`}
-                  style={{
-                    background: `linear-gradient(135deg, ${category.accentFrom} 0%, ${category.accentTo} 100%)`,
-                  }}
                 >
-                  {category.image && (
+                  {category.image ? (
                     <img
                       src={category.image}
                       alt={category.name}
-                      className="h-full w-full object-cover"
+                      className="absolute inset-0 h-full w-full object-cover scale-125"
                     />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Icon icon="solar:widget-5-bold-duotone" fontSize={22} className="text-[#8B98A5]" />
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-col items-center min-w-0 max-w-[80px]">
