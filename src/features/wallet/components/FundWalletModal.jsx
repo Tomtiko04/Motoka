@@ -142,7 +142,7 @@ export default function FundWalletModal({ open, onClose }) {
         >
           {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Redirecting…</> : <>Continue to pay {quote ? naira(quote.total_charge_naira) : ""}</>}
         </button>
-        <p className="mt-3 text-center text-[11px] text-[#697C8C]">Secured by Paystack · Card payment</p>
+        <p className="mt-3 text-center text-[11px] text-[#697C8C]">Secured by Paystack · Card, bank transfer or USSD</p>
       </div>
     </div>
   );
