@@ -109,7 +109,7 @@ export default function FundWalletModal({ open, onClose }) {
         {/* Custom amount */}
         <label className="mb-1.5 block text-xs font-medium text-[#697C8C]">Or enter an amount</label>
         <div className="relative mb-4">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#05243F]">₦</span>
+          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base font-semibold text-[#05243F]">₦</span>
           <input
             type="number"
             inputMode="numeric"
@@ -117,7 +117,7 @@ export default function FundWalletModal({ open, onClose }) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={submitting}
-            className="block w-full rounded-xl bg-[#F9FAFC] py-3 pl-8 pr-4 text-base font-semibold text-[#05243F] focus:bg-[#FFF4DD] focus:outline-none"
+            className="block w-full rounded-xl bg-[#F9FAFC] py-3 pl-10 pr-4 text-base font-semibold text-[#05243F] focus:bg-[#FFF4DD] focus:outline-none"
           />
         </div>
 

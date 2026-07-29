@@ -109,6 +109,15 @@ export default function DriverLicenseOrderSummary() {
         </h1>
       </div>
 
+      {/* Reassurance: the application is already saved, so users can pay now or
+          come back later without losing their details. */}
+      <div className="mb-6 flex items-start gap-3 rounded-[16px] border border-[#1FA97A]/20 bg-[#E7F6EF] px-5 py-4">
+        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1FA97A] text-white">✓</span>
+        <p className="text-sm text-[#05243F]/80">
+          <span className="font-semibold text-[#05243F]">Application submitted.</span> Your details are saved — complete payment to process it. You can leave and come back to pay anytime.
+        </p>
+      </div>
+
       <div className="mb-6 rounded-[20px] border border-[#E1E5EE] bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#05243F]/40">
           Order Details

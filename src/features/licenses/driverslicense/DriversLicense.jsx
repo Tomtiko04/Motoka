@@ -220,6 +220,8 @@ export default function DriversLicense() {
           status: "submitted",
         });
 
+        toast.success("Application submitted — your details are saved. Complete payment to process it.", { duration: 5000 });
+
         navigate("/licenses/drivers-license/order-summary", {
           state: {
             license_type: "new",
@@ -251,6 +253,8 @@ export default function DriversLicense() {
           license_document_url: docUrl,
           status: "submitted",
         });
+
+        toast.success("Application submitted — your details are saved. Complete payment to process it.", { duration: 5000 });
 
         navigate("/licenses/drivers-license/order-summary", {
           state: {
@@ -518,7 +522,7 @@ export default function DriversLicense() {
             disabled={isSubmitting}
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] disabled:opacity-60"
           >
-            {isSubmitting ? "Saving..." : "Confirm and Proceed"}
+            {isSubmitting ? "Submitting..." : "Submit application"}
             <Icon icon="mdi:arrow-right" className="text-lg" />
           </button>
         </div>
