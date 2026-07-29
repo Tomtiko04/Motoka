@@ -351,7 +351,7 @@ export default function AdminDriverLicenseApplications() {
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr>
-                  {['Applicant', 'Type', 'Status', 'Linked Order', 'Submitted', 'Actions'].map(h => (
+                  {['Applicant', 'Type', 'Status', 'Payment', 'Submitted', 'Actions'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       {h}
                     </th>
@@ -371,9 +371,15 @@ export default function AdminDriverLicenseApplications() {
                     <td className="px-4 py-3">
                       <StatusBadge status={app.status} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm">
                       {app.renewal_orders ? (
-                        <span className="text-[#2284DB] font-medium">#{app.renewal_orders.id}</span>
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                          Paid · #{app.renewal_orders.id}
+                        </span>
+                      ) : app.status === 'submitted' ? (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                          Awaiting payment
+                        </span>
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}

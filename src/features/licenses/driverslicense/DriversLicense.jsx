@@ -39,6 +39,9 @@ export default function DriversLicense() {
   const [licenseType, setLicenseType] = useState("new");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Previously-submitted applications (for the "continue to payment" resume CTA).
+  const [newAppData, setNewAppData] = useState(null);
+  const [renewAppData, setRenewAppData] = useState(null);
 
   // New license state
   const [newForm, setNewForm] = useState({});
@@ -82,6 +85,36 @@ export default function DriversLicense() {
 
   const currentPrice = licenseType === "new" ? priceNew : priceRenew;
 
+  // A returning applicant who submitted the form but hasn't paid yet can jump
+  // straight back to payment — we already saved their details.
+  const activeApp = licenseType === "new" ? newAppData : renewAppData;
+  const canResume = activeApp?.status === "submitted" && !activeApp?.order_id;
+
+  const handleResume = () => {
+    if (licenseType === "new") {
+      navigate("/licenses/drivers-license/order-summary", {
+        state: {
+          license_type: "new",
+          duration: selectedNewDuration,
+          price: priceNew,
+          formData: { ...newForm, passport_photo_url: activeApp?.passport_photo_url || passportPreview },
+        },
+      });
+    } else {
+      navigate("/licenses/drivers-license/order-summary", {
+        state: {
+          license_type: "renew",
+          duration: selectedRenewDuration,
+          price: priceRenew,
+          licenseNumber,
+          dateOfBirth,
+          dateOfExpiry,
+          license_document_url: licenseDocUrl,
+        },
+      });
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -90,6 +123,9 @@ export default function DriversLicense() {
           getDriverLicenseApplication("renew").catch(() => null),
           getDriverLicenseDocuments().catch(() => []),
         ]);
+
+        setNewAppData(newApp);
+        setRenewAppData(renewApp);
 
         if (newApp) {
           const vals = {};
@@ -290,6 +326,23 @@ export default function DriversLicense() {
 
         {/* Center: form fields */}
         <div className="scrollbar-thin scrollbar-track-[#F5F6FA] scrollbar-thumb-[#2389E3] hover:scrollbar-thumb-[#2389E3]/80 scrollbar-thumb-rounded-full h-[calc(100vh-300px)] overflow-y-auto pr-4">
+          {canResume && (
+            <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-[#2389E3]/20 bg-[#EAF4FD] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[#05243F]">Continue where you left off</p>
+                <p className="text-xs text-[#05243F]/60">
+                  We've saved your application details. You just need to complete payment.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleResume}
+                className="shrink-0 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] active:scale-[0.98]"
+              >
+                Continue to payment
+              </button>
+            </div>
+          )}
           {licenseType === "new" ? (
             <div className="space-y-4">
               {/* Passport upload */}
