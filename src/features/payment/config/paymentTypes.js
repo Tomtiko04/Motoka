@@ -10,6 +10,7 @@ export const PAYMENT_METHODS = {
   PAYSTACK: 'paystack',
   MONICREDIT: 'monicredit',
   BANK_TRANSFER: 'bank_transfer',
+  WALLET: 'wallet',
 };
 
 export const PAYMENT_CONFIG = {

@@ -23,3 +23,11 @@ export async function initFunding(amountKobo) {
   const { data } = await api.post("/wallet/fund", { amount_kobo: amountKobo });
   return data?.data ?? data;
 }
+
+// Pay for a car renewal from wallet balance. `payload` mirrors the renewal init
+// payload (car_slug, payment_schedule_id, renewal_months, delivery_details,
+// renewal_state). Returns { order_id, order_number, balance_kobo }.
+export async function payFromWallet(payload) {
+  const { data } = await api.post("/wallet/pay", payload);
+  return data?.data ?? data;
+}

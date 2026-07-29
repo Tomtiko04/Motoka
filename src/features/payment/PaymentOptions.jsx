@@ -11,6 +11,7 @@ import { usePaymentVerification } from "./hooks/usePayment";
 import { initializePaystackPayment } from "../../services/apiPaystack";
 import { initiateMonicreditPayment } from "../../services/apiMonicredit";
 import { abandonPayment } from "../../services/apiPayment";
+import { getWallet, payFromWallet } from "../../services/apiWallet";
 import { payLadipoOrder, verifyLadipoPayment } from "../../services/apiLadipo";
 import useCartStore from "../../store/cartStore";
 import { useLadipoPaymentModalStore } from "../../store/ladipoPaymentModalStore";
@@ -35,6 +36,15 @@ export default function PaymentOptions() {
   const [monicreditFallbackError, setMonicreditFallbackError] = useState(null);
   const clearLadipoCart = useCartStore((s) => s.clearCart);
   const [showAutoRenewal, setShowAutoRenewal] = useState(false);
+  const [wallet, setWallet] = useState(null);
+  const [walletPaying, setWalletPaying] = useState(false);
+
+  // Load wallet balance so we can offer "pay from wallet" on car renewals.
+  useEffect(() => {
+    let alive = true;
+    getWallet().then((w) => { if (alive) setWallet(w); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   // For Monicredit
   const customer = paymentSession?.monicredit?.data?.customer;
@@ -54,6 +64,25 @@ export default function PaymentOptions() {
   const paystackAmount = paymentSession?.paystack?.reference
     ? Number(paymentSession?.amount || 0) / 100
     : Number(paymentSession?.price || paymentSession?.amount || 0);
+
+  // ── Pay-from-wallet (car renewals only; /wallet/pay prices renewals) ────────
+  const isRenewalPayment =
+    paymentSession?.type === PAYMENT_TYPES.LICENSE_RENEWAL ||
+    paymentSession?.type === PAYMENT_TYPES.VEHICLE_PAPER;
+  const fmtN = (n) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+  const renewalCostNaira = Number(totalAmount || paystackAmount || 0);
+  const walletBalanceNaira = wallet ? Number(wallet.balance_kobo || 0) / 100 : 0;
+  const walletEligible = isRenewalPayment && !!wallet && wallet.status !== "frozen";
+  const walletSufficient = walletEligible && renewalCostNaira > 0 && walletBalanceNaira >= renewalCostNaira;
+  const walletDetails = {
+    availableBalance: fmtN(walletBalanceNaira),
+    renewalCost: fmtN(renewalCostNaira),
+    newBalance: fmtN(Math.max(0, walletBalanceNaira - renewalCostNaira)),
+  };
+  // Offer wallet first on eligible renewals (matches the payment-options design).
+  const methodsToShow = walletEligible
+    ? [{ id: PAYMENT_METHODS.WALLET, label: `Wallet Balance: ${fmtN(walletBalanceNaira)}` }, ...paymentMethods]
+    : paymentMethods;
 
   const { verifyMonicredit, verifyPaystack } = usePaymentVerification();
 
@@ -450,6 +479,32 @@ export default function PaymentOptions() {
     setIsPaymentMethodConfirmed(false);
   };
 
+  // Pay for the renewal from wallet balance. The backend debits + creates the
+  // order atomically, so success here means the order exists.
+  const handlePayFromWallet = async () => {
+    if (!walletSufficient || walletPaying) return;
+    setWalletPaying(true);
+    try {
+      const payload = buildPaymentPayload();
+      if (!payload.car_slug) {
+        toast.error("Car information is missing. Please try again.");
+        return;
+      }
+      const result = await payFromWallet(payload);
+      if (result?.order_id) {
+        setWallet((w) => (w ? { ...w, balance_kobo: result.balance_kobo } : w));
+        toast.success("Paid from wallet successfully");
+        navigateAfterPayment({ paymentSuccess: true, paymentMethod: "wallet", reference: result.reference });
+      } else {
+        toast.error("Wallet payment could not be completed.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Wallet payment failed.");
+    } finally {
+      setWalletPaying(false);
+    }
+  };
+
   // Note: Monicredit doesn't require a separate payment initiation step
   // Users just see bank details and verify after making the transfer
 
@@ -803,7 +858,7 @@ export default function PaymentOptions() {
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[1fr_auto_1fr]">
           {/* LEFT SECTION */}
           <div className="space-y-2">
-            {paymentMethods.map((method) => (
+            {methodsToShow.map((method) => (
               <button
                 key={method.id}
                 onClick={() => handleMethodSelect(method.id)}
@@ -867,9 +922,27 @@ export default function PaymentOptions() {
                     {walletDetails.newBalance}
                   </span>
                 </div>
-                <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
-                  N35,000 Pay Now
-                </button>
+                {walletSufficient ? (
+                  <button
+                    onClick={handlePayFromWallet}
+                    disabled={walletPaying}
+                    className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6fc2] active:scale-[0.99] disabled:opacity-60 md:mt-10"
+                  >
+                    {walletPaying ? "Processing…" : `${walletDetails.renewalCost} Pay Now`}
+                  </button>
+                ) : (
+                  <div className="mt-5 md:mt-10">
+                    <p className="mb-3 text-center text-sm text-[#C0435C]">
+                      Insufficient balance. You need {walletDetails.renewalCost} but have {walletDetails.availableBalance}.
+                    </p>
+                    <button
+                      onClick={() => navigate("/wallet")}
+                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6fc2]"
+                    >
+                      Top up wallet
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
