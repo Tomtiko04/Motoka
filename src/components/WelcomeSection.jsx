@@ -69,14 +69,20 @@
 
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { formatCurrency } from "../utils/formatCurrency";
+import { getWallet } from "../services/apiWallet";
 
 export default function WelcomeSection({ userName }) {
+  const navigate = useNavigate();
   const [showBalance, setShowBalance] = useState(() => {
     const savedState = localStorage.getItem("showBalance");
     return savedState !== null ? JSON.parse(savedState) : true;
   });
-  const balance = 0;
+
+  const { data: wallet } = useQuery({ queryKey: ["wallet"], queryFn: getWallet });
+  const balance = wallet ? Number(wallet.balance_kobo || 0) / 100 : 0;
 
   useEffect(() => {
     localStorage.setItem("showBalance", JSON.stringify(showBalance));
@@ -104,35 +110,37 @@ export default function WelcomeSection({ userName }) {
         </div>
       </div>
 
-      {/* <div className="flex items-center gap-2 sm:gap-4">
+      {/* Wallet balance pill → tap to open the wallet */}
+      <div className="flex items-center gap-2 sm:gap-4">
         <span className="hidden text-base font-normal text-[#05243F]/44 sm:block sm:text-sm">
           Wallet Balance
         </span>
-        <div className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm sm:gap-3 sm:px-4 sm:py-2">
-          <span onClick={() => setShowBalance(!showBalance)}>
+        <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm shadow-sm sm:gap-3 sm:px-4 sm:py-2">
+          <button
+            type="button"
+            aria-label={showBalance ? "Hide balance" : "Show balance"}
+            onClick={() => setShowBalance((s) => !s)}
+            className="flex items-center"
+          >
             {showBalance ? (
               <Icon icon="mingcute:eye-fill" fontSize={20} color="#697C8C" />
             ) : (
               <Icon icon="majesticons:eye-off" fontSize={20} color="#697C8C" />
             )}
-          </span>
-          <span
-            className={`text-lg font-semibold text-[#2389E3] transition-opacity duration-300 ease-in-out sm:text-base ${
-              showBalance ? "opacity-100" : "opacity-70"
-            }`}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/wallet")}
+            className="text-lg font-semibold text-[#2389E3] transition-opacity duration-300 ease-in-out hover:opacity-80 sm:text-base"
           >
             {showBalance ? (
               formatCurrency(balance)
             ) : (
-              <Icon
-                icon="mdi:shield-lock-outline"
-                fontSize={20}
-                color="#2389E3"
-              />
+              <Icon icon="mdi:shield-lock-outline" fontSize={20} color="#2389E3" />
             )}
-          </span>
+          </button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

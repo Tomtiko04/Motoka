@@ -11,10 +11,13 @@ import { usePaymentVerification } from "./hooks/usePayment";
 import { initializePaystackPayment } from "../../services/apiPaystack";
 import { initiateMonicreditPayment } from "../../services/apiMonicredit";
 import { abandonPayment } from "../../services/apiPayment";
+import { getWallet, payFromWallet } from "../../services/apiWallet";
 import { payLadipoOrder, verifyLadipoPayment } from "../../services/apiLadipo";
 import useCartStore from "../../store/cartStore";
 import { useLadipoPaymentModalStore } from "../../store/ladipoPaymentModalStore";
 import AutoRenewalPrompt from "./components/AutoRenewalPrompt";
+import PhonePromptModal from "./components/PhonePromptModal";
+import { useProfile } from "../settings/hooks/useProfile";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
@@ -35,6 +38,21 @@ export default function PaymentOptions() {
   const [monicreditFallbackError, setMonicreditFallbackError] = useState(null);
   const clearLadipoCart = useCartStore((s) => s.clearCart);
   const [showAutoRenewal, setShowAutoRenewal] = useState(false);
+  const [wallet, setWallet] = useState(null);
+  const [walletPaying, setWalletPaying] = useState(false);
+
+  // Load wallet balance so we can offer "pay from wallet" on car renewals.
+  useEffect(() => {
+    let alive = true;
+    getWallet().then((w) => { if (alive) setWallet(w); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  // Inline phone capture when Monicredit (bank transfer) needs a phone number
+  const [showPhonePrompt, setShowPhonePrompt] = useState(false);
+  const [phoneSaving, setPhoneSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState(null);
+  const { updateUserProfile } = useProfile();
 
   // For Monicredit
   const customer = paymentSession?.monicredit?.data?.customer;
@@ -54,6 +72,25 @@ export default function PaymentOptions() {
   const paystackAmount = paymentSession?.paystack?.reference
     ? Number(paymentSession?.amount || 0) / 100
     : Number(paymentSession?.price || paymentSession?.amount || 0);
+
+  // ── Pay-from-wallet (car renewals only; /wallet/pay prices renewals) ────────
+  const isRenewalPayment =
+    paymentSession?.type === PAYMENT_TYPES.LICENSE_RENEWAL ||
+    paymentSession?.type === PAYMENT_TYPES.VEHICLE_PAPER;
+  const fmtN = (n) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+  const renewalCostNaira = Number(totalAmount || paystackAmount || 0);
+  const walletBalanceNaira = wallet ? Number(wallet.balance_kobo || 0) / 100 : 0;
+  const walletEligible = isRenewalPayment && !!wallet && wallet.status !== "frozen";
+  const walletSufficient = walletEligible && renewalCostNaira > 0 && walletBalanceNaira >= renewalCostNaira;
+  const walletDetails = {
+    availableBalance: fmtN(walletBalanceNaira),
+    renewalCost: fmtN(renewalCostNaira),
+    newBalance: fmtN(Math.max(0, walletBalanceNaira - renewalCostNaira)),
+  };
+  // Offer wallet first on eligible renewals (matches the payment-options design).
+  const methodsToShow = walletEligible
+    ? [{ id: PAYMENT_METHODS.WALLET, label: `Wallet Balance: ${fmtN(walletBalanceNaira)}` }, ...paymentMethods]
+    : paymentMethods;
 
   const { verifyMonicredit, verifyPaystack } = usePaymentVerification();
 
@@ -423,8 +460,15 @@ export default function PaymentOptions() {
       console.error("Payment initialization error:", err);
       const errMsg = err.response?.data?.message || err.message || 'Failed to initialize payment';
 
-      // When Monicredit fails, offer the user a clear path to switch to card payment
-      if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
+      // Monicredit (bank transfer) requires a phone number to generate the
+      // virtual account. If that's the reason it failed, prompt for the phone
+      // inline and retry — rather than dumping the user out to Settings.
+      const needsPhone = /phone number is required/i.test(errMsg);
+      if (selectedMethod === PAYMENT_METHODS.MONICREDIT && needsPhone) {
+        setPhoneError(null);
+        setShowPhonePrompt(true);
+      } else if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
+        // Any other Monicredit failure: offer a clear path to switch to card
         setMonicreditFallbackError(errMsg);
       } else {
         toast.error(errMsg);
@@ -448,6 +492,54 @@ export default function PaymentOptions() {
     setMonicreditFallbackError(null);
     setSelectedMethod(PAYMENT_METHODS.PAYSTACK);
     setIsPaymentMethodConfirmed(false);
+  };
+
+  // Pay for the renewal from wallet balance. The backend debits + creates the
+  // order atomically, so success here means the order exists.
+  const handlePayFromWallet = async () => {
+    if (!walletSufficient || walletPaying) return;
+    setWalletPaying(true);
+    try {
+      const payload = buildPaymentPayload();
+      if (!payload.car_slug) {
+        toast.error("Car information is missing. Please try again.");
+        return;
+      }
+      const result = await payFromWallet(payload);
+      if (result?.order_id) {
+        setWallet((w) => (w ? { ...w, balance_kobo: result.balance_kobo } : w));
+        toast.success("Paid from wallet successfully");
+        navigateAfterPayment({ paymentSuccess: true, paymentMethod: "wallet", reference: result.reference });
+      } else {
+        toast.error("Wallet payment could not be completed.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Wallet payment failed.");
+    } finally {
+      setWalletPaying(false);
+    }
+  };
+
+  // Save the phone number the user entered, then retry the Monicredit init so
+  // they stay in the checkout flow instead of being sent off to Settings.
+  const handleSavePhoneAndRetry = async (phone) => {
+    setPhoneSaving(true);
+    setPhoneError(null);
+    try {
+      const res = await updateUserProfile({ phone_number: phone });
+      if (res && res.success) {
+        setShowPhonePrompt(false);
+        await handleConfirmPaymentMethod();
+      } else {
+        setPhoneError(res?.message || "Could not save your phone number. Please try again.");
+      }
+    } catch (err) {
+      setPhoneError(
+        err.response?.data?.message || err.message || "Could not save your phone number. Please try again.",
+      );
+    } finally {
+      setPhoneSaving(false);
+    }
   };
 
   // Note: Monicredit doesn't require a separate payment initiation step
@@ -770,6 +862,17 @@ export default function PaymentOptions() {
 
   return (
     <>
+      <PhonePromptModal
+        open={showPhonePrompt}
+        saving={phoneSaving}
+        error={phoneError}
+        onSubmit={handleSavePhoneAndRetry}
+        onUseCard={() => {
+          setShowPhonePrompt(false);
+          handleSwitchToPaystack();
+        }}
+        onClose={() => setShowPhonePrompt(false)}
+      />
       {showAutoRenewal && (
         <AutoRenewalPrompt
           carSlug={paymentSession?.car_slug}
@@ -803,7 +906,7 @@ export default function PaymentOptions() {
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[1fr_auto_1fr]">
           {/* LEFT SECTION */}
           <div className="space-y-2">
-            {paymentMethods.map((method) => (
+            {methodsToShow.map((method) => (
               <button
                 key={method.id}
                 onClick={() => handleMethodSelect(method.id)}
@@ -867,9 +970,27 @@ export default function PaymentOptions() {
                     {walletDetails.newBalance}
                   </span>
                 </div>
-                <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
-                  N35,000 Pay Now
-                </button>
+                {walletSufficient ? (
+                  <button
+                    onClick={handlePayFromWallet}
+                    disabled={walletPaying}
+                    className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6fc2] active:scale-[0.99] disabled:opacity-60 md:mt-10"
+                  >
+                    {walletPaying ? "Processing…" : `${walletDetails.renewalCost} Pay Now`}
+                  </button>
+                ) : (
+                  <div className="mt-5 md:mt-10">
+                    <p className="mb-3 text-center text-sm text-[#C0435C]">
+                      Insufficient balance. You need {walletDetails.renewalCost} but have {walletDetails.availableBalance}.
+                    </p>
+                    <button
+                      onClick={() => navigate("/wallet")}
+                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6fc2]"
+                    >
+                      Top up wallet
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

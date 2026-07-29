@@ -21,6 +21,8 @@ import Garage from "./features/garage/Garage.jsx";
 import Licenses from "./features/licenses/Licenses.jsx";
 import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import PaystackCallback from "./pages/PaystackCallback.jsx";
+import Wallet from "./features/wallet/Wallet.jsx";
+import WalletCallback from "./pages/WalletCallback.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
@@ -255,6 +257,8 @@ export default function App() {
             <Route path="documents" element={<CarDocuments />} />
             <Route path="notification" element={<Notification />} />
             <Route path="garage" element={<Garage />} />
+            <Route path="wallet" element={<Wallet />} />
+            <Route path="wallet/callback" element={<WalletCallback />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
             <Route
               path="payment"
