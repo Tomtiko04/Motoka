@@ -22,6 +22,12 @@ export async function listAdminWallets({ page = 1, limit = 20, search } = {}) {
   return handle(res);
 }
 
+// GET /admin/wallets/reconciliation
+export async function getAdminWalletReconciliation() {
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/wallets/reconciliation`, { headers: adminHeaders() });
+  return handle(res);
+}
+
 // GET /admin/wallets/:userId/ledger
 export async function getAdminWalletLedger(userId, { page = 1, limit = 25 } = {}) {
   const params = new URLSearchParams({ page, limit });

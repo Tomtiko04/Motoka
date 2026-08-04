@@ -8,6 +8,9 @@ import {
   LockClosedIcon,
   LockOpenIcon,
   BanknotesIcon,
+  ShieldCheckIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import {
@@ -15,6 +18,7 @@ import {
   getAdminWalletLedger,
   adjustAdminWallet,
   setAdminWalletStatus,
+  getAdminWalletReconciliation,
 } from '../../services/apiAdminWallet';
 
 const naira = (kobo) => `₦${(Number(kobo || 0) / 100).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
@@ -23,6 +27,24 @@ const REASON_LABEL = {
   funding: 'Top-up', payment: 'Payment', refund: 'Refund',
   admin_adjustment: 'Adjustment', reversal: 'Reversal',
 };
+
+function allReconOk(r) {
+  return !!(r?.checks && r.checks.ledger_integrity.ok && r.checks.funding_orphans.ok && r.checks.phantom_credits.ok);
+}
+
+function ReconCheck({ label, ok, count, okText, badText }) {
+  return (
+    <div className="rounded-xl border border-gray-100 bg-white p-3">
+      <div className="flex items-center gap-1.5">
+        <span className={`h-2 w-2 rounded-full ${ok ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+        <p className="text-xs font-semibold text-[#05243F]">{label}</p>
+      </div>
+      <p className={`mt-1 text-xs ${ok ? 'text-emerald-700' : 'text-amber-700'}`}>
+        {ok ? okText : `${count} ${badText}`}
+      </p>
+    </div>
+  );
+}
 
 function WalletDrawer({ userId, onClose, onChanged }) {
   const [data, setData] = useState(null);
@@ -163,6 +185,17 @@ export default function AdminWallets() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [recon, setRecon] = useState(null);
+  const [reconLoading, setReconLoading] = useState(false);
+
+  const loadRecon = useCallback(() => {
+    setReconLoading(true);
+    getAdminWalletReconciliation()
+      .then((r) => setRecon(r.data || r))
+      .catch((e) => toast.error(e.message))
+      .finally(() => setReconLoading(false));
+  }, []);
+  useEffect(() => { loadRecon(); }, [loadRecon]);
 
   const load = useCallback(async (page = 1) => {
     setLoading(true);
@@ -201,6 +234,33 @@ export default function AdminWallets() {
           </div>
         </div>
       </div>
+
+      {/* Reconciliation */}
+      {recon && (
+        <div className={`mb-6 rounded-2xl border p-5 shadow-sm ${allReconOk(recon) ? 'border-emerald-100 bg-emerald-50/40' : 'border-amber-200 bg-amber-50'}`}>
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {allReconOk(recon)
+                ? <ShieldCheckIcon className="h-5 w-5 text-emerald-600" />
+                : <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />}
+              <h2 className="text-sm font-semibold text-[#05243F]">
+                Reconciliation — {allReconOk(recon) ? 'ledger is healthy' : 'attention needed'}
+              </h2>
+            </div>
+            <button onClick={loadRecon} disabled={reconLoading} className="flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+              <ArrowPathIcon className={`h-3.5 w-3.5 ${reconLoading ? 'animate-spin' : ''}`} /> Re-check
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <ReconCheck label="Ledger integrity" ok={recon.checks.ledger_integrity.ok} count={recon.checks.ledger_integrity.count} okText="Balances match ledger" badText="wallet(s) out of sync" />
+            <ReconCheck label="Funding payments" ok={recon.checks.funding_orphans.ok} count={recon.checks.funding_orphans.count} okText="All payments credited" badText="paid but not credited" />
+            <ReconCheck label="Phantom credits" ok={recon.checks.phantom_credits.ok} count={recon.checks.phantom_credits.count} okText="None" badText="credited with no payment" />
+          </div>
+          <p className="mt-3 text-[11px] text-gray-400">
+            Credited {naira(recon.totals.total_credited_kobo)} · Debited {naira(recon.totals.total_debited_kobo)} · Liability {naira(recon.totals.total_liability_kobo)} · {recon.totals.funding_payments} funding payments
+          </p>
+        </div>
+      )}
 
       {/* Search */}
       <form onSubmit={(e) => { e.preventDefault(); setSearch(searchInput); }} className="mb-6 flex max-w-md gap-2">
