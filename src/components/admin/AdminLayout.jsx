@@ -13,6 +13,7 @@ import {
   UsersIcon,
   DocumentTextIcon,
   IdentificationIcon,
+  WalletIcon,
   ShoppingBagIcon,
   Bars3Icon,
   XMarkIcon,
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { name: 'Users',           href: '/admin/users',                        icon: UsersIcon,                 exact: false },
   { name: 'Documents',       href: '/admin/documents',                    icon: DocumentTextIcon,          exact: false },
   { name: 'Driver Licences', href: '/admin/driver-license-applications',  icon: IdentificationIcon,        exact: false },
+  { name: 'Wallets',         href: '/admin/wallets',                      icon: WalletIcon,                exact: false },
 ];
 
 const LADIPO_ITEMS = [
