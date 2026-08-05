@@ -8,6 +8,7 @@ import {
 } from "../../services/apiAuth";
 import { verifyLoginTwoFactor } from "../../services/apiTwoFactor";
 import { signupRequest as signupApi } from "../../services/apiAuth";
+import { clearStoredReferralCode } from "../../services/apiReferral";
 import { verifyAccount as verifyApi } from "../../services/apiAuth";
 import { resendVerificationCode as resendApi } from "../../services/apiAuth";
 import { sendLoginOtp as sendLoginOtpApi, verifyLoginOtp as verifyLoginOtpApi } from "../../services/apiAuth";
@@ -152,6 +153,7 @@ export function useSignup() {
       toast.dismiss();
       const userEmail = variables.email;
       localStorage.setItem("pendingVerificationEmail", userEmail);
+      clearStoredReferralCode();
       toast.success(
         data.message ||
           "User created successfully. Please check your email for the verification code.",

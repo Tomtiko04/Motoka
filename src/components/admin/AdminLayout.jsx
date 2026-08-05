@@ -20,6 +20,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   CurrencyDollarIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { name: 'Documents',       href: '/admin/documents',                    icon: DocumentTextIcon,          exact: false },
   { name: 'Driver Licences', href: '/admin/driver-license-applications',  icon: IdentificationIcon,        exact: false },
   { name: 'Wallets',         href: '/admin/wallets',                      icon: WalletIcon,                exact: false },
+  { name: 'Referrals',       href: '/admin/referral',                     icon: GiftIcon,                  exact: false },
 ];
 
 const LADIPO_ITEMS = [
