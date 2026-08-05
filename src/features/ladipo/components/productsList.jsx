@@ -1,6 +1,6 @@
 import ProductCard from "./productCard";
 
-function ProductsList({ parts = [], selectedCar = null, garageCars = [], compact = false }) {
+function ProductsList({ parts = [], compact = false }) {
   return (
     <div
       className={`grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3 ${
@@ -8,7 +8,7 @@ function ProductsList({ parts = [], selectedCar = null, garageCars = [], compact
       }`}
     >
       {parts.map((part) => (
-        <ProductCard key={part.id} part={part} isCarFilterActive={!!selectedCar} selectedCar={selectedCar} garageCars={garageCars} />
+        <ProductCard key={part.id} part={part} />
       ))}
     </div>
   );
