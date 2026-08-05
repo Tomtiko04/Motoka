@@ -15,6 +15,7 @@ import AdminUsers from '../pages/admin/AdminUsers.jsx';
 import AdminUserDetails from '../pages/admin/AdminUserDetails.jsx';
 import AdminDocuments from '../pages/admin/AdminDocuments.jsx';
 import AdminDriverLicenseApplications from '../pages/admin/AdminDriverLicenseApplications.jsx';
+import AdminWallets from '../pages/admin/AdminWallets.jsx';
 import AdminLadipo from '../pages/admin/AdminLadipo.jsx';
 import AdminVehicleDocs from '../pages/admin/AdminVehicleDocs.jsx';
 
@@ -93,6 +94,7 @@ const AdminRoutes = () => {
                 <Route path="users/:userId" element={<AdminUserDetails />} />
                 <Route path="documents" element={<AdminDocuments />} />
                 <Route path="driver-license-applications" element={<AdminDriverLicenseApplications />} />
+                <Route path="wallets" element={<AdminWallets />} />
                 <Route path="ladipo" element={<AdminLadipo />} />
                 <Route path="vehicle-doc-prices" element={<AdminVehicleDocs />} />
       </Route>

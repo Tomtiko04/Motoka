@@ -3,11 +3,11 @@ import { X, Zap, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getFundingQuote, initFunding } from "../../../services/apiWallet";
 
-const PRESETS = [2000, 5000, 10000, 20000]; // naira
+const PRESETS = [30000, 50000, 75000, 100000]; // naira — sized to Motoka's services (nothing is under ₦30k)
 const naira = (n) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
 
 export default function FundWalletModal({ open, onClose }) {
-  const [amount, setAmount] = useState(5000); // naira
+  const [amount, setAmount] = useState(50000); // naira
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -97,7 +97,7 @@ export default function FundWalletModal({ open, onClose }) {
               }`}
             >
               ₦{(p / 1000)}k
-              {p >= 10000 && (
+              {p >= 75000 && (
                 <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1FA97A] px-1.5 py-0.5 text-[9px] font-bold text-white">
                   best value
                 </span>
