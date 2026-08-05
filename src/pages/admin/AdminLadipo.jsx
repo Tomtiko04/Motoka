@@ -59,6 +59,9 @@ const initialProductForm = {
   is_universal: false,
   is_essential: false,
   is_must_have: false,
+  is_featured: false,
+  is_bestseller: false,
+  is_deal: false,
   is_active: true,
 };
 
@@ -237,7 +240,13 @@ export default function AdminLadipo() {
   const debouncedProductQuery = useDebouncedValue(productQuery, 320);
   const [productsPage, setProductsPage] = useState(1);
   const [productsMeta, setProductsMeta] = useState({ current_page: 1, per_page: 20, total: 0, last_page: 1 });
-  const [curatedProducts, setCuratedProducts] = useState({ essential: [], mustHave: [] });
+  const [curatedProducts, setCuratedProducts] = useState({
+    essential: [],
+    mustHave: [],
+    featured: [],
+    bestsellers: [],
+    deals: [],
+  });
   const [curatedLoading, setCuratedLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [productForm, setProductForm] = useState(initialProductForm);
@@ -335,13 +344,19 @@ export default function AdminLadipo() {
   const loadCuratedProducts = useCallback(async () => {
     setCuratedLoading(true);
     try {
-      const [essential, mustHave] = await Promise.all([
+      const [essential, mustHave, featured, bestsellers, deals] = await Promise.all([
         listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'essential' }),
         listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'must_have' }),
+        listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'featured' }),
+        listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'bestseller' }),
+        listAdminLadipoProducts({ page: 1, per_page: 100, collection: 'deal' }),
       ]);
       setCuratedProducts({
         essential: essential.data?.data || [],
         mustHave: mustHave.data?.data || [],
+        featured: featured.data?.data || [],
+        bestsellers: bestsellers.data?.data || [],
+        deals: deals.data?.data || [],
       });
     } catch (error) {
       toast.error(error.message || 'Failed to load curated collections');
@@ -951,6 +966,9 @@ export default function AdminLadipo() {
       is_universal: product.is_universal ?? false,
       is_essential: product.is_essential ?? false,
       is_must_have: product.is_must_have ?? false,
+      is_featured: product.is_featured ?? false,
+      is_bestseller: product.is_bestseller ?? false,
+      is_deal: product.is_deal ?? false,
       is_active: product.is_active ?? true,
     });
     setCompatibilityDraft(emptyCompatibilityEntry);
@@ -1050,6 +1068,9 @@ export default function AdminLadipo() {
       payload.append('is_universal', String(Boolean(productForm.is_universal)));
       payload.append('is_essential', String(Boolean(productForm.is_essential)));
       payload.append('is_must_have', String(Boolean(productForm.is_must_have)));
+      payload.append('is_featured', String(Boolean(productForm.is_featured)));
+      payload.append('is_bestseller', String(Boolean(productForm.is_bestseller)));
+      payload.append('is_deal', String(Boolean(productForm.is_deal)));
       payload.append('is_active', String(Boolean(productForm.is_active)));
       if (editingProductId) {
         const existing = products.find((item) => item.id === editingProductId);
@@ -2115,25 +2136,27 @@ export default function AdminLadipo() {
                   Universal part (shows for all cars)
                 </label>
 
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={productForm.is_essential}
-                      onChange={(e) => setProductForm((prev) => ({ ...prev, is_essential: e.target.checked }))}
-                      className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
-                    />
-                    Feature in &quot;Essential Products&quot;
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={productForm.is_must_have}
-                      onChange={(e) => setProductForm((prev) => ({ ...prev, is_must_have: e.target.checked }))}
-                      className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
-                    />
-                    Feature in &quot;Must Have&quot;
-                  </label>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Storefront sections</p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {[
+                      { key: 'is_essential', label: 'Essential Products' },
+                      { key: 'is_must_have', label: 'Must Have' },
+                      { key: 'is_featured', label: 'Featured' },
+                      { key: 'is_bestseller', label: 'Bestsellers' },
+                      { key: 'is_deal', label: 'Deals' },
+                    ].map(({ key, label }) => (
+                      <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(productForm[key])}
+                          onChange={(e) => setProductForm((prev) => ({ ...prev, [key]: e.target.checked }))}
+                          className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                        />
+                        Feature in &quot;{label}&quot;
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
                 {!productForm.is_universal && (
@@ -2286,16 +2309,21 @@ export default function AdminLadipo() {
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
             <div>
               <h2 className="text-base font-bold text-[#05243F]">Manual storefront collections</h2>
-              <p className="mt-1 text-xs text-gray-500">Products appear here only when an admin enables Essential Products or Must Have in the product editor.</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Products appear here only when an admin enables a storefront section in the product editor.
+              </p>
             </div>
             <button type="button" onClick={loadCuratedProducts} disabled={curatedLoading} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
               {curatedLoading ? 'Loading…' : 'Refresh'}
             </button>
           </div>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {[
               { key: 'essential', title: 'Essential Products', items: curatedProducts.essential, tone: 'text-[#2284DB]' },
               { key: 'mustHave', title: 'Must Have', items: curatedProducts.mustHave, tone: 'text-violet-700' },
+              { key: 'featured', title: 'Featured', items: curatedProducts.featured, tone: 'text-emerald-700' },
+              { key: 'bestsellers', title: 'Bestsellers', items: curatedProducts.bestsellers, tone: 'text-amber-700' },
+              { key: 'deals', title: 'Deals', items: curatedProducts.deals, tone: 'text-rose-700' },
             ].map(({ key, title, items, tone }) => (
               <section key={key} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
