@@ -313,8 +313,8 @@
 
 
 "use client"
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import ImageSlider from "../../components/ImageSlider";
 import AuthSideHero from "../../components/AuthSideHero"
@@ -325,6 +325,10 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import TwoFactorVerification from "../../components/TwoFA/TwoFactorVerification";
+import {
+  captureReferralCodeFromUrl,
+  getStoredReferralCode,
+} from "../../services/apiReferral";
 
 const schema = yup.object().shape({
   name: yup
@@ -360,23 +364,42 @@ const schema = yup.object().shape({
     .string()
     .oneOf([yup.ref("password"), undefined], "Passwords do not match")
     .required("Please confirm your password"),
+  referral_code: yup
+    .string()
+    .transform((v) => (v ? String(v).trim().toUpperCase() : ""))
+    .test(
+      "referral-format",
+      "Referral code must be 6-12 letters or numbers",
+      (v) => !v || /^[A-Z0-9]{6,12}$/.test(v),
+    ),
   terms: yup.boolean().oneOf([true], "You must accept the Terms & Conditions"),
 });
 
 export default function Signup() {
   const { signupUser, isSigningUp } = useSignup();
   const { loginWithGoogle, isLoadingGoogle } = useGoogleLogin();
+  const [searchParams] = useSearchParams();
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
     mode: "onChange",
     reValidateMode: "onChange",
+    defaultValues: {
+      referral_code: getStoredReferralCode(),
+    },
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    const fromUrl = captureReferralCodeFromUrl(`?${searchParams.toString()}`);
+    const code = fromUrl || getStoredReferralCode();
+    if (code) setValue("referral_code", code);
+  }, [searchParams, setValue]);
 
   const onSubmit = (data) => {
     const loadingToast = toast.loading("Creating your account...");
@@ -388,6 +411,7 @@ export default function Signup() {
           phone_number: data.phone,
           password: data.password.trim(),
           password_confirmation: data.confirmPassword.trim(),
+          referral_code: data.referral_code || getStoredReferralCode() || undefined,
           // nin: data.nin,
         },
         {
@@ -529,6 +553,22 @@ export default function Signup() {
                   {errors.confirmPassword && (
                     <p className="animate-shake mt-1 text-xs text-[#A73957]">
                       {errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <input
+                    id="referral_code"
+                    type="text"
+                    {...register("referral_code")}
+                    placeholder="Referral code (optional)"
+                    autoCapitalize="characters"
+                    className="mt-1 block w-full rounded-xl bg-[#F4F5FC] px-4 py-3 !text-sm uppercase tracking-wider text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none sm:px-5 sm:py-4"
+                  />
+                  {errors.referral_code && (
+                    <p className="animate-shake mt-1 text-xs text-[#A73957]">
+                      {errors.referral_code.message}
                     </p>
                   )}
                 </div>

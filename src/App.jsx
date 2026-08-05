@@ -23,6 +23,7 @@ import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import PaystackCallback from "./pages/PaystackCallback.jsx";
 import Wallet from "./features/wallet/Wallet.jsx";
 import WalletCallback from "./pages/WalletCallback.jsx";
+import Referral from "./features/referral/Referral.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
@@ -42,6 +43,7 @@ import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
 import { authStorage } from "./utils/authStorage.js";
+import { captureReferralCodeFromUrl } from "./services/apiReferral.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
@@ -135,6 +137,8 @@ function processOAuthHash() {
 
 // Run immediately — if this returns true we're mid-redirect, skip rendering
 const isProcessingOAuth = processOAuthHash();
+// Persist ?ref= across landing → signup navigation
+captureReferralCodeFromUrl();
 
 export default function App() {
   const { isOpen } = useModalStore();
@@ -259,6 +263,7 @@ export default function App() {
             <Route path="garage" element={<Garage />} />
             <Route path="wallet" element={<Wallet />} />
             <Route path="wallet/callback" element={<WalletCallback />} />
+            <Route path="referral" element={<Referral />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
             <Route
               path="payment"

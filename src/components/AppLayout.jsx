@@ -19,6 +19,7 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
     { name: "Wallet", path: "/wallet" },
+    { name: "Referrals", path: "/referral" },
     { name: "Ladipo", path: "/ladipo" },
     // { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Settings", path: "/settings" },

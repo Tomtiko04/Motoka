@@ -99,20 +99,26 @@ export async function signupRequest({
   password_confirmation,
   nin: _nin, // Reserved for future KYC
   phone_number,
+  referral_code,
 }) {
   // Split name into first_name and last_name for Node.js backend
   const nameParts = (name || '').trim().split(' ');
   const first_name = nameParts[0] || '';
   const last_name = nameParts.slice(1).join(' ') || nameParts[0] || '';
 
-  const { data } = await api.post("/register", {
+  const payload = {
     first_name,
     last_name,
     email,
     password,
     password_confirmation,
     phone: phone_number,
-  });
+  };
+  if (referral_code) {
+    payload.referral_code = String(referral_code).trim().toUpperCase();
+  }
+
+  const { data } = await api.post("/register", payload);
 
   // Store registration token - Node.js returns session.access_token
   const token = data?.data?.session?.access_token;
