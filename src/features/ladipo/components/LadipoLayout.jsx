@@ -1,13 +1,30 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { IoIosArrowBack } from "react-icons/io";
 import { Icon } from "@iconify/react";
+import { getWallet } from "../../../services/apiWallet";
+
+function formatNaira(kobo) {
+  return `₦${(Number(kobo || 0) / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+}
 
 function WalletDemoChip() {
+  const { data: wallet, isLoading } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: getWallet,
+  });
+
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-[#EAF1FF] px-5 py-2">
+    <Link
+      to="/wallet"
+      className="inline-flex items-center gap-2 rounded-full bg-[#EAF1FF] px-5 py-2 transition-opacity hover:opacity-90"
+      title="Wallet balance"
+    >
       <Icon icon="solar:eye-bold" width="16" className="text-[#697C8C]" />
-      <span className="text-lg font-semibold text-[#2B8DED]">₦0</span>
-    </div>
+      <span className="text-lg font-semibold text-[#2B8DED]">
+        {isLoading ? "₦—" : formatNaira(wallet?.balance_kobo)}
+      </span>
+    </Link>
   );
 }
 
