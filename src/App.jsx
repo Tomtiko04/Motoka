@@ -8,6 +8,8 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import toast, { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import InstallPrompt from "./components/pwa/InstallPrompt.jsx";
+import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt.jsx";
 
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
@@ -301,6 +303,10 @@ export default function App() {
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>
+      {/* PWA: install nudge and the update-available toast. Both self-hide when
+          irrelevant (already installed, dismissed, or no new build waiting). */}
+      <InstallPrompt />
+      <PWAUpdatePrompt />
       <Toaster
         position="top-right"
         gutter={8}

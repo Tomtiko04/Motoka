@@ -144,6 +144,32 @@ const AdminOrderDetails = () => {
     }
   };
 
+  const handleReopenOrder = async () => {
+    try {
+      setStatusUpdating(true);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${config.getApiBaseUrl()}/admin/orders/${slug}/reopen`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'Cancelled in error' }),
+      });
+      const data = await response.json();
+      if (data.status) {
+        await fetchOrderDetails();
+        toast.success(data.message || 'Order reopened');
+      } else {
+        toast.error(data.message || 'Failed to reopen order');
+      }
+    } catch {
+      toast.error('Failed to reopen order');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
   const printOrderPDF = () => {
     const fmt = (v) => v || 'N/A';
     const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
@@ -614,6 +640,26 @@ const AdminOrderDetails = () => {
                 }`}>
                   Order {order.status === 'completed' ? 'Completed' : 'Cancelled'}
                 </div>
+              )}
+
+              {/* Cancelling used to be a one-way door — completing a cancelled order is
+                  rejected outright, so a mis-click stranded paying customers with no
+                  route back. Reopening returns it to pending; completing stays a
+                  separate, deliberate step. */}
+              {order?.status === 'cancelled' && (
+                <>
+                  <p className="text-sm text-gray-500">
+                    Cancelled by mistake? Reopen it to put the order back in the queue,
+                    then mark it Completed to finish the renewal and update the expiry date.
+                  </p>
+                  <button
+                    onClick={handleReopenOrder}
+                    disabled={statusUpdating}
+                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                  >
+                    {statusUpdating ? 'Reopening…' : 'Reopen Order'}
+                  </button>
+                </>
               )}
             </div>
           </div>
