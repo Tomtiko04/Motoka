@@ -4,48 +4,15 @@ import toast from "react-hot-toast";
 import useCartStore from "../../../store/cartStore";
 
 const CONDITION_LABELS = {
-  new: { text: "New", icon: "solar:verified-check-bold", color: "bg-emerald-500 text-white", borderColor: "border-emerald-300" },
-  tokunbo: { text: "Tokunbo", icon: "solar:import-bold", color: "bg-[#2389E3] text-white", borderColor: "border-[#2389E3]/40" },
-  nigerian_used: { text: "Used", icon: "solar:refresh-bold", color: "bg-[#EBB850] text-white", borderColor: "border-[#EBB850]/40" },
+  new: { text: "New", color: "bg-emerald-500 text-white" },
+  tokunbo: { text: "Tokunbo", color: "bg-[#2389E3] text-white" },
+  nigerian_used: { text: "Used", color: "bg-[#EBB850] text-white" },
 };
 
-function normalize(value) {
-  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
-}
-
-function normalizeMake(value) {
-  const normalized = normalize(value);
-  if (normalized === "mercedes" || normalized === "benz") return "mercedesbenz";
-  if (normalized === "vw") return "volkswagen";
-  return normalized;
-}
-
-function isCompatibilityMatch(car, rule) {
-  if (!car || !rule) return false;
-  const carMake = normalizeMake(car.vehicle_make);
-  const carModel = normalize(car.vehicle_model);
-  const carYearRaw = car.vehicle_year;
-  const carYear = carYearRaw === undefined || carYearRaw === null || carYearRaw === ""
-    ? null
-    : Number(carYearRaw);
-
-  const ruleMake = normalizeMake(rule.make);
-  const ruleModel = normalize(rule.model);
-
-  if (!ruleMake || carMake !== ruleMake) return false;
-  if (ruleModel && carModel !== ruleModel) return false;
-
-  if (carYear != null && Number.isFinite(carYear)) {
-    if (rule.year_min != null && carYear < Number(rule.year_min)) return false;
-    if (rule.year_max != null && carYear > Number(rule.year_max)) return false;
-  }
-
-  return true;
-}
-
-function ProductCard({ part, isCarFilterActive = false, selectedCar = null, garageCars = [] }) {
+function ProductCard({ part }) {
   const addItem = useCartStore((s) => s.addItem);
   const navigate = useNavigate();
+  const condition = CONDITION_LABELS[part.condition] || CONDITION_LABELS.new;
 
   function buildCartItem() {
     return {
@@ -79,32 +46,6 @@ function ProductCard({ part, isCarFilterActive = false, selectedCar = null, gara
     if (!part?.slug) return;
     navigate(`/ladipo/${part.slug}`);
   }
-
-  const condition = CONDITION_LABELS[part.condition] || CONDITION_LABELS.new;
-  const showUniversalBadge = part?.is_universal === true;
-  const compatibilityRows = Array.isArray(part?.compatibility) ? part.compatibility : [];
-  const allGarageCars = Array.isArray(garageCars) ? garageCars : [];
-  const matchedGarageCars = allGarageCars.filter((car) =>
-    compatibilityRows.some((rule) => isCompatibilityMatch(car, rule))
-  );
-  const selectedCarMatches = selectedCar
-    ? compatibilityRows.some((rule) => isCompatibilityMatch(selectedCar, rule))
-    : false;
-
-  let fitBadgeText = null;
-  if (!showUniversalBadge) {
-    if (selectedCar) {
-      if (selectedCarMatches) {
-        fitBadgeText = "Fits your car";
-      }
-    } else if (matchedGarageCars.length > 0) {
-      fitBadgeText = matchedGarageCars.length === 1
-        ? "Fits 1 of your cars"
-        : `Fits ${matchedGarageCars.length} of your cars`;
-    }
-  }
-
-  const showFitsBadge = !showUniversalBadge && !!fitBadgeText;
 
   return (
     <div
@@ -143,18 +84,7 @@ function ProductCard({ part, isCarFilterActive = false, selectedCar = null, gara
         ) : (
           <Icon icon="solar:box-bold-duotone" width="48" className="text-[#D3D9DE]" />
         )}
-
       </div>
-
-      {(showFitsBadge || showUniversalBadge) && (
-        <span
-          className={`absolute bottom-4 left-4 z-10 rounded-[4px] px-1.5 py-[2px] text-[9px] font-bold ${
-            showUniversalBadge ? "bg-slate-500 text-white" : "bg-emerald-500 text-white"
-          }`}
-        >
-          {showUniversalBadge ? "Universal" : fitBadgeText}
-        </span>
-      )}
 
       <div className="flex flex-1 flex-col">
         <p className="mb-1 min-h-[3.5rem] text-[14px] font-bold leading-snug text-[#05243F] line-clamp-2">

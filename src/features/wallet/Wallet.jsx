@@ -12,6 +12,7 @@ const REASON_LABEL = {
   refund: "Refund",
   admin_adjustment: "Adjustment",
   reversal: "Reversal",
+  referral: "Referral bonus",
 };
 
 export default function Wallet() {

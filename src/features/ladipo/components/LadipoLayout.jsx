@@ -1,12 +1,48 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { IoIosArrowBack } from "react-icons/io";
 import { Icon } from "@iconify/react";
+import { getWallet } from "../../../services/apiWallet";
+
+function formatNaira(kobo) {
+  return `₦${(Number(kobo || 0) / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+}
 
 function WalletDemoChip() {
+  const [showBalance, setShowBalance] = useState(true);
+  const { data: wallet, isLoading } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: getWallet,
+  });
+
+  const amount = isLoading
+    ? "₦—"
+    : showBalance
+      ? formatNaira(wallet?.balance_kobo)
+      : "₦••••";
+
   return (
     <div className="inline-flex items-center gap-2 rounded-full bg-[#EAF1FF] px-5 py-2">
-      <Icon icon="solar:eye-bold" width="16" className="text-[#697C8C]" />
-      <span className="text-lg font-semibold text-[#2B8DED]">₦0</span>
+      <button
+        type="button"
+        onClick={() => setShowBalance((v) => !v)}
+        className="flex items-center justify-center text-[#697C8C] transition-opacity hover:opacity-70"
+        aria-label={showBalance ? "Hide wallet balance" : "Show wallet balance"}
+        title={showBalance ? "Hide balance" : "Show balance"}
+      >
+        <Icon
+          icon={showBalance ? "solar:eye-bold" : "solar:eye-closed-bold"}
+          width="16"
+        />
+      </button>
+      <Link
+        to="/wallet"
+        className="text-lg font-semibold text-[#2B8DED] transition-opacity hover:opacity-90"
+        title="Open wallet"
+      >
+        {amount}
+      </Link>
     </div>
   );
 }

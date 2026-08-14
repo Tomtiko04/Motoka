@@ -20,6 +20,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   CurrencyDollarIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 
 // NOTE: 'Agents' is intentionally absent. The three agent pages still exist in
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
   { name: 'Driver Licences', href: '/admin/driver-license-applications',  icon: IdentificationIcon,        exact: false },
   { name: 'Wallets',         href: '/admin/wallets',                      icon: WalletIcon,                exact: false },
   { name: 'Doc Prices',      href: '/admin/vehicle-doc-prices',           icon: CurrencyDollarIcon,        exact: false },
+  { name: 'Referrals',       href: '/admin/referral',                     icon: GiftIcon,                  exact: false },
 ];
 
 // Sub-items of the Ladipo marketplace group. Doc Prices used to live here, but

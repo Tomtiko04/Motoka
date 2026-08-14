@@ -4,12 +4,17 @@ import { Icon } from "@iconify/react";
 import ladipoStore from "../../../store/ladipoStore";
 import { getLadipoMainCategories } from "../../../services/apiLadipoCategories";
 
-function Categories() {
+function Categories({ onBrowseAll, isBrowseAllActive = false }) {
   const {
     selectedMainCategory,
     setSelectedMainCategory,
     clearCategoryFilters,
   } = ladipoStore();
+
+  function handleBrowseAll() {
+    clearCategoryFilters();
+    onBrowseAll?.();
+  }
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,10 +102,10 @@ function Categories() {
         >
           {/* All Categories Button */}
           <button
-            onClick={() => clearCategoryFilters()}
+            onClick={handleBrowseAll}
             className="flex flex-col items-center gap-2.5 transition-all duration-200 cursor-pointer flex-shrink-0 group"
           >
-            <div className={`h-[60px] w-[84px] rounded-[90px] border flex items-center justify-center text-base font-bold transition-all ${!selectedMainCategory ? "bg-[#1A7ACF] text-white border-[#2284DB]" : "bg-[#F4F5FC] text-[#05243F] border-[#D3D9DE4D] group-hover:bg-[#E8EDFA]"
+            <div className={`h-[60px] w-[84px] rounded-[90px] border flex items-center justify-center text-base font-bold transition-all ${isBrowseAllActive ? "bg-[#1A7ACF] text-white border-[#2284DB]" : "bg-[#F4F5FC] text-[#05243F] border-[#D3D9DE4D] group-hover:bg-[#E8EDFA]"
               }`}>
               All
             </div>
