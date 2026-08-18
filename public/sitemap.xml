@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only genuinely public, crawlable URLs belong here.
+
+  Services / FAQs / Testimonials are deliberately absent: they are anchor
+  sections on the landing page, not separate routes. Listing them as URLs would
+  submit 404s to Google. If they should rank on their own, they need to become
+  real routes first.
+
+  Individual blog posts (/blog/:slug) are dynamic and cannot be listed in a
+  static file. Once the blog has steady content this should be generated at
+  build time from the same source the blog list uses.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.motokaapp.ng/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.motokaapp.ng/blogs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>
