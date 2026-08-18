@@ -1,0 +1,30 @@
+# Motoka — https://www.motokaapp.ng
+#
+# NOTE: this file only works because vercel.json excludes it from the SPA
+# catch-all rewrite. Without that exclusion every path returns index.html, so
+# crawlers fetched HTML here instead of robots directives and ignored the lot.
+
+User-agent: *
+Allow: /
+
+# Signed-in areas: nothing here is useful in search results, and several paths
+# leak order/payment identifiers into URLs.
+Disallow: /admin
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /garage
+Disallow: /wallet
+Disallow: /settings
+Disallow: /licenses
+Disallow: /notifications
+Disallow: /payment
+Disallow: /receipt
+Disallow: /cart
+Disallow: /checkout
+Disallow: /successful
+
+# Never index anything carrying a payment reference
+Disallow: /*?reference=
+Disallow: /*?trxref=
+
+Sitemap: https://www.motokaapp.ng/sitemap.xml
