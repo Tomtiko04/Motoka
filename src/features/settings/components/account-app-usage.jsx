@@ -19,7 +19,7 @@ export default function FAQs({ onNavigate }) {
       id: "create-account",
       question: "How do I create an account on Motoka?",
       answer:
-        'Download the Motoka app or visit our website, click "Sign Up," and follow the on-screen instructions. You\'ll need to provide your name, email, phone number, and create a password.',
+        'Visit motokaapp.ng, click "Sign Up," and follow the on-screen instructions. You\'ll need to provide your name, email, phone number, and create a password.',
     },
     {
       id: "update-profile",

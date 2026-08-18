@@ -91,8 +91,12 @@ function Footer() {
             links: [
               { label: "License Auto Renewal", to: "/renew-vehicle-licence" },
               { label: "License Auto Reminder", to: "/reminders" },
+              // /ladipo is behind ProtectedRoute — a signed-out visitor is sent
+              // to login, which is expected for a marketplace. /traffic-rules is
+              // also gated but has a public equivalent in /guides, so the footer
+              // points there rather than stranding readers at a login screen.
               { label: "Ladipo Car parts", to: "/ladipo" },
-              { label: "Traffic Education", to: "/traffic-rules" },
+              { label: "Traffic Education", to: "/guides" },
             ],
           },
           {

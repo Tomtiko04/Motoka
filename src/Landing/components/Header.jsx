@@ -44,8 +44,11 @@ function Header() {
              >
               Login
             </button>
+            {/* Secondary on purpose. "Renew now" in the hero is the single
+                primary action; when Register was also #EBB850 the two orange
+                buttons split the visual priority. */}
             <button
-              className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
+              className="rounded-[10px] border-[1.7px] border-transparent px-4 py-2 text-base font-semibold text-[#05243F] underline-offset-4 hover:underline sm:mt-0"
               onClick={() => navigate("/auth/signup")}
             >
               Register

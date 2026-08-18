@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 import { computeSlug } from "../../utils/computeSlug";
 import blogData from "../../Data/blogs";
@@ -34,6 +35,35 @@ import blogData from "../../Data/blogs";
 // ];
 
 export default function BlogSection() {
+  // The row scrolls horizontally but used `scrollbar-hide` with no arrows, dots
+  // or fade, so cards were cut off at the right edge with nothing to say more
+  // existed. These track scroll position so the arrows and the edge fade only
+  // appear when there is actually something to scroll to.
+  const scrollerRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const syncScrollState = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    setCanScrollLeft(el.scrollLeft > 8);
+    setCanScrollRight(el.scrollLeft < maxScroll - 8);
+  }, []);
+
+  useEffect(() => {
+    syncScrollState();
+    window.addEventListener("resize", syncScrollState);
+    return () => window.removeEventListener("resize", syncScrollState);
+  }, [syncScrollState]);
+
+  const scrollByCard = (direction) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // 300px card + 24px gap (min-w-[300px] and gap-6 below).
+    el.scrollBy({ left: direction * 324, behavior: "smooth" });
+  };
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -49,12 +79,52 @@ export default function BlogSection() {
         </div>
 
         {/* Scroll Container */}
-        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 sm:ps-12">
+        <div className="relative">
+          {/* Edge fades: the visual cue that the row continues past the cut. */}
+          {canScrollLeft && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-gray-50 to-transparent"
+            />
+          )}
+          {canScrollRight && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-gray-50 to-transparent"
+            />
+          )}
+
+          {canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => scrollByCard(-1)}
+              aria-label="Scroll to previous posts"
+              className="absolute top-1/2 left-1 z-20 hidden -translate-y-1/2 rounded-full bg-white p-3 text-[#05243F] shadow-md transition hover:bg-gray-100 sm:block"
+            >
+              <Icon icon="mdi:chevron-left" width="22" height="22" />
+            </button>
+          )}
+          {canScrollRight && (
+            <button
+              type="button"
+              onClick={() => scrollByCard(1)}
+              aria-label="Scroll to more posts"
+              className="absolute top-1/2 right-1 z-20 hidden -translate-y-1/2 rounded-full bg-white p-3 text-[#05243F] shadow-md transition hover:bg-gray-100 sm:block"
+            >
+              <Icon icon="mdi:chevron-right" width="22" height="22" />
+            </button>
+          )}
+
+          <div
+            ref={scrollerRef}
+            onScroll={syncScrollState}
+            className="flex snap-x snap-mandatory gap-6 overflow-x-auto scrollbar-hide pb-4 sm:ps-12"
+          >
 
           {blogData.map((blog) => (
             <div
               key={blog.id}
-              className="min-w-[300px] max-w-[300px] bg-white rounded-2xl shadow-sm hover:shadow-lg transition duration-300"
+              className="min-w-[300px] max-w-[300px] snap-start bg-white rounded-2xl shadow-sm hover:shadow-lg transition duration-300"
             >
               <img
                 src={blog.image}
@@ -81,6 +151,7 @@ export default function BlogSection() {
             </div>
           ))}
 
+          </div>
         </div>
         <div className="text-center">
           <Link to="/blogs">
