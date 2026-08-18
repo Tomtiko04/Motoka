@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import blogData from "../Data/blogs";
 import { computeSlug } from "../utils/computeSlug";
-import { Helmet } from "react-helmet";
+import Seo from "../components/Seo";
 
 
 export default function BlogPage() {
@@ -18,10 +18,11 @@ export default function BlogPage() {
   return (
     <section className="py-16">
       <div className="max-w-3xl mx-auto px-4">
-        <Helmet>
-          <title>{blog.title} | Motoka</title>
-          <meta name="description" content={blog.content.slice(0, 120)} />
-        </Helmet>
+        <Seo
+          title={blog.title}
+          description={blog.content.slice(0, 160)}
+          path={`/blog/${slug}`}
+        />
         {/* Image */}
         <img
           src={blog.image}

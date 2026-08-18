@@ -89,7 +89,7 @@ function Footer() {
           {
             title: "Services",
             links: [
-              { label: "License Auto Renewal", to: "/" },
+              { label: "License Auto Renewal", to: "/renew-vehicle-licence" },
               { label: "License Auto Reminder", to: "/reminders" },
               { label: "Ladipo Car parts", to: "/ladipo" },
               { label: "Traffic Education", to: "/traffic-rules" },

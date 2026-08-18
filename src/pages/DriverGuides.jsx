@@ -6,6 +6,7 @@ export default function DriverGuides() {
     <MarketingPage
       title="Driver Guides"
       description="Practical notes for keeping a car legal in Nigeria — papers, renewals, and the road."
+      path="/guides"
     >
       <article>
         <h2 className="mb-3 text-xl font-bold text-[#05243F]">
@@ -24,7 +25,11 @@ export default function DriverGuides() {
           How to renew through Motoka
         </h2>
         <ol className="list-decimal space-y-2 pl-5">
-          <li>On the homepage, enter your plate number, or log in and open Licenses.</li>
+          <li>On Motoka, enter your plate on the{" "}
+            <Link to="/renew-vehicle-licence" className="font-semibold text-[#2389E3] hover:underline">
+              vehicle licence renewal
+            </Link>{" "}
+            page, or log in and open Licenses.</li>
           <li>Choose the documents you need and confirm delivery details.</li>
           <li>Pay online. Motoka creates an order our team can process.</li>
           <li>Track the order until it is completed. Your new expiry is stored on the car.</li>

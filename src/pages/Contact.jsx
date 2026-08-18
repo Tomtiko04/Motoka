@@ -1,15 +1,13 @@
-import { Helmet } from "react-helmet";
+import Seo from "../components/Seo";
 
 export default function Contact() {
   return (
     <section className="px-6 py-12 sm:px-10 sm:py-16">
-      <Helmet>
-        <title>Contact Us | Motoka</title>
-        <meta
-          name="description"
-          content="Reach Motoka on Instagram, X, and TikTok."
-        />
-      </Helmet>
+      <Seo
+        title="Contact Us"
+        description="Reach Motoka on Instagram, X, and TikTok."
+        path="/contact"
+      />
       <div className="mx-auto max-w-3xl">
         <h1 className="text-[32px] font-bold leading-tight text-[#05243F] sm:text-[44px]">
           Contact Us

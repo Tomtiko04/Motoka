@@ -11,6 +11,7 @@ import Whyus from "./components/Whyus";
 import { useEffect, useState } from "react";
 import Action from "./components/Actions";
 import BlogSection from "./components/Blogs";
+import Seo from "../components/Seo";
 
 function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -52,6 +53,11 @@ function LandingPage() {
     },[location])
     return ( 
         <div className="bg-[#EBF5FF]">
+            <Seo
+              title="Motoka — Renew Your Vehicle Licence & Documents Online in Nigeria"
+              description="Renew your vehicle licence, insurance, roadworthiness and driver's licence online in Nigeria. Track expiry dates, get reminders before you're fined, and buy car parts at Ladipo — all from one app."
+              path="/"
+            />
             <Header/>
             <Hero/>
             <Categories/>

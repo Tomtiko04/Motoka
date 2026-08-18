@@ -11,12 +11,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Motoka" />
-    <!-- Canonical: motokaapp.ng and motoka.ng currently serve byte-identical
-         HTML across four variants (both apex domains plus both www forms), which
-         reads as duplicate content. This names one winner. The 301s from the
-         others still need setting up in the Vercel dashboard. -->
-    <link rel="canonical" href="https://www.motokaapp.ng/" />
-
+    <!-- Default title/description for the first HTML paint. React Helmet
+         overwrites these (and sets canonical) per route so /guides is not
+         treated as a duplicate of /. 301s from motoka.ng / non-www still
+         need setting up in the Vercel dashboard. -->
     <title>Motoka — Renew Your Vehicle Licence & Documents Online in Nigeria</title>
     <meta
       name="description"
