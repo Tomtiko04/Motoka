@@ -5,6 +5,7 @@ export default function LicenseReminder() {
     <MarketingPage
       title="License Auto Reminder"
       description="Motoka tracks expiry dates on your vehicle papers and emails you before they lapse — so you can renew on time and skip the fine."
+      path="/reminders"
       ctaLabel="Add a car to get reminders"
       ctaTo="/auth/signup"
     >

@@ -5,6 +5,7 @@ export default function About() {
     <MarketingPage
       title="About Motoka"
       description="Motoka is a Nigerian platform for vehicle papers, reminders, and auto parts — so you can stay legal and keep driving."
+      path="/about"
       ctaLabel="Create a free account"
       ctaTo="/auth/signup"
     >

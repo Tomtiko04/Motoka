@@ -1,9 +1,15 @@
 import blogData  from "../Data/blogs";
 import { Link } from "react-router-dom";
 import {computeSlug} from '../utils/computeSlug';
+import Seo from "../components/Seo";
 export default function BlogsPage() {
   return (
     <section className="py-16 bg-gray-50 min-h-screen">
+      <Seo
+        title="Blog"
+        description="Tips, guides, and updates on managing your vehicle documents in Nigeria."
+        path="/blogs"
+      />
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Header */}

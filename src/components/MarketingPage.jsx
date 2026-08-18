@@ -1,19 +1,17 @@
-import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
+import Seo from "./Seo";
 
 export default function MarketingPage({
   title,
   description,
+  path,
   children,
   ctaLabel,
   ctaTo,
 }) {
   return (
     <section className="px-6 py-12 sm:px-10 sm:py-16">
-      <Helmet>
-        <title>{title} | Motoka</title>
-        {description ? <meta name="description" content={description} /> : null}
-      </Helmet>
+      <Seo title={title} description={description} path={path} />
       <div className="mx-auto max-w-3xl">
         <h1 className="text-[32px] font-bold leading-tight text-[#05243F] sm:text-[44px]">
           {title}

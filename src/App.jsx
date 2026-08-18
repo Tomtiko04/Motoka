@@ -76,6 +76,7 @@ import Contact from "./pages/Contact.jsx";
 import HowItWorks from "./pages/HowItWorks.jsx";
 import DriverGuides from "./pages/DriverGuides.jsx";
 import LicenseReminder from "./pages/LicenseReminder.jsx";
+import RenewVehicleLicence from "./pages/RenewVehicleLicence.jsx";
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
@@ -181,6 +182,7 @@ export default function App() {
             <Route path="how-it-works" element={<HowItWorks />} />
             <Route path="guides" element={<DriverGuides />} />
             <Route path="reminders" element={<LicenseReminder />} />
+            <Route path="renew-vehicle-licence" element={<RenewVehicleLicence />} />
           </Route>
 
           {/* Auth Routes */}

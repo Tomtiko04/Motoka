@@ -24,6 +24,7 @@ export default function HowItWorks() {
     <MarketingPage
       title="How Motoka Works"
       description="Four steps: add your car, get reminded, renew online, and buy parts when you need them."
+      path="/how-it-works"
       ctaLabel="Get started"
       ctaTo="/auth/signup"
     >
