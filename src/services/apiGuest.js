@@ -108,3 +108,13 @@ export async function resendGuestReceiptEmail(email) {
   const { data } = await guestApi.post('/guest/receipt/resend', { email });
   return data;
 }
+
+export async function submitContactMessage({ name, email, message, website = '' }) {
+  const { data } = await guestApi.post('/public/contact', {
+    name,
+    email,
+    message,
+    website,
+  });
+  return data;
+}
