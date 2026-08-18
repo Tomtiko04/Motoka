@@ -7,23 +7,23 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const navLinks = [
-    { name: "Home", href: "#" },
-    { name: "Services", href: "#services" },
-    { name: "Testimonials", href: "#testimonials" },
-    { name: "FAQs", href: "#faqs" },
+    { name: "Home", href: "/" },
+    { name: "Services", href: "/#services" },
+    { name: "Testimonials", href: "/#testimonials" },
+    { name: "FAQs", href: "/#faqs" },
   ];
 
   return (
     <div className="w-full">
       <div className="mx-auto px-6 sm:px-10">
         <header className="flex flex-wrap items-center justify-between py-2">
-          <div className="flex cursor-pointer items-center">
+          <Link to="/" className="flex cursor-pointer items-center">
             <img
               src={logo}
               alt="Motoka"
               className="h-8 w-auto object-contain"
             />
-          </div>
+          </Link>
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center h-fit ">
             {navLinks.map((item) => (

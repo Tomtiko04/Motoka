@@ -70,6 +70,12 @@ import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogsPage from "./pages/Blogs.jsx";
 import BlogLayout from "./components/BlogLayout.jsx";
+import MarketingLayout from "./components/MarketingLayout.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
+import HowItWorks from "./pages/HowItWorks.jsx";
+import DriverGuides from "./pages/DriverGuides.jsx";
+import LicenseReminder from "./pages/LicenseReminder.jsx";
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
@@ -169,6 +175,13 @@ export default function App() {
           {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
           <Route path="/" element={<LandingPage />} />
 
+          <Route element={<MarketingLayout />}>
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="how-it-works" element={<HowItWorks />} />
+            <Route path="guides" element={<DriverGuides />} />
+            <Route path="reminders" element={<LicenseReminder />} />
+          </Route>
 
           {/* Auth Routes */}
           <Route element={<BlogLayout />} >
