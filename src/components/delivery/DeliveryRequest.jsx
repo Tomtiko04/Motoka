@@ -15,20 +15,12 @@ function formatPhoneDisplay(raw) {
 
 /**
  * Shared Request Delivery block for plate / driver-license summaries.
- *
- * DELIVERY_ENABLED: set to true once live terminal/courier keys are configured.
  */
-const DELIVERY_ENABLED = false;
-
 export default function DeliveryRequest({
   purpose,
   selectedItems = [],
   onChange,
 }) {
-  // Delivery is temporarily disabled until live courier keys are set up.
-  // The parent component defaults to wantsDelivery: false, so payment flow
-  // continues normally without delivery.
-  if (!DELIVERY_ENABLED) return null;
   const [wantsDelivery, setWantsDelivery] = useState(false);
   const [form, setForm] = useState({
     address: "",

@@ -30,6 +30,12 @@ export async function getPaymentHistory() {
   return data;
 }
 
+/** Authenticated user's document / renewal orders (renewal_orders). */
+export async function getUserOrders(params = {}) {
+  const { data } = await api.get("/orders", { params });
+  return data;
+}
+
 export async function getCarPaymentReceipt(carId) {
   const { data } = await api.get(`/payment/car-receipt/${carId}`);
   return data;
