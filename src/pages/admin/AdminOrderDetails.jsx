@@ -16,6 +16,10 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import { adminCreateShipment } from '../../services/apiDelivery';
+import ShipmentTracker from '../../components/delivery/ShipmentTracker';
+import { useAdminOrderTracking } from '../../hooks/useOrderTracking';
+import { useQueryClient } from '@tanstack/react-query';
 
 const DOC_CATEGORIES = [
   { value: 'registration_certificate', label: 'Registration Certificate' },
@@ -39,7 +43,14 @@ const AdminOrderDetails = () => {
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadCategory, setUploadCategory] = useState('registration_certificate');
   const [uploading, setUploading] = useState(false);
+  const [shipmentBusy, setShipmentBusy] = useState(false);
+  const [actualWeightKg, setActualWeightKg] = useState('');
   const fileInputRef = useRef(null);
+  const queryClient = useQueryClient();
+  const { data: liveTracking, isPending: trackingPending, refetch: refetchTracking } = useAdminOrderTracking(
+    order?.order_number,
+    { enabled: Boolean(order?.order_number && order?.delivery_address) }
+  );
 
   useEffect(() => {
     fetchOrderDetails();
@@ -59,6 +70,7 @@ const AdminOrderDetails = () => {
       const data = await response.json();
       if (data.status) {
         setOrder(data.data);
+        queryClient.invalidateQueries({ queryKey: ['admin-order-tracking', data.data?.order_number] });
         if (data.data?.car?.id) fetchCarDocuments(data.data.car.id);
       }
     } catch {
@@ -519,6 +531,67 @@ const AdminOrderDetails = () => {
                 <p className="text-sm text-gray-900">{order.delivery_contact}</p>
               </div>
               )}
+              <div className="border-t border-gray-100 pt-4 mt-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <TruckIcon className="h-5 w-5 text-gray-400" />
+                  <p className="text-sm font-medium text-gray-900">Courier shipment</p>
+                </div>
+                <ShipmentTracker
+                  progress={liveTracking?.progress || order.progress}
+                  loading={Boolean(order.order_number && trackingPending && !order.progress)}
+                  compact
+                  admin
+                  labelUrl={liveTracking?.shipment?.label_url || order.shipment?.label_url}
+                />
+                {!(liveTracking?.shipment?.waybill_number || order.shipment?.waybill_number) && (
+                  <div className="space-y-3 mt-4">
+                    <label className="block text-xs text-gray-500">
+                      Actual weight (kg) — optional scale override (min 0.1)
+                      <input
+                        type="number"
+                        min="0.1"
+                        step="0.1"
+                        value={actualWeightKg}
+                        onChange={(e) => setActualWeightKg(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        placeholder="Leave blank to use estimate"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      disabled={shipmentBusy}
+                      onClick={async () => {
+                        try {
+                          setShipmentBusy(true);
+                          const shipment = await adminCreateShipment({
+                            order_number: order.order_number || order.slug,
+                            order_type: order.order_type,
+                            weight_kg: actualWeightKg ? Number(actualWeightKg) : undefined,
+                          });
+                          setOrder((prev) => ({ ...prev, shipment }));
+                          await queryClient.invalidateQueries({ queryKey: ['admin-order-tracking', order.order_number] });
+                          await refetchTracking();
+                          const mismatch = shipment?.raw_response?.fee_mismatch;
+                          if (mismatch && Math.abs(Number(mismatch.difference_kobo) || 0) > 100) {
+                            toast.success(
+                              `Waybill generated. Customer paid ₦${(mismatch.customer_kobo / 100).toLocaleString('en-NG')}; Terminal charged ₦${(mismatch.booked_kobo / 100).toLocaleString('en-NG')}.`
+                            );
+                          } else {
+                            toast.success('Waybill generated');
+                          }
+                        } catch (err) {
+                          toast.error(err.message || 'Failed to generate waybill');
+                        } finally {
+                          setShipmentBusy(false);
+                        }
+                      }}
+                      className="w-full bg-slate-800 text-white py-2 px-4 rounded-lg hover:bg-slate-900 disabled:opacity-50 text-sm font-medium"
+                    >
+                      {shipmentBusy ? 'Generating…' : 'Generate waybill'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           )}

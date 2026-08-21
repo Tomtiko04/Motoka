@@ -73,7 +73,7 @@ function getStatusDescription(statusKey, order) {
   const descriptions = {
     awaiting_payment: "Complete payment to confirm this order.",
     confirmed: "We have confirmed your payment. Next: Processing.",
-    processing: "Your parts are being sourced and packed.",
+    processing: "Your order is being prepared for delivery.",
     out_for_delivery: pickup
       ? "Your order is ready for pickup at the selected pickup point."
       : "Your order is on the way to your delivery address.",
@@ -138,7 +138,7 @@ export default function LadipoMyOrders({ onNavigate }) {
           setError(
             e?.response?.data?.message ||
               e?.message ||
-              "Could not load Ladipo orders.",
+              "Could not load orders.",
           );
         }
       } finally {
@@ -159,7 +159,7 @@ export default function LadipoMyOrders({ onNavigate }) {
         <h2 className="text-base font-medium md:text-lg">My Orders</h2>
       </div>
       <p className="mb-4 text-sm text-gray-500">
-        Ladipo marketplace orders (parts and delivery).
+        Track payment and delivery for any Motoka order that needs delivery.
       </p>
 
       <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 md:space-y-4">
@@ -174,7 +174,7 @@ export default function LadipoMyOrders({ onNavigate }) {
         ) : orders.length === 0 ? (
           <div className="my-10 flex items-center justify-center">
             <p className="text-base font-medium text-gray-500">
-              No Ladipo orders yet
+              No orders yet
             </p>
           </div>
         ) : (

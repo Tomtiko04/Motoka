@@ -3,8 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useGetState, useGetLocalGovernment } from "./useRenew";
 import { useInitializePayment } from "./usePayment";
 import { PAYMENT_TYPES } from "../payment/config/paymentTypes";
-import { fetchPaymentHeads, fetchPaymentSchedules } from "../../services/apiMonicredit";
-import { checkExistingPayments } from "../../services/apiPayment";
+import { fetchPaymentHeads, fetchPaymentSchedules, checkExistingPayments } from "../../services/apiPayment";
 import { updateProfile } from "../../services/apiProfile";
 import { FaArrowLeft, FaCarAlt } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatCurrency";
@@ -16,6 +15,7 @@ import { ClipLoader } from "react-spinners";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useDeliveryQuote } from "../../hooks/useDeliveryQuote";
 
 const NIGERIAN_STATES = [
   "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
@@ -89,6 +89,19 @@ export default function RenewLicense() {
   const [pendingSkippedDocs, setPendingSkippedDocs] = useState([]);
 
   const isState = state?.data;
+
+  const selectedItemKeys = selectedSchedules.map((s) => s?.id || s).filter(Boolean);
+  const { feeKobo: quotedFee, loading: quoting, error: quoteError } = useDeliveryQuote({
+    enabled: wantsDelivery,
+    state: deliveryDetails.state,
+    lga: deliveryDetails.lg,
+    purpose: "renewal",
+    selectedItems: selectedItemKeys,
+  });
+
+  useEffect(() => {
+    setDeliveryDetails((prev) => ({ ...prev, fee: String(quotedFee || 0) }));
+  }, [quotedFee]);
 
   // Fetch payment heads and schedules on mount
   // Fetch payment heads and schedules on mount
@@ -249,7 +262,7 @@ export default function RenewLicense() {
         deliveryDetails.lg.trim() !== "" &&
         deliveryDetails.contact.trim() !== "";
 
-      return hasValidSchedules && hasCompleteDeliveryDetails;
+      return hasValidSchedules && hasCompleteDeliveryDetails && !quoting && !quoteError && Number(deliveryDetails.fee) > 0;
     }
 
     // If delivery is not wanted, only validate schedules
@@ -311,7 +324,7 @@ export default function RenewLicense() {
         state: selectedState.code,           // Backend needs code
         stateName: selectedStateName,        // Display needs name
         lg: "",
-        fee: selectedState.delivery_fee || "0",
+        fee: "0",
       }));
       // Fetch LGAs using state code
       fetchLGAs(selectedState.code);
@@ -338,7 +351,9 @@ export default function RenewLicense() {
   const getStateId = () => {
     if (!deliveryDetails.state || !isState) return null;
     const selectedState = isState.find(
-      (s) => s.state_name === deliveryDetails.state,
+      (s) =>
+        s.code === deliveryDetails.state ||
+        s.state_name === deliveryDetails.state,
     );
     return selectedState?.id || null;
   };
@@ -368,13 +383,13 @@ export default function RenewLicense() {
     }
 
     // Create payload for bulk payment (supports multiple schedules)
-    // Note: payment_gateway defaults to 'monicredit' in apiPayment.js
+    // Note: payment_gateway defaults to 'monipay' in apiPayment.js
     // Users can change to Paystack in PaymentOptions.jsx after navigation
     const paymentPayload = {
       car_slug: carDetail?.slug,
       payment_schedule_id: availableSchedules.map((schedule) => schedule.id), // Array for bulk payments
       renewal_state: renewalState || undefined,
-      // payment_gateway will default to 'monicredit' via apiPayment.js
+      // payment_gateway will default to 'monipay' via apiPayment.js
       // Users can select Paystack in PaymentOptions page
       // Delivery details are optional for license renewal - only include if provided
       ...(deliveryDetails.address.trim() !== "" ||
@@ -485,7 +500,7 @@ export default function RenewLicense() {
       const paymentPayload = {
         car_slug: carDetail?.slug,
         payment_schedule_id: availableSchedules.map((s) => s.id),
-        payment_gateway: 'monicredit',
+        payment_gateway: 'monipay',
         renewal_state: renewalState || undefined,
         ...(deliveryDetails.address.trim() !== "" ||
             deliveryDetails.contact.trim() !== "" ||
@@ -519,21 +534,20 @@ export default function RenewLicense() {
     // Normalize into the structure PaymentOptions expects
     let normalized = {};
     // Check gateway field first, then check for gateway-specific fields
-    const isMonicredit = inner?.gateway === 'monicredit' || 
-                        inner?.customer || 
-                        inner?.account_number || 
-                        inner?.bank_name;
-    const isPaystack = inner?.gateway === 'paystack' || 
-                      (inner?.authorization_url && !isMonicredit);
+    const isMonipay = inner?.gateway === 'monipay' ||
+                      (inner?.authorization_url && inner?.gateway !== 'paystack' && !inner?.account_number);
+    const isPaystack = inner?.gateway === 'paystack' ||
+                      (inner?.authorization_url && inner?.gateway !== 'monipay' && !inner?.account_number);
     
-    if (isPaystack) {
-      // Paystack init
+    if (isPaystack || isMonipay) {
       const authUrl = inner.authorization_url;
       const reference = inner.reference || inner.transaction_id;
+      const key = isMonipay ? 'monipay' : 'paystack';
       normalized = {
         type: PAYMENT_TYPES.LICENSE_RENEWAL,
-        paystack: {
+        [key]: {
           authorization_url: authUrl,
+          access_code: inner.access_code || null,
           reference,
         },
         amount: inner.amount,
@@ -563,26 +577,32 @@ export default function RenewLicense() {
       car_slug: carDetail?.slug,
       selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
       // Only include delivery details if provided
-      ...(deliveryDetails.address.trim() !== "" || 
-          deliveryDetails.contact.trim() !== "" || 
-          deliveryDetails.state.trim() !== "" || 
+      ...(deliveryDetails.address.trim() !== "" &&
+          deliveryDetails.contact.trim() !== "" &&
+          deliveryDetails.state.trim() !== "" &&
           deliveryDetails.lg.trim() !== "" ? {
         deliveryDetails: {
-          ...(deliveryDetails.address.trim() !== "" && { address: deliveryDetails.address }),
-          ...(deliveryDetails.contact.trim() !== "" && { contact: deliveryDetails.contact }),
+          address: deliveryDetails.address.trim(),
+          contact: deliveryDetails.contact.trim(),
+          state: deliveryDetails.state,
+          lga: deliveryDetails.lg,
+          fee: Number(deliveryDetails.fee) || 0,
           ...(getStateId() && { state_id: getStateId() }),
           ...(getLgaId() && { lga_id: getLgaId() }),
         },
-        // Only include meta_data if delivery details are provided
+        delivery_details: {
+          address: deliveryDetails.address.trim(),
+          contact: deliveryDetails.contact.trim(),
+          state: deliveryDetails.state,
+          lga: deliveryDetails.lg,
+        },
         meta_data: {
-          ...(deliveryDetails.address.trim() !== "" && { 
-            delivery_address: deliveryDetails.address,
-            address: deliveryDetails.address 
-          }),
-          ...(deliveryDetails.contact.trim() !== "" && { 
-            delivery_contact: deliveryDetails.contact,
-            contact: deliveryDetails.contact 
-          }),
+          address: deliveryDetails.address.trim(),
+          delivery_address: deliveryDetails.address.trim(),
+          contact: deliveryDetails.contact.trim(),
+          delivery_contact: deliveryDetails.contact.trim(),
+          state: deliveryDetails.state,
+          lga: deliveryDetails.lg,
           ...(getStateId() && { state_id: getStateId() }),
           ...(getLgaId() && { lga_id: getLgaId() }),
         },
@@ -794,7 +814,8 @@ export default function RenewLicense() {
                 )}
               </div>
 
-              {/* Delivery Checkbox */}
+              {/* Delivery — temporarily disabled until live courier keys are configured */}
+              {false && (
               <div className="mb-6">
                 <label className="group flex w-full cursor-pointer items-center gap-3 rounded-full bg-[#F4F5FC] px-6 py-3 transition-all hover:bg-[#FFF4DD]/50">
                   <input
@@ -913,7 +934,13 @@ export default function RenewLicense() {
                       <input
                         disabled={true}
                         type="text"
-                        value={formatCurrency(Number(deliveryDetails.fee) / 100)}
+                        value={
+                          quoting
+                            ? "Calculating…"
+                            : quoteError
+                              ? quoteError
+                              : formatCurrency(Number(deliveryDetails.fee) / 100)
+                        }
                         onChange={(e) => handleDeliveryChange("fee", e.target.value)}
                         className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
                         placeholder="Enter delivery fee"
@@ -949,6 +976,8 @@ export default function RenewLicense() {
                   </motion.div>
                 )}
               </AnimatePresence>
+              </div>
+              )}
 
               {/* Phone required (Google OAuth users) — inline input, same Pay Now button */}
               {monicreditPhoneError && (

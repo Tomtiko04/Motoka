@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { IoIosArrowBack } from "react-icons/io";
 import {
   PAYMENT_METHODS,
@@ -9,7 +9,7 @@ import {
 } from "./config/paymentTypes";
 import { usePaymentVerification } from "./hooks/usePayment";
 import { initializePaystackPayment } from "../../services/apiPaystack";
-import { initiateMonicreditPayment } from "../../services/apiMonicredit";
+import { initializeMonipayPayment } from "../../services/apiMonipay";
 import { abandonPayment } from "../../services/apiPayment";
 import { getWallet, payFromWallet } from "../../services/apiWallet";
 import { payLadipoOrder, verifyLadipoPayment } from "../../services/apiLadipo";
@@ -18,10 +18,11 @@ import { useLadipoPaymentModalStore } from "../../store/ladipoPaymentModalStore"
 import AutoRenewalPrompt from "./components/AutoRenewalPrompt";
 import PhonePromptModal from "./components/PhonePromptModal";
 import { useProfile } from "../settings/hooks/useProfile";
+import { pathAfterDocumentPayment, pickOrderNumber } from "./afterPaymentNavigate";
 
 const paymentMethods = [
   { id: PAYMENT_METHODS.PAYSTACK, label: "Pay Via Paystack", icon: "💳" },
-  { id: PAYMENT_METHODS.MONICREDIT, label: "Pay Via Monicredit" },
+  { id: PAYMENT_METHODS.MONIPAY, label: "Pay Via Monipay" },
 ];
 
 export default function PaymentOptions() {
@@ -30,69 +31,77 @@ export default function PaymentOptions() {
   const queryClient = useQueryClient();
   const [paymentSession, setPaymentSession] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState(
-    PAYMENT_METHODS.MONICREDIT,
+    PAYMENT_METHODS.MONIPAY,
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isPaymentMethodConfirmed, setIsPaymentMethodConfirmed] = useState(false);
-  const [monicreditFallbackError, setMonicreditFallbackError] = useState(null);
+  const [monipayInitError, setMonipayInitError] = useState(null);
   const clearLadipoCart = useCartStore((s) => s.clearCart);
   const [showAutoRenewal, setShowAutoRenewal] = useState(false);
-  const [wallet, setWallet] = useState(null);
+  const paidOrderNumberRef = useRef(null);
   const [walletPaying, setWalletPaying] = useState(false);
+  const [userPickedMethod, setUserPickedMethod] = useState(false);
 
-  // Load wallet balance so we can offer "pay from wallet" on car renewals.
-  useEffect(() => {
-    let alive = true;
-    getWallet().then((w) => { if (alive) setWallet(w); }).catch(() => {});
-    return () => { alive = false; };
-  }, []);
+  // Load wallet via React Query so cached data is shown instantly on navigation
+  // and there is no flash of ₦0 / "Insufficient" while the request is in-flight.
+  const { data: wallet, isLoading: walletLoading } = useQuery({
+    queryKey: ['wallet'],
+    queryFn: getWallet,
+    staleTime: 30_000,
+  });
 
-  // Inline phone capture when Monicredit (bank transfer) needs a phone number
+  // Inline phone capture when a gateway still requires a phone number
   const [showPhonePrompt, setShowPhonePrompt] = useState(false);
   const [phoneSaving, setPhoneSaving] = useState(false);
   const [phoneError, setPhoneError] = useState(null);
   const { updateUserProfile } = useProfile();
 
-  // For Monicredit
-  const customer = paymentSession?.monicredit?.data?.customer;
-  const monicreditData = paymentSession?.monicredit?.data;
-  // Account details may be on the root data object OR nested in customer depending on API version
-  const monicreditAccountNumber = customer?.account_number || monicreditData?.account_number;
-  const monicreditBankName      = customer?.bank_name      || monicreditData?.bank_name;
-  const monicreditAccountName   = customer?.account_name   || monicreditData?.account_name;
-  // Get total_amount in naira (backend now sends both total_amount and amount in naira for Monicredit)
-  // Prefer total_amount, fallback to amount (both should be in naira from backend)
-  // For Ladipo: amount is stored in kobo at paymentSession.amount — convert to naira as fallback
-  const totalAmount = paymentSession?.monicredit?.data?.total_amount || 
-                      paymentSession?.monicredit?.data?.amount || 
-                      (paymentSession?.amount ? paymentSession.amount / 100 : null);
+  // Helper: delivery fee in Naira from session (stored as kobo in deliveryDetails.fee)
+  const sessionDeliveryFeeNaira = (() => {
+    const feeKobo = Number(
+      paymentSession?.deliveryDetails?.fee ||
+      paymentSession?.delivery_details?.fee ||
+      0
+    );
+    return feeKobo / 100;
+  })();
+
+  const totalAmount = paymentSession?.monipay?.reference || paymentSession?.paystack?.reference
+    ? Number(paymentSession?.amount || 0) / 100
+    : (paymentSession?.amount
+        ? paymentSession.amount / 100
+        : Number(paymentSession?.price || 0) + sessionDeliveryFeeNaira) || null;
   
   // Backend always returns amount in kobo — divide by 100 for display
-  const paystackAmount = paymentSession?.paystack?.reference
+  const paystackAmount = (paymentSession?.paystack?.reference || paymentSession?.monipay?.reference)
     ? Number(paymentSession?.amount || 0) / 100
-    : Number(paymentSession?.price || paymentSession?.amount || 0);
+    : Number(paymentSession?.price || paymentSession?.amount || 0) + sessionDeliveryFeeNaira;
 
-  // ── Pay-from-wallet (car renewals only; /wallet/pay prices renewals) ────────
-  const isRenewalPayment =
+  // ── Pay-from-wallet (renewal, plate, driver license — not Ladipo) ────────
+  const isWalletProduct =
     paymentSession?.type === PAYMENT_TYPES.LICENSE_RENEWAL ||
-    paymentSession?.type === PAYMENT_TYPES.VEHICLE_PAPER;
+    paymentSession?.type === PAYMENT_TYPES.VEHICLE_PAPER ||
+    paymentSession?.type === PAYMENT_TYPES.PLATE_NUMBER ||
+    paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE ||
+    paymentSession?.type === "drivers_license";
   const fmtN = (n) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
   const renewalCostNaira = Number(totalAmount || paystackAmount || 0);
   const walletBalanceNaira = wallet ? Number(wallet.balance_kobo || 0) / 100 : 0;
-  const walletEligible = isRenewalPayment && !!wallet && wallet.status !== "frozen";
+  const walletEligible = isWalletProduct && !!wallet && wallet.status !== "frozen";
   const walletSufficient = walletEligible && renewalCostNaira > 0 && walletBalanceNaira >= renewalCostNaira;
   const walletDetails = {
     availableBalance: fmtN(walletBalanceNaira),
     renewalCost: fmtN(renewalCostNaira),
     newBalance: fmtN(Math.max(0, walletBalanceNaira - renewalCostNaira)),
   };
-  // Offer wallet first on eligible renewals (matches the payment-options design).
-  const methodsToShow = walletEligible
+  // Only offer wallet once data is confirmed loaded — prevents "Insufficient" flash
+  const showWalletOption = isWalletProduct && !walletLoading && wallet?.status !== "frozen";
+  const methodsToShow = showWalletOption
     ? [{ id: PAYMENT_METHODS.WALLET, label: `Wallet Balance: ${fmtN(walletBalanceNaira)}` }, ...paymentMethods]
     : paymentMethods;
 
-  const { verifyMonicredit, verifyPaystack } = usePaymentVerification();
+  const { verifyPaystack } = usePaymentVerification();
 
   // Invalidate cars + notifications cache so dashboard and bell update immediately
   const navigateAfterPayment = useCallback((state) => {
@@ -110,16 +119,20 @@ export default function PaymentOptions() {
       return;
     }
 
-    navigate('/dashboard', { state });
+    const orderNumber = pickOrderNumber(state?.order_number, paidOrderNumberRef.current);
+    if (orderNumber) paidOrderNumberRef.current = orderNumber;
+    const dest = pathAfterDocumentPayment({ orderNumber, session: paymentSession });
+    navigate(dest, { state });
   }, [navigate, queryClient, paymentSession]);
 
   // Abandon any initialized-but-unpaid transaction when user leaves this page
   useEffect(() => {
     return () => {
       const paystackRef = paymentSession?.paystack?.reference;
+      const monipayRef = paymentSession?.monipay?.reference;
       const monicreditRef = paymentSession?.monicredit?.data?.reference ||
                             paymentSession?.monicredit?.data?.orderid;
-      const ref = paystackRef || monicreditRef;
+      const ref = paystackRef || monipayRef || monicreditRef;
       if (ref && isPaymentMethodConfirmed && !isProcessing && paymentSession?.type !== PAYMENT_TYPES.LADIPO) {
         abandonPayment(ref, 'User left payment page');
       }
@@ -143,19 +156,28 @@ export default function PaymentOptions() {
         }
 
         setPaymentSession(sessionData);
-        const defaultMethod = sessionData.method || PAYMENT_METHODS.MONICREDIT;
-        setSelectedMethod(defaultMethod);
-
-        // FIX 1: If Monicredit account details already exist (e.g. the user
-        // came from RenewLicense which already called /payments/initialize),
-        // skip re-initialization. Showing "Confirm Payment Method" here would
-        // create a second transaction and immediately abandon the first one.
+        const isWalletProduct =
+          sessionData.type === PAYMENT_TYPES.LICENSE_RENEWAL ||
+          sessionData.type === PAYMENT_TYPES.VEHICLE_PAPER ||
+          sessionData.type === PAYMENT_TYPES.PLATE_NUMBER ||
+          sessionData.type === PAYMENT_TYPES.DRIVERS_LICENSE ||
+          sessionData.type === "drivers_license";
         const monicreditData = sessionData.monicredit?.data;
         const alreadyInitialized =
+          sessionData.monipay?.authorization_url ||
+          sessionData.paystack?.authorization_url ||
           monicreditData?.account_number ||
           monicreditData?.customer?.account_number;
-        if (alreadyInitialized && defaultMethod === PAYMENT_METHODS.MONICREDIT) {
-          setIsPaymentMethodConfirmed(true);
+
+        if (isWalletProduct) {
+          setSelectedMethod(PAYMENT_METHODS.WALLET);
+          setIsPaymentMethodConfirmed(false);
+        } else {
+          const defaultMethod = sessionData.method || PAYMENT_METHODS.MONIPAY;
+          setSelectedMethod(defaultMethod);
+          if (alreadyInitialized && (defaultMethod === PAYMENT_METHODS.MONIPAY || defaultMethod === PAYMENT_METHODS.PAYSTACK)) {
+            setIsPaymentMethodConfirmed(true);
+          }
         }
       } catch (err) {
         console.error("Payment initialization error:", err);
@@ -166,6 +188,20 @@ export default function PaymentOptions() {
 
     initializePaymentSession();
   }, [location, navigate]);
+
+  useEffect(() => {
+    if (walletLoading || userPickedMethod || !isWalletProduct) return;
+    if (wallet?.status === "frozen") {
+      const monicreditData = paymentSession?.monicredit?.data;
+      const alreadyInitialized =
+        paymentSession?.monipay?.authorization_url ||
+        paymentSession?.paystack?.authorization_url ||
+        monicreditData?.account_number ||
+        monicreditData?.customer?.account_number;
+      setSelectedMethod(PAYMENT_METHODS.MONIPAY);
+      setIsPaymentMethodConfirmed(Boolean(alreadyInitialized));
+    }
+  }, [wallet, walletLoading, userPickedMethod, isWalletProduct, paymentSession]);
 
   // Handle payment method selection.
   //
@@ -181,6 +217,7 @@ export default function PaymentOptions() {
     if (isInitializing) return; // a confirm-button click is in-flight; don't race
 
     const currentRef =
+      paymentSession?.monipay?.reference ||
       paymentSession?.monicredit?.data?.reference ||
       paymentSession?.monicredit?.data?.orderid ||
       paymentSession?.paystack?.reference;
@@ -193,16 +230,13 @@ export default function PaymentOptions() {
       abandonPayment(currentRef, 'User switched payment method');
     }
 
+    setUserPickedMethod(true);
     setSelectedMethod(method);
-    setMonicreditFallbackError(null);
+    setMonipayInitError(null);
 
-    // Auto-confirm Monicredit if account details still exist in the session
-    // (e.g. user switches back from Paystack after a prior Monicredit init).
-    const monicreditData = paymentSession?.monicredit?.data;
-    const alreadyInitialized =
-      monicreditData?.account_number || monicreditData?.customer?.account_number;
     setIsPaymentMethodConfirmed(
-      method === PAYMENT_METHODS.MONICREDIT && alreadyInitialized
+      (method === PAYMENT_METHODS.MONIPAY && Boolean(paymentSession?.monipay?.authorization_url || paymentSession?.monipay?.access_code)) ||
+      (method === PAYMENT_METHODS.PAYSTACK && Boolean(paymentSession?.paystack?.authorization_url))
     );
   };
 
@@ -210,22 +244,56 @@ export default function PaymentOptions() {
   const buildPaymentPayload = () => {
     const car_slug = paymentSession?.car_slug || paymentSession?.car_id || paymentSession?.monicredit?.data?.car_slug;
 
+    const deliveryMeta = () => {
+      const delivery = paymentSession?.deliveryDetails || paymentSession?.delivery_details || paymentSession?.meta_data || {};
+      const address = delivery?.address || delivery?.delivery_address || "";
+      const contact = delivery?.contact || delivery?.delivery_contact || "";
+      const stateId = delivery?.state_id;
+      const state = delivery?.state;
+      const lgaId = delivery?.lga_id;
+      const lga = delivery?.lga || delivery?.lg;
+      const hasComplete = address.trim() && contact.trim() && (stateId || state) && (lgaId || lga);
+      if (!hasComplete) return {};
+      return {
+        delivery_details: {
+          address: address.trim(),
+          contact: contact.trim(),
+          ...(state ? { state } : {}),
+          ...(lga ? { lga } : {}),
+          ...(stateId ? { state_id: stateId } : {}),
+          ...(lgaId ? { lga_id: lgaId } : {}),
+        },
+        meta_data: {
+          address: address.trim(),
+          delivery_address: address.trim(),
+          contact: contact.trim(),
+          delivery_contact: contact.trim(),
+          ...(state ? { state } : {}),
+          ...(lga ? { lga } : {}),
+          ...(stateId ? { state_id: stateId } : {}),
+          ...(lgaId ? { lga_id: lgaId } : {}),
+        },
+      };
+    };
+
     // ── Driver license payment: no car, no schedules ─────────────────────────
     if (paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE || paymentSession?.type === 'drivers_license') {
       return {
         payment_type: 'driver_license',
         license_type: paymentSession.license_type || 'new',
         duration: paymentSession.duration || null,
+        ...deliveryMeta(),
       };
     }
 
-    // ── Plate number payment: no schedules or delivery needed ────────────────
+    // ── Plate number payment ─────────────────────────────────────────────────
     if (paymentSession?.type === PAYMENT_TYPES.PLATE_NUMBER) {
       return {
         car_slug,
         payment_type: 'plate_number',
         plate_type: paymentSession.plate_type,
         ...(paymentSession.sub_type ? { sub_type: paymentSession.sub_type } : {}),
+        ...deliveryMeta(),
       };
     }
 
@@ -254,53 +322,11 @@ export default function PaymentOptions() {
       }
     }
 
-    const delivery = paymentSession?.deliveryDetails || paymentSession?.delivery_details || paymentSession?.meta_data || {};
-
-    // Extract delivery fields
-    const address = delivery?.address || delivery?.delivery_address || "";
-    const contact = delivery?.contact || delivery?.delivery_contact || "";
-    const stateId = delivery?.state_id;
-    const state = delivery?.state;
-    const lgaId = delivery?.lga_id;
-    const lga = delivery?.lga;
-
-    // For license renewal, delivery details are optional
-    // For other payment types, backend requires: address, state/state_id, lga/lga_id, and contact
-    const hasAddress = address && address.trim() !== "";
-    const hasContact = contact && contact.trim() !== "";
-    const hasState = (stateId !== undefined && stateId !== null && stateId !== "") || 
-                     (state !== undefined && state !== null && state !== "");
-    const hasLga = (lgaId !== undefined && lgaId !== null && lgaId !== "") || 
-                   (lga !== undefined && lga !== null && lga !== "");
-
-    // Backend requires: if ANY delivery field is sent, ALL must be complete
-    // For license renewal: send meta_data only if ALL fields are provided, otherwise omit entirely
-    // For other types: require all fields to be complete
-    const hasCompleteDeliveryDetails = hasAddress && hasContact && hasState && hasLga;
-
-    const payload = {
+    return {
       car_slug,
-      payment_schedule_id
+      payment_schedule_id,
+      ...deliveryMeta(),
     };
-
-    // Only include meta_data if ALL delivery details are complete
-    // This prevents backend validation errors (backend rejects partial delivery details)
-    if (hasCompleteDeliveryDetails) {
-      payload.meta_data = {
-        address: address.trim(),
-        delivery_address: address.trim(),
-        contact: contact.trim(),
-        delivery_contact: contact.trim(),
-        ...(stateId !== undefined && stateId !== null && stateId !== "" ? { state_id: stateId } : {}),
-        ...(stateId === undefined && state && state.trim() !== "" ? { state: state.trim() } : {}),
-        ...(lgaId !== undefined && lgaId !== null && lgaId !== "" ? { lga_id: lgaId } : {}),
-        ...(lgaId === undefined && lga && lga.trim() !== "" ? { lga: lga.trim() } : {}),
-      };
-    }
-    // For license renewal, if delivery details are incomplete, we simply don't send meta_data
-    // Backend will handle this as "no delivery required"
-
-    return payload;
   };
 
   // Confirm and initialize selected payment method
@@ -321,13 +347,15 @@ export default function PaymentOptions() {
           payment_gateway: selectedMethod,
         });
 
-        if (selectedMethod === PAYMENT_METHODS.PAYSTACK) {
+        if (selectedMethod === PAYMENT_METHODS.PAYSTACK || selectedMethod === PAYMENT_METHODS.MONIPAY) {
           if (result?.authorization_url) {
+            const key = selectedMethod === PAYMENT_METHODS.MONIPAY ? 'monipay' : 'paystack';
             setPaymentSession(prev => {
               const updated = {
                 ...prev,
-                paystack: {
+                [key]: {
                   authorization_url: result.authorization_url,
+                  access_code: result.access_code || null,
                   reference: result.reference,
                 },
                 amount: result.amount || prev?.amount,
@@ -336,37 +364,12 @@ export default function PaymentOptions() {
               return updated;
             });
             setIsPaymentMethodConfirmed(true);
-            toast.success('Paystack payment initialized successfully');
+            toast.success(`${selectedMethod === PAYMENT_METHODS.MONIPAY ? 'Monipay' : 'Paystack'} payment initialized successfully`);
           } else {
-            toast.error('Failed to initialize Paystack payment');
+            toast.error(`Failed to initialize ${selectedMethod === PAYMENT_METHODS.MONIPAY ? 'Monipay' : 'Paystack'} payment`);
           }
         } else {
-          // Monicredit — result already unwrapped by apiLadipo
-          if (result) {
-            setPaymentSession(prev => {
-              const updated = {
-                ...prev,
-                monicredit: {
-                  data: {
-                    ...result,
-                    // Normalize: ensure customer object exists for PaymentOptions UI
-                    customer: result.customer || {
-                      account_number: result.account_number || result.accountNumber,
-                      bank_name: result.bank_name || result.bankName,
-                      account_name: result.account_name || result.accountName,
-                    },
-                    reference: result.reference || result.orderid || orderNumber,
-                  },
-                },
-              };
-              try { sessionStorage.setItem("paymentData", JSON.stringify(updated)); } catch {}
-              return updated;
-            });
-            setIsPaymentMethodConfirmed(true);
-            toast.success('Monicredit payment initialized successfully');
-          } else {
-            toast.error('Failed to initialize Monicredit payment');
-          }
+          toast.error('Unsupported payment method');
         }
         return; // Skip standard flow below
       }
@@ -426,22 +429,28 @@ export default function PaymentOptions() {
         } else {
           toast.error('Failed to initialize Paystack payment');
         }
-      } else if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
-        // Initialize Monicredit
-        payload.payment_gateway = 'monicredit';
-        setMonicreditFallbackError(null);
+      } else if (selectedMethod === PAYMENT_METHODS.MONIPAY) {
+        payload.payment_gateway = 'monipay';
+        setMonipayInitError(null);
 
-        const initRes = await initiateMonicreditPayment(payload);
+        const initRes = await initializeMonipayPayment(payload);
         const responseData = initRes?.data || initRes;
+        const authorizationUrl = responseData?.authorization_url || responseData?.data?.authorization_url;
+        const accessCode = responseData?.access_code || responseData?.data?.access_code;
+        const reference = responseData?.reference || responseData?.data?.reference || responseData?.transaction_id;
+        const amount = responseData?.amount || responseData?.data?.amount;
 
-        if (initRes?.status && responseData) {
+        if ((authorizationUrl || accessCode) && reference) {
           setPaymentSession(prev => {
             const updated = {
               ...prev,
-              monicredit: {
-                ...(prev?.monicredit || {}),
-                data: responseData
-              }
+              monipay: {
+                ...(prev?.monipay || {}),
+                authorization_url: authorizationUrl,
+                access_code: accessCode,
+                reference,
+              },
+              amount: amount || prev?.amount
             };
             try {
               sessionStorage.setItem("paymentData", JSON.stringify(updated));
@@ -451,25 +460,24 @@ export default function PaymentOptions() {
             return updated;
           });
           setIsPaymentMethodConfirmed(true);
-          toast.success('Monicredit payment initialized successfully');
+          toast.success('Monipay payment initialized successfully');
         } else {
-          toast.error(initRes?.message || 'Failed to initialize Monicredit payment');
+          toast.error(initRes?.message || 'Failed to initialize Monipay payment');
         }
       }
     } catch (err) {
       console.error("Payment initialization error:", err);
       const errMsg = err.response?.data?.message || err.message || 'Failed to initialize payment';
 
-      // Monicredit (bank transfer) requires a phone number to generate the
-      // virtual account. If that's the reason it failed, prompt for the phone
-      // inline and retry — rather than dumping the user out to Settings.
+      // Monipay requires a phone number to generate the virtual account.
+      // If that's the reason it failed, prompt for the phone inline and retry
+      // rather than dumping the user out to Settings.
       const needsPhone = /phone number is required/i.test(errMsg);
-      if (selectedMethod === PAYMENT_METHODS.MONICREDIT && needsPhone) {
+      if (selectedMethod === PAYMENT_METHODS.MONIPAY && needsPhone) {
         setPhoneError(null);
         setShowPhonePrompt(true);
-      } else if (selectedMethod === PAYMENT_METHODS.MONICREDIT) {
-        // Any other Monicredit failure: offer a clear path to switch to card
-        setMonicreditFallbackError(errMsg);
+      } else if (selectedMethod === PAYMENT_METHODS.MONIPAY) {
+        setMonipayInitError(errMsg);
       } else {
         toast.error(errMsg);
       }
@@ -478,18 +486,18 @@ export default function PaymentOptions() {
     }
   };
 
-  // Switch to Paystack after Monicredit init failure. Abandon any prior
-  // Monicredit reference explicitly so the row gets a clean reason rather
-  // than the implicit "abandoned because re-init landed" cleanup the backend
-  // does. Makes admin Payments noise filterable.
+  // Switch to Paystack after Monipay init failure. Abandon any prior
+  // Monipay reference so the row gets a clean reason logged in admin.
   const handleSwitchToPaystack = () => {
+    const monipayRef = paymentSession?.monipay?.reference;
     const monicreditRef =
       paymentSession?.monicredit?.data?.reference ||
       paymentSession?.monicredit?.data?.orderid;
-    if (monicreditRef) {
-      abandonPayment(monicreditRef, 'Monicredit init failed, user switched to Paystack');
+    const priorRef = monipayRef || monicreditRef;
+    if (priorRef) {
+      abandonPayment(priorRef, 'Payment init failed, user switched to Paystack');
     }
-    setMonicreditFallbackError(null);
+    setMonipayInitError(null);
     setSelectedMethod(PAYMENT_METHODS.PAYSTACK);
     setIsPaymentMethodConfirmed(false);
   };
@@ -501,15 +509,26 @@ export default function PaymentOptions() {
     setWalletPaying(true);
     try {
       const payload = buildPaymentPayload();
-      if (!payload.car_slug) {
+      const isDriverLicense =
+        payload.payment_type === "driver_license" ||
+        paymentSession?.type === PAYMENT_TYPES.DRIVERS_LICENSE;
+      if (!isDriverLicense && !payload.car_slug) {
         toast.error("Car information is missing. Please try again.");
         return;
       }
       const result = await payFromWallet(payload);
       if (result?.order_id) {
-        setWallet((w) => (w ? { ...w, balance_kobo: result.balance_kobo } : w));
+        const unusedRef =
+          paymentSession?.monipay?.reference ||
+          paymentSession?.monicredit?.data?.reference ||
+          paymentSession?.monicredit?.data?.orderid ||
+          paymentSession?.paystack?.reference;
+        if (unusedRef) {
+          abandonPayment(unusedRef, "User paid with wallet");
+        }
+        queryClient.setQueryData(['wallet'], (old) => old ? { ...old, balance_kobo: result.balance_kobo } : old);
         toast.success("Paid from wallet successfully");
-        navigateAfterPayment({ paymentSuccess: true, paymentMethod: "wallet", reference: result.reference });
+        navigateAfterPayment({ paymentSuccess: true, paymentMethod: "wallet", reference: result.reference, order_number: result.order_number });
       } else {
         toast.error("Wallet payment could not be completed.");
       }
@@ -634,6 +653,86 @@ export default function PaymentOptions() {
     }
   };
 
+  const loadMonipayInline = () =>
+    new Promise((resolve, reject) => {
+      if (window.MonipayPop) {
+        resolve(window.MonipayPop);
+        return;
+      }
+      const existing = document.querySelector('script[src="https://js.monipay.ng/v2/inline.js"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(window.MonipayPop));
+        existing.addEventListener("error", reject);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://js.monipay.ng/v2/inline.js";
+      script.async = true;
+      script.onload = () => resolve(window.MonipayPop);
+      script.onerror = () => reject(new Error("Failed to load Monipay checkout"));
+      document.body.appendChild(script);
+    });
+
+  const handleMonipayPayment = async () => {
+    try {
+      const checkoutUrl = paymentSession?.monipay?.authorization_url;
+      const accessCode = paymentSession?.monipay?.access_code;
+      const reference = paymentSession?.monipay?.reference;
+
+      if (!checkoutUrl && !accessCode) {
+        toast.error("Payment not initialized. Please confirm your payment method first.");
+        return;
+      }
+
+      if (reference) {
+        storePaymentReference(reference, PAYMENT_METHODS.MONIPAY);
+      }
+
+      if (accessCode) {
+        try {
+          const MonipayPop = await loadMonipayInline();
+          if (MonipayPop) {
+            const popup = new MonipayPop();
+            popup.resumeTransaction(accessCode);
+            toast.success("Opening Monipay checkout...");
+            return;
+          }
+        } catch (inlineErr) {
+          console.warn("Monipay inline checkout unavailable, using redirect", inlineErr);
+        }
+      }
+
+      if (!checkoutUrl) {
+        toast.error("Monipay checkout URL missing. Please retry.");
+        return;
+      }
+
+      if (paymentSession?.type === PAYMENT_TYPES.LADIPO) {
+        clearLadipoCart();
+        window.location.href = checkoutUrl;
+        return;
+      }
+
+      const newWindow = window.open(checkoutUrl, "_blank");
+      if (!newWindow) {
+        toast.success("Redirecting to Monipay...");
+        window.location.href = checkoutUrl;
+        return;
+      }
+
+      toast.success("Redirecting to Monipay...");
+      const checkPopup = setInterval(() => {
+        if (newWindow.closed) {
+          clearInterval(checkPopup);
+          setTimeout(checkPaystackStatus, 3000);
+        }
+      }, 1000);
+    } catch (err) {
+      console.error("Monipay payment error:", err);
+      throw new Error(err.message || "Failed to process Monipay payment");
+    }
+  };
+
   // Store payment reference for verification
   const storePaymentReference = (reference, gateway) => {
     if (!reference || !gateway) return;
@@ -658,7 +757,7 @@ export default function PaymentOptions() {
   };
 
   const checkPaystackStatus = async () => {
-    const reference = paymentSession?.paystack?.reference;
+    const reference = paymentSession?.paystack?.reference || paymentSession?.monipay?.reference;
     if (!reference) return;
 
     const isLadipo = paymentSession?.type === PAYMENT_TYPES.LADIPO;
@@ -700,7 +799,8 @@ export default function PaymentOptions() {
         navigateAfterPayment({
           paymentSuccess: true,
           reference,
-          amount: paymentSession.amount
+          amount: paymentSession.amount,
+          order_number: responseData?.order_number || responseData?.data?.order_number || result?.order_number,
         });
       } else {
         toast.error('Payment verification failed. Please try again.');
@@ -711,72 +811,6 @@ export default function PaymentOptions() {
         useLadipoPaymentModalStore.getState().close();
       }
       toast.error(error.message || 'Failed to verify payment');
-      setIsProcessing(false);
-    }
-  };
-
-  // Handle Monicredit verification
-  const handleVerifyMonicredit = async () => {
-    const isLadipo = paymentSession?.type === PAYMENT_TYPES.LADIPO;
-    const orderId = paymentSession?.monicredit?.data?.reference ||
-                    paymentSession?.monicredit?.data?.orderid ||
-                    paymentSession?.monicredit?.data?.order_id ||
-                    paymentSession?.order_number;
-    if (!orderId) {
-      toast.error("No payment reference found. Please contact support.");
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      if (isLadipo) {
-        useLadipoPaymentModalStore.getState().openProcessing(paymentSession?.amount || 0);
-        const result = await verifyLadipoPayment(orderId);
-        if (result?.status === "success" || result?.status === "paid") {
-          clearLadipoCart();
-          toast.success('Payment verified successfully!');
-          const merged = { ...paymentSession?.orderData, ...result };
-          useLadipoPaymentModalStore.getState().openSuccess({
-            order: merged,
-            amountKobo: merged?.total_kobo ?? paymentSession?.amount,
-          });
-          navigate("/ladipo");
-          setIsProcessing(false);
-          return;
-        } else {
-          useLadipoPaymentModalStore.getState().close();
-          toast.error("Payment not yet confirmed. Please complete the transfer and try again.");
-          setIsProcessing(false);
-          return;
-        }
-      }
-
-      const result = await verifyMonicredit.mutateAsync(orderId);
-      if (result.data.status === "APPROVED") {
-        toast.success('Payment successful! Your renewal is being processed.');
-        setIsProcessing(false);
-        // Show auto-renewal prompt for bank transfer payments (no card on file)
-        if (paymentSession?.car_slug) {
-          setShowAutoRenewal(true);
-        } else {
-          navigateAfterPayment({
-            paymentSuccess: true,
-            orderId,
-            amount: paymentSession.amount,
-            paymentMethod: "monicredit"
-          });
-        }
-      } else {
-        // FIX 3: Bank transfers can take a few minutes to clear. "failed" is
-        // misleading — tell the user to wait and try again instead.
-        toast.error("Transfer not yet confirmed. Please allow a few minutes and try again.");
-        setIsProcessing(false);
-      }
-    } catch (err) {
-      if (isLadipo) {
-        useLadipoPaymentModalStore.getState().close();
-      }
-      toast.error(err?.response?.data?.message || err?.message || "Verification failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -805,7 +839,8 @@ export default function PaymentOptions() {
           paymentSuccess: true,
           reference,
           amount: paymentSession.amount,
-          paymentMethod: "paystack"
+          paymentMethod: "paystack",
+          order_number: responseData?.order_number || responseData?.data?.order_number || result?.order_number,
         });
       } else {
         toast.error("Payment verification failed");
@@ -824,12 +859,23 @@ export default function PaymentOptions() {
         if (reference) {
           setIsProcessing(true);
           try {
+            let orderNumber = event.data.order_number;
+            if (!orderNumber && verifyPaystack?.mutateAsync) {
+              const result = await verifyPaystack.mutateAsync(reference);
+              const responseData = result?.data || result;
+              orderNumber = pickOrderNumber(
+                responseData?.order_number,
+                responseData?.data?.order_number,
+                result?.order_number
+              );
+            }
             toast.success('Payment successful! Your renewal is being processed.');
             navigateAfterPayment({
               paymentSuccess: true,
               reference,
               amount: paymentSession?.amount,
-              paymentMethod: 'paystack'
+              paymentMethod: 'paystack',
+              order_number: orderNumber,
             });
           } catch (error) {
             console.error('Error processing payment success:', error);
@@ -882,7 +928,7 @@ export default function PaymentOptions() {
             setShowAutoRenewal(false);
             navigateAfterPayment({
               paymentSuccess: true,
-              paymentMethod: "monicredit"
+              paymentMethod: "monipay",
             });
           }}
         />
@@ -944,6 +990,14 @@ export default function PaymentOptions() {
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
                 Wallet Method
               </h2>
+              {walletLoading ? (
+                <div className="space-y-3 animate-pulse">
+                  <div className="h-4 w-3/4 rounded bg-[#E1E5EE]" />
+                  <div className="h-4 w-1/2 rounded bg-[#E1E5EE]" />
+                  <div className="h-4 w-2/3 rounded bg-[#E1E5EE]" />
+                  <div className="mt-5 h-12 w-full rounded-full bg-[#E1E5EE]" />
+                </div>
+              ) : (
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm font-normal text-[#05243F]/40">
@@ -992,20 +1046,20 @@ export default function PaymentOptions() {
                   </div>
                 )}
               </div>
+              )}
             </div>
           )}
 
-          {selectedMethod === PAYMENT_METHODS.MONICREDIT && (
+          {selectedMethod === PAYMENT_METHODS.MONIPAY && (
             <div>
               <h2 className="mb-5 text-sm font-normal text-[#697C8C]">
-                Bank Transfer Details
+                Monipay Payment
               </h2>
 
-              {/* Monicredit fallback banner — shown when initialization fails */}
-              {monicreditFallbackError && (
+              {monipayInitError && (
                 <div className="mb-4 rounded-[12px] border border-amber-200 bg-amber-50 p-4">
-                  <p className="text-sm font-medium text-amber-800 mb-1">Bank transfer unavailable</p>
-                  <p className="text-xs text-amber-700 mb-3">{monicreditFallbackError}</p>
+                  <p className="text-sm font-medium text-amber-800 mb-1">Monipay unavailable</p>
+                  <p className="text-xs text-amber-700 mb-3">{monipayInitError}</p>
                   <button
                     onClick={handleSwitchToPaystack}
                     className="w-full rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors"
@@ -1017,9 +1071,22 @@ export default function PaymentOptions() {
 
               {!isPaymentMethodConfirmed ? (
                 <div className="space-y-4 rounded-[20px] border border-[#697B8C]/11 px-6 py-6">
+                  <div className="rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl">🏦</div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Secure Payment
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Pay with card, bank transfer, or QR
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   <div className="text-center">
                     <p className="text-sm text-[#05243F]/60 mb-4">
-                      Click the button below to confirm your payment method and view bank transfer details.
+                      Click the button below to confirm your payment method and proceed with payment.
                     </p>
                     <button
                       onClick={handleConfirmPaymentMethod}
@@ -1037,102 +1104,49 @@ export default function PaymentOptions() {
                     </button>
                   </div>
                 </div>
-              ) : (paymentSession?.monicredit?.data?.customer || monicreditAccountNumber) ? (
-                <div className="space-y-3 rounded-[20px] border border-[#697B8C]/11 px-6 py-4">
-                  <div className="text-center">
-                    <h3 className="text-sm font-normal text-[#05243F]/40">
-                      Transfer
-                    </h3>
-                    <p className="mt-2 text-4xl font-semibold text-[#2284DB]">
-                      ₦{Number(totalAmount || 0).toLocaleString()}
-                    </p>
-                    <p className="mt-3 text-[15px] text-[#05243F]/40">
-                      Account No. Expires in
-                      <span className="ml-1 font-semibold text-[#EBB850]">
-                        30
-                      </span>
-                      mins
-                    </p>
-                  </div>
-                  <div className="mt-5 space-y-4">
-                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                      <span className="text-[15px] font-light text-[#05243F]/60">
-                        Account Number:
-                      </span>
-                      <span className="text-base font-semibold text-[#05243F]">
-                        {monicreditAccountNumber}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                      <span className="text-[15px] font-light text-[#05243F]/60">
-                        Bank Name:
-                      </span>
-                      <span className="text-base font-semibold text-[#05243F]">
-                        {monicreditBankName}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                      <span className="text-[15px] font-light text-[#05243F]/60">
-                        Account Name:
-                      </span>
-                      <span className="text-right text-base font-semibold text-[#05243F]">
-                        {monicreditAccountName}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b border-[#697B8C]/11 pb-3">
-                      <span className="text-[15px] font-light text-[#05243F]/60">
-                        Amount:
-                      </span>
-                      <span className="text-base font-semibold text-[#05243F]">
-                        ₦{Number(totalAmount || 0).toLocaleString()}
-                      </span>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <h4 className="mb-2 text-sm font-medium text-gray-900">
+                      Payment Summary
+                    </h4>
+                    <div className="space-y-1 text-xs text-[#697C8C]">
+                      <div className="flex justify-between">
+                        <span>Amount:</span>
+                        <span className="font-semibold">
+                          ₦{(paystackAmount || totalAmount || 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Reference:</span>
+                        <span className="font-mono text-xs">
+                          {paymentSession?.monipay?.reference || "Not initialized"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Payment Method:</span>
+                        <span>Monipay</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-[10px] bg-[#F4F5FC] p-4 drop-shadow-xs">
-                    <div className="flex gap-3">
-                      <span className="text-base font-medium text-[#05243F]">
-                        Note:
-                      </span>
-                      <p className="text-sm font-normal text-[#05243F]/60">
-                        Kindly transfer the exact amount to the account details
-                        above. After payment, click the button below to confirm.
-                      </p>
-                    </div>
-                  </div>
                   <button
-                    className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] disabled:opacity-50"
-                    onClick={handleVerifyMonicredit}
-                    disabled={verifyMonicredit.isPending}
+                    onClick={handleMonipayPayment}
+                    disabled={(!paymentSession?.monipay?.authorization_url && !paymentSession?.monipay?.access_code) || isProcessing}
+                    className="flex w-full items-center justify-center rounded-full bg-[#2284DB] px-4 py-3 text-base font-semibold text-white hover:bg-[#1a6bb8] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {verifyMonicredit.isPending
-                      ? "Verifying..."
-                      : "I've Made Payment"}
+                    {isProcessing ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                        Verifying payment...
+                      </>
+                    ) : (
+                      "Pay with Monipay"
+                    )}
                   </button>
-                  {verifyMonicredit.data && (
-                    <div
-                      className={`mt-4 text-center text-sm font-semibold ${(verifyMonicredit.data?.status ?? verifyMonicredit.data.status) ? "text-green-600" : "text-red-600"}`}
-                    >
-                      {typeof verifyMonicredit.data === "object" &&
-                        verifyMonicredit.data !== null
-                        ? verifyMonicredit.data?.message ||
-                        verifyMonicredit.data.message ||
-                        "Verification completed"
-                        : String(verifyMonicredit.data)}
-                    </div>
-                  )}
-                  {verifyMonicredit.isError && (
-                    <div className="mt-4 text-center text-sm font-semibold text-red-600">
-                      {typeof verifyMonicredit.error === "string"
-                        ? verifyMonicredit.error
-                        : String(verifyMonicredit.error)}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center text-sm font-normal text-red-500">
-                  No payment records found. It looks like you haven’t initiated
-                  any payments yet.
+                  <p className="mt-2 text-center text-xs text-[#697C8C]">
+                    You will complete payment in Monipay checkout. Verification happens on the server after return.
+                  </p>
                 </div>
               )}
             </div>

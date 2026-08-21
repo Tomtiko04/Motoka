@@ -14,6 +14,8 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { CheckCircle2, AlertCircle, RefreshCw, User, FileText } from "lucide-react";
 import { getGuestReceipt, resendGuestReceipt } from "../../services/apiGuest";
+import { useGuestOrderTracking } from "../../hooks/useOrderTracking";
+import ShipmentTracker from "../../components/delivery/ShipmentTracker";
 import toast from "react-hot-toast";
 
 function DetailRow({ label, value }) {
@@ -36,6 +38,10 @@ export default function GuestRenewalReceipt() {
   const [error, setError]     = useState(null);
   const [resending, setResending] = useState(false);
   const [resent, setResent]       = useState(false);
+  const { data: tracking, isPending: trackingPending } = useGuestOrderTracking(orderId, {
+    token,
+    enabled: Boolean(orderId && token),
+  });
 
   useEffect(() => {
     if (!orderId || !token) {
@@ -161,6 +167,13 @@ export default function GuestRenewalReceipt() {
             <DetailRow label="State"   value={receipt.deliveryDetails.state} />
             <DetailRow label="LGA"     value={receipt.deliveryDetails.lga} />
             <DetailRow label="Contact" value={receipt.deliveryDetails.contact} />
+            <div className="pt-3">
+              <ShipmentTracker
+                progress={tracking?.progress}
+                loading={trackingPending}
+                compact
+              />
+            </div>
           </div>
         )}
 

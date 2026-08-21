@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { verifyPaystackPayment } from '../services/apiPaystack';
 import { toast } from 'react-hot-toast';
+import {
+  pathAfterDocumentPayment,
+  pickOrderNumber,
+  readStoredPaymentSession,
+} from '../features/payment/afterPaymentNavigate';
 
 export default function PaystackCallback() {
   const [searchParams] = useSearchParams();
@@ -21,21 +26,26 @@ export default function PaystackCallback() {
     //      spinner forever.
     const hasOpener = !!window.opener;
 
-    // Resolve the flow: message the opener + close, OR navigate this tab.
-    const finish = (ok, ref) => {
+    const finish = (ok, ref, orderNumber) => {
       if (hasOpener) {
         window.opener.postMessage(
           ok
-            ? { type: 'PAYMENT_SUCCESS', reference: ref, ordersCreated: true }
+            ? { type: 'PAYMENT_SUCCESS', reference: ref, order_number: orderNumber || null, ordersCreated: true }
             : { type: 'PAYMENT_ERROR' },
           '*'
         );
         setTimeout(() => window.close(), 1500);
       } else {
+        const dest = ok
+          ? pathAfterDocumentPayment({
+              orderNumber,
+              session: readStoredPaymentSession(),
+            })
+          : '/payment';
         setTimeout(() => {
-          navigate(ok ? '/dashboard' : '/payment', {
+          navigate(dest, {
             replace: true,
-            state: ok ? { paymentSuccess: true, reference: ref } : undefined,
+            state: ok ? { paymentSuccess: true, reference: ref, order_number: orderNumber } : undefined,
           });
         }, 1500);
       }
@@ -55,16 +65,20 @@ export default function PaystackCallback() {
       return;
     }
 
-    // Verify the payment
     verifyPaystackPayment(reference)
       .then((response) => {
         const data = response.data || response;
         const responseData = data.data || data;
+        const orderNumber = pickOrderNumber(
+          responseData?.order_number,
+          data?.order_number,
+          response?.order_number
+        );
 
         if (responseData.status === 'success' || data.status === true) {
           setIsProcessing(false);
           toast.success('Payment verified successfully!');
-          finish(true, reference);
+          finish(true, reference, orderNumber);
         } else {
           setIsProcessing(false);
           toast.error('Payment verification failed');

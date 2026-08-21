@@ -57,6 +57,7 @@ import LadipoPaymentStatusModals from "./features/ladipo/components/LadipoPaymen
 import LadipoPaystackReturnHandler from "./features/ladipo/LadipoPaystackReturnHandler.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
 import PaymentReceipt from "./pages/PaymentReceipt.jsx";
+import TrackOrder from "./pages/TrackOrder.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
 import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
@@ -292,6 +293,10 @@ export default function App() {
               path="payment/paystack/callback"
               element={<PaystackCallback />}
             />
+            <Route
+              path="payment/monipay/callback"
+              element={<PaystackCallback />}
+            />
             <Route path="settings">
               <Route index element={<Settings />} />
             </Route>
@@ -306,6 +311,7 @@ export default function App() {
             <Route path="payment-success" element={<SuccessPage />} />
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
             <Route path="payment/receipt/:paymentType/:identifier" element={<PaymentReceipt />} />
+            <Route path="orders/:orderNumber/track" element={<TrackOrder />} />
           </Route>
 
           {/* Guest renewal flow — public, no auth required */}

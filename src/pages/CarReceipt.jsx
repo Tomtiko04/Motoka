@@ -1,13 +1,31 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { useCarPaymentReceipt } from "../features/licenses/usePayment";
 import { formatCurrency } from "../utils/formatCurrency";
+import ShipmentTracker from "../components/delivery/ShipmentTracker";
+import { useOrderTracking } from "../hooks/useOrderTracking";
+
+function unwrapReceipt(data) {
+  const payload = data?.data || data || {};
+  const transaction = payload.payment || payload.transaction;
+  if (!transaction) return { payment: null, order: payload.order || null };
+  const payment = payload.payment || {
+    ...transaction,
+    transaction_id: transaction.id || transaction.reference,
+    payment_description: transaction.payment_type || transaction.payment_description,
+    meta_data: transaction.metadata || transaction.meta_data,
+  };
+  return { payment, order: payload.order || null };
+}
 
 export default function CarReceipt() {
   const { carId } = useParams();
   const navigate = useNavigate();
   const { data, isPending, error } = useCarPaymentReceipt(carId);
+  const { payment, order } = unwrapReceipt(data);
+  const orderNumber = order?.order_number;
+  const { data: tracking, isPending: trackingPending } = useOrderTracking(orderNumber);
 
   if (isPending) {
     return (
@@ -39,8 +57,7 @@ export default function CarReceipt() {
     );
   }
 
-  const payment = data?.payment;
-  const monicreditResponse = data?.monicredit_response;
+  const monicreditResponse = (data?.data || data)?.monicredit_response;
 
   if (!payment) {
     return (
@@ -179,6 +196,20 @@ export default function CarReceipt() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {(orderNumber || tracking?.progress) && (
+            <div className="bg-gray-50 rounded-lg p-5">
+              <ShipmentTracker progress={tracking?.progress} loading={trackingPending} compact />
+              {orderNumber && tracking?.progress?.has_delivery && (
+                <Link
+                  to={`/orders/${orderNumber}/track`}
+                  className="mt-3 inline-block text-sm font-semibold text-[#2389E3]"
+                >
+                  Open full tracking page
+                </Link>
+              )}
             </div>
           )}
 

@@ -2,6 +2,7 @@
 
 import { ChevronLeft } from "lucide-react"
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getPaymentHistory } from "../../../services/apiPayment";
 import { ClipLoader } from "react-spinners";
 
@@ -103,6 +104,21 @@ export default function TransactionHistory({ onNavigate }) {
                         </ul>
                       </div>
                     )}
+                    {transaction.source === 'guest' && transaction.receipt_token && (transaction.order.delivery_address || Number(transaction.order.delivery_fee) > 0) ? (
+                      <Link
+                        to={`/guest/renewal/receipt?orderId=${transaction.order.id}&token=${transaction.receipt_token}`}
+                        className="mt-2 inline-block text-xs font-semibold text-[#2389E3]"
+                      >
+                        Track package
+                      </Link>
+                    ) : transaction.order?.order_number && (transaction.order.delivery_address || Number(transaction.order.delivery_fee) > 0) ? (
+                      <Link
+                        to={`/orders/${transaction.order.order_number}/track`}
+                        className="mt-2 inline-block text-xs font-semibold text-[#2389E3]"
+                      >
+                        Track package
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
                 <div className="text-right">

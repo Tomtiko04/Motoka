@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { Icon } from "@iconify/react";
 import { PAYMENT_TYPES } from "../../payment/config/paymentTypes";
+import DeliveryRequest from "../../../components/delivery/DeliveryRequest";
+import toast from "react-hot-toast";
 
 const SESSION_KEY = "driverLicenseOrderSummary";
 
@@ -51,6 +53,8 @@ export default function DriverLicenseOrderSummary() {
     }
   }, [summaryState]);
 
+  const [delivery, setDelivery] = useState({ wantsDelivery: false, details: {}, quoting: false, quoteError: "" });
+
   if (!summaryState?.license_type) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
@@ -75,13 +79,42 @@ export default function DriverLicenseOrderSummary() {
   const { license_type, duration, price } = summaryState;
   const label = LICENSE_LABELS[license_type] || license_type;
   const durationLabel = duration ? DURATION_LABELS[duration] : null;
+  const deliveryFeeNaira = delivery.wantsDelivery ? Number(delivery.details?.fee || 0) / 100 : 0;
+  const totalNaira = Number(price || 0) + deliveryFeeNaira;
 
   const handleProceedToPayment = () => {
+    if (delivery.wantsDelivery) {
+      const d = delivery.details || {};
+      if (!d.address?.trim() || !d.state || !d.lga || !d.contact?.trim()) {
+        toast.error("Please complete delivery details or uncheck Request Delivery");
+        return;
+      }
+      if (delivery.quoting || delivery.quoteError || !d.fee) {
+        toast.error(delivery.quoteError || "Wait for the delivery quote before paying");
+        return;
+      }
+    }
+
     const paymentData = {
       type: PAYMENT_TYPES.DRIVERS_LICENSE,
       license_type,
       duration,
       price,
+      ...(delivery.wantsDelivery ? {
+        delivery_details: {
+          address: delivery.details.address,
+          state: delivery.details.state,
+          lga: delivery.details.lga,
+          contact: delivery.details.contact,
+        },
+        deliveryDetails: {
+          address: delivery.details.address,
+          state: delivery.details.state,
+          lga: delivery.details.lga,
+          contact: delivery.details.contact,
+          fee: delivery.details.fee,
+        },
+      } : {}),
     };
 
     try {
@@ -156,14 +189,16 @@ export default function DriverLicenseOrderSummary() {
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-sm font-medium text-[#05243F]/70">
-              Total Amount
+              {delivery.wantsDelivery ? "Total (incl. delivery)" : "Total Amount"}
             </span>
             <span className="text-2xl font-bold text-[#2284DB]">
-              {formatNaira(price)}
+              {formatNaira(totalNaira)}
             </span>
           </div>
         </div>
       </div>
+
+      <DeliveryRequest purpose="driver_license" onChange={setDelivery} />
 
       <div className="mb-8 rounded-[16px] bg-[#EBF4FD] px-5 py-4">
         <div className="flex gap-3">

@@ -21,7 +21,7 @@ export default function GuestRenewalCallback() {
 
   const orderId =
     searchParams.get("orderId") || sessionStorage.getItem("guestOrderId");
-  const gateway = searchParams.get("gateway") || "monicredit";
+  const gateway = searchParams.get("gateway") || "monipay";
   // Paystack appends reference/trxref to the redirect URL
   const paystackRef =
     searchParams.get("reference") || searchParams.get("trxref") || null;
@@ -43,7 +43,7 @@ export default function GuestRenewalCallback() {
     clearInterval(pollRef.current);
     setStatus("success");
     setTimeout(() => {
-      navigate(`/guest/renewal/receipt?orderId=${orderId}`, { state: { receiptToken } });
+      navigate(`/guest/renewal/receipt?orderId=${orderId}&token=${encodeURIComponent(receiptToken)}`);
     }, 1500);
   };
 
@@ -53,7 +53,7 @@ export default function GuestRenewalCallback() {
     // For Paystack: hit the verify endpoint first so we don't have to wait
     // for the webhook (which can't reach localhost). If that confirms payment,
     // skip polling entirely.
-    if (gateway === "paystack" && paystackRef) {
+    if ((gateway === "paystack" || gateway === "monipay") && paystackRef) {
       verifyGuestOrder(orderId, paystackRef)
         .then((result) => {
           if (result.status === "payment_success") {
@@ -113,7 +113,7 @@ export default function GuestRenewalCallback() {
             if (next >= MAX_POLLS) {
               clearInterval(pollRef.current);
               setStatus("error");
-            } else if (gateway === "monicredit" && next % 4 === 0 && paymentRefRef.current) {
+            } else if ((gateway === "monicredit" || gateway === "monipay" || gateway === "paystack") && next % 4 === 0 && paymentRefRef.current) {
               verifyGuestOrder(orderId, paymentRefRef.current)
                 .then((result) => {
                   if (result.status === "payment_success") handleSuccess(result.receiptToken);

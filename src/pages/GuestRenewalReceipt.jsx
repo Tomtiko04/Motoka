@@ -5,6 +5,8 @@ import { authStorage } from "../utils/authStorage";
 import { Icon } from "@iconify/react";
 import { formatCurrency } from "../utils/formatCurrency";
 import toast from "react-hot-toast";
+import ShipmentTracker from "../components/delivery/ShipmentTracker";
+import { useGuestOrderTracking } from "../hooks/useOrderTracking";
 
 export default function GuestRenewalReceipt() {
   const [searchParams] = useSearchParams();
@@ -30,6 +32,19 @@ export default function GuestRenewalReceipt() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signupLoading, setSignupLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { data: tracking, isPending: trackingPending } = useGuestOrderTracking(orderId, {
+    token,
+    enabled: Boolean(orderId && token),
+  });
+
+  useEffect(() => {
+    if (orderId && location.state?.receiptToken && !searchParams.get("token")) {
+      navigate(
+        `/guest/renewal/receipt?orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(location.state.receiptToken)}`,
+        { replace: true }
+      );
+    }
+  }, [orderId, location.state, searchParams, navigate]);
 
   useEffect(() => {
     if (!orderId || !token) { setLoading(false); return; }
@@ -274,6 +289,16 @@ export default function GuestRenewalReceipt() {
                 <span className="text-[#2389E3] text-lg">{formatCurrency(receipt.totalAmount / 100)}</span>
               </div>
             </div>
+
+            {(receipt.deliveryFee > 0 || receipt.deliveryDetails) && (
+              <div className="px-6 pb-2">
+                <ShipmentTracker
+                  progress={tracking?.progress}
+                  loading={trackingPending}
+                  compact
+                />
+              </div>
+            )}
 
             {/* Actions */}
             <div className="px-6 pb-6 flex flex-col gap-3">

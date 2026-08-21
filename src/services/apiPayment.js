@@ -1,10 +1,10 @@
 import { api } from "./apiClient";
 
 export async function initializePayment(payload) {
-  // If payment_gateway is not specified, default to 'monicredit' to match backend default
+  // If payment_gateway is not specified, default to 'monipay' to match backend default
   const paymentPayload = {
     ...payload,
-    payment_gateway: payload.payment_gateway || 'monicredit'
+    payment_gateway: payload.payment_gateway || 'monipay'
   };
   const { data } = await api.post("/payments/initialize", paymentPayload);
   return data;
@@ -114,7 +114,7 @@ export async function initializePlatePayment(payload) {
   const { data } = await api.post('/payments/initialize', {
     ...payload,
     payment_type: 'plate_number',
-    payment_gateway: payload.payment_gateway || 'monicredit'
+    payment_gateway: payload.payment_gateway || 'monipay'
   });
   return data;
 }
@@ -129,7 +129,19 @@ export async function initializeDriverLicensePayment(payload) {
   const { data } = await api.post('/payments/initialize', {
     ...payload,
     payment_type: 'driver_license',
-    payment_gateway: payload.payment_gateway || 'monicredit'
+    payment_gateway: payload.payment_gateway || 'monipay'
   });
   return data;
+}
+
+export async function fetchPaymentSchedules() {
+  const res = await api.get("/payment-schedule");
+  if (!res.data.status) throw new Error(res.data.message || "Failed to fetch payment schedules");
+  return res.data.data;
+}
+
+export async function fetchPaymentHeads() {
+  const res = await api.get("/payment-schedule/get-payment-head");
+  if (!res.data.status) throw new Error(res.data.message || "Failed to fetch payment heads");
+  return res.data.data;
 }
