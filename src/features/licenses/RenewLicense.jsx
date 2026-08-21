@@ -816,6 +816,7 @@ export default function RenewLicense() {
 
               {/* Delivery — temporarily disabled until live courier keys are configured */}
               {false && (
+              <>
               <div className="mb-6">
                 <label className="group flex w-full cursor-pointer items-center gap-3 rounded-full bg-[#F4F5FC] px-6 py-3 transition-all hover:bg-[#FFF4DD]/50">
                   <input
@@ -976,7 +977,7 @@ export default function RenewLicense() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              </div>
+              </>
               )}
 
               {/* Phone required (Google OAuth users) — inline input, same Pay Now button */}
