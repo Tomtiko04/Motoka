@@ -71,8 +71,8 @@ const SearchableSelect = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className={`block w-full rounded-[10px] bg-[#F4F5FC] py-4 pl-4 pr-10 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] disabled:opacity-50 ${
-            error ? "ring-2 ring-red-300" : "border-0"
+          className={`block w-full rounded-[10px] border border-[#E1E5EE] bg-[#F4F5FC] py-4 pl-4 pr-10 text-sm text-[#05243F] transition-colors outline-none placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:border-[#2389E3] focus:bg-[#FFF4DD] disabled:opacity-50 ${
+            error ? "ring-2 ring-red-300" : ""
           }`}
         />
         <div className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">

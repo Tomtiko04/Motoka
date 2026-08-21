@@ -19,6 +19,8 @@ import AdminWallets from '../pages/admin/AdminWallets.jsx';
 import AdminRenewals from '../pages/admin/AdminRenewals.jsx';
 import AdminLadipo from '../pages/admin/AdminLadipo.jsx';
 import AdminVehicleDocs from '../pages/admin/AdminVehicleDocs.jsx';
+import AdminGuestOrders from '../pages/admin/AdminGuestOrders.jsx';
+import AdminGuestOrderDetails from '../pages/admin/AdminGuestOrderDetails.jsx';
 import AdminReferral from '../pages/admin/AdminReferral.jsx';
 
 const AdminRoutes = () => {
@@ -85,6 +87,8 @@ const AdminRoutes = () => {
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="orders/:slug" element={<AdminOrderDetails />} />
+                <Route path="guest-orders" element={<AdminGuestOrders />} />
+                <Route path="guest-orders/:orderId" element={<AdminGuestOrderDetails />} />
                 <Route path="agents" element={<AdminAgents />} />
                 <Route path="agents/create" element={<CreateAgent />} />
                 <Route path="agents/:uuid" element={<AgentView />} />

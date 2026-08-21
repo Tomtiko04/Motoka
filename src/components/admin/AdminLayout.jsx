@@ -30,6 +30,7 @@ import {
 const NAV_ITEMS = [
   { name: 'Dashboard',       href: '/admin/dashboard',                    icon: HomeIcon,                  exact: true },
   { name: 'Orders',          href: '/admin/orders',                       icon: ClipboardDocumentListIcon, exact: false },
+  { name: 'Guest Orders',    href: '/admin/guest-orders',                 icon: ClipboardDocumentListIcon, exact: false },
   { name: 'Payments',        href: '/admin/payments',                     icon: CreditCardIcon,            exact: false },
   { name: 'Cars',            href: '/admin/cars',                         icon: TruckIcon,                 exact: false },
   { name: 'Users',           href: '/admin/users',                        icon: UsersIcon,                 exact: false },

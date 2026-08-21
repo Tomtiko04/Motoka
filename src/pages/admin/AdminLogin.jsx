@@ -15,7 +15,7 @@ const AdminLogin = () => {
   const [showOtp, setShowOtp] = useState(false);
   const navigate = useNavigate();
 
-  const ALLOWED_ADMIN_EMAILS = ['rasak@motokaapp.ng'];
+  const ALLOWED_ADMIN_EMAILS = ['bellosulai6@gmail.com'];
 
   const handleSendOTP = async (e) => {
     e.preventDefault();

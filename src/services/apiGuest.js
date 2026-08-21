@@ -44,7 +44,7 @@ export async function fetchLGAs(stateCode) {
  * @param {string[]} payload.selected_items
  * @param {boolean} payload.wants_delivery
  * @param {Object} [payload.delivery_details]
- * @param {string} payload.payment_gateway  - "monicredit" | "paystack"
+ * @param {string} payload.payment_gateway  - "monipay" | "paystack"
  */
 export async function initGuestRenewal(payload) {
   const { data } = await guestApi.post('/guest/renewals', payload);
