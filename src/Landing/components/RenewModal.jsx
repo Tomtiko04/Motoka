@@ -69,8 +69,11 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   }, [initialPlateNumber]);
   // ── Reset to step 1 when modal closes so it starts fresh on next open ────
   useEffect(() => {
-    if (!isOpen) setStep(1);
-  }, [isOpen]);
+    if (!isOpen) {
+      setStep(1);
+      setPlateNumber(initialPlateNumber || "");
+    }
+  }, [isOpen, initialPlateNumber]);
   // ── Load renewal items when reaching step 2 ──────────────────────────────
   useEffect(() => {
     if (step !== 2) return;
@@ -136,8 +139,25 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     }));
   };
 
+  const isPlateLocked = Boolean(initialPlateNumber);
+
+  const formatPlateNumber = (value) => {
+    const cleaned = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    if (cleaned.length <= 3) return cleaned;
+    if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 8)}`;
+  };
+
+  const handlePlateChange = (e) => {
+    setPlateNumber(formatPlateNumber(e.target.value));
+  };
+
   const handleSubmitStep1 = (e) => {
     e.preventDefault();
+    if (!plateNumber.trim()) {
+      toast.error("Please enter your plate number");
+      return;
+    }
     if (!formData.name || !formData.phone || !formData.email || !formData.expiryDate) {
       toast.error("Please fill in all fields");
       return;
@@ -385,8 +405,13 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                           type="text"
                           id="plateNumber"
                           value={plateNumber}
-                          readOnly
-                          className="peer block w-full rounded-lg bg-[#FFFBEB] px-4 pb-4 pt-7 text-lg text-[#05243F] font-bold shadow-2xs focus:outline-none border-none sm:px-5 placeholder-transparent"
+                          readOnly={isPlateLocked}
+                          onChange={isPlateLocked ? undefined : handlePlateChange}
+                          className={`peer block w-full rounded-lg px-4 pb-4 pt-7 text-lg text-[#05243F] font-bold shadow-2xs focus:outline-none border-none sm:px-5 placeholder-transparent ${
+                            isPlateLocked
+                              ? "bg-[#FFFBEB]"
+                              : "bg-[#F4F5FC] hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                          }`}
                           placeholder="Your plate no."
                         />
                         <label

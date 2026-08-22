@@ -278,12 +278,6 @@ export default function AddCar() {
         { name: "registrationNo", label: "Plate Number" },
         { name: "expiryDate", label: "Expiry Date" },
       );
-    } else {
-      requiredFields.push(
-        { name: "phoneNo", label: "Phone Number" },
-        { name: "chassisNo", label: "Chassis Number" },
-        { name: "engineNo", label: "Engine Number" },
-      );
     }
 
     requiredFields.forEach(({ name, label }) => {
@@ -464,14 +458,14 @@ maxDate={new Date("2035-12-31")}
     </div>
   );
 
-  const renderField = (name, label, placeholder, type = "text") => (
+  const renderField = (name, label, placeholder, type = "text", optional = false) => (
     <div>
       <label
         htmlFor={name}
         className="mb-2 block text-sm font-medium text-[#05243F]"
       >
         {label}
-        <span className="ml-0.5 text-[#A73957B0]">*</span>
+        {!optional && <span className="ml-0.5 text-[#A73957B0]">*</span>}
       </label>
       <div className="relative">
         <input
@@ -480,7 +474,7 @@ maxDate={new Date("2035-12-31")}
           name={name}
           value={formData[name]}
           onChange={handleChange}
-          placeholder={placeholder}
+          placeholder={optional ? `${placeholder} (optional)` : placeholder}
           className={`block w-full rounded-lg bg-[#F4F5FC] px-4 py-3 text-sm text-[#05243F] transition-all duration-200 placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none ${errors[name]
             ? "border-2 border-[#A73957B0] focus:border-[#A73957B0]"
             : formData[name]?.trim()
@@ -590,9 +584,19 @@ maxDate={new Date("2035-12-31")}
           <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] overflow-y-auto px-6 sm:px-8">
             <div className="py-2">
               <form onSubmit={handleSubmit} className="mr-4 space-y-4">
+                {formData.isRegistered && (
+                  <>
+                    {renderField(
+                      "registrationNo",
+                      "Plate Number",
+                      "LSD2345",
+                    )}
+                    {renderDateField("expiryDate", "Expiry Date", new Date())}
+                  </>
+                )}
                 {renderField("ownerName", "Name of Owner", "Ali Johnson")}
                 {!formData.isRegistered &&
-                  renderField("phoneNo", "Phone Number", "087654323456")}
+                  renderField("phoneNo", "Phone Number", "087654323456", "text", true)}
                 {renderField(
                   "address",
                   "Address",
@@ -653,20 +657,9 @@ maxDate={new Date("2035-12-31")}
                   filterKey="color"
                 />
                 {!formData.isRegistered &&
-                  renderField("chassisNo", "Chassis Number", "123489645432")}
+                  renderField("chassisNo", "Chassis Number", "123489645432", "text", true)}
                 {!formData.isRegistered &&
-                  renderField("engineNo", "Engine Number", "4567890")}
-
-                {formData.isRegistered && (
-                  <>
-                    {renderField(
-                      "registrationNo",
-                      "Plate Number",
-                      "LSD2345",
-                    )}
-                    {renderDateField("expiryDate", "Expiry Date", new Date())}
-                  </>
-                )}
+                  renderField("engineNo", "Engine Number", "4567890", "text", true)}
               </form>
             </div>
           </div>
