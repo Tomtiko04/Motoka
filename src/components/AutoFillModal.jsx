@@ -34,7 +34,11 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
 
   const reset = () => {
     setSelectedFile(null);
-    setPreview(null);
+    // Revoke the blob URL to free memory
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
     setResult(null);
     setError(null);
     setIsProcessing(false);
@@ -60,7 +64,10 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
     setError(null);
     setResult(null);
     setSelectedFile(file);
-    setPreview(URL.createObjectURL(file));
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
   };
 
   const handleFileInput = (e) => acceptFile(e.target.files[0]);
@@ -84,11 +91,20 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
       const body = new FormData();
       body.append('image', selectedFile);
 
-      const res = await fetch(`${config.getApiBaseUrl()}/cars/extract-document`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        body,
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 35_000);
+
+      let res;
+      try {
+        res = await fetch(`${config.getApiBaseUrl()}/cars/extract-document`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       const json = await res.json();
 
@@ -104,7 +120,10 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
         toast.success(`Found ${json.fieldsFound.length} field${json.fieldsFound.length > 1 ? 's' : ''} in the document.`);
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      const msg = err.name === 'AbortError'
+        ? 'The request timed out. Please try again.'
+        : err.message || 'Something went wrong. Please try again.';
+      setError(msg);
       toast.error('Could not extract document data.');
     } finally {
       setIsProcessing(false);
