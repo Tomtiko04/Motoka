@@ -7,19 +7,25 @@ import {
   EnvelopeIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { listRenewals, listDeferredRenewals } from '../../services/apiAdminRenewals';
+import { listRenewals, listDeferredRenewals, getRenewalsSummary } from '../../services/apiAdminRenewals';
+import {
+  Pulse,
+  MetricNumber,
+  ExpiredMonthChart,
+  QueueCard,
+} from '../../components/admin/renewalsMetrics';
+import { RENEWAL_QUEUES, monthTitle } from '../../components/admin/renewalsQueues';
 
 /**
- * Renewals — a call list, not a dashboard.
+ * Renewals — KPI overview plus a call list.
  *
- * Read-only by design: it sends nothing. Outbound reminders belong to the daily
- * expiry-notifications job; this screen exists so the team can work the book by
- * hand, which matters most for the expired cohort no automated reminder revisits.
+ * Counts come from /renewals/summary so the metrics paint independently of the
+ * table. Outbound reminders belong to the daily expiry-notifications job; this
+ * screen exists so the team can work the book by hand.
  */
 
 const DEFERRED_TAB = 'deferred';
 
-// Nigerian numbers are stored as 08… locally; wa.me needs E.164 without the +.
 const toWhatsApp = (phone) => {
   if (!phone) return null;
   const digits = String(phone).replace(/[\s\-().+]/g, '');
@@ -36,10 +42,6 @@ const formatDate = (iso) => {
     : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-// Timing, always — never the workflow state. For an in-progress renewal the API's
-// expiry_message becomes "Renewal in progress", which the state badge beside it
-// already says; showing the date facts here instead keeps the two badges
-// complementary rather than repetitive.
 const daysText = (daysLeft) => {
   const n = Math.abs(daysLeft);
   const unit = n === 1 ? 'day' : 'days';
@@ -65,12 +67,6 @@ function UrgencyBadge({ daysLeft, message, state }) {
   );
 }
 
-/**
- * Why a row might not be a sales call.
- *
- * `chase` renders nothing — the absence of a badge is the signal that the row is
- * safe to ring. Only the exceptions get called out.
- */
 function RenewalStateBadge({ state, openOrder, cancelledOrder }) {
   if (state === 'in_progress') {
     return (
@@ -93,6 +89,39 @@ function RenewalStateBadge({ state, openOrder, cancelledOrder }) {
     );
   }
   return null;
+}
+
+function RenewalsTableSkeleton() {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm">
+        <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr>
+            {['Vehicle', 'Customer', 'Contact', 'Expiry', 'Status'].map((label) => (
+              <th key={label} className="text-left font-semibold px-5 py-3">{label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <tr key={i}>
+              <td className="px-5 py-4">
+                <Pulse className="h-4 w-28 mb-2" />
+                <Pulse className="h-3 w-40" />
+              </td>
+              <td className="px-5 py-4"><Pulse className="h-4 w-32" /></td>
+              <td className="px-5 py-4">
+                <Pulse className="h-3 w-36 mb-2" />
+                <Pulse className="h-3 w-24" />
+              </td>
+              <td className="px-5 py-4"><Pulse className="h-4 w-20" /></td>
+              <td className="px-5 py-4"><Pulse className="h-6 w-28 rounded-full" /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function ContactLinks({ email, phone }) {
@@ -133,54 +162,91 @@ function ContactLinks({ email, phone }) {
 }
 
 const AdminRenewals = () => {
-  // Dashboard tiles deep-link in as /admin/renewals?bucket=week
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState(searchParams.get('bucket') || 'expired');
-  const [buckets, setBuckets] = useState([]);
+  const [month, setMonth] = useState(searchParams.get('month') || '');
+  const [summary, setSummary] = useState(null);
   const [rows, setRows] = useState([]);
   const [deferredCount, setDeferredCount] = useState(null);
   const [pagination, setPagination] = useState({ total: 0, page: 1, total_pages: 1 });
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [metricsLoading, setMetricsLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const loadMetrics = useCallback(async ({ fresh = false } = {}) => {
+    setMetricsLoading(true);
     try {
-      if (tab === DEFERRED_TAB) {
-        const data = await listDeferredRenewals({ page, limit: 25 });
-        setRows(data.data || []);
-        setPagination(data.pagination || { total: 0, page: 1, total_pages: 1 });
-        setDeferredCount(data.pagination?.total ?? 0);
-      } else {
-        const data = await listRenewals({ bucket: tab, page, limit: 25, search: search || undefined });
-        setRows(data.data || []);
-        setBuckets(data.buckets || []);
-        setPagination(data.pagination || { total: 0, page: 1, total_pages: 1 });
-      }
+      const [data, deferred] = await Promise.all([
+        getRenewalsSummary({ fresh }),
+        listDeferredRenewals({ page: 1, limit: 1 }),
+      ]);
+      setSummary(data);
+      setDeferredCount(deferred.pagination?.total ?? 0);
     } catch (err) {
-      toast.error(err.message || 'Failed to load renewals');
-      setRows([]);
+      toast.error(err.message || 'Failed to load renewal counts');
     } finally {
-      setLoading(false);
+      setMetricsLoading(false);
     }
-  }, [tab, page, search]);
-
-  useEffect(() => { load(); }, [load]);
-
-  // Deferred count is needed for its tab badge even while another tab is open
-  useEffect(() => {
-    listDeferredRenewals({ page: 1, limit: 1 })
-      .then(d => setDeferredCount(d.pagination?.total ?? 0))
-      .catch(() => {});
   }, []);
+
+  useEffect(() => { loadMetrics(); }, [loadMetrics]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setTableLoading(true);
+    (async () => {
+      try {
+        if (tab === DEFERRED_TAB) {
+          const data = await listDeferredRenewals({ page, limit: 25 });
+          if (cancelled) return;
+          setRows(data.data || []);
+          setPagination(data.pagination || { total: 0, page: 1, total_pages: 1 });
+          setDeferredCount(data.pagination?.total ?? 0);
+        } else {
+          const data = await listRenewals({
+            bucket: tab,
+            page,
+            limit: 25,
+            search: search || undefined,
+            month: tab === 'expired' ? month || undefined : undefined,
+          });
+          if (cancelled) return;
+          setRows(data.data || []);
+          setPagination(data.pagination || { total: 0, page: 1, total_pages: 1 });
+        }
+      } catch (err) {
+        if (cancelled) return;
+        toast.error(err.message || 'Failed to load renewals');
+        setRows([]);
+      } finally {
+        if (!cancelled) setTableLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [tab, page, search, month, reloadKey]);
+
+  const refresh = () => {
+    loadMetrics({ fresh: true });
+    setReloadKey((k) => k + 1);
+  };
 
   const switchTab = (key) => {
     setTab(key);
     setPage(1);
-    // Keep the URL shareable so an admin can send a colleague a specific bucket
+    setMonth('');
     setSearchParams(key === DEFERRED_TAB ? {} : { bucket: key }, { replace: true });
+  };
+
+  const selectMonth = (key) => {
+    setTab('expired');
+    setMonth(key);
+    setPage(1);
+    const next = { bucket: 'expired' };
+    if (key) next.month = key;
+    setSearchParams(next, { replace: true });
   };
 
   const submitSearch = (e) => {
@@ -190,6 +256,10 @@ const AdminRenewals = () => {
   };
 
   const isDeferred = tab === DEFERRED_TAB;
+  const counts = summary?.counts || {};
+  const byMonth = summary?.by_month || [];
+  const thisMonthLabel = monthTitle(summary?.expired_month) || 'This month';
+  const selectedMonthLabel = month ? (byMonth.find((m) => m.month === month)?.label || monthTitle(month)) : null;
 
   return (
     <div className="space-y-6">
@@ -197,83 +267,116 @@ const AdminRenewals = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Renewals</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Customers to contact about expiring or expired vehicle licences.
+            Overdue licences and customers to contact before papers lapse.
           </p>
         </div>
         <button
           type="button"
-          onClick={load}
-          disabled={loading}
+          onClick={refresh}
+          disabled={metricsLoading || tableLoading}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50"
         >
-          <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <ArrowPathIcon className={`h-4 w-4 ${metricsLoading || tableLoading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
       </div>
 
-      {/* Urgency tabs — counts come from the API so they stay right on every tab */}
-      <div className="flex gap-2 flex-wrap">
-        {buckets.map(b => (
-          <button
-            key={b.key}
-            type="button"
-            onClick={() => switchTab(b.key)}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors border ${
-              tab === b.key
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            {b.label}
-            <span className={`ml-2 text-xs font-bold ${tab === b.key ? 'text-white/80' : 'text-gray-400'}`}>
-              {b.count}
-            </span>
-          </button>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => switchTab(DEFERRED_TAB)}
-          className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors border ${
-            isDeferred
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-          }`}
-          title="Customers who chose 'remind me later' on a document at checkout"
-        >
-          Asked to be reminded
-          <span className={`ml-2 text-xs font-bold ${isDeferred ? 'text-white/80' : 'text-gray-400'}`}>
-            {deferredCount ?? '—'}
-          </span>
-        </button>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="rounded-lg bg-white p-5 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Overdue</p>
+          <MetricNumber loading={metricsLoading} value={summary?.expired_total} />
+          <p className="mt-1 text-sm text-gray-500">Licences already expired</p>
+        </div>
+        <div className="rounded-lg bg-white p-5 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Lapsed this month</p>
+          <MetricNumber loading={metricsLoading} value={summary?.expired_this_month} />
+          <p className="mt-1 text-sm text-gray-500">{metricsLoading ? 'Calendar month' : thisMonthLabel}</p>
+        </div>
       </div>
 
-      {/* State the sort in words. A column arrow alone does not tell a non-technical
-          user WHICH end is urgent, and "call from the top" is the whole workflow. */}
-      <p className="text-xs text-gray-500">
-        {isDeferred
-          ? 'Most recent request first.'
-          : tab === 'expired'
-            ? 'Sorted by longest overdue first — start calling from the top.'
-            : 'Sorted by soonest to expire first — start calling from the top.'}
-      </p>
-
       {!isDeferred && (
-        <form onSubmit={submitSearch} className="relative max-w-md">
-          <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search plate, vehicle, owner name, email or phone…"
-            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="rounded-lg bg-white p-5 shadow-sm">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Expired by month</p>
+              <p className="text-sm text-gray-600">
+                {selectedMonthLabel
+                  ? `Showing ${selectedMonthLabel}`
+                  : 'All overdue licences — pick a month to narrow the list'}
+              </p>
+            </div>
+            <select
+              value={month}
+              onChange={(e) => selectMonth(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All months</option>
+              {byMonth.map((m) => (
+                <option key={m.month} value={m.month}>
+                  {m.label} ({m.count})
+                </option>
+              ))}
+            </select>
+          </div>
+          <ExpiredMonthChart
+            data={byMonth}
+            selected={month}
+            onSelect={selectMonth}
+            loading={metricsLoading}
           />
-        </form>
+        </div>
       )}
 
+      <div>
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Call queue</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {RENEWAL_QUEUES.map((q) => (
+            <QueueCard
+              key={q.key}
+              label={q.label}
+              hint={q.hint}
+              count={counts[q.key]}
+              loading={metricsLoading}
+              active={tab === q.key}
+              onClick={() => switchTab(q.key)}
+            />
+          ))}
+          <QueueCard
+            label="Asked to be reminded"
+            hint="Chose later at checkout"
+            count={deferredCount}
+            loading={metricsLoading && deferredCount === null}
+            active={isDeferred}
+            onClick={() => switchTab(DEFERRED_TAB)}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <p className="text-xs text-gray-500">
+          {isDeferred
+            ? 'Most recent request first.'
+            : tab === 'expired'
+              ? 'Sorted by longest overdue first — start calling from the top.'
+              : 'Sorted by soonest to expire first — start calling from the top.'}
+        </p>
+        {!isDeferred && (
+          <form onSubmit={submitSearch} className="relative w-full max-w-md">
+            <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search plate, vehicle, owner name, email or phone…"
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </form>
+        )}
+      </div>
+
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {loading ? (
-          <p className="p-6 text-sm text-gray-500">Loading…</p>
+        {tableLoading ? (
+          <RenewalsTableSkeleton />
         ) : rows.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-sm font-medium text-gray-900">Nothing here</p>
@@ -282,7 +385,9 @@ const AdminRenewals = () => {
                 ? 'No customers have asked to be reminded about a document.'
                 : search
                   ? 'No matches for that search in this group.'
-                  : 'No vehicles fall into this group right now.'}
+                  : month
+                    ? 'No expired licences in that month.'
+                    : 'No vehicles fall into this group right now.'}
             </p>
           </div>
         ) : (

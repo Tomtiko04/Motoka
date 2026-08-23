@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ClipboardDocumentListIcon,
   UserGroupIcon,
@@ -8,6 +9,7 @@ import {
   ArrowDownIcon,
   DocumentTextIcon,
   UsersIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import {
@@ -24,15 +26,21 @@ import {
 import config from '../../config/config';
 import GatewayHealthPanel from '../../components/admin/GatewayHealthPanel';
 import RenewalsSummary from '../../components/admin/RenewalsSummary';
+import { Pulse } from '../../components/admin/renewalsMetrics';
+
+function KpiNumber({ ready, children, className }) {
+  if (!ready) return <Pulse className="mt-1 h-8 w-24" />;
+  return <p className={className}>{children}</p>;
+}
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [statsReady, setStatsReady] = useState(false);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
@@ -46,32 +54,35 @@ const AdminDashboard = () => {
       try { return await res.json(); } catch { return null; }
     };
 
-    const [statsResult, ordersResult, txResult, allOrdersResult] = await Promise.allSettled([
-      fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers }).then(safeJson),
-      fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson),
-      fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson),
-      fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson),
+    const statsPromise = fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers })
+      .then(safeJson)
+      .then((statsData) => {
+        if (statsData?.status) setStats(statsData.data);
+        setStatsReady(true);
+        return statsData;
+      })
+      .catch(() => {
+        setStatsReady(true);
+        return null;
+      });
+
+    const [statsData, ordersResult, txResult, allOrdersResult] = await Promise.all([
+      statsPromise,
+      fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson).catch(() => null),
+      fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson).catch(() => null),
+      fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson).catch(() => null),
     ]);
 
-    const statsData     = statsResult.status     === 'fulfilled' ? statsResult.value     : null;
-    const ordersData    = ordersResult.status     === 'fulfilled' ? ordersResult.value    : null;
-    const txData        = txResult.status         === 'fulfilled' ? txResult.value        : null;
-    const allOrdersData = allOrdersResult.status  === 'fulfilled' ? allOrdersResult.value : null;
+    if (ordersResult?.status) setRecentOrders(ordersResult.data);
+    if (txResult?.status) setRecentTransactions(txResult.data);
 
-    if (statsData?.status)  setStats(statsData.data);
-    if (ordersData?.status) setRecentOrders(ordersData.data);
-    if (txData?.status)     setRecentTransactions(txData.data);
-
-    const orders = allOrdersData?.status
-      ? (allOrdersData.data?.data || allOrdersData.data || [])
-      : (ordersData?.data || []);
+    const orders = allOrdersResult?.status
+      ? (allOrdersResult.data?.data || allOrdersResult.data || [])
+      : (ordersResult?.data || []);
     setAllOrders(orders);
 
-    const allFailed = [statsResult, ordersResult, txResult, allOrdersResult]
-      .every(r => r.status === 'rejected' || !r.value);
+    const allFailed = !statsData && !ordersResult && !txResult && !allOrdersResult;
     if (allFailed) toast.error('Failed to fetch dashboard data');
-
-    setLoading(false);
   };
 
   const buildChartFromOrders = (orders, period) => {
@@ -154,14 +165,6 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -171,15 +174,15 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
         {/* Total Amount */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 ₦{stats ? parseFloat(stats.total_amount).toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <CreditCardIcon className="h-5 w-5 text-blue-600" />
@@ -192,9 +195,9 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_orders.toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
@@ -207,9 +210,9 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_users.toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <UsersIcon className="h-5 w-5 text-blue-600" />
@@ -222,15 +225,36 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_cars.toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <TruckIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
+
+        <Link
+          to={
+            stats?.expired_month
+              ? `/admin/renewals?bucket=expired&month=${stats.expired_month}`
+              : '/admin/renewals?bucket=expired'
+          }
+          className="bg-white rounded-lg shadow-sm p-6 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Expired this month</p>
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+                {stats ? Number(stats.expired_cars_this_month || 0).toLocaleString() : '0'}
+              </KpiNumber>
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Order Status Cards */}
