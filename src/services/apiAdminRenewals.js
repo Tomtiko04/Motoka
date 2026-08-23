@@ -11,11 +11,20 @@ async function handle(res) {
   return data;
 }
 
-/** GET /admin/renewals — call list for one urgency bucket, plus counts for all */
-export async function listRenewals({ bucket = 'expired', page = 1, limit = 25, search } = {}) {
+/** GET /admin/renewals — one page of the call list, plus bucket counts */
+export async function listRenewals({ bucket = 'expired', page = 1, limit = 25, search, month } = {}) {
   const params = new URLSearchParams({ bucket, page, limit });
   if (search) params.set('search', search);
+  if (month) params.set('month', month);
   const res = await fetch(`${config.getApiBaseUrl()}/admin/renewals?${params}`, { headers: adminHeaders() });
+  const json = await handle(res);
+  return json.data;
+}
+
+/** GET /admin/renewals/summary — counts only, no car rows */
+export async function getRenewalsSummary({ fresh = false } = {}) {
+  const params = fresh ? '?fresh=1' : '';
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/renewals/summary${params}`, { headers: adminHeaders() });
   const json = await handle(res);
   return json.data;
 }
