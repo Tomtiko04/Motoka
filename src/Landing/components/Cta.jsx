@@ -18,7 +18,7 @@ function CtaSection() {
             className="mt-4 rounded-[15px] bg-[#EBB850] px-8 py-4 text-lg font-[600] text-[#05243F] transition hover:bg-[#edb138]"
             onClick={() => navigate("/auth/signup")}
           >
-            Signup Now
+            Sign Up Now
           </button>
         </div>
       </div>

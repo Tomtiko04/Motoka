@@ -1,10 +1,6 @@
-import Licensesample2 from "../../assets/images/6fe45ed589cd8efebdda471557ad5d41b9a94c27.png";
 import { useState, useEffect } from "react";
-import drivers from "../../assets/images/license-sample.png";
 import { Icon } from "@iconify/react";
 import { toast } from "react-hot-toast";
-
-const driversLicense = drivers;
 
 function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
   const [aspect, setAspect] = useState("portrait");
@@ -20,8 +16,13 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
     setAspect("portrait");
   };
 
-  // Determine image and metadata
-  const imageSrc = selectedDocument || (docType === "MyCar" ? Licensesample2 : driversLicense);
+  // Determine image and metadata. This used to fall back to two bundled sample
+  // images when no document was selected — but nothing renders in that case
+  // (see the `selectedDocument ? … : "Select a document"` branch below), so the
+  // fallback was unreachable. Both files were photographs of real Nigerian
+  // documents with legible names, addresses, licence and next-of-kin numbers,
+  // and they shipped in every build at a guessable asset URL. Deleted.
+  const imageSrc = selectedDocument;
   const docTitle = docType === "MyCar" ? "Vehicle Document" : "Driver's License";
   const expiryDate = car?.expiry_date || car?.expiryDate || "";
 

@@ -50,7 +50,7 @@ function Categories() {
       image: category3,
       iconName: "ix:maintenance-filled",
       bgColor: "#E2E2E2",
-      button: "shedule now"
+      button: "schedule now"
     },
     {
       id: 4,
@@ -126,6 +126,33 @@ function Categories() {
         {/* Slider container */}
         {/* Desktop & Tablet View */}
         <div className="relative mt-5 mb-20 hidden sm:block">
+          {/* The row is drag-scrollable but gave no sign of it, so cards just
+              looked cut off at the right edge. These drive the same activeIndex
+              the category tabs above already use. */}
+          {activeIndex > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
+              aria-label="Previous service"
+              className="absolute top-1/2 left-2 z-20 -translate-y-1/2 rounded-full bg-white p-3 text-[#05243F] shadow-md transition hover:bg-gray-100"
+            >
+              <Icon icon="mdi:chevron-left" width="24" height="24" />
+            </button>
+          )}
+          {activeIndex < CategoryData.length - 1 && (
+            <button
+              type="button"
+              onClick={() =>
+                setActiveIndex((prev) =>
+                  Math.min(prev + 1, CategoryData.length - 1),
+                )
+              }
+              aria-label="Next service"
+              className="absolute top-1/2 right-2 z-20 -translate-y-1/2 rounded-full bg-white p-3 text-[#05243F] shadow-md transition hover:bg-gray-100"
+            >
+              <Icon icon="mdi:chevron-right" width="24" height="24" />
+            </button>
+          )}
           <motion.div
             ref={sliderRef}
             className="flex cursor-grab px-10 active:cursor-grabbing"
