@@ -20,7 +20,7 @@ export default defineConfig(({ command, mode }) => {
         // assets must never swap underneath a user mid-session. A new version waits
         // until the user accepts it via the update toast (see PWAUpdatePrompt).
         registerType: 'prompt',
-        includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-32.png'],
+        includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-32.png', 'push-sw.js'],
         manifest: {
           name: 'Motoka — Vehicle Registration',
           short_name: 'Motoka',
@@ -37,6 +37,29 @@ export default defineConfig(({ command, mode }) => {
             { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
             { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
             { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          ],
+          shortcuts: [
+            {
+              name: 'Notifications',
+              short_name: 'Alerts',
+              description: 'View your Motoka notifications',
+              url: '/notifications',
+              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+            },
+            {
+              name: 'Renew documents',
+              short_name: 'Renew',
+              description: 'Renew vehicle papers and licences',
+              url: '/licenses/renew',
+              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+            },
+            {
+              name: 'My garage',
+              short_name: 'Garage',
+              description: 'Manage your vehicles',
+              url: '/garage',
+              icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+            },
           ],
         },
         workbox: {
@@ -79,6 +102,8 @@ export default defineConfig(({ command, mode }) => {
           ],
 
           cleanupOutdatedCaches: true,
+          // Custom push / notificationclick handlers (Web Push)
+          importScripts: ['/push-sw.js'],
         },
         devOptions: {
           // Keep the service worker out of `vite dev` — stale-SW confusion during

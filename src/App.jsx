@@ -10,6 +10,7 @@ import toast, { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import InstallPrompt from "./components/pwa/InstallPrompt.jsx";
 import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt.jsx";
+import PushOptInPrompt from "./components/pwa/PushOptInPrompt.jsx";
 
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
@@ -65,7 +66,7 @@ import SuccessPage from "./pages/SuccessPage.jsx";
 import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
-import LandingPage from "./Landing/Landing.jsx";
+import HomeEntry from "./components/HomeEntry.jsx";
 import GuestRenewalCallback from "./pages/GuestRenewalCallback.jsx";
 import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
@@ -175,7 +176,8 @@ export default function App() {
         {isOpen && <CarDetailsModal />}
         <Routes>
           {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Browser → landing; installed PWA → login or dashboard */}
+          <Route path="/" element={<HomeEntry />} />
 
           <Route element={<MarketingLayout />}>
             <Route path="about" element={<About />} />
@@ -324,9 +326,10 @@ export default function App() {
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>
-      {/* PWA: install nudge and the update-available toast. Both self-hide when
-          irrelevant (already installed, dismissed, or no new build waiting). */}
+      {/* PWA: install nudge, soft push opt-in, and update toast. Each self-hides
+          when irrelevant so we never spam the user. */}
       <InstallPrompt />
+      <PushOptInPrompt />
       <PWAUpdatePrompt />
       <Toaster
         position="top-right"

@@ -55,6 +55,20 @@ export default function AppLayout() {
         0,
       )
     : 0;
+
+  // Home-screen / OS app badge (installed PWA)
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    try {
+      if (unreadCount > 0 && "setAppBadge" in navigator) {
+        navigator.setAppBadge(unreadCount);
+      } else if ("clearAppBadge" in navigator) {
+        navigator.clearAppBadge();
+      }
+    } catch {
+      /* unsupported */
+    }
+  }, [unreadCount]);
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

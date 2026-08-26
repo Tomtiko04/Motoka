@@ -18,12 +18,12 @@ import { XMarkIcon, ArrowDownTrayIcon, ShareIcon } from '@heroicons/react/24/out
 const DISMISS_KEY = 'motoka:install-prompt-dismissed';
 const DISMISS_DAYS = 30;
 
+import { isPwaStandalone } from '../../utils/pwa';
+
 const isIos = () =>
   /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !window.MSStream;
 
-const isStandalone = () =>
-  window.matchMedia?.('(display-mode: standalone)').matches ||
-  window.navigator.standalone === true;
+const isStandalone = () => isPwaStandalone();
 
 const recentlyDismissed = () => {
   try {
