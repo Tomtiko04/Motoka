@@ -6,8 +6,9 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   ArrowPathIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { listRenewals, listDeferredRenewals, getRenewalsSummary } from '../../services/apiAdminRenewals';
+import { listRenewals, listDeferredRenewals, getRenewalsSummary, markRenewalChannel } from '../../services/apiAdminRenewals';
 import {
   Pulse,
   MetricNumber,
@@ -97,7 +98,7 @@ function RenewalsTableSkeleton() {
       <table className="min-w-full text-sm">
         <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
           <tr>
-            {['Vehicle', 'Customer', 'Contact', 'Expiry', 'Status'].map((label) => (
+            {['Vehicle', 'Customer', 'Contact', 'Expiry', 'Status', 'Channel'].map((label) => (
               <th key={label} className="text-left font-semibold px-5 py-3">{label}</th>
             ))}
           </tr>
@@ -116,10 +117,126 @@ function RenewalsTableSkeleton() {
               </td>
               <td className="px-5 py-4"><Pulse className="h-4 w-20" /></td>
               <td className="px-5 py-4"><Pulse className="h-6 w-28 rounded-full" /></td>
+              <td className="px-5 py-4"><Pulse className="h-6 w-24" /></td>
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function nextYearFrom(iso) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  let base = today;
+  if (iso) {
+    const expiry = new Date(iso);
+    if (!Number.isNaN(expiry.getTime())) {
+      expiry.setUTCHours(0, 0, 0, 0);
+      base = expiry < today ? today : expiry;
+    }
+  }
+  const next = new Date(base);
+  next.setMonth(next.getMonth() + 12);
+  return next.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function MarkChannelModal({ pending, confirming, onCancel, onConfirm }) {
+  if (!pending) return null;
+  const { row, channel } = pending;
+  const label = channel === 'internal' ? 'Internal (Motoka)' : 'External';
+  const plate = row.registration_no || 'this vehicle';
+  const nextDate = nextYearFrom(row.expiry_date);
+  const openOrder = row.renewal_state === 'in_progress';
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={() => !confirming && onCancel()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mark-channel-title"
+        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <h3 id="mark-channel-title" className="text-lg font-semibold text-gray-900">
+            Mark as {label}?
+          </h3>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={confirming}
+            className="text-gray-400 hover:text-gray-600 disabled:opacity-40"
+            aria-label="Close"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+        <p className="mt-2 text-sm text-gray-600">
+          <span className="font-medium text-gray-900">{plate}</span>
+          {' '}will be recorded as a {channel} renewal. Expiry moves to{' '}
+          <span className="font-medium text-gray-900">{nextDate}</span>
+          {' '}and this vehicle leaves the call list until then.
+        </p>
+        {openOrder && (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+            This vehicle still has an open Motoka order. Completing that order later will not add another year.
+          </p>
+        )}
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={confirming}
+            className="px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={confirming}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {confirming ? 'Saving…' : `Confirm ${label}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RenewalChannelCell({ row, disabled, onMark }) {
+  const current = row.last_renewal_channel;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onMark(row, 'internal')}
+          className="px-2 py-1 text-[11px] font-semibold rounded-md border border-blue-200 text-blue-800 bg-blue-50 hover:bg-blue-100 disabled:opacity-40"
+        >
+          Internal
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onMark(row, 'external')}
+          className="px-2 py-1 text-[11px] font-semibold rounded-md border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40"
+        >
+          External
+        </button>
+      </div>
+      {current && (
+        <p className="text-[11px] text-gray-500 capitalize">
+          Last marked {current}
+        </p>
+      )}
     </div>
   );
 }
@@ -175,6 +292,8 @@ const AdminRenewals = () => {
   const [metricsLoading, setMetricsLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
+  const [markingId, setMarkingId] = useState(null);
+  const [pendingMark, setPendingMark] = useState(null);
 
   const loadMetrics = useCallback(async ({ fresh = false } = {}) => {
     setMetricsLoading(true);
@@ -253,6 +372,27 @@ const AdminRenewals = () => {
     e.preventDefault();
     setSearch(searchInput.trim());
     setPage(1);
+  };
+
+  const openMarkModal = (row, channel) => {
+    setPendingMark({ row, channel });
+  };
+
+  const confirmMarkChannel = async () => {
+    if (!pendingMark) return;
+    const { row, channel } = pendingMark;
+    const label = channel === 'internal' ? 'internal (Motoka)' : 'external';
+    setMarkingId(row.car_id);
+    try {
+      const result = await markRenewalChannel(row.car_id, channel);
+      toast.success(`Marked ${label}. New expiry: ${formatDate(result?.expiry_date)}`);
+      setPendingMark(null);
+      refresh();
+    } catch (err) {
+      toast.error(err.message || 'Could not mark renewal');
+    } finally {
+      setMarkingId(null);
+    }
   };
 
   const isDeferred = tab === DEFERRED_TAB;
@@ -404,6 +544,9 @@ const AdminRenewals = () => {
                     {isDeferred ? 'Requested' : 'Expiry ↓'}
                   </th>
                   <th className="text-left font-semibold px-5 py-3">Status</th>
+                  {!isDeferred && (
+                    <th className="text-left font-semibold px-5 py-3">Channel</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -465,6 +608,16 @@ const AdminRenewals = () => {
                         </div>
                       )}
                     </td>
+
+                    {!isDeferred && (
+                      <td className="px-5 py-4 align-top">
+                        <RenewalChannelCell
+                          row={row}
+                          disabled={markingId === row.car_id}
+                          onMark={openMarkModal}
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -498,6 +651,13 @@ const AdminRenewals = () => {
           </div>
         )}
       </div>
+
+      <MarkChannelModal
+        pending={pendingMark}
+        confirming={Boolean(markingId)}
+        onCancel={() => !markingId && setPendingMark(null)}
+        onConfirm={confirmMarkChannel}
+      />
     </div>
   );
 };
