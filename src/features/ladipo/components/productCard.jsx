@@ -49,7 +49,7 @@ function ProductCard({ part }) {
 
   return (
     <div
-      className="group relative flex h-full w-full cursor-pointer flex-col rounded-[16px] border border-[#E1E6F4] bg-white p-4 transition-all duration-300 hover:border-[#2389E3]"
+      className="group relative flex h-full w-full cursor-pointer flex-col rounded-[16px] border border-[#E1E6F4] bg-white p-3 sm:p-4 transition-all duration-300 hover:border-[#2389E3]"
       onClick={handleCardOpen}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -63,18 +63,18 @@ function ProductCard({ part }) {
     >
       <button
         onClick={handleAddToCart}
-        className="absolute top-4 right-4 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-[#DFE4E8] text-white transition-colors group-hover:bg-[#2389E3]"
+        className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-[#DFE4E8] text-white transition-colors group-hover:bg-[#2389E3]"
       >
         <Icon icon="lucide:plus" width="14" strokeWidth="3" />
       </button>
 
       {part.condition && (
-        <span className={`absolute top-4 left-4 z-10 rounded-[4px] px-1.5 py-[2px] text-[9px] font-bold ${condition.color}`}>
+        <span className={`absolute top-3 left-3 sm:top-4 sm:left-4 z-10 rounded-[4px] px-1.5 py-[2px] text-[9px] font-bold ${condition.color}`}>
           {condition.text}
         </span>
       )}
 
-      <div className="relative mb-4 aspect-square flex items-center justify-center">
+      <div className="relative mb-3 sm:mb-4 aspect-square flex items-center justify-center">
         {part.primary_image_url ? (
           <img
             src={part.primary_image_url}
@@ -82,21 +82,21 @@ function ProductCard({ part }) {
             className="h-3/4 w-3/4 object-contain transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <Icon icon="solar:box-bold-duotone" width="48" className="text-[#D3D9DE]" />
+          <Icon icon="solar:box-bold-duotone" width="36" className="text-[#D3D9DE] sm:w-12" />
         )}
       </div>
 
       <div className="flex flex-1 flex-col">
-        <p className="mb-1 min-h-[3.5rem] text-[14px] font-bold leading-snug text-[#05243F] line-clamp-2">
+        <p className="mb-1 min-h-[2.25rem] sm:min-h-[3.5rem] text-[12px] sm:text-[14px] font-bold leading-snug text-[#05243F] line-clamp-2">
           {part.name}
         </p>
 
-        <p className="mb-2 min-h-[1.25rem] text-[12px] font-medium text-[#8A9EB0] line-clamp-1">
+        <p className="mb-1 sm:mb-2 min-h-[1rem] sm:min-h-[1.25rem] text-[11px] sm:text-[12px] font-medium text-[#8A9EB0] line-clamp-1">
           {part.brand || "\u00A0"}
         </p>
 
-        <div className="mt-auto flex flex-col gap-3">
-          <p className="text-[14px] font-bold text-[#2389E3]">
+        <div className="mt-auto flex flex-col gap-2 sm:gap-3">
+          <p className="text-[13px] sm:text-[14px] font-bold text-[#2389E3]">
             {part.price_kobo != null
               ? `\u20A6${(Math.round(part.price_kobo) / 100).toLocaleString("en-NG", {
                   minimumFractionDigits: 0,
@@ -107,7 +107,7 @@ function ProductCard({ part }) {
 
           <button
             onClick={handleBuyNow}
-            className="flex w-full items-center justify-center rounded-full bg-[#DFE4E8] py-2 text-[13px] font-bold text-white transition-colors duration-300 cursor-pointer group-hover:bg-[#2389E3]"
+            className="flex w-full items-center justify-center rounded-full bg-[#DFE4E8] py-1.5 sm:py-2 text-[11px] sm:text-[13px] font-bold text-white transition-colors duration-300 cursor-pointer group-hover:bg-[#2389E3]"
           >
             Buy Now
           </button>

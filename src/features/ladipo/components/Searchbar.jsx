@@ -65,9 +65,9 @@ export default function SearchBar({
 
   return (
     <div ref={dropdownRef} className="relative">
-      {/* Top row: Search input + car selector + Ask Mo */}
-      <div className="flex items-center gap-3">
-        {/* Search Input with embedded button */}
+      {/* Mobile: stacked vertically. sm+: side by side */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        {/* Search Input — always full width */}
         <div className="relative flex flex-1 items-center bg-[#F0F4F8] rounded-full p-1 border border-transparent focus-within:bg-white focus-within:border-[#46A2EC] transition-all">
           <Search className="absolute left-5 text-[#8A9EB0] pointer-events-none" size={18} />
           <input
@@ -94,43 +94,32 @@ export default function SearchBar({
           </button>
         </div>
 
-        {/* Car filter button */}
+        {/* Car filter button — full-width row on mobile, compact pill on sm+ */}
         {garageCars.length > 0 && (
-          <div className="relative flex-shrink-0">
+          <div className="relative">
             <button
               onClick={() => {
                 setCarDropdownOpen((v) => !v);
                 if (!carDropdownOpen) setCarFilterSearch("");
               }}
-              className={`flex items-center gap-2 flex-shrink-0 rounded-full px-3 sm:px-4 py-3 text-[13px] font-semibold border transition-all duration-200 cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start rounded-xl sm:rounded-full px-4 py-2.5 sm:py-3 text-[13px] font-semibold border transition-all duration-200 cursor-pointer ${
                 selectedCar
                   ? "bg-[#2389E3]/8 text-[#2389E3] border-[#2389E3]/30"
                   : "bg-white text-[#05243F] border-[#E1E6F4] hover:border-[#C4CDD5]"
               }`}
             >
-              <div className={`flex items-center justify-center w-5 h-5 rounded-lg flex-shrink-0 text-[12px] ${
-                selectedCar ? "bg-[#2389E3] text-white" : "bg-[#F4F5FC] text-[#697C8C]"
-              }`}>
-                <Icon icon="ion:car-sport-sharp" fontSize={14} />
-              </div>
-
-              {selectedCar ? (
-                <>
-                  <span className="sm:hidden flex-shrink-0 text-[11px]">
-                    {selectedCar.vehicle_make?.substring(0, 3)}
-                  </span>
-                  <span className="hidden sm:inline flex-shrink-0">
-                    {selectedCar.vehicle_make}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="sm:hidden">Select</span>
-                  <span className="hidden sm:inline flex-shrink-0">
-                    Select a car
-                  </span>
-                </>
-              )}
+              <span className="flex items-center gap-2 min-w-0">
+                <span className={`flex items-center justify-center w-5 h-5 rounded-lg flex-shrink-0 text-[12px] ${
+                  selectedCar ? "bg-[#2389E3] text-white" : "bg-[#F4F5FC] text-[#697C8C]"
+                }`}>
+                  <Icon icon="ion:car-sport-sharp" fontSize={14} />
+                </span>
+                <span className="truncate">
+                  {selectedCar
+                    ? `${selectedCar.vehicle_make} ${selectedCar.vehicle_model}`
+                    : "Filter by my car"}
+                </span>
+              </span>
 
               <ChevronDown
                 size={14}
@@ -138,9 +127,9 @@ export default function SearchBar({
               />
             </button>
 
-            {/* Car Dropdown */}
+            {/* Car Dropdown — full width on mobile, fixed width on sm+ */}
             {carDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[380px] w-80 border border-[#E1E6F4]">
+              <div className="absolute left-0 top-full mt-1.5 z-50 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[380px] w-full sm:w-80 sm:left-auto sm:right-0 border border-[#E1E6F4]">
                 <div className="px-4 py-3 flex-shrink-0">
                   <p className="text-[11px] font-bold text-[#697C8C] uppercase tracking-wider">
                     My Garage {garageCars.length > 0 && <span className="text-[#2389E3]">({garageCars.length})</span>}
