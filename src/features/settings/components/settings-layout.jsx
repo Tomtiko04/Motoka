@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Cog } from "lucide-react";
 import SearchBar from "./search-bar";
@@ -14,6 +14,7 @@ export default function SettingsLayout({
   onSectionToggle,
 }) {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getTitleParts = () => {
     switch (activePage) {
@@ -129,7 +130,7 @@ export default function SettingsLayout({
               } border-r border-gray-100 lg:col-span-2 min-h-0`}
             >
               <div className="p-4">
-                <SearchBar />
+                <SearchBar value={searchQuery} onChange={setSearchQuery} />
               </div>
               <div className="max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-330px)] overflow-y-auto customscroll px-4 sm:px-6">
                 <SettingsSidebar
@@ -137,6 +138,7 @@ export default function SettingsLayout({
                   expandedSection={expandedSection}
                   onNavigate={onNavigate}
                   onSectionToggle={onSectionToggle}
+                  searchQuery={searchQuery}
                 />
               </div>
             </div>
