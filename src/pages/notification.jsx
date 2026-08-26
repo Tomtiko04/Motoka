@@ -271,8 +271,9 @@ export default function Notification() {
   const queryClient = useQueryClient();
 
   const isAll = notificationsCategory === "All";
-  const { data: allData } = useNotifications({ unreadOnly: false, enabled: isAll });
-  const { data: typeData } = useNotificationsByType(notificationsCategory, { enabled: !isAll });
+  const { data: allData, isLoading: isLoadingAll } = useNotifications({ unreadOnly: false, enabled: isAll });
+  const { data: typeData, isLoading: isLoadingType } = useNotificationsByType(notificationsCategory, { enabled: !isAll });
+  const isLoading = isAll ? isLoadingAll : isLoadingType;
 
   const markAllMutation = useMutation({
     mutationFn: markAllNotificationsAsRead,
@@ -398,6 +399,7 @@ export default function Notification() {
           notificationsCategory={notificationsCategory}
           notificationData={notificationData}
           onMarkRead={handleMarkRead}
+          isLoading={isLoading}
         />
       </div>
     </PageLayout>
