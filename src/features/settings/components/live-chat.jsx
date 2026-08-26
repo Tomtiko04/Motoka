@@ -1,17 +1,8 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
-
 export default function LiveChat({ onNavigate }) {
   return (
     <div>
-      <div className="flex items-center mb-6">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">Live Chat / Help Desk</h2>
-      </div>
-
       <div className="space-y-6 my-5">
         <p className="mb-2 block text-sm font-medium text-grey-500">Chat with a support agent in real-time.</p>
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, X } from "lucide-react"
+import { X } from "lucide-react"
 import { useProfile } from "../hooks/useProfile"
 import { authStorage } from "../../../utils/authStorage"
 
@@ -56,13 +56,6 @@ export default function DeleteAccount({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center mb-6">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">Delete Account</h2>
-      </div>
-
       <div className="text-center space-y-6">
         <div className="flex justify-center items-center w-full h-full text-center">
           <p className="text-gray-500 mb-4 text-center text-sm md:text-base w-80">

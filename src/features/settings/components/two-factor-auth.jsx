@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import { enableTwoFactorEmail, verifyTwoFactorEmail, enableTwoFactorApp, verifyTwoFactorApp } from '../../../services/apiTwoFactor';
 import VerifyTwoFactor from './ui/verifyTwoFactor.jsx';
 import toast from "react-hot-toast";
@@ -73,13 +72,6 @@ export default function TwoFactorAuth({ onNavigate }) {
   return (
     <div className="">
       <div>
-        <div className="flex items-center mb-6">
-          <button onClick={() => onNavigate("main")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-lg font-medium">Two Factor Authenticator</h2>
-        </div>
-
         <div className="flex justify-center items-center w-full h-full text-center my-6">
           <p className="text-sm text-[#05243F]/40 w-80">
             Motoka requires you to protect your account with 2FA. How would you like to receive one-time password (OTP)

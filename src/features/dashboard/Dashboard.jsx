@@ -86,7 +86,7 @@ export default function Dashboard() {
                   onRenewClick={handleRenewLicense}
                 />
               </div>
-              <div className="h-full">
+              <div className="hidden h-full md:block">
                 <AddCarCard onAddCarClick={handleAddCar} />
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function Dashboard() {
                 <div className="custom-pagination !mt-0 flex justify-center" />
               </div>
 
-              <div className="shrink-0">
+              <div className="hidden shrink-0 md:block">
                 <button
                   onClick={handleAddCar}
                   className="group flex flex-col items-center justify-center gap-2"
@@ -152,7 +152,7 @@ export default function Dashboard() {
               </p>
               <button
                 onClick={handleAddCar}
-                className="flex items-center gap-2 rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
+                className="hidden md:flex items-center gap-2 rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90"
               >
                 <FaPlus className="text-sm" />
                 Add Your First Car

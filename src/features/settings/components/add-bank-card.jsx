@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, CreditCard, Building2, ChevronDown } from "lucide-react";
+import { CreditCard, Building2, ChevronDown } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
   useGetPendingTokenizationSubscriptions,
@@ -207,13 +207,6 @@ export default function AddBankCard({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center md:mb-6">
-        <button onClick={() => onNavigate("payment")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base font-medium md:text-lg">Add a Bank Card/Account</h2>
-      </div>
-
       <div className="mb-5 flex">
         <button
           onClick={() => setActiveTab("card")}

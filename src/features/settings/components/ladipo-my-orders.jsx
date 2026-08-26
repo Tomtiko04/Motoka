@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserLadipoOrders } from "../../../services/apiLadipo";
@@ -264,12 +263,6 @@ export default function LadipoMyOrders({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center md:mb-6">
-        <button type="button" onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base font-medium md:text-lg">My Orders</h2>
-      </div>
       <p className="mb-4 text-sm text-gray-500">
         Track renewals, plates, licences, and marketplace orders — including courier delivery.
       </p>
