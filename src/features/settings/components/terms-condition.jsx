@@ -1,6 +1,5 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
 import { useState } from "react"
 
 export default function TermsCondition({ onNavigate }) {
@@ -8,13 +7,6 @@ export default function TermsCondition({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center mb-6">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">Terms & Condition</h2>
-      </div>
-
       <div className="space-y-6">
         <div className="space-y-4">
           <h3 className="mb-2 block text-sm font-medium text-[#9BA7B2]">Acceptance of Terms</h3>

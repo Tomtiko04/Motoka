@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useProfile } from "../hooks/useProfile"
 
 export default function ChangePassword({ onNavigate }) {
@@ -91,13 +91,6 @@ export default function ChangePassword({ onNavigate }) {
   return (
     <div className="flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center mb-6">
-          <button onClick={() => onNavigate("main")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-lg font-medium">Change Password</h2>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-6 relative">
           <div>
             <label htmlFor="old_password" className="mb-2 block text-sm font-medium text-[#05243F]">

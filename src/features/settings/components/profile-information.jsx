@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, Pencil } from "lucide-react"
+import { Pencil } from "lucide-react"
 import { useProfile } from "../hooks/useProfile"
 import Avatar from "./ui/avatar"
 
@@ -48,14 +48,8 @@ export default function ProfileInformation({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <button onClick={() => onNavigate("main")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-lg font-medium">Profile Information</h2>
-        </div>
-        <button className="text-sky-500" onClick={handleEditClick}>
+      <div className="flex justify-end mb-6">
+        <button className="flex items-center gap-1 text-sky-500 hover:text-sky-600 transition-colors cursor-pointer" onClick={handleEditClick}>
           <Pencil className="h-5 w-5" />
         </button>
       </div>

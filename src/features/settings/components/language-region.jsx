@@ -8,12 +8,14 @@ export default function LanguageRegion({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center mb-6">
-        <button onClick={() => (activeTab === "main" ? onNavigate("main") : setActiveTab("main"))} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">Language & Region</h2>
-      </div>
+      {activeTab !== "main" && (
+        <div className="flex items-center mb-6">
+          <button onClick={() => setActiveTab("main")} className="mr-2">
+            <ChevronLeft className="h-5 w-5 text-gray-500" />
+          </button>
+          <h2 className="text-lg font-medium">{activeTab === "language" ? "Select Language" : "Select Region"}</h2>
+        </div>
+      )}
 
       {activeTab === "main" && (
         <div className="space-y-4">

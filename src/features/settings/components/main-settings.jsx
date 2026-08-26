@@ -11,7 +11,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useProfile } from "../hooks/useProfile";
 import Avatar from "./ui/avatar";
 import { Icon } from "@iconify/react";
@@ -57,7 +57,7 @@ export default function MainSettings({ onNavigate }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className="hidden md:flex flex-col items-center justify-center h-full">
     {/* // <div> */}
       <div>
         <div>

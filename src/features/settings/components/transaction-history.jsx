@@ -1,6 +1,5 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getPaymentHistory } from "../../../services/apiPayment";
@@ -55,15 +54,6 @@ export default function TransactionHistory({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center md:mb-6">
-        <button onClick={() => onNavigate("payment")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base font-medium md:text-lg">
-          Transaction History
-        </h2>
-      </div>
-
       <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 md:space-y-4">
         {loading ? (
           <div className="flex items-center justify-center my-10">

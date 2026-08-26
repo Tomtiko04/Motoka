@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft } from "lucide-react"
 
 export default function CustomizedNotification({ onNavigate }) {
   const [customEnabled, setCustomEnabled] = useState(true)
@@ -10,13 +9,6 @@ export default function CustomizedNotification({ onNavigate }) {
     <div className="flex flex-col justify-between h-full">
 
       <div>
-        <div className="flex items-center mb-4 md:mb-6">
-          <button onClick={() => onNavigate("notifications")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-base md:text-lg font-medium">Customized Notification</h2>
-        </div>
-
         <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md cursor-pointer">
           <div className="pr-4">
             <h3 className="font-medium text-sm md:text-base">Customized Notification</h3>
