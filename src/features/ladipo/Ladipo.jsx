@@ -68,6 +68,13 @@ export default function Ladipo() {
     sidebarFilters.minPriceNgn != null ||
     sidebarFilters.maxPriceNgn != null ||
     (sidebarFilters.sort && sidebarFilters.sort !== "newest");
+
+  const sidebarFilterCount =
+    (sidebarFilters.brand?.length > 0 ? 1 : 0) +
+    (sidebarFilters.condition?.length > 0 ? 1 : 0) +
+    (sidebarFilters.part_type?.length > 0 ? 1 : 0) +
+    ((sidebarFilters.minPriceNgn != null || sidebarFilters.maxPriceNgn != null) ? 1 : 0) +
+    ((sidebarFilters.sort && sidebarFilters.sort !== "newest") ? 1 : 0);
   const itemsPerPage = 12; // 3 rows on desktop (4 columns), 6 items on mobile (2 columns)
 
   function normalizeFilterValue(value) {
@@ -566,37 +573,18 @@ export default function Ladipo() {
         {/* Active filters / active collection / forced catalog */}
         {(hasFilters || activeCollection || showCatalog) && (
           <>
-            {/* Mobile: Compact filter summary */}
-            <div className="md:hidden flex items-center justify-between gap-3 pt-4">
-              <div className="flex items-center gap-2">
-                <span className="text-[12px] text-[#697C8C] font-medium">
-                  {activeCollection
-                    ? collectionLabel
-                    : showCatalog && !hasFilters
-                      ? "All parts"
-                      : (() => {
-                          let count = 0;
-                          if (selectedCar) count++;
-                          if (selectedMainCategory) count++;
-                          if (selectedSubcategory) count++;
-                          if (activeSearch) count++;
-                          return `${count} filter${count !== 1 ? "s" : ""} active`;
-                        })()}
-                </span>
+            {/* Mobile: exit collection / all-parts only — filter count lives on the Filters button */}
+            {(activeCollection || (showCatalog && !hasFilters)) && (
+              <div className="md:hidden flex items-center justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={activeCollection ? exitCollection : () => setShowCatalog(false)}
+                  className="text-[12px] text-[#2389E3] hover:text-[#1a7acf] font-semibold cursor-pointer whitespace-nowrap"
+                >
+                  Back
+                </button>
               </div>
-              <button
-                onClick={
-                  activeCollection
-                    ? exitCollection
-                    : showCatalog && !hasFilters
-                      ? () => setShowCatalog(false)
-                      : clearAllFilters
-                }
-                className="text-[11px] text-[#2389E3] hover:text-[#1a7acf] font-semibold cursor-pointer whitespace-nowrap"
-              >
-                {activeCollection || (showCatalog && !hasFilters) ? "Back" : "Clear all"}
-              </button>
-            </div>
+            )}
 
             {/* Desktop: Detailed filter chips */}
             <div className="hidden md:flex items-center gap-2 flex-wrap pt-4">
@@ -713,12 +701,7 @@ export default function Ladipo() {
               className="inline-flex items-center gap-2 rounded-lg border border-[#E1E6F4] bg-white px-3 py-2 text-[13px] font-semibold text-[#05243F]"
             >
               <Icon icon="solar:filter-bold-duotone" width="16" />
-              Filters
-              {hasSidebarFilters && (
-                <span className="ml-1 rounded-full bg-[#1A7ACF] px-2 py-0.5 text-[10px] text-white">
-                  on
-                </span>
-              )}
+              Filters{sidebarFilterCount > 0 && ` (${sidebarFilterCount})`}
             </button>
             <p className="text-[12px] text-[#697C8C]">
               {partsCountLabel}
@@ -752,7 +735,7 @@ export default function Ladipo() {
           )}
 
           {partsLoading ? (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-3">
               {Array.from({ length: 9 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
@@ -962,7 +945,7 @@ export default function Ladipo() {
             className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-[#F9FAFC] px-4 py-5 lg:max-h-full lg:w-[420px] lg:rounded-l-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 flex w-full max-w-[280px] items-center justify-between">
+            <div className="mb-4 flex w-full items-center justify-between">
               <h3 className="text-[15px] font-bold text-[#05243F]">Filters</h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
