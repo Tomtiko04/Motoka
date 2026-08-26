@@ -42,6 +42,7 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
         hour: "2-digit",
         minute: "2-digit",
       }),
+      rawDate: created,
       isRead: Boolean(n.is_read),
     };
   };
@@ -100,22 +101,42 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
     }
   };
 
-  const lastFive = useMemo(() => {
+  const recentTwo = useMemo(() => {
     if (!data) return [];
     const allNotifications = flattenNotifications(data);
-    return allNotifications.slice(-5);
+    allNotifications.sort((a, b) => b.rawDate - a.rawDate);
+    return allNotifications.slice(0, 2);
   }, [data]);
-  
+
   return (
-    <div className="">
+    <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-transparent"
+        className="fixed inset-0 z-40 bg-black/10"
         onClick={() => setNotificationsModal(false)}
-      ></div>
-      <div className="absolute top-3 right-2 z-60 w-[90%] max-w-md rounded-2xl bg-white p-4 !pt-10 shadow-lg sm:right-5 sm:p-6">
-        <ul className="flex h-fit flex-col items-center space-y-3">
-          {lastFive.length > 0 ? (
-            lastFive.map((n) => (
+      />
+      <div className="absolute top-2 right-2 z-50 w-[300px] sm:w-[350px] rounded-2xl bg-white p-4 shadow-xl border border-gray-100 sm:right-6">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-[#05243F]">Notifications</h3>
+            {recentTwo.length > 0 && (
+              <span className="rounded-full bg-[#EAF5FF] px-2 py-0.5 text-[10px] font-semibold text-[#2389E3]">
+                {recentTwo.length} Recent
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setNotificationsModal(false)}
+            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            <FaTimes size={14} />
+          </button>
+        </div>
+
+        <div className="space-y-2.5">
+          {recentTwo.length > 0 ? (
+            recentTwo.map((n) => (
               <NotificationCard
                 key={n.id}
                 notification={n}
@@ -124,25 +145,25 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
               />
             ))
           ) : (
-            <li className="text-sm text-gray-500">No notifications</li>
+            <div className="py-6 text-center text-xs text-gray-400">
+              No unread notifications
+            </div>
           )}
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-center">
           <button
-            className="m-auto w-full rounded-full bg-[#2389E3] px-6 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] hover:shadow-md"
+            type="button"
+            className="text-xs font-semibold text-[#2389E3] hover:text-[#1a6dba] hover:underline cursor-pointer transition-colors"
             onClick={() => {
-              navigate("/notifications"), setNotificationsModal(false);
+              navigate("/notifications");
+              setNotificationsModal(false);
             }}
           >
-            Show All
+            View all notifications &rarr;
           </button>
-        </ul>
-
-        <button
-          onClick={() => setNotificationsModal(false)}
-          className="absolute top-3 right-4 text-gray-500 hover:text-gray-700 sm:right-6"
-        >
-          <FaTimes size={20} />
-        </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
