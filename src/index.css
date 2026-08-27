@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #2389e3;
+  --color-brand-blue-dark: #0e6fc6;
+  --color-brand-navy: #05243f;
+  --color-brand-gold: #ebb850;
+  --color-brand-green: #21b993;
+  --color-brand-mint: #5df8d0;
+  --color-brand-bg: #daebfa;
+}
+
+html {
+  scroll-behavior: smooth;
+  zoom: 1.1;
+}
+
+body {
+  font-family: 'Lexend', system-ui, -apple-system, Roboto, sans-serif;
+  background: #fff;
+  color: #0f172a;
+}
+
+.services-scroll::-webkit-scrollbar {
+  display: none;
+}
