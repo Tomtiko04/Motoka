@@ -36,3 +36,14 @@ export async function listDeferredRenewals({ page = 1, limit = 25 } = {}) {
   const json = await handle(res);
   return json.data;
 }
+
+/** POST /admin/renewals/:carId/channel — mark internal/external and roll expiry forward 12 months */
+export async function markRenewalChannel(carId, channel) {
+  const res = await fetch(`${config.getApiBaseUrl()}/admin/renewals/${carId}/channel`, {
+    method: 'POST',
+    headers: { ...adminHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channel }),
+  });
+  const json = await handle(res);
+  return json.data;
+}
