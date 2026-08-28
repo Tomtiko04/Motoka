@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 import certifiedBadge from '../assets/v2/certified-badge.svg'
 import doc1 from '../assets/v2/doc-1.jpg'
 import doc2 from '../assets/v2/doc-2.jpg'
