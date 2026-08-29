@@ -7,6 +7,8 @@
     "predev": "node scripts/free-ports.js",
     "dev": "concurrently -n vite,server -c blue,green \"vite\" \"node server/index.js\"",
     "build": "vite build && node scripts/prerender.js",
+    "build:development": "vite build --mode development && node scripts/prerender.js",
+    "build:production": "vite build --mode production && node scripts/prerender.js",
     "lint": "oxlint",
     "preview": "vite preview",
     "server": "node server/index.js"
