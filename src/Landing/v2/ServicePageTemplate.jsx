@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import useSeoHead from './useSeoHead'
+import Seo from '../../components/Seo'
 
 // Shared shell for the location/service landing pages (License Renewal, Road
 // Worthiness, Ogun State, Ladipo). Same visual language as the rest of the
@@ -18,10 +18,9 @@ export default function ServicePageTemplate({
   ctaText = 'Renew Now',
   ctaTo = '/#top',
 }) {
-  useSeoHead(seoTitle, seoDescription, seoPath)
-
   return (
     <>
+      <Seo title={seoTitle} description={seoDescription} path={seoPath} />
       <section className="bg-[#daebfa]" style={{ paddingTop: 96, paddingBottom: 96 }}>
         <div style={{ paddingLeft: 'clamp(24px, 7.9vw, 114px)', paddingRight: 'clamp(24px, 7.9vw, 114px)', maxWidth: 820 }}>
           <p style={{ fontWeight: 600, fontSize: 12, letterSpacing: '0.1em', color: '#0e6fc6', textTransform: 'uppercase', marginBottom: 12 }}>
