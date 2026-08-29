@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { STATES } from '../../Data/states'
 import logoMark from '../../assets/v2/logo-mark.svg'
@@ -74,6 +75,18 @@ const SOCIALS = [
 ]
 
 export default function Footer() {
+  // The button was rendered unconditionally, so it sat over the hero before
+  // there was anything to scroll back up to. Matches the previous landing's
+  // behaviour: appears once you are past the first screen.
+  const [showTop, setShowTop] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 300)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <footer className="bg-[#05243f]" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
       <div
@@ -129,6 +142,7 @@ export default function Footer() {
         </div>
       </div>
 
+      {showTop && (
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -141,6 +155,7 @@ export default function Footer() {
           <path d="M5 12l7-7 7 7" />
         </svg>
       </button>
+      )}
     </footer>
   )
 }
