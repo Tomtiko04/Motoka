@@ -1,11 +1,15 @@
 import { useEffect } from 'react'
 
-// The site is reachable at two hostnames (motoka.ng and motokaapp.ng both
-// resolve to the same content) — without a canonical tag that's exactly the
-// duplicate-content setup that can split ranking signal between two URLs
-// instead of consolidating it onto one. motoka.ng is the one used in
-// sitemap.xml/robots.txt, so it's the one every page canonicalizes to here.
-const CANONICAL_ORIGIN = 'https://motoka.ng'
+// The site is reachable at two hostnames (motoka.ng and motokaapp.ng serve
+// byte-identical content) — without a canonical tag that's exactly the
+// duplicate-content setup that splits ranking signal across two hosts
+// instead of consolidating it onto one. motoka.ng is the chosen canonical.
+//
+// Specifically the *www* form: the apex 307-redirects to www.motoka.ng, so
+// canonicalizing to the bare apex would point every page at a URL that
+// immediately redirects. The canonical should be the address that actually
+// serves a 200. Keep this in sync with sitemap.xml and robots.txt.
+const CANONICAL_ORIGIN = 'https://www.motoka.ng'
 const DEFAULT_OG_IMAGE = CANONICAL_ORIGIN + '/og-image.png'
 
 function setMeta(attr, key, content) {

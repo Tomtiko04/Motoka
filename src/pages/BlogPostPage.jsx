@@ -21,9 +21,9 @@ export default function BlogPostPage() {
       publisher: {
         '@type': 'Organization',
         name: 'Motoka',
-        logo: { '@type': 'ImageObject', url: 'https://motoka.ng/og-image.png' },
+        logo: { '@type': 'ImageObject', url: 'https://www.motoka.ng/og-image.png' },
       },
-      mainEntityOfPage: { '@type': 'WebPage', '@id': `https://motoka.ng/blog/${post.slug}` },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.motoka.ng/blog/${post.slug}` },
     }
   )
 
