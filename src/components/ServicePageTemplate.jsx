@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import PageLayout from './PageLayout'
 import useSeoHead from '../hooks/useSeoHead'
+import useJsonLd from '../hooks/useJsonLd'
 
 // Shared shell for the location/service landing pages (License Renewal, Road
 // Worthiness, Ogun State, Ladipo). Same visual language as the rest of the
@@ -19,6 +20,17 @@ export default function ServicePageTemplate({
   ctaTo = '/#top',
 }) {
   useSeoHead(seoTitle, seoDescription)
+  useJsonLd(
+    faqs && {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
+    }
+  )
 
   return (
     <PageLayout>

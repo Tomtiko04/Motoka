@@ -23,6 +23,10 @@ export default function AboutPage() {
           q: 'Which states does Motoka currently serve?',
           a: 'Coverage includes Lagos, Ogun, Oyo, Osun, Edo, and Rivers, with more states being added as the agent network grows.',
         },
+        {
+          q: 'Is Motoka related to any car dealership or "Motoka" social media account?',
+          a: 'No — Motoka (motoka.ng) is a vehicle document renewal platform only. We\'re not affiliated with any car dealership or other business using a similar name.',
+        },
       ]}
       ctaText="See how renewal works"
       ctaTo="/renew/vehicle-license"

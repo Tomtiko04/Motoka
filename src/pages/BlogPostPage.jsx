@@ -1,6 +1,7 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
 import PageLayout from '../components/PageLayout'
 import useSeoHead from '../hooks/useSeoHead'
+import useJsonLd from '../hooks/useJsonLd'
 import { getPostBySlug } from '../data/blogPosts'
 
 export default function BlogPostPage() {
@@ -8,6 +9,23 @@ export default function BlogPostPage() {
   const post = getPostBySlug(slug)
 
   useSeoHead(post?.seoTitle, post?.seoDescription)
+  // No publish/modified date in the post data — omitted rather than faked,
+  // since Article schema is still valid without datePublished/dateModified.
+  useJsonLd(
+    post && {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: post.seoDescription,
+      author: { '@type': 'Organization', name: 'Motoka' },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Motoka',
+        logo: { '@type': 'ImageObject', url: 'https://motoka.ng/og-image.png' },
+      },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `https://motoka.ng/blog/${post.slug}` },
+    }
+  )
 
   if (!post) return <Navigate to="/blog" replace />
 

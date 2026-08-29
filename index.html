@@ -9,6 +9,42 @@
       name="description"
       content="Renew your vehicle license, road worthiness, and insurance online — no queues, no office visits. Motoka tracks your renewal dates and handles the rest. MVAA-certified."
     />
+
+    <!-- Baseline OG/Twitter tags so the homepage has a real share card even
+         before useSeoHead's per-route JS runs — per-page routes overwrite
+         these (same tags, found by attribute) once their own effect fires. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Motoka" />
+    <meta property="og:title" content="Motoka — Renew Your Vehicle License Online in Nigeria | MVAA Licensed" />
+    <meta
+      property="og:description"
+      content="Renew your vehicle license, road worthiness, and insurance online — no queues, no office visits. Motoka tracks your renewal dates and handles the rest. MVAA-certified."
+    />
+    <meta property="og:url" content="https://motoka.ng/" />
+    <meta property="og:image" content="https://motoka.ng/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Motoka — Renew Your Vehicle License Online in Nigeria | MVAA Licensed" />
+    <meta
+      name="twitter:description"
+      content="Renew your vehicle license, road worthiness, and insurance online — no queues, no office visits. Motoka tracks your renewal dates and handles the rest. MVAA-certified."
+    />
+    <meta name="twitter:image" content="https://motoka.ng/og-image.png" />
+
+    <!-- Organization schema — site identity, not page content, so it's
+         static here rather than injected per-route like FAQPage/Article
+         schema (see useJsonLd). Also doubles as the disambiguation signal
+         against the unrelated "Motoka NG" car dealership account. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Motoka",
+        "url": "https://motoka.ng",
+        "logo": "https://motoka.ng/og-image.png",
+        "description": "Motoka is an online platform for renewing vehicle licenses, road worthiness certificates, and insurance in Nigeria — not affiliated with any car dealership."
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

@@ -49,7 +49,13 @@ async function main() {
     process.exit(1)
   }
 
-  const server = createServer((req, res) => serveHandler(req, res, DIST))
+  // Captured before any route is processed — dist/index.html gets
+  // overwritten with the '/' route's own snapshot partway through the loop
+  // below, so the SPA fallback needs its own untouched copy rather than
+  // re-reading the file from disk on every request (see serve-static.js).
+  const pristineIndexHtml = await readFile(path.join(DIST, 'index.html'), 'utf-8')
+
+  const server = createServer((req, res) => serveHandler(req, res, DIST, pristineIndexHtml))
   await new Promise((resolve) => server.listen(PORT, resolve))
   console.log(`[prerender] serving dist/ on http://localhost:${PORT}`)
 

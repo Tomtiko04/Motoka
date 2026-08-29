@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 import Reveal from './Reveal'
+import useJsonLd from '../hooks/useJsonLd'
 
 const FAQS = [
   {
@@ -33,6 +34,16 @@ const FAQS = [
 ]
 
 export default function FAQ() {
+  useJsonLd({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  })
+
   return (
     <section id="faqs" style={{ paddingLeft: 'clamp(24px, 7.9vw, 114px)', paddingRight: 'clamp(24px, 7.9vw, 114px)', paddingTop: 112, paddingBottom: 112 }}>
       <div className="flex flex-col lg:flex-row lg:items-start" style={{ gap: 48 }}>
