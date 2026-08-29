@@ -11,6 +11,7 @@ import Mission from "./v2/Mission";
 import FAQ from "./v2/FAQ";
 import Waitlist from "./v2/Waitlist";
 import Footer from "./v2/Footer";
+import ChatWidget from "./v2/ChatWidget";
 
 function LandingV2() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function LandingV2() {
         <Waitlist />
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 }
