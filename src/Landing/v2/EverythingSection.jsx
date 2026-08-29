@@ -3,14 +3,14 @@ import { ShoppingCart, FolderLock, Signpost, Sparkles, Wrench } from 'lucide-rea
 import Reveal from './Reveal'
 import iconLicense from '../../assets/v2/icon-license.svg'
 import iconNotif from '../../assets/v2/icon-notif.svg'
-import phoneFrame from '../../assets/v2/hand-phone-test.png'
-import screenLicenseRenewal from '../../assets/v2/License renewal.png'
-import screenExpiryReminders from '../../assets/v2/Expiry reminders.png'
-import screenVehicleMaintenance from '../../assets/v2/Vehicle maintenance.png'
-import screenPartsMarketplace from '../../assets/v2/Verified Parts Marketplace.png'
-import screenDocumentWallet from '../../assets/v2/Documents wallet.png'
-import screenTrafficEducation from '../../assets/v2/Traffic Education.jpg'
-import screenAskMo from '../../assets/v2/ask mo.png'
+import phoneFrame from '../../assets/v2/hand-phone-test.webp'
+import screenLicenseRenewal from '../../assets/v2/License renewal.webp'
+import screenExpiryReminders from '../../assets/v2/Expiry reminders.webp'
+import screenVehicleMaintenance from '../../assets/v2/Vehicle maintenance.webp'
+import screenPartsMarketplace from '../../assets/v2/Verified Parts Marketplace.webp'
+import screenDocumentWallet from '../../assets/v2/Documents wallet.webp'
+import screenTrafficEducation from '../../assets/v2/Traffic Education.webp'
+import screenAskMo from '../../assets/v2/ask mo.webp'
 
 /**
  * "Everything your car needs, all in one place" — pinned phone with
@@ -223,11 +223,7 @@ export default function EverythingSection() {
                       <img src={feature.iconSrc} alt="" className="size-full" />
                     )}
                   </div>
-                  {/* Narrower than the desktop 435px cap — mobile/tablet
-                      share this column with the flush-right sticky phone
-                      (same grid cell), so text has to stay clear of it
-                      instead of running underneath. */}
-                  <div className="flex flex-col gap-[10px] max-w-[62vw] md:max-w-[calc(37vw-24px)] lg:max-w-none">
+                  <div className="flex flex-col gap-[10px]">
                     <h3 className="font-medium text-[32px] lg:text-[40px] text-white">{feature.title}</h3>
                     <p className="font-light text-[14.4px] lg:text-[18px] leading-[22.4px] lg:leading-[28px] text-[#cae3f9] lg:max-w-[435px]">
                       {feature.description}
@@ -237,22 +233,12 @@ export default function EverythingSection() {
               </div>
             )
           })}
-          {/* Trailing buffer so the last feature (Ask Mo) still gets its full
-              centered dwell time on mobile before the section runs out of
-              scroll room, instead of being swept past almost immediately. */}
-          <div className="h-[25vh] lg:hidden" aria-hidden />
         </div>
 
-        {/* Right: sticky phone, flush to the screen edge on both breakpoints.
-            Mobile pins bottom-0 over the feature list (same col/row-start-1
-            overlap trick as desktop's bottom-right pin) instead of sitting
-            above it in normal flow. */}
-        <div
-          className="lg:hidden sticky justify-end items-end flex col-start-1 row-start-1"
-          style={{ bottom: 0, alignSelf: 'end', marginRight: 'calc(-1 * clamp(24px, 7.9vw, 114px))', marginBottom: 0 }}
-        >
-          <PhoneMock activeIndex={activeIndex} reduceMotion={reduceMotion} widthClamp="clamp(324px, 47.385vw, 758.7px)" />
-        </div>
+        {/* Desktop only. The phone used to pin over the feature list on mobile
+            too, with the text deliberately scrolling behind it — but at phone
+            widths the two just collide and the copy is unreadable, so it is
+            dropped below lg rather than overlapped. */}
         <div
           className="hidden lg:flex sticky justify-end items-end"
           style={{ bottom: '-64px', alignSelf: 'end', marginRight: 'calc(-1 * clamp(24px, 7.9vw, 114px))', marginBottom: '-125px' }}

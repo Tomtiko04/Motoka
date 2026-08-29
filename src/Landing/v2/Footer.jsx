@@ -1,17 +1,33 @@
+import { Link } from 'react-router-dom'
 import logoMark from '../../assets/v2/logo-mark.svg'
 
+// The prototype shipped these as labels with href="#". Pointed at the routes
+// this app actually serves. Traffic Education is the only one behind
+// ProtectedRoute, so a logged-out visitor lands on login from it.
 const COLUMNS = [
   {
     title: 'Services',
-    links: ['License Auto Renewal', 'License Auto Reminder', 'Ladipo Car parts', 'Traffic Education'],
+    links: [
+      { label: 'License Auto Renewal', to: '/renew-vehicle-licence' },
+      { label: 'License Auto Reminder', to: '/reminders' },
+      { label: 'Ladipo Car parts', to: '/ladipo' },
+      { label: 'Traffic Education', to: '/traffic-rules' },
+    ],
   },
   {
     title: 'Resources',
-    links: ['Blog & News', 'Driver Guides', 'How Motoka Works'],
+    links: [
+      { label: 'Blog & News', to: '/blogs' },
+      { label: 'Driver Guides', to: '/guides' },
+      { label: 'How Motoka Works', to: '/how-it-works' },
+    ],
   },
   {
     title: 'Company',
-    links: ['About Motoka', 'Contact Us'],
+    links: [
+      { label: 'About Motoka', to: '/about' },
+      { label: 'Contact Us', to: '/contact' },
+    ],
   },
 ]
 
@@ -42,9 +58,9 @@ function TikTokIcon(props) {
 }
 
 const SOCIALS = [
-  { label: 'Instagram', Icon: InstagramIcon, href: '#' },
-  { label: 'X', Icon: XIcon, href: '#' },
-  { label: 'TikTok', Icon: TikTokIcon, href: '#' },
+  { label: 'Instagram', Icon: InstagramIcon, href: 'https://www.instagram.com/trymotoka' },
+  { label: 'X', Icon: XIcon, href: 'https://x.com/trymotoka' },
+  { label: 'TikTok', Icon: TikTokIcon, href: 'https://www.tiktok.com/@trymotoka1' },
 ]
 
 export default function Footer() {
@@ -70,6 +86,8 @@ export default function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="flex items-center justify-center hover:brightness-125 transition-all"
                   style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.12)', color: 'white' }}
@@ -89,10 +107,10 @@ export default function Footer() {
               <p style={{ fontWeight: 700, fontSize: 16, color: 'white', marginBottom: 20 }}>{col.title}</p>
               <ul className="flex flex-col" style={{ gap: 14 }}>
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="hover:text-white transition-colors" style={{ fontSize: 15, color: '#94a3b8' }}>
-                      {link}
-                    </a>
+                  <li key={link.label}>
+                    <Link to={link.to} className="hover:text-white transition-colors" style={{ fontSize: 15, color: '#94a3b8' }}>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
