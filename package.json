@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "node scripts/free-ports.js",
     "dev": "concurrently -n vite,server -c blue,green \"vite\" \"node server/index.js\"",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.js",
     "lint": "oxlint",
     "preview": "vite preview",
     "server": "node server/index.js"
@@ -18,7 +18,8 @@
     "lucide-react": "^1.33.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "concurrently": "^10.0.5",
     "oxlint": "^1.75.0",
+    "puppeteer": "^25.9.0",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.0"
   }

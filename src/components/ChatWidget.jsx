@@ -2,6 +2,24 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { X, MessageCircle, Send } from 'lucide-react'
 
+const CONTACT_KEY = 'motoka_chat_contact'
+
+function loadContact() {
+  try {
+    return JSON.parse(localStorage.getItem(CONTACT_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
+function saveContact(contact) {
+  try {
+    localStorage.setItem(CONTACT_KEY, JSON.stringify(contact))
+  } catch {
+    // localStorage unavailable (private mode, etc) — contact just won't persist
+  }
+}
+
 const markdownComponents = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 last:mb-0 pl-4 space-y-1 list-disc marker:text-brand-blue">{children}</ul>,
@@ -86,6 +104,9 @@ async function getAnswer(message, history) {
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
+  const [contact, setContact] = useState(() => loadContact())
+  const [nameInput, setNameInput] = useState('')
+  const [phoneInput, setPhoneInput] = useState('')
   const [messages, setMessages] = useState([{ from: 'mo', text: INTRO }])
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
@@ -94,6 +115,18 @@ export default function ChatWidget() {
   useEffect(() => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, typing])
+
+  function handleContactSubmit(e) {
+    e.preventDefault()
+    const name = nameInput.trim()
+    const phone = phoneInput.trim()
+    if (!name || !phone) return
+
+    const newContact = { name, phone }
+    saveContact(newContact)
+    setContact(newContact)
+    setMessages([{ from: 'mo', text: `Hi ${name} 👋 I can answer a few common questions while the full assistant is being built. Try asking about renewals, documents, cost, or expired papers.` }])
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -147,62 +180,106 @@ export default function ChatWidget() {
             </button>
           </div>
 
-          <div ref={threadRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                    m.from === 'user' ? 'bg-brand-blue text-white' : 'bg-white/5 text-slate-200'
-                  }`}
-                >
-                  {m.from === 'mo' ? (
-                    <ReactMarkdown components={markdownComponents}>{m.text}</ReactMarkdown>
-                  ) : (
-                    m.text
-                  )}
-                </div>
+          {contact ? (
+            <>
+              <div ref={threadRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                {messages.map((m, i) => (
+                  <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                        m.from === 'user' ? 'bg-brand-blue text-white' : 'bg-white/5 text-slate-200'
+                      }`}
+                    >
+                      {m.from === 'mo' ? (
+                        <ReactMarkdown components={markdownComponents}>{m.text}</ReactMarkdown>
+                      ) : (
+                        m.text
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {typing && (
+                  <div className="flex justify-start">
+                    <div className="rounded-2xl px-4 py-3 bg-white/5 flex items-center gap-1" aria-label="Mo is typing">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
-            {typing && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl px-4 py-3 bg-white/5 flex items-center gap-1" aria-label="Mo is typing">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
-                </div>
-              </div>
-            )}
-          </div>
 
-          <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 flex gap-2">
-            <label htmlFor="chat-input" className="sr-only">
-              Message
-            </label>
-            <input
-              id="chat-input"
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about renewals, cost, documents…"
-              className="flex-1 min-w-0 rounded-full px-4 py-2.5 bg-white/5 border border-white/15 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-            />
-            <button
-              type="submit"
-              aria-label="Send message"
-              className="shrink-0 w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center hover:brightness-110 transition-all"
-            >
-              <Send size={16} strokeWidth={2} />
-            </button>
-          </form>
+              <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 flex gap-2">
+                <label htmlFor="chat-input" className="sr-only">
+                  Message
+                </label>
+                <input
+                  id="chat-input"
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask about renewals, cost, documents…"
+                  className="flex-1 min-w-0 rounded-full px-4 py-2.5 bg-white/5 border border-white/15 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+                />
+                <button
+                  type="submit"
+                  aria-label="Send message"
+                  className="shrink-0 w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center hover:brightness-110 transition-all"
+                >
+                  <Send size={16} strokeWidth={2} />
+                </button>
+              </form>
+            </>
+          ) : (
+            <form onSubmit={handleContactSubmit} className="flex-1 flex flex-col px-5 py-5">
+              <p className="text-sm text-slate-300 leading-relaxed mb-4">
+                Before we start chatting, what's your name and phone number? We'll only ask once.
+              </p>
+
+              <label htmlFor="chat-name" className="text-xs font-medium text-slate-400 mb-1.5">
+                Name
+              </label>
+              <input
+                id="chat-name"
+                type="text"
+                required
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="Your name"
+                className="rounded-xl px-4 py-2.5 mb-4 bg-white/5 border border-white/15 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              />
+
+              <label htmlFor="chat-phone" className="text-xs font-medium text-slate-400 mb-1.5">
+                Phone number
+              </label>
+              <input
+                id="chat-phone"
+                type="tel"
+                required
+                value={phoneInput}
+                onChange={(e) => setPhoneInput(e.target.value)}
+                placeholder="080…"
+                className="rounded-xl px-4 py-2.5 mb-5 bg-white/5 border border-white/15 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              />
+
+              <button
+                type="submit"
+                className="mt-auto rounded-full py-2.5 bg-brand-blue text-white text-sm font-semibold hover:brightness-110 transition-all"
+              >
+                Start chatting
+              </button>
+            </form>
+          )}
       </div>
 
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Close Ask Mo chat' : 'Open Ask Mo chat'}
-        className="w-14 h-14 rounded-full bg-brand-blue text-white shadow-xl shadow-blue-950/30 flex items-center justify-center hover:brightness-110 transition-all"
+        className="h-14 pl-5 pr-6 rounded-full bg-brand-blue text-white shadow-xl shadow-blue-950/30 flex items-center gap-2 hover:brightness-110 transition-all"
       >
-        {open ? <X size={22} strokeWidth={2} /> : <MessageCircle size={22} strokeWidth={2} />}
+        {open ? <X size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}
+        <span className="text-sm font-semibold whitespace-nowrap">Chat us</span>
       </button>
     </div>
   )

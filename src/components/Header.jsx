@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import logoMark from '../assets/v2/logo-mark.svg'
 
-const NAV_LINKS = ['About', 'Service', 'Blog', 'Explore']
+const NAV_LINKS = [
+  { label: 'About', to: '/about' },
+  { label: 'Service', to: '/renew/vehicle-license' },
+  { label: 'Blog', to: '/blog' },
+  { label: 'FAQ', to: '/faq' },
+]
 
 export default function Header() {
   const [open, setOpen] = useState(false)
@@ -26,7 +32,8 @@ export default function Header() {
         style={{ paddingLeft: 'clamp(20px, 7.9vw, 114px)', paddingRight: 'clamp(20px, 7.9vw, 114px)' }}
       >
         <div className="flex gap-[47px] items-center">
-          <div
+          <Link
+            to="/"
             className="inline-grid place-items-start"
             style={{ gridTemplateColumns: 'max-content', gridTemplateRows: 'max-content', lineHeight: 0 }}
           >
@@ -46,20 +53,20 @@ export default function Header() {
             >
               Motoka
             </span>
-          </div>
+          </Link>
 
           <div className="hidden lg:flex gap-[16px] items-center justify-center p-[10px]">
-            <div className="border border-[rgba(35,137,227,0.25)] flex items-center justify-center px-[16px] py-[8px] rounded-[50px] cursor-pointer transition-colors hover:bg-[#f4faff]">
+            <Link to="/" className="border border-[rgba(35,137,227,0.25)] flex items-center justify-center px-[16px] py-[8px] rounded-[50px] cursor-pointer transition-colors hover:bg-[#f4faff]">
               <span className="font-semibold text-[#0e6fc5] text-[14px] leading-normal whitespace-nowrap">
                 Home
               </span>
-            </div>
+            </Link>
             {NAV_LINKS.map((l) => (
-              <div key={l} className="flex items-center justify-center px-[16px] py-[8px] cursor-pointer">
+              <Link key={l.label} to={l.to} className="flex items-center justify-center px-[16px] py-[8px] cursor-pointer">
                 <span className="font-normal text-[#697c8c] text-[14px] leading-normal whitespace-nowrap transition-colors hover:text-[#05243f]">
-                  {l}
+                  {l.label}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -127,13 +134,13 @@ export default function Header() {
         </div>
 
         <div className="flex flex-col" style={{ padding: '12px 20px', gap: 4 }}>
-          <a href="#top" onClick={() => setOpen(false)} className="font-semibold text-[#0e6fc5] text-[15px] rounded-lg transition-colors hover:bg-[#f4faff]" style={{ padding: '10px 12px', margin: '0 -12px' }}>
+          <Link to="/" onClick={() => setOpen(false)} className="font-semibold text-[#0e6fc5] text-[15px] rounded-lg transition-colors hover:bg-[#f4faff]" style={{ padding: '10px 12px', margin: '0 -12px' }}>
             Home
-          </a>
+          </Link>
           {NAV_LINKS.map((l) => (
-            <a key={l} href="#" onClick={() => setOpen(false)} className="font-normal text-[#697c8c] text-[15px] rounded-lg transition-colors hover:bg-[#f4faff] hover:text-[#05243f]" style={{ padding: '10px 12px', margin: '0 -12px' }}>
-              {l}
-            </a>
+            <Link key={l.label} to={l.to} onClick={() => setOpen(false)} className="font-normal text-[#697c8c] text-[15px] rounded-lg transition-colors hover:bg-[#f4faff] hover:text-[#05243f]" style={{ padding: '10px 12px', margin: '0 -12px' }}>
+              {l.label}
+            </Link>
           ))}
           <div className="flex flex-col" style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #e2e8f0', gap: 12 }}>
             <button

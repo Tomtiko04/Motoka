@@ -1,17 +1,42 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import logoMark from '../assets/v2/logo-mark.svg'
+import { STATES } from '../data/states'
 
 const COLUMNS = [
   {
-    title: 'Services',
-    links: ['License Auto Renewal', 'License Auto Reminder', 'Ladipo Car parts', 'Traffic Education'],
+    title: 'Renew',
+    links: [
+      { label: 'Vehicle License', to: '/renew/vehicle-license' },
+      { label: 'Road Worthiness', to: '/renew/road-worthiness' },
+      { label: "Driver's License", to: '/renew/drivers-license' },
+      { label: 'Insurance', to: '/renew/insurance' },
+    ],
   },
   {
-    title: 'Resources',
-    links: ['Blog & News', 'Driver Guides', 'How Motoka Works'],
+    title: 'States',
+    links: STATES.map((s) => ({ label: s.name, to: `/states/${s.slug}` })),
+  },
+  {
+    title: 'Features',
+    links: [
+      { label: 'Ladipo Marketplace', to: '/ladipo' },
+      { label: 'Save-Ahead Wallet', to: '/wallet' },
+      { label: 'Ask Mo (AI Assistant)', to: '/mo' },
+      { label: 'License Auto Reminder', to: '/#everything' },
+    ],
   },
   {
     title: 'Company',
-    links: ['About Motoka', 'Contact Us'],
+    links: [
+      { label: 'Blog', to: '/blog' },
+      { label: 'FAQ', to: '/faq' },
+      { label: 'About Motoka', to: '/about' },
+      // No dedicated contact page/mechanism exists yet — stays unlinked
+      // (inert text, not a "#" href) rather than pointing somewhere
+      // misleading. Build a real contact page or mailto to make it live.
+      { label: 'Contact Us' },
+    ],
   },
 ]
 
@@ -48,6 +73,15 @@ const SOCIALS = [
 ]
 
 export default function Footer() {
+  const [showBackToTop, setShowBackToTop] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > window.innerHeight * 0.6)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <footer className="bg-[#05243f]" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
       <div
@@ -88,13 +122,19 @@ export default function Footer() {
             <div key={col.title}>
               <p style={{ fontWeight: 700, fontSize: 16, color: 'white', marginBottom: 20 }}>{col.title}</p>
               <ul className="flex flex-col" style={{ gap: 14 }}>
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="hover:text-white transition-colors" style={{ fontSize: 15, color: '#94a3b8' }}>
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {col.links.map((link) =>
+                  link.to ? (
+                    <li key={link.label}>
+                      <Link to={link.to} className="hover:text-white transition-colors" style={{ fontSize: 15, color: '#94a3b8' }}>
+                        {link.label}
+                      </Link>
+                    </li>
+                  ) : (
+                    <li key={link.label}>
+                      <span style={{ fontSize: 15, color: '#475569', cursor: 'default' }}>{link.label}</span>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           ))}
@@ -105,8 +145,23 @@ export default function Footer() {
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Back to top"
+        aria-hidden={!showBackToTop}
+        tabIndex={showBackToTop ? 0 : -1}
         className="fixed flex items-center justify-center hover:brightness-110 transition-all z-50"
-        style={{ right: 20, bottom: 92, width: 48, height: 48, borderRadius: '50%', background: '#2389e3', color: 'white', boxShadow: '0 8px 20px -4px rgba(35,137,227,0.5)' }}
+        style={{
+          right: 20,
+          bottom: 92,
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          background: '#2389e3',
+          color: 'white',
+          boxShadow: '0 8px 20px -4px rgba(35,137,227,0.5)',
+          opacity: showBackToTop ? 1 : 0,
+          transform: showBackToTop ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.9)',
+          pointerEvents: showBackToTop ? 'auto' : 'none',
+          transition: 'opacity 200ms ease, transform 200ms ease',
+        }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 19V5" />
