@@ -3,14 +3,14 @@ import { ShoppingCart, FolderLock, Signpost, Sparkles, Wrench } from 'lucide-rea
 import Reveal from './Reveal'
 import iconLicense from '../assets/v2/icon-license.svg'
 import iconNotif from '../assets/v2/icon-notif.svg'
-import phoneFrame from '../assets/v2/hand-phone-test.png'
-import screenLicenseRenewal from '../assets/v2/License renewal.png'
-import screenExpiryReminders from '../assets/v2/Expiry reminders.png'
-import screenVehicleMaintenance from '../assets/v2/Vehicle maintenance.png'
-import screenPartsMarketplace from '../assets/v2/Verified Parts Marketplace.png'
-import screenDocumentWallet from '../assets/v2/Documents wallet.png'
-import screenTrafficEducation from '../assets/v2/Traffic Education.jpg'
-import screenAskMo from '../assets/v2/ask mo.png'
+import phoneFrame from '../assets/v2/hand-phone-test.webp'
+import screenLicenseRenewal from '../assets/v2/License renewal.webp'
+import screenExpiryReminders from '../assets/v2/Expiry reminders.webp'
+import screenVehicleMaintenance from '../assets/v2/Vehicle maintenance.webp'
+import screenPartsMarketplace from '../assets/v2/Verified Parts Marketplace.webp'
+import screenDocumentWallet from '../assets/v2/Documents wallet.webp'
+import screenTrafficEducation from '../assets/v2/Traffic Education.webp'
+import screenAskMo from '../assets/v2/ask mo.webp'
 
 /**
  * "Everything your car needs, all in one place" — pinned phone with

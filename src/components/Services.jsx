@@ -1,14 +1,14 @@
 import { useRef, useEffect, forwardRef, useState } from 'react'
 import { useScroll, motion } from 'framer-motion'
 import TiltCard from './TiltCard'
-import doc1 from '../assets/v2/doc-1.jpg'
-import plateCard from '../assets/v2/plate-card.png'
-import roadWorthy1 from '../assets/v2/road-worthy-1.png'
-import roadWorthy2 from '../assets/v2/road-worthy-2.png'
-import doc6 from '../assets/v2/doc-6.jpg'
-import doc2 from '../assets/v2/doc-2.jpg'
-import doc7 from '../assets/v2/doc-7.jpg'
-import doc3 from '../assets/v2/doc-3.jpg'
+import doc1 from '../assets/v2/doc-1.webp'
+import plateCard from '../assets/v2/plate-card.webp'
+import roadWorthy1 from '../assets/v2/road-worthy-1.webp'
+import roadWorthy2 from '../assets/v2/road-worthy-2.webp'
+import doc6 from '../assets/v2/doc-6.webp'
+import doc2 from '../assets/v2/doc-2.webp'
+import doc7 from '../assets/v2/doc-7.webp'
+import doc3 from '../assets/v2/doc-3.webp'
 
 const CARDS = [
   { id: 1, bg: '#fef0ff', color: '#79617b', title: ['Renew', 'Vehicle License'], desc: 'Fast renewals and official updates without visiting the licensing office.', img: doc1, style: { height: 470, width: 356 } },
