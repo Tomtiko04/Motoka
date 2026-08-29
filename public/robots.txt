@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.motoka.ng/sitemap.xml
+Sitemap: https://www.motokaapp.ng/sitemap.xml

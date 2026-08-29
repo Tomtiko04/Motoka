@@ -1,15 +1,27 @@
 import { useEffect } from 'react'
 
-// The site is reachable at two hostnames (motoka.ng and motokaapp.ng serve
-// byte-identical content) — without a canonical tag that's exactly the
-// duplicate-content setup that splits ranking signal across two hosts
-// instead of consolidating it onto one. motoka.ng is the chosen canonical.
+// The site answers on four hostnames — motoka.ng / motokaapp.ng and their
+// www forms — serving byte-identical content. With no canonical tag that's
+// exactly the duplicate-content setup that splits ranking signal across
+// hosts instead of consolidating it onto one.
 //
-// Specifically the *www* form: the apex 307-redirects to www.motoka.ng, so
-// canonicalizing to the bare apex would point every page at a URL that
-// immediately redirects. The canonical should be the address that actually
-// serves a 200. Keep this in sync with sitemap.xml and robots.txt.
-const CANONICAL_ORIGIN = 'https://www.motoka.ng'
+// motokaapp.ng is the chosen canonical, for three reasons:
+//   1. It's the domain the team controls directly. SEO needs iteration
+//      (Search Console, sitemap resubmits, redirect tweaks); being blocked
+//      on another party for each round is a recurring cost.
+//   2. Clean history. motoka.ng previously ran a used-car marketplace
+//      ("Motoka - Buy and Sell Cars", archived 2018-2020) — five years of
+//      unrelated association and unauditable penalty history.
+//   3. It defuses the brand collision the SEO audit flagged (an unrelated
+//      "Motoka NG" dealership) rather than building on that same domain.
+//
+// The *www* form specifically: both apexes redirect to their www host, so
+// canonicalizing to a bare apex would point every page at a URL that
+// immediately redirects rather than one that serves 200.
+//
+// Keep this in sync with sitemap.xml, robots.txt and index.html's static
+// og/schema tags — they all hardcode the same origin.
+const CANONICAL_ORIGIN = 'https://www.motokaapp.ng'
 const DEFAULT_OG_IMAGE = CANONICAL_ORIGIN + '/og-image.png'
 
 function setMeta(attr, key, content) {
