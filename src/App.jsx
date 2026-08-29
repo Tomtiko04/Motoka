@@ -67,6 +67,15 @@ import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
 import HomeEntry from "./components/HomeEntry.jsx";
+import VehicleLicenseRenewalPage from "./Landing/v2/pages/VehicleLicenseRenewalPage.jsx";
+import RoadWorthinessRenewalPage from "./Landing/v2/pages/RoadWorthinessRenewalPage.jsx";
+import DriversLicenseRenewalPage from "./Landing/v2/pages/DriversLicenseRenewalPage.jsx";
+import InsuranceRenewalPage from "./Landing/v2/pages/InsuranceRenewalPage.jsx";
+import StatePage from "./Landing/v2/pages/StatePage.jsx";
+import FaqPage from "./Landing/v2/pages/FaqPage.jsx";
+import MoPage from "./Landing/v2/pages/MoPage.jsx";
+import LadipoMarketingPage from "./Landing/v2/pages/LadipoPage.jsx";
+import WalletMarketingPage from "./Landing/v2/pages/WalletPage.jsx";
 import GuestRenewalCallback from "./pages/GuestRenewalCallback.jsx";
 import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
@@ -186,6 +195,17 @@ export default function App() {
             <Route path="guides" element={<DriverGuides />} />
             <Route path="reminders" element={<LicenseReminder />} />
             <Route path="renew-vehicle-licence" element={<RenewVehicleLicence />} />
+            {/* Marketing pages behind the redesigned footer. /ladipo and
+                /wallet are the signed-in app, so these use distinct paths. */}
+            <Route path="renew/vehicle-license" element={<VehicleLicenseRenewalPage />} />
+            <Route path="renew/road-worthiness" element={<RoadWorthinessRenewalPage />} />
+            <Route path="renew/drivers-license" element={<DriversLicenseRenewalPage />} />
+            <Route path="renew/insurance" element={<InsuranceRenewalPage />} />
+            <Route path="states/:slug" element={<StatePage />} />
+            <Route path="faq" element={<FaqPage />} />
+            <Route path="mo" element={<MoPage />} />
+            <Route path="ladipo-marketplace" element={<LadipoMarketingPage />} />
+            <Route path="save-ahead-wallet" element={<WalletMarketingPage />} />
           </Route>
 
           {/* Auth Routes */}

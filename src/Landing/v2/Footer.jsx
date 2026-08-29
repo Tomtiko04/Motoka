@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { STATES } from '../../Data/states'
 import logoMark from '../../assets/v2/logo-mark.svg'
 
 // The prototype shipped these as labels with href="#". Pointed at the routes
@@ -6,25 +8,34 @@ import logoMark from '../../assets/v2/logo-mark.svg'
 // ProtectedRoute, so a logged-out visitor lands on login from it.
 const COLUMNS = [
   {
-    title: 'Services',
+    title: 'Renew',
     links: [
-      { label: 'License Auto Renewal', to: '/renew-vehicle-licence' },
-      { label: 'License Auto Reminder', to: '/reminders' },
-      { label: 'Ladipo Car parts', to: '/ladipo' },
-      { label: 'Traffic Education', to: '/traffic-rules' },
+      { label: 'Vehicle License', to: '/renew/vehicle-license' },
+      { label: 'Road Worthiness', to: '/renew/road-worthiness' },
+      { label: "Driver's License", to: '/renew/drivers-license' },
+      { label: 'Insurance', to: '/renew/insurance' },
     ],
   },
   {
-    title: 'Resources',
+    title: 'States',
+    links: STATES.map((s) => ({ label: s.name, to: `/states/${s.slug}` })),
+  },
+  {
+    title: 'Features',
     links: [
-      { label: 'Blog & News', to: '/blogs' },
-      { label: 'Driver Guides', to: '/guides' },
-      { label: 'How Motoka Works', to: '/how-it-works' },
+      // /ladipo and /wallet are the signed-in app, so the marketing pages
+      // for those features live on their own paths.
+      { label: 'Ladipo Marketplace', to: '/ladipo-marketplace' },
+      { label: 'Save-Ahead Wallet', to: '/save-ahead-wallet' },
+      { label: 'Ask Mo (AI Assistant)', to: '/mo' },
+      { label: 'License Auto Reminder', to: '/reminders' },
     ],
   },
   {
     title: 'Company',
     links: [
+      { label: 'Blog', to: '/blogs' },
+      { label: 'FAQ', to: '/faq' },
       { label: 'About Motoka', to: '/about' },
       { label: 'Contact Us', to: '/contact' },
     ],
@@ -64,6 +75,18 @@ const SOCIALS = [
 ]
 
 export default function Footer() {
+  // The button was rendered unconditionally, so it sat over the hero before
+  // there was anything to scroll back up to. Matches the previous landing's
+  // behaviour: appears once you are past the first screen.
+  const [showTop, setShowTop] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 300)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <footer className="bg-[#05243f]" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
       <div
@@ -119,6 +142,7 @@ export default function Footer() {
         </div>
       </div>
 
+      {showTop && (
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -131,6 +155,7 @@ export default function Footer() {
           <path d="M5 12l7-7 7 7" />
         </svg>
       </button>
+      )}
     </footer>
   )
 }
