@@ -7,23 +7,23 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const navLinks = [
-    { name: "Home", href: "#" },
-    { name: "Services", href: "#services" },
-    { name: "Testimonials", href: "#testimonials" },
-    { name: "FAQs", href: "#faqs" },
+    { name: "Home", href: "/" },
+    { name: "Services", href: "/#services" },
+    { name: "Testimonials", href: "/#testimonials" },
+    { name: "FAQs", href: "/#faqs" },
   ];
 
   return (
     <div className="w-full">
       <div className="mx-auto px-6 sm:px-10">
         <header className="flex flex-wrap items-center justify-between py-2">
-          <div className="flex cursor-pointer items-center">
+          <Link to="/" className="flex cursor-pointer items-center">
             <img
               src={logo}
               alt="Motoka"
               className="h-8 w-auto object-contain"
             />
-          </div>
+          </Link>
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center h-fit ">
             {navLinks.map((item) => (
@@ -44,8 +44,11 @@ function Header() {
              >
               Login
             </button>
+            {/* Secondary on purpose. "Renew now" in the hero is the single
+                primary action; when Register was also #EBB850 the two orange
+                buttons split the visual priority. */}
             <button
-              className="rounded-[10px] bg-[#EBB850] px-4 py-2 text-base font-semibold text-[#05243F] sm:mt-0"
+              className="rounded-[10px] border-[1.7px] border-transparent px-4 py-2 text-base font-semibold text-[#05243F] underline-offset-4 hover:underline sm:mt-0"
               onClick={() => navigate("/auth/signup")}
             >
               Register

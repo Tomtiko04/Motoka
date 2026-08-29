@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import { ClipLoader } from "react-spinners";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getUserLadipoOrders } from "../../../services/apiLadipo";
+import { getUserOrders } from "../../../services/apiPayment";
 
 function formatDate(iso) {
   if (!iso) return "—";
@@ -44,9 +44,9 @@ function getUserFacingStatus(order) {
   if (orderStatus === "cancelled") return "cancelled";
   if (paymentStatus !== "paid") return "awaiting_payment";
   if (orderStatus === "pending_payment") return "confirmed";
-  if (orderStatus === "processing") return "processing";
+  if (orderStatus === "processing" || orderStatus === "pending") return "processing";
   if (orderStatus === "out_for_delivery" || orderStatus === "shipped") return "out_for_delivery";
-  if (orderStatus === "delivered") return "delivered";
+  if (orderStatus === "delivered" || orderStatus === "completed") return "delivered";
   return "confirmed";
 }
 
@@ -73,7 +73,9 @@ function getStatusDescription(statusKey, order) {
   const descriptions = {
     awaiting_payment: "Complete payment to confirm this order.",
     confirmed: "We have confirmed your payment. Next: Processing.",
-    processing: "Your parts are being sourced and packed.",
+    processing: order?.has_delivery
+      ? "Your documents are being prepared for courier delivery."
+      : "Your order is being prepared.",
     out_for_delivery: pickup
       ? "Your order is ready for pickup at the selected pickup point."
       : "Your order is on the way to your delivery address.",
@@ -101,6 +103,77 @@ const TIMELINE_STEPS = [
   "Delivered",
 ];
 
+function toKobo(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  // Heuristic: values under 1000 are almost always naira for Motoka document fees
+  return n < 1000 ? Math.round(n * 100) : Math.round(n);
+}
+
+function orderTypeLabel(orderType) {
+  const t = String(orderType || "").toLowerCase();
+  if (t === "plate_number") return "Plate number";
+  if (t === "driver_license") return "Driver's license";
+  return "Vehicle papers";
+}
+
+function normalizeLadipoOrder(order) {
+  return {
+    ...order,
+    source: "ladipo",
+    has_delivery: String(order?.delivery?.method || "").toLowerCase() !== "pickup",
+    track_path: null,
+    sort_at: order.updated_at || order.paid_at || order.created_at,
+  };
+}
+
+function normalizeRenewalOrder(order) {
+  const hasDelivery = Boolean(
+    order.delivery_address ||
+      order.delivery_contact ||
+      Number(order.delivery_fee) > 0
+  );
+  const status = String(order.status || "").toLowerCase();
+  let order_status = "processing";
+  if (status === "cancelled") order_status = "cancelled";
+  else if (status === "completed") order_status = hasDelivery ? "delivered" : "completed";
+  else if (status === "processing") order_status = "processing";
+  else if (status === "pending") order_status = "processing";
+
+  const items = [{ name: orderTypeLabel(order.order_type) }];
+  const car = order.cars;
+  if (car) {
+    const carLabel = [car.vehicle_make, car.vehicle_model, car.registration_no]
+      .filter(Boolean)
+      .join(" · ");
+    if (carLabel) items.push({ name: carLabel });
+  }
+  const selected = Array.isArray(order.selected_items) ? order.selected_items : [];
+  for (const entry of selected.slice(0, 6)) {
+    if (typeof entry === "string") items.push({ name: entry });
+    else if (entry?.name) items.push({ name: entry.name });
+    else if (entry?.title) items.push({ name: entry.title });
+  }
+
+  return {
+    id: `renewal-${order.id}`,
+    source: "renewal",
+    order_number: order.order_number,
+    total_kobo: toKobo(order.amount_paid || order.total_amount),
+    payment_status: "paid",
+    order_status,
+    items,
+    created_at: order.created_at,
+    updated_at: order.updated_at,
+    has_delivery: hasDelivery,
+    track_path:
+      hasDelivery && order.order_number
+        ? `/orders/${order.order_number}/track`
+        : null,
+    sort_at: order.updated_at || order.created_at,
+  };
+}
+
 export default function LadipoMyOrders({ onNavigate }) {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -108,7 +181,7 @@ export default function LadipoMyOrders({ onNavigate }) {
   const [error, setError] = useState(null);
 
   const handleRetryPayment = (order) => {
-    if (!order?.order_number) return;
+    if (!order?.order_number || order.source !== "ladipo") return;
     const paymentData = {
       type: "ladipo",
       order_number: order.order_number,
@@ -130,15 +203,53 @@ export default function LadipoMyOrders({ onNavigate }) {
       try {
         setLoading(true);
         setError(null);
-        const data = await getUserLadipoOrders();
-        if (!cancelled) setOrders(Array.isArray(data) ? data : []);
+
+        const [ladipoResult, renewalResult] = await Promise.allSettled([
+          getUserLadipoOrders(),
+          getUserOrders({ limit: 50 }),
+        ]);
+
+        const ladipoOrders =
+          ladipoResult.status === "fulfilled" && Array.isArray(ladipoResult.value)
+            ? ladipoResult.value.map(normalizeLadipoOrder)
+            : [];
+
+        const renewalPayload =
+          renewalResult.status === "fulfilled"
+            ? renewalResult.value?.data?.orders ||
+              renewalResult.value?.orders ||
+              []
+            : [];
+        const renewalOrders = Array.isArray(renewalPayload)
+          ? renewalPayload.map(normalizeRenewalOrder)
+          : [];
+
+        const merged = [...renewalOrders, ...ladipoOrders].sort((a, b) => {
+          const ta = new Date(a.sort_at || 0).getTime();
+          const tb = new Date(b.sort_at || 0).getTime();
+          return tb - ta;
+        });
+
+        if (!cancelled) {
+          setOrders(merged);
+          if (
+            ladipoResult.status === "rejected" &&
+            renewalResult.status === "rejected"
+          ) {
+            setError(
+              ladipoResult.reason?.response?.data?.message ||
+                ladipoResult.reason?.message ||
+                "Could not load orders."
+            );
+          }
+        }
       } catch (e) {
         if (!cancelled) {
           setOrders([]);
           setError(
             e?.response?.data?.message ||
               e?.message ||
-              "Could not load Ladipo orders.",
+              "Could not load orders."
           );
         }
       } finally {
@@ -152,14 +263,8 @@ export default function LadipoMyOrders({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center md:mb-6">
-        <button type="button" onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base font-medium md:text-lg">My Orders</h2>
-      </div>
       <p className="mb-4 text-sm text-gray-500">
-        Ladipo marketplace orders (parts and delivery).
+        Track renewals, plates, licences, and marketplace orders — including courier delivery.
       </p>
 
       <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 md:space-y-4">
@@ -174,7 +279,7 @@ export default function LadipoMyOrders({ onNavigate }) {
         ) : orders.length === 0 ? (
           <div className="my-10 flex items-center justify-center">
             <p className="text-base font-medium text-gray-500">
-              No Ladipo orders yet
+              No orders yet
             </p>
           </div>
         ) : (
@@ -203,6 +308,16 @@ export default function LadipoMyOrders({ onNavigate }) {
                       >
                         {statusLabel}
                       </span>
+                      {order.source === "renewal" && (
+                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs text-sky-700">
+                          Documents
+                        </span>
+                      )}
+                      {order.has_delivery && (
+                        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">
+                          Delivery
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-xs text-gray-500">
                       Last updated: {formatDate(order.updated_at || order.paid_at || order.created_at)}
@@ -276,7 +391,8 @@ export default function LadipoMyOrders({ onNavigate }) {
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(statusKey === "awaiting_payment" || statusKey === "payment_failed") && (
+                  {order.source === "ladipo" &&
+                    (statusKey === "awaiting_payment" || statusKey === "payment_failed") && (
                     <button
                       type="button"
                       onClick={() => handleRetryPayment(order)}
@@ -284,6 +400,14 @@ export default function LadipoMyOrders({ onNavigate }) {
                     >
                       {statusKey === "payment_failed" ? "Retry payment" : "Pay now"}
                     </button>
+                  )}
+                  {order.track_path && (
+                    <Link
+                      to={order.track_path}
+                      className="rounded-full border border-[#2284DB]/40 bg-[#F0F7FF] px-3 py-1.5 text-xs font-semibold text-[#2284DB] hover:bg-[#E6F2FF]"
+                    >
+                      Track package
+                    </Link>
                   )}
                   {(statusKey === "out_for_delivery" || statusKey === "processing") && (
                     <button

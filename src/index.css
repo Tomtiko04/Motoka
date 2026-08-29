@@ -1,5 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
 @import "tailwindcss";
+
+/* Landing redesign palette. Named tokens rather than the numeric brand-*
+   scale already referenced below, so the two do not collide. */
+@theme {
+  --color-brand-blue: #2389e3;
+  --color-brand-blue-dark: #0e6fc6;
+  --color-brand-navy: #05243f;
+  --color-brand-gold: #ebb850;
+  --color-brand-green: #21b993;
+  --color-brand-mint: #5df8d0;
+  --color-brand-bg: #daebfa;
+}
+
+.services-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
@@ -195,4 +212,40 @@ input[type="number"] {
   input, select, textarea, button {
     font-size: 16px;
   }
+}
+
+/* Only while the redesigned landing route is mounted — LandingV2 adds and
+   removes these classes. The prototype set these on html/body
+   unconditionally, which would rescale and repaint the whole app.
+
+   The two overrides below matter as much as the paint: this app's globals
+   assume a 1.6rem base and a clipped body, neither of which the prototype
+   was built against.
+
+   - font-size: the app sets body{font-size:1.6rem} = 25.6px. Anything in the
+     landing that inherits rather than declaring its own size came out ~1.6x
+     too big, which overflowed the fixed-height cards.
+   - overflow: the app sets html,body{overflow-x:hidden}, and a hidden axis
+     computes the other to auto, making body a scroll container. That breaks
+     position:sticky, which is what pins the phone in the Everything section.
+     `clip` suppresses the same horizontal overflow without becoming one. */
+/* v2 chrome — anywhere the redesigned Header/Footer render, including the
+   marketing and blog pages, not just the landing itself. */
+html.motoka-v2-chrome,
+body.motoka-v2-chrome {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+body.motoka-v2-chrome {
+  font-size: 16px;
+  line-height: normal;
+}
+
+/* Landing only — the prototype's own canvas. Kept separate from the chrome
+   rules above so /about and /blogs don't inherit the 1.1 zoom. */
+body.landing-v2-active {
+  background-color: #fff;
+  background-image: none;
+  zoom: 1.1;
 }

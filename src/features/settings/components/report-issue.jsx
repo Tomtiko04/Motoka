@@ -1,18 +1,9 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
-
 export default function ReportIssue({ onNavigate }) {
   return (
     <div className="flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center mb-6">
-          <button onClick={() => onNavigate("main")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-lg font-medium">Report an Issue</h2>
-        </div>
-
         <div className="space-y-6">
           <div>
             <label className="mb-2 block text-sm font-medium text-[#05243F]">Tell us about the problem</label>

@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Cog, Sparkles, Menu } from "lucide-react";
+import { ChevronLeft, Cog } from "lucide-react";
 import SearchBar from "./search-bar";
 import SettingsSidebar from "./settings-sidebar";
 
@@ -14,24 +13,8 @@ export default function SettingsLayout({
   onNavigate,
   onSectionToggle,
 }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkIfMobile();
-
-    // Add event listener
-    window.addEventListener("resize", checkIfMobile);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getTitleParts = () => {
     switch (activePage) {
@@ -39,19 +22,21 @@ export default function SettingsLayout({
         return { section: "Settings", page: "" };
       case "profile":
         return { section: "Settings", page: "Profile Information" };
+      case "edit-profile":
+        return { section: "Settings", page: "Edit Profile" };
       case "password":
         return { section: "Settings", page: "Change Password" };
       case "2fa":
-        return { section: "Settings", page: "2FA" };
+        return { section: "Settings", page: "2FA Authenticator" };
       case "payment":
       case "payment-with-cards":
         return { section: "Settings", page: "Saved Payment Method" };
       case "add-card":
-        return { section: "Settings", page: "Add a Bank Card/Account" };
+        return { section: "Settings", page: "Add Bank Card / Account" };
       case "transaction":
         return { section: "Settings", page: "Transaction History" };
       case "auto-renewal":
-        return { section: "Settings", page: "Auto Renewal" };
+        return { section: "Settings", page: "Auto Renewal Settings" };
       case "billing":
         return { section: "Settings", page: "Billing Address" };
       case "ladipo-orders":
@@ -60,35 +45,62 @@ export default function SettingsLayout({
         return { section: "Settings", page: "Push Notification" };
       case "custom-notification":
         return { section: "Settings", page: "Customized Notification" };
+      case "language-region":
+        return { section: "Settings", page: "Language & Region" };
+      case "dark-mode":
+        return { section: "Settings", page: "Dark Mode / Light Mode" };
+      case "location-service":
+        return { section: "Settings", page: "Location Services" };
+      case "contact-support":
+        return { section: "Settings", page: "Contact Support" };
+      case "report-issue":
+        return { section: "Settings", page: "Report an Issue" };
+      case "live-chat":
+        return { section: "Settings", page: "Live Chat / Help Desk" };
+      case "terms-condition":
+        return { section: "Settings", page: "Terms & Conditions" };
+      case "data-permission":
+        return { section: "Settings", page: "Data & Permissions" };
+      case "delete-account":
+        return { section: "Settings", page: "Delete Account" };
+      case "info-collect":
+      case "info-sharing":
+      case "data-security":
+        return { section: "Settings", page: "Privacy Policy" };
+      case "account-app-usage":
+        return { section: "Settings", page: "Account & App Usage" };
+      case "licensing-registration":
+        return { section: "Settings", page: "Licensing & Registration" };
+      case "autocare-maintenance":
+        return { section: "Settings", page: "Auto Care & Maintenance" };
       default:
         return { section: "Settings", page: "" };
     }
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+  const handleBack = () => {
+    if (activePage === "edit-profile") {
+      onNavigate("profile");
+    } else if (activePage === "add-card") {
+      onNavigate("payment");
+    } else if (activePage !== "main") {
+      onNavigate("main");
+    } else {
+      navigate(-1);
+    }
   };
 
   return (
     <>
       <div className="container mx-auto flex h-full flex-1 flex-col px-4 py-5 md:py-8">
         <header className="relative mb-6 flex items-center justify-center">
-          {isMobile && (
-            <button
-              onClick={toggleMobileMenu}
-              className="absolute left-0 rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200 md:hidden"
-            >
-              <Menu className="h-5 w-5 text-gray-600" />
-            </button>
-          )}
-          {!isMobile && (
-            <button
-              onClick={() => onNavigate("main")}
-              className="absolute left-0 rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200"
-            >
-              <ChevronLeft className="h-5 w-5 text-gray-600" />
-            </button>
-          )}
+          <button
+            onClick={handleBack}
+            className="absolute left-0 rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200 cursor-pointer"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="h-5 w-5 text-gray-600" />
+          </button>
           <div className="flex items-center text-xl font-medium">
             <Cog className="mr-2 h-5 w-5 text-sky-500" />
             <h1 className="text-center text-xl font-medium md:text-2xl">
@@ -100,7 +112,7 @@ export default function SettingsLayout({
 
                 return (
                   <>
-                    <span className="text-[#697B8C4A]">{section}/</span>
+                    <span className="text-[#697B8C4A] hidden sm:inline">{section}/</span>
                     <span className="text-[#05243F]">{page}</span>
                   </>
                 );
@@ -111,51 +123,32 @@ export default function SettingsLayout({
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-sm">
           <div className="grid h-full md:grid-cols-2 lg:grid-cols-5 flex-1">
-            {/* Mobile sidebar overlay */}
-            {isMobile && isMobileMenuOpen && (
-              <div
-                className="bg-opacity-50 fixed inset-0 z-40 bg-black"
-                onClick={toggleMobileMenu}
-              >
-                <div
-                  className="absolute top-0 left-0 z-50 h-full w-3/4 overflow-y-auto bg-white"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="border-b p-3">
-                    <SearchBar />
-                  </div>
-                  <SettingsSidebar
-                    activePage={activePage}
-                    expandedSection={expandedSection}
-                    onNavigate={(page) => {
-                      onNavigate(page);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    onSectionToggle={onSectionToggle}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Desktop sidebar */}
-            <div className="hidden border-r border-gray-100 md:flex md:flex-col  lg:col-span-2 min-h-0">
+            {/* Sidebar column (Primary navigation on mobile when activePage === "main", fixed sidebar on desktop) */}
+            <div
+              className={`${
+                activePage === "main" ? "flex flex-col w-full" : "hidden md:flex md:flex-col"
+              } border-r border-gray-100 lg:col-span-2 min-h-0`}
+            >
               <div className="p-4">
-                <SearchBar />
+                <SearchBar value={searchQuery} onChange={setSearchQuery} />
               </div>
-              {/* <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#EAB750] hover:scrollbar-thumb-[#EAB750] max-h-[calc(100vh-380px)] min-h-full overflow-y-auto customScroll px-6 sm:px-4"> */}
-                              <div className="max-h-[calc(100vh-330px)] overflow-y-auto customscroll px-6 sm:px-4">
-                {/* max-h-[calc(100vh-380px)] removed this and added flex-1 */}
+              <div className="max-h-[calc(100vh-280px)] md:max-h-[calc(100vh-330px)] overflow-y-auto customscroll px-4 sm:px-6">
                 <SettingsSidebar
                   activePage={activePage}
                   expandedSection={expandedSection}
                   onNavigate={onNavigate}
                   onSectionToggle={onSectionToggle}
+                  searchQuery={searchQuery}
                 />
               </div>
             </div>
 
-            {/* Main content */}
-            <div className="bg-[#F8F8FA] p-4 md:p-6 lg:col-span-3">
+            {/* Main content column (Active sub-page on mobile when activePage !== "main", right panel on desktop) */}
+            <div
+              className={`${
+                activePage !== "main" ? "block w-full" : "hidden md:block"
+              } bg-[#F8F8FA] p-4 md:p-6 lg:col-span-3`}
+            >
               {children}
             </div>
           </div>

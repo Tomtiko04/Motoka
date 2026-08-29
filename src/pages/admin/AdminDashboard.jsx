@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ClipboardDocumentListIcon,
   UserGroupIcon,
@@ -8,6 +9,7 @@ import {
   ArrowDownIcon,
   DocumentTextIcon,
   UsersIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import {
@@ -22,19 +24,23 @@ import {
   Line,
 } from 'recharts';
 import config from '../../config/config';
+import GatewayHealthPanel from '../../components/admin/GatewayHealthPanel';
+import RenewalsSummary from '../../components/admin/RenewalsSummary';
+import { Pulse } from '../../components/admin/renewalsMetrics';
+
+function KpiNumber({ ready, children, className }) {
+  if (!ready) return <Pulse className="mt-1 h-8 w-24" />;
+  return <p className={className}>{children}</p>;
+}
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [statsReady, setStatsReady] = useState(false);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
-  const [loading, setLoading] = useState(true);
-  const [expiryReminderState, setExpiryReminderState] = useState('idle');
-  const [expiryReminderResult, setExpiryReminderResult] = useState(null);
-  const [addCarReminderState, setAddCarReminderState] = useState('idle');
-  const [addCarReminderResult, setAddCarReminderResult] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -48,32 +54,35 @@ const AdminDashboard = () => {
       try { return await res.json(); } catch { return null; }
     };
 
-    const [statsResult, ordersResult, txResult, allOrdersResult] = await Promise.allSettled([
-      fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers }).then(safeJson),
-      fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson),
-      fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson),
-      fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson),
+    const statsPromise = fetch(`${config.getApiBaseUrl()}/admin/dashboard/stats`, { headers })
+      .then(safeJson)
+      .then((statsData) => {
+        if (statsData?.status) setStats(statsData.data);
+        setStatsReady(true);
+        return statsData;
+      })
+      .catch(() => {
+        setStatsReady(true);
+        return null;
+      });
+
+    const [statsData, ordersResult, txResult, allOrdersResult] = await Promise.all([
+      statsPromise,
+      fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson).catch(() => null),
+      fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson).catch(() => null),
+      fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson).catch(() => null),
     ]);
 
-    const statsData     = statsResult.status     === 'fulfilled' ? statsResult.value     : null;
-    const ordersData    = ordersResult.status     === 'fulfilled' ? ordersResult.value    : null;
-    const txData        = txResult.status         === 'fulfilled' ? txResult.value        : null;
-    const allOrdersData = allOrdersResult.status  === 'fulfilled' ? allOrdersResult.value : null;
+    if (ordersResult?.status) setRecentOrders(ordersResult.data);
+    if (txResult?.status) setRecentTransactions(txResult.data);
 
-    if (statsData?.status)  setStats(statsData.data);
-    if (ordersData?.status) setRecentOrders(ordersData.data);
-    if (txData?.status)     setRecentTransactions(txData.data);
-
-    const orders = allOrdersData?.status
-      ? (allOrdersData.data?.data || allOrdersData.data || [])
-      : (ordersData?.data || []);
+    const orders = allOrdersResult?.status
+      ? (allOrdersResult.data?.data || allOrdersResult.data || [])
+      : (ordersResult?.data || []);
     setAllOrders(orders);
 
-    const allFailed = [statsResult, ordersResult, txResult, allOrdersResult]
-      .every(r => r.status === 'rejected' || !r.value);
+    const allFailed = !statsData && !ordersResult && !txResult && !allOrdersResult;
     if (allFailed) toast.error('Failed to fetch dashboard data');
-
-    setLoading(false);
   };
 
   const buildChartFromOrders = (orders, period) => {
@@ -143,50 +152,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleTriggerExpiryReminders = async (dryRun = false) => {
-    setExpiryReminderState('loading');
-    setExpiryReminderResult(null);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const url = `${config.getApiBaseUrl()}/admin/notifications/expiry-reminders${dryRun ? '?dry_run=true' : ''}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Failed');
-      setExpiryReminderResult({ success: true, data: json.data });
-      setExpiryReminderState('done');
-      toast.success(json.data?.message || 'Done');
-    } catch (err) {
-      setExpiryReminderResult({ success: false, error: err.message });
-      setExpiryReminderState('error');
-      toast.error(err.message || 'Request failed');
-    }
-  };
-
-  const handleTriggerAddCarReminder = async (dryRun = false) => {
-    setAddCarReminderState('loading');
-    setAddCarReminderResult(null);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const url = `${config.getApiBaseUrl()}/admin/notifications/add-car-reminder${dryRun ? '?dry_run=true' : ''}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Failed');
-      setAddCarReminderResult({ success: true, data: json.data });
-      setAddCarReminderState('done');
-      toast.success(json.data?.message || 'Done');
-    } catch (err) {
-      setAddCarReminderResult({ success: false, error: err.message });
-      setAddCarReminderState('error');
-      toast.error(err.message || 'Request failed');
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'New':
@@ -200,14 +165,6 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -217,15 +174,15 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
         {/* Total Amount */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 ₦{stats ? parseFloat(stats.total_amount).toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <CreditCardIcon className="h-5 w-5 text-blue-600" />
@@ -238,9 +195,9 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_orders.toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
@@ -253,9 +210,9 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_users.toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <UsersIcon className="h-5 w-5 text-blue-600" />
@@ -268,15 +225,36 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
                 {stats ? stats.total_cars.toLocaleString() : '0'}
-              </p>
+              </KpiNumber>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <TruckIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </div>
+
+        <Link
+          to={
+            stats?.expired_month
+              ? `/admin/renewals?bucket=expired&month=${stats.expired_month}`
+              : '/admin/renewals?bucket=expired'
+          }
+          className="bg-white rounded-lg shadow-sm p-6 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Expired this month</p>
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+                {stats ? Number(stats.expired_cars_this_month || 0).toLocaleString() : '0'}
+              </KpiNumber>
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Order Status Cards */}
@@ -342,108 +320,11 @@ const AdminDashboard = () => {
         </div> */}
       </div>
 
-      {/* WhatsApp Communications */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {/* Panel header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-green-600" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.524 5.843L.057 23.272a.75.75 0 00.916.916l5.43-1.467A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.7-.504-5.25-1.385l-.376-.214-3.892 1.052 1.053-3.892-.214-.376A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">WhatsApp Communications</p>
-            <p className="text-xs text-gray-400">Trigger or preview WhatsApp messages to users</p>
-          </div>
-        </div>
+      {/* Renewals — who is expiring and who is already paid up */}
+      <RenewalsSummary />
 
-        {/* Command list — add new commands here */}
-        <div className="divide-y divide-gray-100">
-
-          {/* ── Expiry Reminders ── */}
-          <div className="px-5 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="flex items-start gap-3 min-w-0">
-                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-green-500" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900">Expiry Reminders</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Message users whose cars expire in 1, 7, 14, or 30 days.</p>
-                  {expiryReminderResult && (
-                    <div className={`mt-2 rounded-md px-3 py-2 text-xs ${expiryReminderResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                      {expiryReminderResult.success ? (
-                        <>
-                          <p className="font-medium">{expiryReminderResult.data?.message}</p>
-                          {expiryReminderResult.data?.windows?.map(w => (
-                            <p key={w.days}>{w.days}d window: {w.count} car(s)</p>
-                          ))}
-                        </>
-                      ) : (
-                        <p>{expiryReminderResult.error}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex shrink-0 gap-2 sm:ml-4">
-                <button
-                  onClick={() => handleTriggerExpiryReminders(true)}
-                  disabled={expiryReminderState === 'loading'}
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                >
-                  {expiryReminderState === 'loading' ? 'Checking…' : 'Dry Run'}
-                </button>
-                <button
-                  onClick={() => handleTriggerExpiryReminders(false)}
-                  disabled={expiryReminderState === 'loading'}
-                  className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
-                >
-                  {expiryReminderState === 'loading' ? 'Sending…' : 'Send Now'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Add Car Reminder ── */}
-          <div className="px-5 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="flex items-start gap-3 min-w-0">
-                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900">Add Car Reminder</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Nudge users who haven't added a vehicle to their account yet.</p>
-                  {addCarReminderResult && (
-                    <div className={`mt-2 rounded-md px-3 py-2 text-xs ${addCarReminderResult.success ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>
-                      {addCarReminderResult.success ? (
-                        <p className="font-medium">{addCarReminderResult.data?.message}</p>
-                      ) : (
-                        <p>{addCarReminderResult.error}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex shrink-0 gap-2 sm:ml-4">
-                <button
-                  onClick={() => handleTriggerAddCarReminder(true)}
-                  disabled={addCarReminderState === 'loading'}
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                >
-                  {addCarReminderState === 'loading' ? 'Checking…' : 'Dry Run'}
-                </button>
-                <button
-                  onClick={() => handleTriggerAddCarReminder(false)}
-                  disabled={addCarReminderState === 'loading'}
-                  className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  {addCarReminderState === 'loading' ? 'Sending…' : 'Send Now'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      {/* Payment gateway health — live ops signal during payment incidents */}
+      <GatewayHealthPanel />
 
       {/* Chart and Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { fetchRenewalItems, fetchStates, fetchLGAs, initGuestRenewal } from "../../services/apiGuest";
+import { useDeliveryQuote } from "../../hooks/useDeliveryQuote";
 import { saveGuestDeferredReminders } from "../../services/apiDeferredReminders";
 import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
 import { useNavigate } from "react-router-dom";
@@ -50,7 +51,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   const [renewalState, setRenewalState] = useState("Ogun");
 
   // Step 3 — gateway selection
-  const [selectedGateway, setSelectedGateway] = useState("monicredit");
+  const [selectedGateway, setSelectedGateway] = useState("monipay");
   const [showPartialPrompt, setShowPartialPrompt] = useState(false);
   const [pendingSkippedDocs, setPendingSkippedDocs] = useState([]);
 
@@ -68,8 +69,11 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   }, [initialPlateNumber]);
   // ── Reset to step 1 when modal closes so it starts fresh on next open ────
   useEffect(() => {
-    if (!isOpen) setStep(1);
-  }, [isOpen]);
+    if (!isOpen) {
+      setStep(1);
+      setPlateNumber(initialPlateNumber || "");
+    }
+  }, [isOpen, initialPlateNumber]);
   // ── Load renewal items when reaching step 2 ──────────────────────────────
   useEffect(() => {
     if (step !== 2) return;
@@ -113,6 +117,19 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
   const totalAmount = renewalAmount + (wantsDelivery ? (deliveryDetails.fee || 0) : 0);
 
+  const { feeKobo: quotedFee, loading: quoting, error: quoteError } = useDeliveryQuote({
+    enabled: wantsDelivery,
+    state: deliveryDetails.stateCode,
+    lga: deliveryDetails.lga,
+    purpose: "renewal",
+    selectedItems: selectedDocs,
+    guest: true,
+  });
+
+  useEffect(() => {
+    setDeliveryDetails((p) => ({ ...p, fee: quotedFee || 0 }));
+  }, [quotedFee]);
+
   // ── Form handlers ─────────────────────────────────────────────────────────
   const handleChange = (e) => {
     const { id, value, type, checked } = e.target;
@@ -122,8 +139,25 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     }));
   };
 
+  const isPlateLocked = Boolean(initialPlateNumber);
+
+  const formatPlateNumber = (value) => {
+    const cleaned = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    if (cleaned.length <= 3) return cleaned;
+    if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 8)}`;
+  };
+
+  const handlePlateChange = (e) => {
+    setPlateNumber(formatPlateNumber(e.target.value));
+  };
+
   const handleSubmitStep1 = (e) => {
     e.preventDefault();
+    if (!plateNumber.trim()) {
+      toast.error("Please enter your plate number");
+      return;
+    }
     if (!formData.name || !formData.phone || !formData.email || !formData.expiryDate) {
       toast.error("Please fill in all fields");
       return;
@@ -179,7 +213,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
       stateCode: selected?.code || "",
       stateName: selected?.name || "",
       lga: "",
-      fee: selected?.delivery_fee || 0,
+      fee: 0,
     }));
   };
 
@@ -191,7 +225,10 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
         deliveryDetails.address.trim() &&
         deliveryDetails.stateCode &&
         deliveryDetails.lga &&
-        deliveryDetails.contact.trim()
+        deliveryDetails.contact.trim() &&
+        !quoting &&
+        !quoteError &&
+        Number(deliveryDetails.fee) > 0
       );
     }
     return true;
@@ -281,11 +318,10 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
       sessionStorage.setItem("guestOrderId", result.orderId);
 
       if (result.paymentUrl) {
-        // Paystack — redirect to hosted checkout
         window.location.href = result.paymentUrl;
+      } else if (result.accessCode) {
+        navigate(`/guest/renewal/callback?orderId=${result.orderId}&gateway=monipay`);
       } else if (result.accountNumber) {
-        // MoniCredit bank transfer — persist bank details to sessionStorage so
-        // the callback page can recover them if the user navigates back
         sessionStorage.setItem("guestBankDetails", JSON.stringify({
           accountNumber: result.accountNumber,
           bankName: result.bankName,
@@ -369,8 +405,13 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                           type="text"
                           id="plateNumber"
                           value={plateNumber}
-                          readOnly
-                          className="peer block w-full rounded-lg bg-[#FFFBEB] px-4 pb-4 pt-7 text-lg text-[#05243F] font-bold shadow-2xs focus:outline-none border-none sm:px-5 placeholder-transparent"
+                          readOnly={isPlateLocked}
+                          onChange={isPlateLocked ? undefined : handlePlateChange}
+                          className={`peer block w-full rounded-lg px-4 pb-4 pt-7 text-lg text-[#05243F] font-bold shadow-2xs focus:outline-none border-none sm:px-5 placeholder-transparent ${
+                            isPlateLocked
+                              ? "bg-[#FFFBEB]"
+                              : "bg-[#F4F5FC] hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD]"
+                          }`}
                           placeholder="Your plate no."
                         />
                         <label
@@ -509,7 +550,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                   {/* Left — method selector */}
                   <div className="space-y-3">
                     {[
-                      { id: "monicredit", label: "Pay Via MoniCredit", sub: "Bank transfer — virtual account" },
+                      { id: "monipay", label: "Pay Via Monipay", sub: "Card, bank transfer, or QR" },
                       { id: "paystack", label: "Pay Via Paystack", sub: "Card, bank or mobile money" },
                     ].map((m) => (
                       <button
@@ -540,17 +581,12 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
                   {/* Right — detail panel */}
                   <div className="space-y-4">
-                    {selectedGateway === "monicredit" ? (
+                    {selectedGateway === "monipay" ? (
                       <div className="rounded-[20px] border border-[#697B8C]/11 px-6 py-5 space-y-3">
-                        <p className="text-sm text-[#697C8C]">Bank Transfer Details</p>
+                        <p className="text-sm text-[#697C8C]">Monipay Checkout</p>
                         <p className="text-xs text-[#05243F]/60">
-                          Click confirm below. We'll generate a dedicated virtual account number for this transaction. Transfer the exact amount to complete your renewal.
+                          Click confirm below. You will be sent to Monipay to pay by card, bank transfer, or QR. We verify the payment on the server after you return.
                         </p>
-                        <div className="rounded-[10px] bg-[#F4F5FC] p-3">
-                          <p className="text-xs text-[#697C8C]">
-                            <span className="font-medium text-[#05243F]">Note:</span> Account expires in 30 mins. After payment, you'll be redirected to a status page.
-                          </p>
-                        </div>
                       </div>
                     ) : (
                       <div className="rounded-[20px] border border-[#697B8C]/11 px-6 py-5 space-y-3">
@@ -824,9 +860,13 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                             <input
                               readOnly
                               type="text"
-                              value={deliveryDetails.stateCode
-                                ? formatCurrency(deliveryDetails.fee / 100)
-                                : "Select a state first"}
+                              value={quoting
+                                ? "Calculating…"
+                                : quoteError
+                                  ? quoteError
+                                  : deliveryDetails.stateCode && deliveryDetails.lga
+                                    ? formatCurrency(deliveryDetails.fee / 100)
+                                    : "Select a state and LGA"}
                               className="mt-3 w-full rounded-[10px] bg-[#F4F5FC] p-4 text-sm text-[#05243F] outline-none"
                             />
                           </div>

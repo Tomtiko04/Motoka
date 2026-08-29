@@ -7,24 +7,47 @@ function FaqsSection() {
       <h2 className="text-[56px] font-bold text-[#05243F]">FAQs</h2>
           {[
         {
-          title: "How do i create account on Motoka",
+          // Website-only wording on purpose: the mobile app is still "Coming
+          // soon" in the Mobile section, so telling visitors to download it
+          // here contradicted the same page.
+          title: "How do I create an account on Motoka?",
           content:
-            "Download the Motoka app or visit our website, click 'Sign Up,' and follow the on-screen instructions. You'll need to provide your name, email, phone number, and create a password.",
+            "Visit motokaapp.ng, click 'Sign Up,' and follow the on-screen instructions. You'll need to provide your name, email, phone number, and create a password. Everything works in your browser — no download needed.",
         },
         {
-          title: "How do I renew my driver’s/vehicle license usuing Motoka?",
+          title: "How do I renew my driver’s or vehicle licence using Motoka?",
           content:
-            "Log in to your Motoka account, navigate to the 'License Renewal' section, and follow the prompts to enter your vehicle details and make payment. We'll handle the rest and notify you when your renewed license is ready.",
+            "Log in to your Motoka account, go to the 'License Renewal' section, and follow the prompts to enter your vehicle details and make payment. We handle the rest and notify you when your renewed licence is ready.",
         },
         {
-          title: "Can I upload digital copies of my license documents?",
+          title: "How much does a renewal cost?",
           content:
-            "Yes, Motoka allows you to securely upload digital copies of your license documents for easy access and verification during the renewal process.",
+            "You see a full breakdown before you pay — the government fee for your document and vehicle type, plus Motoka's service fee, itemised separately. Nothing is added at checkout, and the price you approve is the price you pay.",
         },
         {
-          title: "Can I set reminders for upcoming maintenance tasks?",
+          title: "My vehicle papers have already expired. Can Motoka still help?",
           content:
-            "Absolutely! Motoka offers a reminder feature that allows you to set notifications for upcoming maintenance tasks, ensuring you never miss an important service.",
+            "Yes. Expired papers are one of the most common reasons people come to us. Start the renewal the same way you would before expiry — enter your vehicle details and we process it. Any penalty an agency applies for late renewal is shown in your breakdown before payment, so there are no surprises.",
+        },
+        {
+          title: "How do I know the documents I get back are genuine?",
+          content:
+            "Every renewal is processed through the issuing authority for your document, and you receive the official document with the verification details intact. You can independently check it through the agency's own verification channel — we encourage it. Motoka never issues or prints documents itself.",
+        },
+        {
+          title: "How do I avoid fake agents and fraudulent documents?",
+          content:
+            "Never pay an individual into a personal account for vehicle papers, and be wary of anyone who cannot show you an itemised government fee. On Motoka, payment happens only inside your account through our payment provider, every transaction produces a receipt, and no staff member will ever ask you for your password or a transfer to a personal account.",
+        },
+        {
+          title: "Can I upload digital copies of my licence documents?",
+          content:
+            "Yes. Motoka lets you securely upload digital copies of your documents so you can reach them instantly during a roadside check, and so they are ready for verification when you renew.",
+        },
+        {
+          title: "Can I set reminders for renewals and maintenance?",
+          content:
+            "Yes. Motoka sends automated reminders ahead of every licence, insurance and service due date, so you can renew before a penalty applies rather than after.",
         },
       ].map((item, idx) => (
         <div

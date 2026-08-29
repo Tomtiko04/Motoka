@@ -1,12 +1,48 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { IoIosArrowBack } from "react-icons/io";
 import { Icon } from "@iconify/react";
+import { getWallet } from "../../../services/apiWallet";
+
+function formatNaira(kobo) {
+  return `₦${(Number(kobo || 0) / 100).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+}
 
 function WalletDemoChip() {
+  const [showBalance, setShowBalance] = useState(true);
+  const { data: wallet, isLoading } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: getWallet,
+  });
+
+  const amount = isLoading
+    ? "₦—"
+    : showBalance
+      ? formatNaira(wallet?.balance_kobo)
+      : "₦••••";
+
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-[#EAF1FF] px-5 py-2">
-      <Icon icon="solar:eye-bold" width="16" className="text-[#697C8C]" />
-      <span className="text-lg font-semibold text-[#2B8DED]">₦0</span>
+    <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-[#EAF1FF] px-3 py-1.5 sm:px-5 sm:py-2">
+      <button
+        type="button"
+        onClick={() => setShowBalance((v) => !v)}
+        className="flex items-center justify-center text-[#697C8C] transition-opacity hover:opacity-70"
+        aria-label={showBalance ? "Hide wallet balance" : "Show wallet balance"}
+        title={showBalance ? "Hide balance" : "Show balance"}
+      >
+        <Icon
+          icon={showBalance ? "solar:eye-bold" : "solar:eye-closed-bold"}
+          width="15"
+        />
+      </button>
+      <Link
+        to="/wallet"
+        className="text-sm sm:text-lg font-semibold text-[#2B8DED] transition-opacity hover:opacity-90"
+        title="Open wallet"
+      >
+        {amount}
+      </Link>
     </div>
   );
 }
@@ -31,11 +67,11 @@ export default function LadipoLayout({
   const rightSlot =
     headerEnd ??
     (showWalletDemo ? (
-      <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
+      <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
         <Link
           to="/settings"
           state={{ settingsPage: "ladipo-orders" }}
-          className="whitespace-nowrap text-[13px] font-semibold text-[#2389E3] underline-offset-2 hover:underline sm:text-sm"
+          className="whitespace-nowrap text-[11px] sm:text-[13px] font-semibold text-[#2389E3] underline-offset-2 hover:underline"
         >
           My Orders
         </Link>
@@ -61,7 +97,7 @@ export default function LadipoLayout({
                   {title}
                 </h1>
                 {subTitle ? (
-                  <p className="mt-1 text-sm font-normal text-[#05243F]/40 line-clamp-2">
+                  <p className="hidden sm:block mt-1 text-sm font-normal text-[#05243F]/40 line-clamp-2">
                     {subTitle}
                   </p>
                 ) : null}

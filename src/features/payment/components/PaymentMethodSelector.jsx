@@ -3,12 +3,14 @@ import { PAYMENT_METHODS } from '../config/paymentTypes';
 
 const methodIcons = {
   [PAYMENT_METHODS.PAYSTACK]: '💳',
+  [PAYMENT_METHODS.MONIPAY]: '🏦',
   [PAYMENT_METHODS.MONICREDIT]: '🏦',
   [PAYMENT_METHODS.BANK_TRANSFER]: '🏛️',
 };
 
 const methodLabels = {
   [PAYMENT_METHODS.PAYSTACK]: 'Pay with Card (Paystack)',
+  [PAYMENT_METHODS.MONIPAY]: 'Pay with Monipay',
   [PAYMENT_METHODS.MONICREDIT]: 'Pay with Monicredit',
   [PAYMENT_METHODS.BANK_TRANSFER]: 'Bank Transfer',
 };

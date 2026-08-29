@@ -40,9 +40,9 @@ function Footer() {
       </div>
       <div className="grid justify-center w-full grid-cols-1 gap-6 mt-20 justify-items-start sm:mt-40 sm:grid-cols-2 md:grid-cols-4">
         <div className="flex flex-col items-start gap-6 mt-10 col-span sm:mt-0 sm:gap-8">
-          <div onClick={scrollToTop}>
+          <Link to="/" onClick={scrollToTop}>
             <img src={logo} alt="motoka logo" className="h-[52px] w-fit" />
-          </div>{" "}
+          </Link>
           <p className="font-regular text-[15px] leading-[25px] text-white/70">
             Simplifying vehicle licensing, maintenance, and auto services — all
             in one smart platform.
@@ -85,26 +85,53 @@ function Footer() {
             &copy; {new Date().getFullYear()} Motoka Inc
           </p>
         </div>
-        {
-          [
-            { title: 'Services', links: ['License Auto Renewal', 'License Auto Reminder', 'Vehicle Maintenance', 'Ladipo Car parts', 'Traffic Education'] },
-            { title: 'Resources', links: ['Blog & News', 'Driver Guides', 'Community Forum', 'How Motoka Works'] },
-            { title: 'Company', links: ['About Motoka', 'Our Mission', 'Careers', 'Partners', 'Contact Us'] },
-          ].map((section) => (
-            <div key={section.title} className="w-full flex justify-start sm:justify-end">
-              <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
-                <h4 className="text-lg font-semibold text-white">{section.title}</h4>
-                <div className="flex flex-col items-start gap-4">
-                  {section.links.map((link) => (
-                    <a key={link} href="#" className="text-[15px] font-regular text-white/70 hover:text-white">
-                      {link}
-                    </a>
-                  ))}
-                </div>
+        {[
+          {
+            title: "Services",
+            links: [
+              { label: "License Auto Renewal", to: "/renew-vehicle-licence" },
+              { label: "License Auto Reminder", to: "/reminders" },
+              // /ladipo is behind ProtectedRoute — a signed-out visitor is sent
+              // to login, which is expected for a marketplace. /traffic-rules is
+              // also gated but has a public equivalent in /guides, so the footer
+              // points there rather than stranding readers at a login screen.
+              { label: "Ladipo Car parts", to: "/ladipo" },
+              { label: "Traffic Education", to: "/guides" },
+            ],
+          },
+          {
+            title: "Resources",
+            links: [
+              { label: "Blog & News", to: "/blogs" },
+              { label: "Driver Guides", to: "/guides" },
+              { label: "How Motoka Works", to: "/how-it-works" },
+            ],
+          },
+          {
+            title: "Company",
+            links: [
+              { label: "About Motoka", to: "/about" },
+              { label: "Contact Us", to: "/contact" },
+            ],
+          },
+        ].map((section) => (
+          <div key={section.title} className="w-full flex justify-start sm:justify-end">
+            <div className="mt-10 flex flex-col items-start gap-6 sm:mt-0 w-fit">
+              <h4 className="text-lg font-semibold text-white">{section.title}</h4>
+              <div className="flex flex-col items-start gap-4">
+                {section.links.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className="text-[15px] font-regular text-white/70 hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             </div>
-          ))
-        }
+          </div>
+        ))}
       </div>
     </div>
   );

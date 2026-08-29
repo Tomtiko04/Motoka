@@ -62,19 +62,10 @@
 // }
 
 import { useMutation } from '@tanstack/react-query';
-import { verifyPayment, verifyPaystackPayment } from '../../../services/apiPayment';
+import { verifyPaystackPayment } from '../../../services/apiPayment';
 import { toast } from 'react-hot-toast';
 
 export function usePaymentVerification() {
-  // Toast handling is done by the caller (handleVerifyMonicredit in PaymentOptions)
-  // so we do not add onSuccess/onError here — that would cause duplicate toasts.
-  const verifyMonicredit = useMutation({
-    mutationFn: async (orderId) => {
-      const response = await verifyPayment(orderId);
-      return response;
-    }
-  });
-
   const verifyPaystack = useMutation({
     mutationFn: async (reference) => {
       const response = await verifyPaystackPayment(reference);
@@ -86,7 +77,6 @@ export function usePaymentVerification() {
   });
 
   return {
-    verifyMonicredit,
     verifyPaystack
   };
 }

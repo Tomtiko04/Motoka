@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { Icon } from "@iconify/react";
 import { PAYMENT_TYPES } from "../../payment/config/paymentTypes";
+import DeliveryRequest from "../../../components/delivery/DeliveryRequest";
+import toast from "react-hot-toast";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -53,6 +55,8 @@ export default function PlateOrderSummary() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [delivery, setDelivery] = useState({ wantsDelivery: false, details: {}, quoting: false, quoteError: "" });
+
   // Guard — no state means user landed here directly
   if (!summaryState?.carSlug) {
     return (
@@ -80,14 +84,51 @@ export default function PlateOrderSummary() {
   const subLabel =
     subType && subType !== "Dealership" ? subType : null;
 
-  // ── Navigate to the shared PaymentOptions page ─────────────────────────────
+  const deliveryFeeNaira = delivery.wantsDelivery ? Number(delivery.details?.fee || 0) / 100 : 0;
+  const totalNaira = Number(price || 0) + deliveryFeeNaira;
+
+  const deliveryDetails = delivery.details || {};
+  const deliveryContactDigits = String(deliveryDetails.contact || "").replace(/\D/g, "");
+  const deliveryComplete =
+    Boolean(deliveryDetails.address?.trim()) &&
+    Boolean(deliveryDetails.state) &&
+    Boolean(deliveryDetails.lga) &&
+    deliveryContactDigits.length >= 11 &&
+    !delivery.quoting &&
+    !delivery.quoteError &&
+    Number(deliveryDetails.fee) > 0;
+  const canProceed = !delivery.wantsDelivery || deliveryComplete;
+
   const handleProceedToPayment = () => {
+    if (delivery.wantsDelivery && !deliveryComplete) {
+      toast.error(
+        delivery.quoteError ||
+          "Please complete delivery address, state, LGA, and phone, or uncheck Request Delivery"
+      );
+      return;
+    }
+
     const paymentData = {
-      type: PAYMENT_TYPES.PLATE_NUMBER,   // 'plate_number'
+      type: PAYMENT_TYPES.PLATE_NUMBER,
       car_slug: carSlug,
-      plate_type: plateTypeName,           // 'Normal' | 'Customized' | 'Dealership' | 'Reprint'
+      plate_type: plateTypeName,
       sub_type: subLabel || null,
       price,
+      ...(delivery.wantsDelivery ? {
+        delivery_details: {
+          address: delivery.details.address,
+          state: delivery.details.state,
+          lga: delivery.details.lga,
+          contact: delivery.details.contact,
+        },
+        deliveryDetails: {
+          address: delivery.details.address,
+          state: delivery.details.state,
+          lga: delivery.details.lga,
+          contact: delivery.details.contact,
+          fee: delivery.details.fee,
+        },
+      } : {}),
     };
 
     try {
@@ -167,14 +208,16 @@ export default function PlateOrderSummary() {
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-sm font-medium text-[#05243F]/70">
-              Total Amount
+              {delivery.wantsDelivery ? "Total (incl. delivery)" : "Total Amount"}
             </span>
             <span className="text-2xl font-bold text-[#2284DB]">
-              {formatNaira(price)}
+              {formatNaira(totalNaira)}
             </span>
           </div>
         </div>
       </div>
+
+      <DeliveryRequest purpose="plate_number" onChange={setDelivery} />
 
       {/* ── What Happens Next ───────────────────────────────────────────────── */}
       <div className="mb-8 rounded-[16px] bg-[#EBF4FD] px-5 py-4">
@@ -185,7 +228,7 @@ export default function PlateOrderSummary() {
           />
           <p className="text-sm text-[#05243F]/70">
             On the next page you can choose your preferred payment method —{" "}
-            <strong>Monicredit</strong> (bank transfer) or{" "}
+            <strong>Monipay</strong> (bank transfer) or{" "}
             <strong>Paystack</strong> (card / online) — and complete your
             payment.
           </p>
@@ -195,7 +238,8 @@ export default function PlateOrderSummary() {
       {/* ── CTA ─────────────────────────────────────────────────────────────── */}
       <button
         onClick={handleProceedToPayment}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] active:scale-[0.98]"
+        disabled={!canProceed}
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
         Proceed to Payment
         <Icon icon="mdi:arrow-right" className="text-lg" />

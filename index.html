@@ -2,9 +2,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./src/assets/images/icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Motoka</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2389E3" />
+    <!-- iOS has no beforeinstallprompt; these control how it looks once a user
+         adds Motoka to their home screen by hand. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Motoka" />
+    <!-- Default title/description for the first HTML paint. React Helmet
+         overwrites these (and sets canonical) per route so /guides is not
+         treated as a duplicate of /. 301s from motoka.ng / non-www still
+         need setting up in the Vercel dashboard. -->
+    <title>Motoka — Renew Your Vehicle Licence & Documents Online in Nigeria</title>
+    <meta
+      name="description"
+      content="Renew your vehicle licence, insurance, roadworthiness and driver's licence online in Nigeria. Track expiry dates, get reminders before you're fined, and buy car parts at Ladipo — all from one app."
+    />
+
+    <!-- Open Graph / Twitter: without these, every share of a Motoka link
+         renders as a bare URL with no title, image or summary. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Motoka" />
+    <meta property="og:url" content="https://www.motokaapp.ng/" />
+    <meta property="og:title" content="Motoka — Renew Your Vehicle Documents Online in Nigeria" />
+    <meta
+      property="og:description"
+      content="Renew your vehicle licence, insurance and roadworthiness online. Never miss an expiry date again."
+    />
+    <meta property="og:image" content="https://www.motokaapp.ng/icons/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="en_NG" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Motoka — Renew Your Vehicle Documents Online in Nigeria" />
+    <meta
+      name="twitter:description"
+      content="Renew your vehicle licence, insurance and roadworthiness online. Never miss an expiry date again."
+    />
+    <meta name="twitter:image" content="https://www.motokaapp.ng/icons/icon-512.png" />
   </head>
   <body>
     <div class="background-gradient"></div>

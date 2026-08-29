@@ -1,7 +1,7 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getPaymentHistory } from "../../../services/apiPayment";
 import { ClipLoader } from "react-spinners";
 
@@ -54,15 +54,6 @@ export default function TransactionHistory({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-center md:mb-6">
-        <button onClick={() => onNavigate("payment")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base font-medium md:text-lg">
-          Transaction History
-        </h2>
-      </div>
-
       <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 md:space-y-4">
         {loading ? (
           <div className="flex items-center justify-center my-10">
@@ -103,6 +94,21 @@ export default function TransactionHistory({ onNavigate }) {
                         </ul>
                       </div>
                     )}
+                    {transaction.source === 'guest' && transaction.receipt_token && (transaction.order.delivery_address || Number(transaction.order.delivery_fee) > 0) ? (
+                      <Link
+                        to={`/guest/renewal/receipt?orderId=${transaction.order.id}&token=${transaction.receipt_token}`}
+                        className="mt-2 inline-block text-xs font-semibold text-[#2389E3]"
+                      >
+                        Track package
+                      </Link>
+                    ) : transaction.order?.order_number && (transaction.order.delivery_address || Number(transaction.order.delivery_fee) > 0) ? (
+                      <Link
+                        to={`/orders/${transaction.order.order_number}/track`}
+                        className="mt-2 inline-block text-xs font-semibold text-[#2389E3]"
+                      >
+                        Track package
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
                 <div className="text-right">

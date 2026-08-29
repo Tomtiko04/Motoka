@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, CreditCard } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { CardTypeBadge } from "./add-bank-card";
 import { useGetPaymentMethods } from "../usePaymentMethods";
 
@@ -65,13 +65,6 @@ export default function SavedPaymentMethodWithCards({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-6 flex items-center">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">Saved Payment Method</h2>
-      </div>
-
       <div className="mb-8 space-y-3">
         {paymentMethods.map((method) => (
           <CardItem

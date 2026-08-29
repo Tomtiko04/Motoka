@@ -1,19 +1,12 @@
 "use client"
 
-import { ChevronLeft, Mail, Phone } from "lucide-react"
+import { Mail, Phone } from "lucide-react"
 
 export default function ContactSupport({ onNavigate }) {
   return (
     <div className="flex flex-col justify-between h-full">
 
       <div>
-        <div className="flex items-center mb-6">
-          <button onClick={() => onNavigate("main")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-lg font-medium">Contact Support</h2>
-        </div>
-
         <div className="space-y-6">
           <div>
             <label className="mb-2 block text-sm font-medium text-[#05243F]">Full Name</label>

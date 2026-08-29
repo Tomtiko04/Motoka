@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
@@ -115,13 +114,6 @@ export default function AutoRenewalSettings({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center mb-4 md:mb-6">
-        <button onClick={() => onNavigate("payment")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base md:text-lg font-medium">Auto Renewal Settings</h2>
-      </div>
-
       {isLoading ? (
         <div className="flex justify-center py-8">
           <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-[#2389E3]" />

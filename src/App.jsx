@@ -8,6 +8,9 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import toast, { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import InstallPrompt from "./components/pwa/InstallPrompt.jsx";
+import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt.jsx";
+import PushOptInPrompt from "./components/pwa/PushOptInPrompt.jsx";
 
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
@@ -23,6 +26,7 @@ import PaymentOptions from "./features/payment/PaymentOptions.jsx";
 import PaystackCallback from "./pages/PaystackCallback.jsx";
 import Wallet from "./features/wallet/Wallet.jsx";
 import WalletCallback from "./pages/WalletCallback.jsx";
+import Referral from "./features/referral/Referral.jsx";
 import VehiclePaper from "./features/licenses/VehiclePaper.jsx";
 import ConfirmRequest from "./components/shared/ConfirmRequest.jsx";
 import DriversLicense from "./features/licenses/driverslicense/DriversLicense.jsx";
@@ -42,6 +46,7 @@ import ScrollToTop from "./components/scrollToTop.jsx";
 import AddCarRoute from "./components/AddCarRoute";
 import useModalStore from "./store/modalStore.js";
 import { authStorage } from "./utils/authStorage.js";
+import { captureReferralCodeFromUrl } from "./services/apiReferral.js";
 import CarDetailsModal from "./components/CarDetailsModal.jsx";
 import CartPage from "./features/ladipo/CartPage.jsx";
 import Ladipo from "./features/ladipo/Ladipo.jsx";
@@ -53,6 +58,7 @@ import LadipoPaymentStatusModals from "./features/ladipo/components/LadipoPaymen
 import LadipoPaystackReturnHandler from "./features/ladipo/LadipoPaystackReturnHandler.jsx";
 import CarReceipt from "./pages/CarReceipt.jsx";
 import PaymentReceipt from "./pages/PaymentReceipt.jsx";
+import TrackOrder from "./pages/TrackOrder.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
 import CarDocuments from "./pages/CarDocuments.jsx";
 import Notification from "./pages/notification.jsx";
@@ -60,12 +66,28 @@ import SuccessPage from "./pages/SuccessPage.jsx";
 import ForgotPassword from "./features/auth/forgotPassword.jsx";
 import OAuthCallback from "./features/auth/OAuthCallback.jsx";
 import NotFound404 from "./components/NotFound404.jsx";
-import LandingPage from "./Landing/Landing.jsx";
+import HomeEntry from "./components/HomeEntry.jsx";
+import VehicleLicenseRenewalPage from "./Landing/v2/pages/VehicleLicenseRenewalPage.jsx";
+import RoadWorthinessRenewalPage from "./Landing/v2/pages/RoadWorthinessRenewalPage.jsx";
+import DriversLicenseRenewalPage from "./Landing/v2/pages/DriversLicenseRenewalPage.jsx";
+import InsuranceRenewalPage from "./Landing/v2/pages/InsuranceRenewalPage.jsx";
+import StatePage from "./Landing/v2/pages/StatePage.jsx";
+import FaqPage from "./Landing/v2/pages/FaqPage.jsx";
+import MoPage from "./Landing/v2/pages/MoPage.jsx";
+import LadipoMarketingPage from "./Landing/v2/pages/LadipoPage.jsx";
+import WalletMarketingPage from "./Landing/v2/pages/WalletPage.jsx";
 import GuestRenewalCallback from "./pages/GuestRenewalCallback.jsx";
 import GuestRenewalReceipt from "./pages/GuestRenewalReceipt.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogsPage from "./pages/Blogs.jsx";
 import BlogLayout from "./components/BlogLayout.jsx";
+import MarketingLayout from "./components/MarketingLayout.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
+import HowItWorks from "./pages/HowItWorks.jsx";
+import DriverGuides from "./pages/DriverGuides.jsx";
+import LicenseReminder from "./pages/LicenseReminder.jsx";
+import RenewVehicleLicence from "./pages/RenewVehicleLicence.jsx";
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
@@ -135,6 +157,8 @@ function processOAuthHash() {
 
 // Run immediately — if this returns true we're mid-redirect, skip rendering
 const isProcessingOAuth = processOAuthHash();
+// Persist ?ref= across landing → signup navigation
+captureReferralCodeFromUrl();
 
 export default function App() {
   const { isOpen } = useModalStore();
@@ -161,8 +185,28 @@ export default function App() {
         {isOpen && <CarDetailsModal />}
         <Routes>
           {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Browser → landing; installed PWA → login or dashboard */}
+          <Route path="/" element={<HomeEntry />} />
 
+          <Route element={<MarketingLayout />}>
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="how-it-works" element={<HowItWorks />} />
+            <Route path="guides" element={<DriverGuides />} />
+            <Route path="reminders" element={<LicenseReminder />} />
+            <Route path="renew-vehicle-licence" element={<RenewVehicleLicence />} />
+            {/* Marketing pages behind the redesigned footer. /ladipo and
+                /wallet are the signed-in app, so these use distinct paths. */}
+            <Route path="renew/vehicle-license" element={<VehicleLicenseRenewalPage />} />
+            <Route path="renew/road-worthiness" element={<RoadWorthinessRenewalPage />} />
+            <Route path="renew/drivers-license" element={<DriversLicenseRenewalPage />} />
+            <Route path="renew/insurance" element={<InsuranceRenewalPage />} />
+            <Route path="states/:slug" element={<StatePage />} />
+            <Route path="faq" element={<FaqPage />} />
+            <Route path="mo" element={<MoPage />} />
+            <Route path="ladipo-marketplace" element={<LadipoMarketingPage />} />
+            <Route path="save-ahead-wallet" element={<WalletMarketingPage />} />
+          </Route>
 
           {/* Auth Routes */}
           <Route element={<BlogLayout />} >
@@ -259,6 +303,7 @@ export default function App() {
             <Route path="garage" element={<Garage />} />
             <Route path="wallet" element={<Wallet />} />
             <Route path="wallet/callback" element={<WalletCallback />} />
+            <Route path="referral" element={<Referral />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
             <Route
               path="payment"
@@ -268,6 +313,10 @@ export default function App() {
             />
             <Route
               path="payment/paystack/callback"
+              element={<PaystackCallback />}
+            />
+            <Route
+              path="payment/monipay/callback"
               element={<PaystackCallback />}
             />
             <Route path="settings">
@@ -284,6 +333,7 @@ export default function App() {
             <Route path="payment-success" element={<SuccessPage />} />
             <Route path="payment/car-receipt/:carId" element={<CarReceipt />} />
             <Route path="payment/receipt/:paymentType/:identifier" element={<PaymentReceipt />} />
+            <Route path="orders/:orderNumber/track" element={<TrackOrder />} />
           </Route>
 
           {/* Guest renewal flow — public, no auth required */}
@@ -296,6 +346,11 @@ export default function App() {
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>
+      {/* PWA: install nudge, soft push opt-in, and update toast. Each self-hides
+          when irrelevant so we never spam the user. */}
+      <InstallPrompt />
+      <PushOptInPrompt />
+      <PWAUpdatePrompt />
       <Toaster
         position="top-right"
         gutter={8}

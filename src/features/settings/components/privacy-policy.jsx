@@ -1,22 +1,8 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
-
 export default function PrivacyPolicy({ onNavigate, activeTab }) {
   return (
     <div>
-      <div className="flex items-center mb-6">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">
-          Privacy Policy
-          {activeTab === "collect" && " / Information We Collect"}
-          {activeTab === "sharing" && " / Information Sharing"}
-          {activeTab === "security" && " / Data Security"}
-        </h2>
-      </div>
-
       {activeTab === "collect" && (
         <div className="space-y-6 bg-white p-6 rounded-lg">
           <div>

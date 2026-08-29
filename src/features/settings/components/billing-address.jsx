@@ -1,17 +1,8 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
-
 export default function BillingAddress({ onNavigate }) {
   return (
     <div>
-      <div className="flex items-center mb-4 md:mb-6">
-        <button onClick={() => onNavigate("payment")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-base md:text-lg font-medium">Billing Address</h2>
-      </div>
-
       <div className="space-y-4 md:space-y-6">
         <div>
           <label className="mb-2 block text-sm font-medium text-[#05243F]">Address 1</label>

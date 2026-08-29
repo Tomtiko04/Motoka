@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft } from "lucide-react"
 import { useProfile } from "../hooks/useProfile"
 import Avatar from "./ui/avatar"
 import { toast } from "react-hot-toast"
@@ -101,15 +100,6 @@ export default function EditProfile({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <button onClick={() => onNavigate("profile")} className="mr-2">
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
-          </button>
-          <h2 className="text-lg font-medium">Edit Profile</h2>
-        </div>
-      </div>
-
       <div className="flex flex-col md:flex-row md:items-start gap-6 items-center justify-between mb-8">
         <div className="relative">
           <Avatar src={profileData?.image} alt={displayData.name} />

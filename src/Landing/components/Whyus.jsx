@@ -61,10 +61,30 @@ function Whyus() {
                 </div>
               </div>
             ))}
-            <div className="flex w-fit gap-8 py-5">
-              {[image1, image2, image3].map((logo, index) => (
-                <img src={logo} alt="logo" className="h-15 w-15 block" key={index} />
-              ))}
+            {/* These are government agency crests. Shown bare they read as an
+                official endorsement, so the caption states the actual
+                relationship: we help drivers meet these agencies' requirements
+                — we are not appointed by them. */}
+            <div className="py-5">
+              <div className="flex w-fit gap-8">
+                {[
+                  { src: image1, alt: "Directorate of Vehicle Inspection Service (VIS)" },
+                  { src: image2, alt: "Nigeria Police Force" },
+                  { src: image3, alt: "Federal Road Safety Commission (FRSC)" },
+                ].map((logo) => (
+                  <img
+                    src={logo.src}
+                    alt={logo.alt}
+                    className="h-15 w-15 block"
+                    key={logo.alt}
+                  />
+                ))}
+              </div>
+              <p className="mt-4 max-w-[520px] text-sm text-[#05203DB2]">
+                Motoka helps you stay compliant with VIS, Nigeria Police and FRSC
+                requirements. We are an independent service and are not affiliated
+                with or endorsed by these agencies.
+              </p>
             </div>
           </div>
         </div>
@@ -124,7 +144,7 @@ function Whyus() {
           <div>
             <div className="text-[#05243F]">
               <h2 className="text-[24px] sm:text-[32px] font-bold">
-                Guranteed Quality Service:
+                Guaranteed Quality Service:
               </h2>
               <p className="text-2xl pb-9">Trust & Reliability</p>
             </div>
@@ -136,7 +156,8 @@ function Whyus() {
                 iconName: "iconoir:shop",
               },
               {
-                title: "We’ve Got Your Back:",
+                // No trailing colon: the template below already renders one.
+                title: "We’ve Got Your Back",
                 content: "You don’t have to figure it out alone. From finding the right spare parts to booking a quick fix, our team is always here to guide you. We make sure you get top-notch service without the usual headaches.",
                 iconName: "iconoir:shop",
               }

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronDown } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { useState } from "react"
 
 export default function FAQs({ onNavigate }) {
@@ -19,7 +19,7 @@ export default function FAQs({ onNavigate }) {
       id: "create-account",
       question: "How do I create an account on Motoka?",
       answer:
-        'Download the Motoka app or visit our website, click "Sign Up," and follow the on-screen instructions. You\'ll need to provide your name, email, phone number, and create a password.',
+        'Visit motokaapp.ng, click "Sign Up," and follow the on-screen instructions. You\'ll need to provide your name, email, phone number, and create a password.',
     },
     {
       id: "update-profile",
@@ -49,13 +49,6 @@ export default function FAQs({ onNavigate }) {
 
   return (
     <div>
-      <div className="flex items-center mb-6">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">FAQs / Account & App Usage</h2>
-      </div>
-
       <div className="space-y-4">
         {accountFaqs.map((faq) => (
           <div key={faq.id} className="border border-gray-100 rounded-lg overflow-hidden">

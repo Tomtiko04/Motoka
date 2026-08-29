@@ -6,13 +6,13 @@ import Logo from "../../assets/images/motoka logo.svg";
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
-  UserGroupIcon,
   TruckIcon,
   CreditCardIcon,
   ArrowRightOnRectangleIcon,
   UsersIcon,
   DocumentTextIcon,
   IdentificationIcon,
+  BellAlertIcon,
   WalletIcon,
   ShoppingBagIcon,
   Bars3Icon,
@@ -20,27 +20,36 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   CurrencyDollarIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 
+// NOTE: 'Agents' is intentionally absent. The three agent pages still exist in
+// AdminRoutes, but every endpoint they call (/admin/agents, /admin/agent-payments,
+// /admin/agents/check-state, /admin/states) returns 404 — there is no agents
+// router on the backend. Re-add this entry when that API is built.
 const NAV_ITEMS = [
   { name: 'Dashboard',       href: '/admin/dashboard',                    icon: HomeIcon,                  exact: true },
   { name: 'Orders',          href: '/admin/orders',                       icon: ClipboardDocumentListIcon, exact: false },
+  { name: 'Guest Orders',    href: '/admin/guest-orders',                 icon: ClipboardDocumentListIcon, exact: false },
   { name: 'Payments',        href: '/admin/payments',                     icon: CreditCardIcon,            exact: false },
-  { name: 'Agents',          href: '/admin/agents',                       icon: UserGroupIcon,             exact: false },
   { name: 'Cars',            href: '/admin/cars',                         icon: TruckIcon,                 exact: false },
   { name: 'Users',           href: '/admin/users',                        icon: UsersIcon,                 exact: false },
   { name: 'Documents',       href: '/admin/documents',                    icon: DocumentTextIcon,          exact: false },
+  { name: 'Renewals',        href: '/admin/renewals',                     icon: BellAlertIcon,             exact: false },
   { name: 'Driver Licences', href: '/admin/driver-license-applications',  icon: IdentificationIcon,        exact: false },
   { name: 'Wallets',         href: '/admin/wallets',                      icon: WalletIcon,                exact: false },
+  { name: 'Doc Prices',      href: '/admin/vehicle-doc-prices',           icon: CurrencyDollarIcon,        exact: false },
+  { name: 'Referrals',       href: '/admin/referral',                     icon: GiftIcon,                  exact: false },
 ];
 
+// Sub-items of the Ladipo marketplace group. Doc Prices used to live here, but
+// it prices Motoka vehicle documents and has nothing to do with the marketplace
+// — it is a top-level destination above.
 const LADIPO_ITEMS = [
   { name: 'Orders', href: '/admin/ladipo?tab=orders' },
   { name: 'Products', href: '/admin/ladipo?tab=products' },
   { name: 'Collections', href: '/admin/ladipo?tab=collections' },
   { name: 'Categories', href: '/admin/ladipo?tab=categories' },
-  { name: 'Ladipo',          href: '/admin/ladipo',                       icon: ShoppingBagIcon,           exact: false },
-  { name: 'Doc Prices',      href: '/admin/vehicle-doc-prices',           icon: CurrencyDollarIcon,        exact: false },
 ];
 
 function NavItem({ item, active, onClick }) {

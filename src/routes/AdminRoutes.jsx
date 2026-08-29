@@ -16,8 +16,12 @@ import AdminUserDetails from '../pages/admin/AdminUserDetails.jsx';
 import AdminDocuments from '../pages/admin/AdminDocuments.jsx';
 import AdminDriverLicenseApplications from '../pages/admin/AdminDriverLicenseApplications.jsx';
 import AdminWallets from '../pages/admin/AdminWallets.jsx';
+import AdminRenewals from '../pages/admin/AdminRenewals.jsx';
 import AdminLadipo from '../pages/admin/AdminLadipo.jsx';
 import AdminVehicleDocs from '../pages/admin/AdminVehicleDocs.jsx';
+import AdminGuestOrders from '../pages/admin/AdminGuestOrders.jsx';
+import AdminGuestOrderDetails from '../pages/admin/AdminGuestOrderDetails.jsx';
+import AdminReferral from '../pages/admin/AdminReferral.jsx';
 
 const AdminRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -83,6 +87,8 @@ const AdminRoutes = () => {
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="orders/:slug" element={<AdminOrderDetails />} />
+                <Route path="guest-orders" element={<AdminGuestOrders />} />
+                <Route path="guest-orders/:orderId" element={<AdminGuestOrderDetails />} />
                 <Route path="agents" element={<AdminAgents />} />
                 <Route path="agents/create" element={<CreateAgent />} />
                 <Route path="agents/:uuid" element={<AgentView />} />
@@ -94,9 +100,11 @@ const AdminRoutes = () => {
                 <Route path="users/:userId" element={<AdminUserDetails />} />
                 <Route path="documents" element={<AdminDocuments />} />
                 <Route path="driver-license-applications" element={<AdminDriverLicenseApplications />} />
+                <Route path="renewals" element={<AdminRenewals />} />
                 <Route path="wallets" element={<AdminWallets />} />
                 <Route path="ladipo" element={<AdminLadipo />} />
                 <Route path="vehicle-doc-prices" element={<AdminVehicleDocs />} />
+                <Route path="referral" element={<AdminReferral />} />
       </Route>
     </Routes>
   );

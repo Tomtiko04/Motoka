@@ -1,260 +1,183 @@
-import React, { useState } from 'react';
-import { FiX, FiUpload, FiCheck, FiAlertCircle } from 'react-icons/fi';
-import FileUpload from './FileUpload';
-import ocrService from '../services/ocrService';
-import textParserService from '../services/textParserService';
+import React, { useState, useRef } from 'react';
+import { BsStars } from 'react-icons/bs';
+import { FiX, FiUpload, FiCheck, FiAlertCircle, FiImage } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import PropTypes from 'prop-types';
+import { supabase } from '../config/supabaseClient';
+import config from '../config/config';
+
+const FIELD_LABELS = {
+  ownerName: 'Owner Name',
+  address: 'Address',
+  vehicleMake: 'Vehicle Make',
+  vehicleModel: 'Vehicle Model',
+  vehicleYear: 'Vehicle Year',
+  vehicleColor: 'Vehicle Color',
+  registrationNo: 'Plate Number',
+  chassisNo: 'Chassis Number',
+  engineNo: 'Engine Number',
+  expiryDate: 'Expiry Date',
+  dateIssued: 'Date Issued',
+  carType: 'Car Type',
+};
+
+const ALL_FIELDS = Object.keys(FIELD_LABELS);
 
 const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [extractedData, setExtractedData] = useState(null);
-  const [extractedText, setExtractedText] = useState('');
+  const [result, setResult] = useState(null); // { data, fieldsFound }
   const [error, setError] = useState(null);
-  const [processingStep, setProcessingStep] = useState('');
-  const [showRawText, setShowRawText] = useState(false);
-  const [hasAutoApplied, setHasAutoApplied] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleFileSelect = (file, error) => {
-    setSelectedFile(file);
-    setError(error);
-    setExtractedData(null);
-  };
-
-  const handleFileRemove = () => {
+  const reset = () => {
     setSelectedFile(null);
-    setExtractedData(null);
-    setExtractedText('');
+    // Revoke the blob URL to free memory
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setResult(null);
     setError(null);
-    setShowRawText(false);
-  };
-
-  const processDocument = async () => {
-    if (!selectedFile) {
-      setError('Please select a document to process');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-    setProcessingStep('Checking Document AI configuration...');
-
-    try {
-      const projectId = import.meta.env.VITE_DOC_AI_PROJECT_ID;
-      const location = import.meta.env.VITE_DOC_AI_LOCATION;
-      const processorId = import.meta.env.VITE_DOC_AI_FORM_PROCESSOR_ID;
-
-      let parsedData = null;
-
-      if (projectId && location && processorId) {
-        // Try Google Document AI via backend
-        setProcessingStep('Sending to Google Document AI...');
-        try {
-          const cleaned = await ocrService.extractWithDocumentAI(selectedFile);
-          // Map cleaned keys to form keys
-          const toIso = (v) => {
-            if (!v) return '';
-            if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-            try {
-              const parsed = textParserService.parseDate(v);
-              if (/^\d{4}-\d{2}-\d{2}$/.test(parsed)) return parsed;
-              const d = new Date(parsed);
-              if (!isNaN(d)) return d.toISOString().split('T')[0];
-            } catch {
-              // ignore parse error
-            }
-            // Fallback for common dd/mm/yyyy and dd-mm-yyyy
-            const m1 = v.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
-            if (m1) {
-              let [ , dd, mm, yy ] = m1;
-              if (yy.length === 2) yy = parseInt(yy) > 50 ? `19${yy}` : `20${yy}`;
-              dd = dd.padStart(2, '0');
-              mm = mm.padStart(2, '0');
-              return `${yy}-${mm}-${dd}`;
-            }
-            return '';
-          };
-          parsedData = {
-            ownerName: cleaned.ownerName || '',
-            address: cleaned.address || '',
-            vehicleMake: cleaned.vehicleMake || '',
-            vehicleModel: cleaned.vehicleModel || '',
-            registrationNo: cleaned.registrationNumber || '',
-            chassisNo: cleaned.chassisNumber || '',
-            engineNo: cleaned.engineNumber || '',
-            vehicleColor: cleaned.color || '',
-            dateIssued: toIso(cleaned.issuedDate || cleaned.issueDate || ''),
-            expiryDate: toIso(cleaned.expiryDate || ''),
-          };
-        } catch (e) {
-          // Fall back to local OCR + parser
-          console.warn('Document AI failed, falling back to OCR:', e);
-        }
-      }
-
-      if (!parsedData) {
-        // Step 1: Extract text using OCR
-        const fileType = selectedFile.type.startsWith('image/') ? 'image' : 'PDF';
-        setProcessingStep(`Extracting text from ${fileType}...`);
-        const rawText = await ocrService.extractText(selectedFile);
-        setExtractedText(rawText);
-        
-        if (!rawText || rawText.trim().length === 0) {
-          throw new Error('No text could be extracted from the document. Please ensure the document is clear and readable.');
-        }
-
-        // Step 2: Parse the extracted text
-        setProcessingStep('Parsing extracted information...');
-        parsedData = textParserService.parseText(rawText);
-        
-        // Step 3: Determine car type if not found
-        if (!parsedData.carType && parsedData.vehicleMake) {
-          parsedData.carType = textParserService.determineCarType(parsedData);
-        }
-      }
-
-      setExtractedData(parsedData);
-      setProcessingStep('Processing complete!');
-      toast.success('Document processed successfully!');
-
-      // Auto-apply to the form immediately so the user sees the fields filled
-      try {
-        const mergedData = { ...formData, ...parsedData };
-        onAutoFill(mergedData);
-        setHasAutoApplied(true);
-      } catch (err) {
-        console.warn('Auto-apply failed', err);
-      }
-    } catch (err) {
-      console.error('OCR processing error:', err);
-      setError(err.message || 'Failed to process document. Please try again.');
-      toast.error('Failed to process document');
-    } finally {
-      setIsProcessing(false);
-      setProcessingStep('');
-    }
-  };
-
-  const handleAutoFill = () => {
-    if (!extractedData) return;
-
-    // Merge extracted data with existing form data
-    const mergedData = {
-      ...formData,
-      ...extractedData,
-    };
-
-    onAutoFill(mergedData);
-    onClose();
-    toast.success('Form auto-filled successfully!');
+    setIsProcessing(false);
   };
 
   const handleClose = () => {
-    if (!isProcessing) {
-      setSelectedFile(null);
-      setExtractedData(null);
-      setExtractedText('');
-      setError(null);
-      setProcessingStep('');
-      setShowRawText(false);
-      onClose();
+    if (isProcessing) return;
+    reset();
+    onClose();
+  };
+
+  const acceptFile = (file) => {
+    if (!file) return;
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+      setError('Please upload an image file (JPG, PNG, WEBP).');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File must be under 10 MB.');
+      return;
+    }
+    setError(null);
+    setResult(null);
+    setSelectedFile(file);
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+  };
+
+  const handleFileInput = (e) => acceptFile(e.target.files[0]);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    acceptFile(e.dataTransfer.files[0]);
+  };
+
+  const processDocument = async () => {
+    if (!selectedFile) return;
+    setIsProcessing(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Session expired. Please log in again.');
+
+      const body = new FormData();
+      body.append('image', selectedFile);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 35_000);
+
+      let res;
+      try {
+        res = await fetch(`${config.getApiBaseUrl()}/cars/extract-document`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      const json = await res.json();
+
+      if (!res.ok || !json.status) {
+        throw new Error(json.message || 'Failed to analyse the document.');
+      }
+
+      setResult(json);
+
+      if (json.fieldsFound.length === 0) {
+        setError('No readable information was found. Please try a clearer photo of the document.');
+      } else {
+        toast.success(`Found ${json.fieldsFound.length} field${json.fieldsFound.length > 1 ? 's' : ''} in the document.`);
+      }
+    } catch (err) {
+      const msg = err.name === 'AbortError'
+        ? 'The request timed out. Please try again.'
+        : err.message || 'Something went wrong. Please try again.';
+      setError(msg);
+      toast.error('Could not extract document data.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const renderExtractedData = () => {
-    if (!extractedData) return null;
+  const applyToForm = () => {
+    if (!result?.data) return;
 
-    const fields = [
-      { key: 'ownerName', label: 'Owner Name' },
-      { key: 'address', label: 'Address' },
-      { key: 'vehicleMake', label: 'Vehicle Make' },
-      { key: 'vehicleModel', label: 'Vehicle Model' },
-      { key: 'carType', label: 'Car Type' },
-      { key: 'registrationNo', label: 'Registration Number' },
-      { key: 'chassisNo', label: 'Chassis Number' },
-      { key: 'engineNo', label: 'Engine Number' },
-      { key: 'vehicleYear', label: 'Vehicle Year' },
-      { key: 'vehicleColor', label: 'Vehicle Color' },
-      { key: 'phoneNo', label: 'Phone Number' },
-      { key: 'dateIssued', label: 'Date Issued' },
-      { key: 'expiryDate', label: 'Expiry Date' },
-    ];
+    // Map extracted keys → AddCar form keys
+    const mapping = {
+      ownerName: 'ownerName',
+      address: 'address',
+      vehicleMake: 'vehicleMake',
+      vehicleModel: 'vehicleModel',
+      vehicleYear: 'vehicleYear',
+      vehicleColor: 'vehicleColor',
+      registrationNo: 'registrationNo',
+      chassisNo: 'chassisNo',
+      engineNo: 'engineNo',
+      expiryDate: 'expiryDate',
+      dateIssued: 'dateIssued',
+      carType: 'carType',
+    };
 
-    return (
-      <div className="mt-6">
-        <h3 className="text-lg font-medium text-[#05243F] mb-4">
-          Extracted Information
-        </h3>
-        <div className="space-y-3 max-h-60 overflow-y-auto">
-          {fields.map(({ key, label }) => {
-            const value = extractedData[key];
-            if (!value) return null;
+    const patch = {};
+    for (const [extractKey, formKey] of Object.entries(mapping)) {
+      if (result.data[extractKey] !== null && result.data[extractKey] !== undefined) {
+        patch[formKey] = result.data[extractKey];
+      }
+    }
 
-            return (
-              <div key={key} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                <div>
-                  <p className="text-sm font-medium text-[#05243F]">{label}</p>
-                  <p className="text-sm text-green-700">{value}</p>
-                </div>
-                <FiCheck className="h-5 w-5 text-green-500" />
-              </div>
-            );
-          })}
-        </div>
-        
-        {Object.keys(extractedData).length === 0 && (
-          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <div className="flex items-center gap-2">
-              <FiAlertCircle className="h-5 w-5 text-yellow-600" />
-              <p className="text-sm text-yellow-800">
-                No information could be extracted from the document. Please try with a clearer image or manually fill the form.
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {/* Raw Text Toggle */}
-        {extractedText && (
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => setShowRawText(!showRawText)}
-              className="text-sm text-[#2389E3] hover:text-[#1e7bc7] underline"
-            >
-              {showRawText ? 'Hide' : 'Show'} extracted text
-            </button>
-            
-            {showRawText && (
-              <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-600 mb-2 font-medium">Raw extracted text:</p>
-                <pre className="text-xs text-gray-800 whitespace-pre-wrap max-h-32 overflow-y-auto">
-                  {extractedText}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
+    onAutoFill({ ...formData, ...patch });
+    toast.success('Form filled with extracted data.');
+    handleClose();
   };
 
   if (!isOpen) return null;
 
+  const found = result?.fieldsFound ?? [];
+  const notFound = result ? ALL_FIELDS.filter(k => !found.includes(k)) : [];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
+
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div>
-            <h2 className="text-xl font-semibold text-[#05243F]">Auto Fill Form</h2>
-            <p className="text-sm text-[#05243F]/60 mt-1">
-              Upload a document to automatically extract and fill form information
-            </p>
-            <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-800">
-                <strong>Tip:</strong> For best results, use clear, high-quality images or PDFs with readable text. 
-                Supported formats: JPG, PNG, PDF (max 10MB)
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <BsStars className="text-[#EBB950] text-xl" />
+            <div>
+              <h2 className="text-base font-semibold text-[#05243F]">Smart Auto Fill</h2>
+              <p className="text-xs text-[#05243F]/50 mt-0.5">
+                Upload a vehicle document — AI will read only what it can clearly see.
               </p>
             </div>
           </div>
@@ -262,81 +185,180 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
             type="button"
             onClick={handleClose}
             disabled={isProcessing}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-40"
           >
-            <FiX className="h-6 w-6" />
+            <FiX className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {/* File Upload Section */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-[#05243F] mb-3">
-              Upload Document
-              <span className="ml-0.5 text-[#A73957B0]">*</span>
-            </label>
-            <FileUpload
-              onFileSelect={handleFileSelect}
-              onFileRemove={handleFileRemove}
-              acceptedTypes="image/*,.pdf"
-              maxSize={10 * 1024 * 1024} // 10MB
-              disabled={isProcessing}
-              error={error}
-            />
-          </div>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {/* Processing Status */}
+          {/* Drop zone */}
+          {!result && (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 p-6 min-h-[180px] ${
+                isDragging
+                  ? 'border-[#2389E3] bg-blue-50'
+                  : selectedFile
+                    ? 'border-green-400 bg-green-50'
+                    : 'border-gray-200 bg-gray-50 hover:border-[#2389E3] hover:bg-blue-50/30'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleFileInput}
+              />
+
+              {preview ? (
+                <div className="flex flex-col items-center gap-2 w-full">
+                  <img
+                    src={preview}
+                    alt="Document preview"
+                    className="max-h-36 max-w-full rounded-lg object-contain shadow"
+                  />
+                  <p className="text-xs text-gray-500 truncate max-w-full px-2">{selectedFile.name}</p>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); reset(); }}
+                    className="text-xs text-red-500 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-[#2389E3]/10 flex items-center justify-center">
+                    <FiImage className="text-[#2389E3] text-2xl" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-[#05243F]">
+                      Drop your document here or <span className="text-[#2389E3]">browse</span>
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP up to 10 MB</p>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+              <FiAlertCircle className="text-red-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Processing */}
           {isProcessing && (
-            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-3">
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
-                <p className="text-sm text-blue-800">{processingStep}</p>
+            <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#2389E3] border-t-transparent flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-blue-800">Analysing your document…</p>
+                <p className="text-xs text-blue-600 mt-0.5">AI is reading the image. This takes a few seconds.</p>
               </div>
             </div>
           )}
 
-          {/* Extracted Data */}
-          {renderExtractedData()}
+          {/* Results */}
+          {result && (
+            <div className="space-y-4">
+              {/* Image thumbnail + change button */}
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                {preview && (
+                  <img src={preview} alt="doc" className="h-12 w-12 object-cover rounded-lg border border-gray-200 flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-700 truncate">{selectedFile?.name}</p>
+                  <p className="text-xs text-gray-400">{found.length} of {ALL_FIELDS.length} fields found</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setResult(null); setError(null); setSelectedFile(null); setPreview(null); }}
+                  className="text-xs text-[#2389E3] hover:underline flex-shrink-0"
+                >
+                  Change image
+                </button>
+              </div>
 
-          {hasAutoApplied && (
-            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-              <p className="text-xs text-green-800">Extracted data has been applied to the form. You can close this window or adjust any fields manually.</p>
+              {/* Found fields */}
+              {found.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-2">
+                    ✓ Extracted from document ({found.length})
+                  </p>
+                  <div className="space-y-1.5">
+                    {found.map((key) => (
+                      <div key={key} className="flex items-center justify-between px-3 py-2 bg-green-50 rounded-lg border border-green-200">
+                        <div>
+                          <p className="text-xs font-medium text-gray-600">{FIELD_LABELS[key]}</p>
+                          <p className="text-sm font-semibold text-[#05243F] mt-0.5">{result.data[key]}</p>
+                        </div>
+                        <FiCheck className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Not-found fields */}
+              {notFound.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                    Not found — fill these manually ({notFound.length})
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {notFound.map((key) => (
+                      <span key={key} className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-500 border border-gray-200">
+                        {FIELD_LABELS[key]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
           <button
             type="button"
             onClick={handleClose}
             disabled={isProcessing}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-40"
           >
             Cancel
           </button>
-          
-          {!extractedData ? (
+
+          {!result ? (
             <button
               type="button"
               onClick={processDocument}
               disabled={!selectedFile || isProcessing}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#1e7bc7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#1e7bc7] transition-colors disabled:opacity-40 flex items-center gap-2"
             >
               <FiUpload className="h-4 w-4" />
-              {isProcessing ? 'Processing...' : 'Process Document'}
+              {isProcessing ? 'Analysing…' : 'Analyse Document'}
             </button>
-          ) : (
+          ) : found.length > 0 ? (
             <button
               type="button"
-              onClick={handleAutoFill}
+              onClick={applyToForm}
               className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
             >
               <FiCheck className="h-4 w-4" />
-              Apply to Form Again
+              Apply {found.length} field{found.length > 1 ? 's' : ''} to form
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

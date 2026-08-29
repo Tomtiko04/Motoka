@@ -4,12 +4,17 @@ import { Icon } from "@iconify/react";
 import ladipoStore from "../../../store/ladipoStore";
 import { getLadipoMainCategories } from "../../../services/apiLadipoCategories";
 
-function Categories() {
+function Categories({ onBrowseAll, isBrowseAllActive = false }) {
   const {
     selectedMainCategory,
     setSelectedMainCategory,
     clearCategoryFilters,
   } = ladipoStore();
+
+  function handleBrowseAll() {
+    clearCategoryFilters();
+    onBrowseAll?.();
+  }
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,14 +69,11 @@ function Categories() {
 
   if (loading) {
     return (
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+      <div className="flex gap-5 overflow-x-auto no-scrollbar pb-3">
         {Array(6).fill(0).map((_, i) => (
-          <div
-            key={i}
-            className="flex flex-col items-center gap-2 flex-shrink-0"
-          >
-            <div className="h-16 w-16 rounded-full bg-[#F4F5FC] animate-pulse" />
-            <div className="h-3 w-12 bg-[#F4F5FC] animate-pulse rounded" />
+          <div key={i} className="flex flex-col items-center gap-2.5 flex-shrink-0">
+            <div className="h-[60px] w-[84px] rounded-[90px] bg-[#F4F5FC] animate-pulse" />
+            <div className="h-2.5 w-14 bg-[#F4F5FC] animate-pulse rounded-full" />
           </div>
         ))}
       </div>
@@ -88,23 +90,36 @@ function Categories() {
 
   return (
     <div className="w-full">
-      {/* Horizontal Scrollable Categories */}
       <div className="relative">
+
+        {/* Edge fade — left: signals more content behind, non-interactive */}
+        {canScrollLeft && (
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-r from-white to-transparent" />
+        )}
+        {/* Edge fade — right */}
+        {canScrollRight && (
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-white to-transparent" />
+        )}
+
+        {/* Scrollable row */}
         <div
           ref={scrollContainerRef}
           onScroll={checkScroll}
-          className="flex gap-8 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
+          className="flex gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-3 scroll-smooth"
         >
-          {/* All Categories Button */}
+          {/* Browse All */}
           <button
-            onClick={() => clearCategoryFilters()}
+            onClick={handleBrowseAll}
             className="flex flex-col items-center gap-2.5 transition-all duration-200 cursor-pointer flex-shrink-0 group"
           >
-            <div className={`h-[60px] w-[84px] rounded-[90px] border flex items-center justify-center text-base font-bold transition-all ${!selectedMainCategory ? "bg-[#1A7ACF] text-white border-[#2284DB]" : "bg-[#F4F5FC] text-[#05243F] border-[#D3D9DE4D] group-hover:bg-[#E8EDFA]"
-              }`}>
+            <div className={`h-[60px] w-[84px] rounded-[90px] border flex items-center justify-center text-base font-bold transition-all ${
+              isBrowseAllActive
+                ? "bg-[#1A7ACF] text-white border-[#2284DB]"
+                : "bg-[#F4F5FC] text-[#05243F] border-[#D3D9DE4D] group-hover:bg-[#E8EDFA]"
+            }`}>
               All
             </div>
-            <span className="text-[12px] font-semibold text-center text-[#05243F]">Browse All</span>
+            <span className="text-[11px] sm:text-[12px] font-semibold text-center text-[#05243F]">Browse All</span>
           </button>
 
           {/* Main Categories */}
@@ -116,10 +131,11 @@ function Categories() {
                 onClick={() => setSelectedMainCategory(category)}
                 className="flex flex-col items-center gap-2.5 transition-all duration-200 cursor-pointer flex-shrink-0 group"
               >
-                <div
-                  className={`relative h-[60px] w-[84px] rounded-[90px] overflow-hidden flex-shrink-0 bg-[#F4F5FC] transition-all border ${isActive ? "border-[#2284DB]" : "border-[#D3D9DE4D] group-hover:shadow-md"
-                    }`}
-                >
+                <div className={`relative h-[60px] w-[84px] rounded-[90px] overflow-hidden flex-shrink-0 bg-[#F4F5FC] transition-all border-2 ${
+                  isActive
+                    ? "border-[#2389E3] ring-2 ring-[#2389E3]/20"
+                    : "border-transparent group-hover:border-[#2389E3]/40 group-hover:shadow-md"
+                }`}>
                   {category.image ? (
                     <img
                       src={category.image}
@@ -133,7 +149,9 @@ function Categories() {
                   )}
                 </div>
                 <div className="flex flex-col items-center min-w-0 max-w-[80px]">
-                  <span className="text-[12px] font-semibold leading-tight text-center line-clamp-2 text-[#05243F]">
+                  <span className={`text-[11px] sm:text-[12px] font-semibold leading-tight text-center line-clamp-2 transition-colors ${
+                    isActive ? "text-[#2389E3]" : "text-[#05243F]"
+                  }`}>
                     {category.name}
                   </span>
                 </div>
@@ -142,23 +160,23 @@ function Categories() {
           })}
         </div>
 
+        {/* Scroll arrows — desktop only (mobile users swipe) */}
         {canScrollLeft && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 top-6 z-10 flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 text-[#697C8C] shadow-sm hover:text-[#2389E3] hover:bg-[#F4F5FC] transition-all"
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 h-8 w-8 items-center justify-center rounded-full bg-white text-[#697C8C] shadow-md border border-[#E1E6F4] hover:text-[#2389E3] hover:border-[#2389E3] transition-all"
             aria-label="Scroll left"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} />
           </button>
         )}
-
         {canScrollRight && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 top-6 z-10 flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 text-[#697C8C] shadow-sm hover:text-[#2389E3] hover:bg-[#F4F5FC] transition-all"
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 h-8 w-8 items-center justify-center rounded-full bg-white text-[#697C8C] shadow-md border border-[#E1E6F4] hover:text-[#2389E3] hover:border-[#2389E3] transition-all"
             aria-label="Scroll right"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} />
           </button>
         )}
       </div>

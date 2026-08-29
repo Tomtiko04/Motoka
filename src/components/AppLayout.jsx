@@ -19,6 +19,7 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
     { name: "Wallet", path: "/wallet" },
+    { name: "Referrals", path: "/referral" },
     { name: "Ladipo", path: "/ladipo" },
     // { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Settings", path: "/settings" },
@@ -54,6 +55,20 @@ export default function AppLayout() {
         0,
       )
     : 0;
+
+  // Home-screen / OS app badge (installed PWA)
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    try {
+      if (unreadCount > 0 && "setAppBadge" in navigator) {
+        navigator.setAppBadge(unreadCount);
+      } else if ("clearAppBadge" in navigator) {
+        navigator.clearAppBadge();
+      }
+    } catch {
+      /* unsupported */
+    }
+  }, [unreadCount]);
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

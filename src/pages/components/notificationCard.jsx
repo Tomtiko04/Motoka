@@ -55,21 +55,21 @@ export default function NotificationCard({ notification, onMarkRead, markReadBut
 
   return (
     <div
-      className={`flex w-full items-start gap-3 rounded-2xl border px-3 py-3 transition-colors ${
-        isRead ? "border-slate-100 bg-slate-50" : "border-slate-200 bg-white"
+      className={`flex w-full items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-colors ${
+        isRead ? "border-slate-100 bg-slate-50" : "border-slate-200/80 bg-white shadow-2xs"
       }`}
     >
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3F5F8] text-[#697C8C]">
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F3F5F8] text-[#697C8C]">
         {renderStatus()}
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-[#05243F]">{category}</p>
-            <p className="mt-1 text-[13px] leading-5 text-[#4B5D6D]">{message}</p>
+            <p className="text-xs font-semibold text-[#05243F] truncate">{category}</p>
+            <p className="mt-0.5 text-xs leading-4 text-[#4B5D6D] line-clamp-2">{message}</p>
           </div>
-          <p className="shrink-0 text-[11px] text-[#94A3B8]">{time}</p>
+          <p className="shrink-0 text-[10px] text-[#94A3B8]">{time}</p>
         </div>
       </div>
 

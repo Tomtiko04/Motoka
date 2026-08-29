@@ -1,19 +1,8 @@
 "use client"
 
-import { ChevronLeft } from "lucide-react"
-
 export default function DataPermission({ onNavigate }) {
   return (
     <div className="pb-10 mb-10">
-      <div className="flex items-center mb-6 ">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium text-sm md:text-base">Data & Permission</h2>
-      </div>
-
-
-
       <div className="space-y-10 ">
         <div className="flex justify-center items-center w-full h-full text-center ">
           <p className="text-sm text-[#05243F]/40  w-85">

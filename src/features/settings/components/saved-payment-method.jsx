@@ -1,4 +1,4 @@
-import { ChevronLeft, Plus, CreditCard } from "lucide-react";
+import { Plus, CreditCard } from "lucide-react";
 import { CardTypeBadge } from "./add-bank-card";
 import { useGetPaymentMethods } from "../usePaymentMethods";
 
@@ -54,13 +54,6 @@ export default function SavedPaymentMethod({ onNavigate }) {
 
   return (
     <div>
-      <div className="mb-6 flex items-center">
-        <button onClick={() => onNavigate("main")} className="mr-2">
-          <ChevronLeft className="h-5 w-5 text-gray-500" />
-        </button>
-        <h2 className="text-lg font-medium">Saved Payment Method</h2>
-      </div>
-
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />

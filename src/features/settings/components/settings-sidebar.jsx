@@ -1,26 +1,122 @@
-"use client"
+"use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight, LogOut } from "lucide-react"
+import { useMemo, useState } from "react";
+import { ChevronDown, ChevronRight, LogOut } from "lucide-react";
 import { logout } from "../../../services/apiAuth";
 import { toast } from "react-hot-toast";
 
-export default function SettingsSidebar({ activePage, expandedSection, onNavigate, onSectionToggle }) {
+const SETTINGS_SECTIONS = [
+  {
+    id: "account",
+    label: "Account Settings",
+    items: [
+      { page: "profile", label: "Profile Information" },
+      { page: "password", label: "Change Password" },
+      { page: "2fa", label: "2FA" },
+    ],
+  },
+  {
+    id: "payment",
+    label: "Payment & Billing",
+    items: [
+      { page: "payment", label: "Saved Payment Method" },
+      { page: "ladipo-orders", label: "My Orders" },
+      { page: "transaction", label: "Transaction History" },
+      { page: "auto-renewal", label: "Auto Renewal Settings" },
+      { page: "billing", label: "Billing Address" },
+    ],
+  },
+  {
+    id: "notifications",
+    label: "Notifications & Alerts",
+    items: [
+      { page: "push-notification", label: "Push Notification" },
+      { page: "custom-notification", label: "Customized Notification" },
+    ],
+  },
+  {
+    id: "support",
+    label: "Support & Help",
+    items: [
+      { page: "contact-support", label: "Contact Support" },
+      { page: "report-issue", label: "Report an Issue" },
+      { page: "live-chat", label: "Live Chat / Help Desk" },
+    ],
+  },
+  {
+    id: "legal-privacy",
+    label: "Legal & Privacy",
+    items: [
+      { page: "terms-condition", label: "Terms & Condition" },
+      { page: "data-permission", label: "Data & Permission" },
+      { page: "delete-account", label: "Delete Account" },
+      { page: "info-collect", label: "Information We Collect", tab: "collect" },
+      { page: "info-sharing", label: "Information Sharing", tab: "sharing" },
+      { page: "data-security", label: "Data Security", tab: "security" },
+    ],
+  },
+  {
+    id: "faqs",
+    label: "FAQs",
+    items: [
+      { page: "account-app-usage", label: "Account & App Usage" },
+      { page: "licensing-registration", label: "Licensing & Registration" },
+      { page: "autocare-maintenance", label: "Auto Care & Maintenance" },
+    ],
+  },
+];
+
+export default function SettingsSidebar({
+  activePage,
+  expandedSection,
+  onNavigate,
+  onSectionToggle,
+  searchQuery = "",
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const isActive = (page) => activePage === page
+  const query = searchQuery.trim().toLowerCase();
+  const isSearching = query.length > 0;
+
+  const filteredSections = useMemo(() => {
+    if (!isSearching) return SETTINGS_SECTIONS;
+
+    return SETTINGS_SECTIONS.map((section) => {
+      const sectionMatches = section.label.toLowerCase().includes(query);
+      const matchedItems = section.items.filter((item) =>
+        item.label.toLowerCase().includes(query),
+      );
+
+      if (sectionMatches) {
+        return { ...section, items: section.items };
+      }
+      if (matchedItems.length > 0) {
+        return { ...section, items: matchedItems };
+      }
+      return null;
+    }).filter(Boolean);
+  }, [isSearching, query]);
+
+  const isActive = (page) => {
+    if (page === "payment") {
+      return activePage === "payment" || activePage === "payment-with-cards";
+    }
+    return activePage === page;
+  };
+
+  const isSectionOpen = (sectionId) =>
+    isSearching || expandedSection === sectionId;
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      const response = await logout();
-      
+      await logout();
       onNavigate("login");
     } catch (error) {
       toast.error(error.response?.data?.message || error.message, {
         duration: 5000,
-        id: 'logout-error'
+        id: "logout-error",
       });
     } finally {
       setIsLoggingOut(false);
@@ -31,396 +127,113 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
   return (
     <div className="pb-4">
       <div className="space-y-1">
-        {/* Account Settings */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "account" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("account")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">Account Settings</span>
-          {expandedSection === "account" ? (
-            <ChevronDown className="h-5 w-5 text-gray-500" />
-          ) : (
-            <ChevronDown className="h-5 w-5 text-gray-500" />
-          )}
-        </div>
+        {filteredSections.length === 0 && (
+          <p className="px-2 py-6 text-center text-sm text-[#697C8C]">
+            No settings match “{searchQuery.trim()}”
+          </p>
+        )}
 
-        {expandedSection === "account" && (
-          <div className="bg-amber-50 pl-4">
+        {filteredSections.map((section) => (
+          <div key={section.id}>
             <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("profile") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
+              className={`my-2 flex cursor-pointer items-center justify-between rounded-[12px] bg-[#F4F5FC] px-4 py-3 shadow-xs ${
+                isSectionOpen(section.id) ? "bg-amber-50" : "hover:bg-gray-50"
               }`}
-              onClick={() => onNavigate("profile")}
+              onClick={() => {
+                if (!isSearching) onSectionToggle(section.id);
+              }}
             >
-              <span className={`text-sm font-semibold ${isActive("profile") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Profile Information</span>
-              <ChevronRight className="h-5 w-5" />
+              <span className="text-sm font-semibold text-[#05243F]/95">
+                {section.label}
+              </span>
+              <ChevronDown
+                className={`h-5 w-5 text-gray-500 transition-transform ${
+                  isSectionOpen(section.id) ? "rotate-180" : ""
+                }`}
+              />
             </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("password") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("password")}
-            >
-              <span className={`text-sm font-semibold ${isActive("password") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Change Password</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("2fa") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("2fa")}
-            >
-              <span className={`text-sm font-semibold ${isActive("2fa") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>2FA</span>
-              <ChevronRight className="h-5 w-5" />
+
+            {isSectionOpen(section.id) && (
+              <div className="bg-amber-50 pl-4">
+                {section.items.map((item) => (
+                  <div
+                    key={item.page}
+                    className={`flex cursor-pointer items-center justify-between px-4 py-2 ${
+                      isActive(item.page)
+                        ? "text-blue-600"
+                        : "text-gray-600 hover:text-sky-600"
+                    }`}
+                    onClick={() =>
+                      item.tab
+                        ? onNavigate(item.page, item.tab)
+                        : onNavigate(item.page)
+                    }
+                  >
+                    <span
+                      className={`text-sm font-semibold ${
+                        isActive(item.page)
+                          ? "text-blue-600"
+                          : "text-gray-600 hover:text-sky-600"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                    <ChevronRight className="h-5 w-5" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {!isSearching && (
+          <div
+            className="flex cursor-pointer items-center justify-between rounded-[12px] bg-[#F4F5FC] px-4 py-3 shadow-xs transition-colors duration-200 hover:bg-red-50"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <div className="flex items-center space-x-2">
+              <LogOut className="h-5 w-5 text-red-500" />
+              <span className="text-sm font-semibold text-red-500">
+                {isLoggingOut ? "Logging out..." : "Log out"}
+              </span>
             </div>
           </div>
         )}
-
-        {/* Payment & Billing */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "payment" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("payment")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">Payment & Billing</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "payment" && (
-          <div className="bg-amber-50 pl-4">
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("payment") || isActive("payment-with-cards")
-                  ? "text-blue-600"
-                  : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("payment")}
-            >
-              <span className={`text-sm font-semibold ${isActive("payment") || isActive("payment-with-cards") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Saved Payment Method</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("ladipo-orders") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("ladipo-orders")}
-            >
-              <span className={`text-sm font-semibold ${isActive("ladipo-orders") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>My Orders</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("transaction") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("transaction")}
-            >
-              <span className={`text-sm font-semibold ${isActive("transaction") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Transaction History</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("auto-renewal") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("auto-renewal")}
-            >
-              <span className={`text-sm font-semibold ${isActive("auto-renewal") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Auto Renewal Settings</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("billing") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("billing")}
-            >
-              <span className={`text-sm font-semibold ${isActive("billing") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Billing Address</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-          </div>
-        )}
-
-        {/* Notifications & Alerts */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "notifications" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("notifications")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">Notifications & Alerts</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "notifications" && (
-          <div className="bg-amber-50 pl-4">
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("push-notification") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("push-notification")}
-            >
-              <span className={`text-sm font-semibold ${isActive("push-notification") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Push Notification</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("custom-notification") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("custom-notification")}
-            >
-              <span className={`text-sm font-semibold ${isActive("custom-notification") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Customized Notification</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-          </div>
-        )}
-
-        {/* App Preference */}
-        {/* <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "preference" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("preference")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">App Preference</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "preference" && (
-          <div className="bg-amber-50 pl-4">
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("language-region") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("language-region")}
-            >
-              <span className={`text-sm font-semibold ${isActive("language-region") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Language & Region</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("dark-mode") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("dark-mode")}
-            >
-              <span className={`text-sm font-semibold ${isActive("dark-mode") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Dark Mode/ Light Mode</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("location-service") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("location-service")}
-            >
-              <span className={`text-sm font-semibold ${isActive("location-service") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Location Services</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-          </div>
-        )} */}
-
-        {/* Support & Help */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "support" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("support")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">Support & Help</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "support" && (
-          <div className="bg-amber-50 pl-4">
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("contact-support") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("contact-support")}
-            >
-              <span className={`text-sm font-semibold ${isActive("contact-support") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Contact Support</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("report-issue") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("report-issue")}
-            >
-              <span className={`text-sm font-semibold ${isActive("report-issue") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Report an Issue</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("live-chat") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("live-chat")}
-            >
-              <span className={`text-sm font-semibold ${isActive("live-chat") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Live Chat / Help Desk</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-          </div>
-        )}
-
-        {/* Legal & Privacy */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "legal-privacy" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("legal-privacy")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">Legal & Privacy</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "legal-privacy" && (
-          <div className="bg-amber-50 pl-4">
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("terms-condition") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("terms-condition")}
-            >
-              <span className={`text-sm font-semibold ${isActive("terms-condition") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Terms & Condition</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("data-permission") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("data-permission")}
-            >
-              <span className={`text-sm font-semibold ${isActive("data-permission") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Data & Permission</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("delete-account") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("delete-account")}
-            >
-              <span className={`text-sm font-semibold ${isActive("delete-account") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Delete Account</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("info-collect") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("info-collect", "collect")}
-            >
-              <span className={`text-sm font-semibold ${isActive("info-collect") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Information We Collect</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("info-sharing") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("info-sharing", "sharing")}
-            >
-              <span className={`text-sm font-semibold ${isActive("info-sharing") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Information Sharing</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("data-security") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("data-security", "security")}
-            >
-              <span className={`text-sm font-semibold ${isActive("data-security") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Data Security</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-          </div>
-        )}
-
-        {/* FAQs */}
-        <div
-          className={`flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer my-2 ${
-            expandedSection === "faqs" ? "bg-amber-50" : "hover:bg-gray-50"
-          }`}
-          onClick={() => onSectionToggle("faqs")}
-        >
-          <span className="text-sm font-semibold text-[#05243F]/95">FAQs</span>
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        </div>
-
-        {expandedSection === "faqs" && (
-          <div className="bg-amber-50 pl-4">
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("account-app-usage") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("account-app-usage")}
-            >
-              <span className={`text-sm font-semibold ${isActive("account-app-usage") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Account & App Usage</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("licensing-registration") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("licensing-registration")}
-            >
-              <span className={`text-sm font-semibold ${isActive("licensing-registration") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Licensing & Registration</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-            <div
-              className={`flex justify-between items-center px-4 py-2 cursor-pointer ${
-                isActive("autocare-maintenance") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"
-              }`}
-              onClick={() => onNavigate("autocare-maintenance")}
-            >
-              <span className={`text-sm font-semibold ${isActive("autocare-maintenance") ? "text-blue-600" : "text-gray-600 hover:text-sky-600"}`}>Auto Care & Maintenance</span>
-              <ChevronRight className="h-5 w-5" />
-            </div>
-          </div>
-        )}
-
-        {/* Logout Button */}
-        <div
-          className="flex justify-between items-center rounded-[12px] bg-[#F4F5FC] shadow-xs px-4 py-3 cursor-pointer hover:bg-red-50 transition-colors duration-200"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <div className="flex items-center space-x-2">
-            <LogOut className="h-5 w-5 text-red-500" />
-            <span className="text-sm font-semibold text-red-500">
-              {isLoggingOut ? "Logging out..." : "Log out"}
-            </span>
-          </div>
-        </div>
       </div>
 
-      {/* Logout Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50">
-          <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg transform transition-all">
-            <div className="flex items-center justify-center mb-4">
-              <div className="bg-red-100 p-3 rounded-full">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-[90%] max-w-md transform rounded-xl bg-white p-6 shadow-lg transition-all">
+            <div className="mb-4 flex items-center justify-center">
+              <div className="rounded-full bg-red-100 p-3">
                 <LogOut className="h-6 w-6 text-red-500" />
               </div>
             </div>
-            
-            <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">
+
+            <h2 className="mb-2 text-center text-xl font-semibold text-gray-800">
               Confirm Logout
             </h2>
-            
-            <p className="text-gray-600 text-center mb-6 text-sm">
-              Are you sure you want to log out? You will need to log in again to access your account.
+
+            <p className="mb-6 text-center text-sm text-gray-600">
+              Are you sure you want to log out? You will need to log in again to
+              access your account.
             </p>
 
             <div className="flex flex-col space-y-3">
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2"
+                className="flex w-full items-center justify-center space-x-2 rounded-lg bg-red-500 px-4 py-2.5 text-white transition-colors duration-200 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoggingOut ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span role="button" className="text-sm font-semibold">Logging out...</span>
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="text-sm font-semibold">Logging out...</span>
                   </>
                 ) : (
                   <>
                     <LogOut className="h-5 w-5" />
-                    <span role="button" className="text-sm font-semibold">Yes, Logout</span>
+                    <span className="text-sm font-semibold">Yes, Logout</span>
                   </>
                 )}
               </button>
@@ -428,7 +241,7 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
               <button
                 onClick={() => setIsModalOpen(false)}
                 disabled={isLoggingOut}
-                className="text-sm w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                className="w-full rounded-lg bg-gray-100 px-4 py-2.5 text-sm text-gray-700 transition-colors duration-200 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -437,5 +250,5 @@ export default function SettingsSidebar({ activePage, expandedSection, onNavigat
         </div>
       )}
     </div>
-  )
+  );
 }
