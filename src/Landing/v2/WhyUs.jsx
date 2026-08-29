@@ -1,6 +1,6 @@
-import secureIcon from '../../assets/v2/Secure.png'
-import timeIcon from '../../assets/v2/Time.png'
-import trustIcon from '../../assets/v2/Trust.png'
+import secureIcon from '../../assets/v2/Secure.webp'
+import timeIcon from '../../assets/v2/Time.webp'
+import trustIcon from '../../assets/v2/Trust.webp'
 import Reveal from './Reveal'
 import TiltCard from './TiltCard'
 
