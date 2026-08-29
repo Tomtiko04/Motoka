@@ -7,13 +7,14 @@
     "dev": "vite",
     "dev:development": "vite --mode development",
     "dev:production": "vite --mode production",
-    "build": "vite build",
+    "build": "vite build && npm run prerender",
     "build:development": "vite build --mode development",
-    "build:production": "vite build --mode production",
+    "build:production": "vite build --mode production && npm run prerender",
     "lint": "eslint .",
     "preview": "vite preview",
     "env:development": "node scripts/switch-env.js development",
-    "env:production": "node scripts/switch-env.js production"
+    "env:production": "node scripts/switch-env.js production",
+    "prerender": "node scripts/prerender.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -60,6 +61,7 @@
     "globals": "^15.15.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "puppeteer": "^24.43.1",
     "tailwind-scrollbar": "^4.0.2",
     "vite": "^6.2.0",
     "vite-plugin-pwa": "^1.3.0",
