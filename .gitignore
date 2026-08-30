@@ -12,9 +12,6 @@ dist
 dist-ssr
 *.local
 .env
-.env.development
-.env.production
-.env.example
 
 # Editor directories and files
 .vscode/*
@@ -26,9 +23,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Documentation Files (exclude from repository)
-README.md
-ENVIRONMENT_SETUP.md
-src/components/README_AutoFill.md
-src/docs/AutoFillFlow.md
+.vercel

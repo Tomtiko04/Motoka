@@ -1,171 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
 @import "tailwindcss";
-@utility no-scrollbar {
-  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+
+@theme {
+  --color-brand-blue: #2389e3;
+  --color-brand-blue-dark: #0e6fc6;
+  --color-brand-navy: #05243f;
+  --color-brand-gold: #ebb850;
+  --color-brand-green: #21b993;
+  --color-brand-mint: #5df8d0;
+  --color-brand-bg: #daebfa;
 }
-*,
-*::before,
-*::after {
-  box-sizing: border-box !important;
-  /* padding: 0;
-  margin: 0; */
-}
-html,
-body {
-  overflow-x: hidden;
-}
+
 html {
-  /* font-size: 62.5%; */
-  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  zoom: 1.1;
 }
 
 body {
-  font-family: "Lexend", sans-serif;
-  /* min-height: 100vh; */
-  line-height: 1.5;
-  font-size: 1.6rem;
-  background-color: #f4f5fc;
-  /* background-image: url("./assets/images/Subtract.png"); */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  font-family: 'Lexend', system-ui, -apple-system, Roboto, sans-serif;
+  background: #fff;
+  color: #0f172a;
 }
 
-
-.customscroll::-webkit-scrollbar{
-    height: 8px;
-}
-
-
-.customscroll::-webkit-scrollbar-track {
-  /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.824); */
-  background-color: #F4F5FC;
-}
- 
-.customscroll::-webkit-scrollbar-thumb {
-  background-color: #EAB750;
-  /* outline: 1px solid rgb(6, 60, 114); */
-  border-radius: 10px;
-}
-
-
-.customscroll::-webkit-scrollbar {
-  width: 6px;
-
-}
- 
-.customScroll::-webkit-scrollbar-track {
-  /* box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.824); */
-  background-color: #F4F5FC;
-}
- 
-.customScroll::-webkit-scrollbar-thumb {
-  background-color: #EAB750;
-  /* outline: 1px solid rgb(6, 60, 114); */
-  border-radius: 10px;
-}
-
-img {
-  display: block;
-  width: 100%;
-}
-
-a {
-  text-decoration: none;
-}
-
-ul {
-  list-style: none;
-}
-
-button {
-  cursor: pointer;
-}
-
-*:disabled {
-  cursor: not-allowed;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* padding: 10px; */
-}
-
-.spinner-image {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-/* select:disabled,
-input:disabled {
-  background-color: var(--color-grey-200);
-  color: var(--color-grey-500);
-} */
-
-/* input:focus,
-button:focus,
-textarea:focus,
-select:focus {
-  outline: 2px solid var(--color-brand-600);
-  outline-offset: -1px;
-} */
-
-/* Parent selector, finally 😃 */
-/* button:has(svg) {
-  line-height: 0;
-} */
-
-/* p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  overflow-wrap: break-word;
-  hyphens: auto;
-} */
-
-img {
-  max-width: 100%;
-}
-
-.ai-button {
-  background-image: linear-gradient(#ebb850, #ba8823);
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Hide number input spinners for Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Don't REMOVE BY OYINKANSOLA: The bullet dot on the slider*/
-.custom-pagination {
-  position: relative;
-}
-
-.custom-pagination .swiper-pagination-bullet {
-  background: #ccc;
-  opacity: 1;
-  transition: background 0.3s;
-}
-
-.custom-pagination .swiper-pagination-bullet-active {
-  background: #2389E3;
-}
-
-
-@media (max-width: 640px) {
-  input, select, textarea, button {
-    font-size: 16px;
-  }
+.services-scroll::-webkit-scrollbar {
+  display: none;
 }
