@@ -243,9 +243,19 @@ body.motoka-v2-chrome {
 }
 
 /* Landing only — the prototype's own canvas. Kept separate from the chrome
-   rules above so /about and /blogs don't inherit the 1.1 zoom. */
+   rules above so /about and /blogs don't inherit the 1.1 zoom.
+
+   The 1.1 zoom was designed for 15" and up. On 13" laptops (~1280–1440px)
+   it eats the side gutters and jams the hero copy against the collage —
+   which is why Cmd+- to 90% looked right (1.1 × 0.9 ≈ native size). */
 body.landing-v2-active {
   background-color: #fff;
   background-image: none;
-  zoom: 1.1;
+  --landing-gutter: clamp(40px, 6.5vw, 114px);
+}
+
+@media (min-width: 1600px) {
+  body.landing-v2-active {
+    zoom: 1.1;
+  }
 }

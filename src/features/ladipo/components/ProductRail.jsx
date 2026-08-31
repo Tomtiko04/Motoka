@@ -20,7 +20,7 @@ function ProductRail({ title, parts = [], loading = false, onSeeAll, seeAllLabel
       </div>
 
       {loading ? (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 sm:-mx-6 sm:px-6 pb-1">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="w-[160px] sm:w-[200px] flex-shrink-0">
               <ProductSkeleton />
@@ -28,7 +28,7 @@ function ProductRail({ title, parts = [], loading = false, onSeeAll, seeAllLabel
           ))}
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-5 px-5 sm:-mx-6 sm:px-6 pb-1 scroll-smooth">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1 scroll-smooth">
           {parts.map((part) => (
             <div
               key={part.id}
