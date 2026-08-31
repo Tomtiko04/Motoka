@@ -12,6 +12,11 @@ import FAQ from "./v2/FAQ";
 import Waitlist from "./v2/Waitlist";
 import Footer from "./v2/Footer";
 import ChatWidget from "./v2/ChatWidget";
+import { ORGANIZATION, WEBSITE } from "../utils/schema";
+
+// Module scope so the identity is stable — Seo re-appends the script whenever
+// this changes.
+const JSON_LD = [ORGANIZATION, WEBSITE];
 
 function LandingV2() {
   const location = useLocation();
@@ -37,6 +42,7 @@ function LandingV2() {
         title="Motoka — Renew Your Vehicle Licence & Documents Online in Nigeria"
         description="Renew your vehicle licence, insurance, roadworthiness and driver's licence online in Nigeria. Track expiry dates, get reminders before you're fined, and buy car parts at Ladipo — all from one app."
         path="/"
+        jsonLd={JSON_LD}
       />
       <Header />
       <main className="flex-1">
