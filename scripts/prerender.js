@@ -20,9 +20,9 @@ import { createServer } from 'node:http'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import puppeteer from 'puppeteer'
 import serveHandler from './serve-static.js'
 import { STATES } from '../src/Data/states.js'
+import { SITE_ORIGIN } from '../src/utils/site.js'
 
 const DIST = path.resolve(import.meta.dirname, '..', 'dist')
 const PORT = 4173
@@ -49,6 +49,32 @@ const STATIC_ROUTES = [
   '/blogs',
 ]
 
+// Vercel's build image ships no Chrome shared libraries, so the browser
+// puppeteer downloads for itself dies on launch with
+// `libnspr4.so: cannot open shared object file`. That took down every deploy
+// after this script landed, Ask Mo included. @sparticuz/chromium is a Chromium
+// build with those libraries packed in; use it on Vercel and keep puppeteer's
+// own browser locally, where it works and manages its own download.
+async function launchBrowser() {
+  if (process.env.VERCEL) {
+    const [{ default: chromium }, { default: puppeteerCore }] = await Promise.all([
+      import('@sparticuz/chromium'),
+      import('puppeteer-core'),
+    ])
+    return puppeteerCore.launch({
+      headless: true,
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+    })
+  }
+
+  const { default: puppeteer } = await import('puppeteer')
+  return puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  })
+}
+
 async function main() {
   if (!existsSync(DIST)) {
     console.error('[prerender] dist/ not found — run `vite build` first.')
@@ -65,10 +91,7 @@ async function main() {
   await new Promise((resolve) => server.listen(PORT, resolve))
   console.log(`[prerender] serving dist/ on http://localhost:${PORT}`)
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-dev-shm-usage'],
-  })
+  const browser = await launchBrowser()
 
   try {
     // Blog slugs are derived from post titles at runtime by computeSlug, and
@@ -100,6 +123,20 @@ async function main() {
       await writeFile(path.join(outDir, 'index.html'), html)
       console.log(`[prerender] wrote ${route === '/' ? '/' : route + '/'}index.html`)
     }
+
+    // The sitemap used to be a hand-written file in public/ and had drifted to
+    // 12 of these 26 URLs — every state page, every /renew/* page and /faq
+    // among the missing. Generating it from the same list that was just
+    // rendered is the only way it stays true.
+    const lastmod = new Date().toISOString().slice(0, 10)
+    const urls = routes
+      .map((route) => `  <url>\n    <loc>${SITE_ORIGIN}${route}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`)
+      .join('\n')
+    await writeFile(
+      path.join(DIST, 'sitemap.xml'),
+      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+    )
+    console.log(`[prerender] wrote sitemap.xml — ${routes.length} urls`)
 
     console.log(`[prerender] done — ${routes.length} routes`)
   } finally {
