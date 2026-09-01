@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import blogData from "../Data/blogs";
 import { computeSlug } from "../utils/computeSlug";
 import Seo from "../components/Seo";
+import { blogPostingSchema } from "../utils/schema";
 
 
 export default function BlogPage() {
@@ -10,6 +12,22 @@ export default function BlogPage() {
   const blog = blogData.find((b) => computeSlug(b.title) === slug);
   const prevBlog = blogData[blogData.indexOf(blog) - 1];
   const nextBlog = blogData[blogData.indexOf(blog) + 1];
+
+  const jsonLd = useMemo(
+    () =>
+      blog
+        ? [
+            blogPostingSchema({
+              title: blog.title,
+              description: blog.content.slice(0, 160),
+              path: `/blog/${slug}`,
+              date: blog.date,
+              image: blog.image,
+            }),
+          ]
+        : undefined,
+    [blog, slug],
+  );
 
   if (!blog) {
     return <div className="p-10">Blog not found</div>;
@@ -22,6 +40,7 @@ export default function BlogPage() {
           title={blog.title}
           description={blog.content.slice(0, 160)}
           path={`/blog/${slug}`}
+          jsonLd={jsonLd}
         />
         {/* Image */}
         <img
