@@ -33,11 +33,11 @@ const markdownComponents = {
   ),
 }
 
-const INTRO =
-  "Hi, I'm Mo 👋 I can answer a few common questions while the full assistant is being built. Try asking about renewals, documents, cost, or expired papers."
+const introFor = (name) =>
+  `Hi${name ? ` ${name}` : ''} 👋 I'm Mo. Ask me anything about renewing your vehicle papers — what it costs, what you need, or what to do when something has already expired.`
 
 const FALLBACK =
-  "I don't have a canned answer for that yet — check the FAQ section below, or join the waitlist and we'll notify you when the full Mo goes live."
+  "I can't reach the assistant right now — check the FAQ section below, or enter your plate number on the home page to start a renewal."
 
 const RULES = [
   {
@@ -101,7 +101,7 @@ const MAX_TURNS = 12
 async function getAnswer(message, history) {
   try {
     const turns = history
-      .filter((m) => m.text && m.text !== INTRO && !m.text.startsWith('Hi '))
+      .filter((m) => m.text && !m.intro)
       .map((m) => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.text }))
 
     const messages = [...turns, { role: 'user', content: message }].slice(-MAX_TURNS)
@@ -125,7 +125,11 @@ export default function ChatWidget() {
   const [contact, setContact] = useState(() => loadContact())
   const [nameInput, setNameInput] = useState('')
   const [phoneInput, setPhoneInput] = useState('')
-  const [messages, setMessages] = useState([{ from: 'mo', text: INTRO }])
+  // Flagged rather than matched on its text — the greeting is not conversation
+  // history and must not be replayed to the endpoint as an assistant turn.
+  const [messages, setMessages] = useState(() => [
+    { from: 'mo', text: introFor(contact?.name), intro: true },
+  ])
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const threadRef = useRef(null)
@@ -143,7 +147,7 @@ export default function ChatWidget() {
     const newContact = { name, phone }
     saveContact(newContact)
     setContact(newContact)
-    setMessages([{ from: 'mo', text: `Hi ${name} 👋 I can answer a few common questions while the full assistant is being built. Try asking about renewals, documents, cost, or expired papers.` }])
+    setMessages([{ from: 'mo', text: introFor(name), intro: true }])
   }
 
   async function handleSubmit(e) {
@@ -185,7 +189,7 @@ export default function ChatWidget() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-white leading-none">Ask Mo</p>
-                <p className="text-xs text-slate-400 mt-1">Preview assistant</p>
+                <p className="text-xs text-slate-400 mt-1">Renewals assistant</p>
               </div>
             </div>
             <button

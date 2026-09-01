@@ -70,7 +70,16 @@ export default function Seo({ title, description, path = "/", jsonLd }) {
   // Structured data is removed on unmount — unlike the tags above it is not
   // overwritten by the next route, so leaving it would attach one page's
   // schema to another.
+  //
+  // The sweep is for prerendering: a snapshot ships with its own block baked
+  // in, and every route that is not prerendered boots from the homepage
+  // snapshot, so without this the page ends up carrying two — the file's and
+  // this route's.
   useEffect(() => {
+    document.head
+      .querySelectorAll('script[type="application/ld+json"][data-seo]')
+      .forEach((el) => el.remove());
+
     if (!jsonLd) return undefined;
 
     const script = document.createElement("script");
