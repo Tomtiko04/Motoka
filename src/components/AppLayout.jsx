@@ -18,11 +18,17 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Dashboard", path: "/dashboard" },
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
-    { name: "Wallet", path: "/wallet" },
-    { name: "Referrals", path: "/referral" },
     { name: "Ladipo", path: "/ladipo" },
     // { name: "Traffic Rules", path: "/traffic-rules" },
     { name: "Settings", path: "/settings" },
+  ];
+
+  // Account-level, not day-to-day: these live in the profile dropdown on
+  // desktop, where the bar had run out of room. The mobile drawer is vertical
+  // and still lists them alongside the rest.
+  const accountLinks = [
+    { name: "Wallet", path: "/wallet", icon: "solar:wallet-money-bold" },
+    { name: "Referrals", path: "/referral", icon: "solar:users-group-rounded-bold" },
   ];
 
 
@@ -134,7 +140,7 @@ export default function AppLayout() {
   }, [isDropDownMenuOpen]);
 
   return (
-    <div className="flex items-center justify-center  flex-col min-h-screen" >{/* removed the background to allow the gradient to show  bg-[#F4F5FC]*/}
+    <div className="flex items-center justify-center  flex-col min-h-screen bg-[#F4F5FC]" >
       <div className="w-full max-w-4xl sm:mt-4 flex flex-col flex-1">
         {/* Header Navigation */}
         <header className="sticky top-0 z-10 h-16 bg-white shadow-sm sm:rounded-full">
@@ -299,10 +305,24 @@ export default function AppLayout() {
                         </div>
 
                         <div className="p-1.5">
+                          {accountLinks.map((link) => (
+                            <Link
+                              key={link.path}
+                              to={link.path}
+                              onClick={() => setIsDropDownMenuOpen(false)}
+                              className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
+                                <Icon icon={link.icon} width="20" />
+                              </div>
+                              <span className="font-medium">{link.name}</span>
+                            </Link>
+                          ))}
+
                           <Link
                             to="/settings"
                             onClick={() => setIsDropDownMenuOpen(false)}
-                            className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                            className="group mt-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
                           >
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
                               <Icon icon="proicons:settings" width="20" />
@@ -371,7 +391,7 @@ export default function AppLayout() {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-6">
               <nav className="flex flex-col space-y-2">
-                {navLinks.map((link) => {
+                {[...navLinks, ...accountLinks].map((link) => {
                   const isActive = location.pathname.startsWith(link.path);
                   return (
                     <Link

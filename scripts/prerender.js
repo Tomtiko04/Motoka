@@ -115,6 +115,18 @@ async function main() {
       // Seo sets title/description/canonical in a useEffect. networkidle0 is
       // already past that; this gives layout one more tick to settle.
       await new Promise((r) => setTimeout(r, 150))
+
+      // useV2Chrome puts motoka-v2-chrome / landing-v2-active on html and body
+      // at runtime. That is page state, not content, and dist/index.html is
+      // also the SPA fallback for every route that is not prerendered — so
+      // baking the landing's classes in put the landing canvas, white
+      // background and 1.1 zoom, on the whole signed-in app. Source index.html
+      // carries no classes on either element; this restores that.
+      await page.evaluate(() => {
+        document.documentElement.className = ''
+        document.body.className = ''
+      })
+
       const html = await page.content()
       await page.close()
 
