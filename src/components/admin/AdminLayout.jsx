@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../config/supabaseClient';
 import { toast } from 'react-hot-toast';
 import Logo from "../../assets/images/motoka logo.svg";
+import useAdminActivityPing from "../../hooks/useAdminActivityPing";
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -124,6 +125,12 @@ const AdminLayout = () => {
   const [adminUser, setAdminUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ladipoOpen, setLadipoOpen] = useState(() => location.pathname.startsWith('/admin/ladipo'));
+
+  // Only poll once the admin session is resolved — before that there is no
+  // token to send and every tick would 401.
+  const { soundOn, toggleSound, total: alertTotal } = useAdminActivityPing({
+    enabled: !!adminUser,
+  });
 
   useEffect(() => {
     const applySession = async (session) => {
@@ -262,6 +269,28 @@ const AdminLayout = () => {
           onNavigate={handleNav}
         />
       </nav>
+
+      {/* New-activity alerts. The toggle is also the gesture that unlocks
+          audio, so sound cannot be turned on from anywhere else. */}
+      <div className="border-t border-white/8 px-3 py-2">
+        <button
+          onClick={toggleSound}
+          title={soundOn ? 'Mute new-activity alerts' : 'Play a sound on new signups and payments'}
+          className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-white/40 transition-colors hover:bg-white/8 hover:text-white"
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/5">
+            <BellAlertIcon style={{ width: 16, height: 16 }} className={soundOn ? 'text-[#EBB950]' : undefined} />
+          </div>
+          <span className="flex-1 text-xs font-semibold">
+            {soundOn ? 'Alerts on' : 'Alerts muted'}
+          </span>
+          {alertTotal > 0 && (
+            <span className="shrink-0 rounded-full bg-[#EBB950] px-1.5 py-0.5 text-[10px] font-bold text-[#05243F]">
+              {alertTotal > 99 ? '99+' : alertTotal}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* User + Logout */}
       <div className="border-t border-white/8 px-3 py-3">
