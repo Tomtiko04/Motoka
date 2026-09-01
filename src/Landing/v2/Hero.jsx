@@ -252,23 +252,23 @@ export default function Hero() {
       <div className="relative mx-auto w-full max-w-[1920px] flex flex-col lg:flex-row lg:items-stretch">
         {/* Left: text + form */}
         <div
-          className="relative z-20 flex flex-col gap-[48px] w-full lg:max-w-[clamp(680px,52vw,920px)] shrink-0"
+          className="relative z-20 flex flex-col gap-[clamp(28px,4vw,48px)] w-full lg:max-w-[min(46vw,920px)] xl:max-w-[clamp(560px,48vw,920px)] shrink-0"
           style={{
-            paddingLeft: 'clamp(24px, 7.9vw, 114px)',
+            paddingLeft: 'var(--landing-gutter, 40px)',
             paddingRight: 'clamp(24px, 2vw, 24px)',
-            paddingTop: 'clamp(72px, 7.7vw, 112px)',
+            paddingTop: 'clamp(48px, 6vw, 112px)',
             paddingBottom: '80px',
           }}
         >
           <div className="flex flex-col gap-[19px] items-start w-full" style={{ marginTop: '-16px' }}>
             <h1
-              className="w-full whitespace-normal lg:whitespace-nowrap"
+              className="w-full whitespace-normal 2xl:whitespace-nowrap"
               style={{
                 fontWeight: 500,
-                fontSize: 'clamp(52px, 5.46vw, 83.2px)',
+                fontSize: 'clamp(40px, 4.4vw, 83.2px)',
                 lineHeight: 1.2,
                 color: '#0e6fc6',
-                maxWidth: 'clamp(680px, 52vw, 920px)',
+                maxWidth: 'min(100%, 920px)',
               }}
             >
               Your car&apos;s paperwork,
@@ -350,7 +350,7 @@ export default function Hero() {
           bottom: 0,
           width: 830,
           height: 640,
-          '--collage-scale': 'clamp(0.72, calc(100vw / 1920 * 0.98), 1)',
+          '--collage-scale': 'clamp(0.52, calc((100vw - 720px) / 1000), 1)',
           transform: 'scale(var(--collage-scale))',
         }}
       >
@@ -364,7 +364,7 @@ export default function Hero() {
         className="hidden lg:flex absolute z-20 bg-[rgba(255,255,255,0.59)] flex-col items-start p-[10px] rounded-[8px]"
         style={{
           width: 177.03,
-          left: 'clamp(24px, 7.9vw, 114px)',
+          left: 'var(--landing-gutter, 40px)',
           bottom: 'clamp(24px, 4vh, 48px)',
         }}
       >

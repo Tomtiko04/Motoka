@@ -20,15 +20,12 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Garage", path: "/garage" },
     { name: "Ladipo", path: "/ladipo" },
     // { name: "Traffic Rules", path: "/traffic-rules" },
-    { name: "Settings", path: "/settings" },
   ];
 
-  // Account-level, not day-to-day: these live in the profile dropdown on
-  // desktop, where the bar had run out of room. The mobile drawer is vertical
-  // and still lists them alongside the rest.
   const accountLinks = [
-    { name: "Wallet", path: "/wallet", icon: "solar:wallet-money-bold" },
-    { name: "Referrals", path: "/referral", icon: "solar:users-group-rounded-bold" },
+    { name: "Wallet", path: "/wallet", icon: "solar:wallet-bold" },
+    { name: "Referrals", path: "/referral", icon: "solar:gift-bold" },
+    { name: "Settings", path: "/settings", icon: "proicons:settings" },
   ];
 
 
@@ -319,17 +316,6 @@ export default function AppLayout() {
                             </Link>
                           ))}
 
-                          <Link
-                            to="/settings"
-                            onClick={() => setIsDropDownMenuOpen(false)}
-                            className="group mt-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
-                              <Icon icon="proicons:settings" width="20" />
-                            </div>
-                            <span className="font-medium">Settings</span>
-                          </Link>
-
                           <button
                             onClick={() => {
                               setIsDropDownMenuOpen(false);
@@ -391,7 +377,25 @@ export default function AppLayout() {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-6">
               <nav className="flex flex-col space-y-2">
-                {[...navLinks, ...accountLinks].map((link) => {
+                {navLinks.map((link) => {
+                  const isActive = location.pathname.startsWith(link.path);
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-[#F4F5FC] font-semibold text-[#2389E3]"
+                          : "text-[#05243F]/60 hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
+                <div className="my-2 border-t border-[#F4F5FC]" />
+                {accountLinks.map((link) => {
                   const isActive = location.pathname.startsWith(link.path);
                   return (
                     <Link

@@ -448,7 +448,7 @@ export default function Ladipo() {
       subTitle="Browse genuine and aftermarket parts for your vehicle."
       showWalletDemo
     >
-      <div className="bg-white rounded-2xl pt-5 pb-6 px-5 sm:px-6">
+      <div className="bg-white rounded-2xl pt-5 pb-6 px-5 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-0">
           {/* Search */}
           <Searchbar

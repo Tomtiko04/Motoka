@@ -31,7 +31,7 @@ export default function Header() {
     <div className="bg-white sticky top-0 z-[70]">
       <div
         className="flex h-[63px] items-center justify-between w-full"
-        style={{ paddingLeft: 'clamp(20px, 7.9vw, 114px)', paddingRight: 'clamp(20px, 7.9vw, 114px)' }}
+        style={{ paddingLeft: 'var(--landing-gutter, 40px)', paddingRight: 'var(--landing-gutter, 40px)' }}
       >
         <div className="flex gap-[47px] items-center">
           <Link
