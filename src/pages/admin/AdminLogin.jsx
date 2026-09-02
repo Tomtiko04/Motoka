@@ -8,7 +8,12 @@ import Logo from "../../assets/images/motoka logo.svg";
 
 const AdminLogin = () => {
   const [step, setStep] = useState('email'); // 'email' or 'otp'
+  // Password is the default now; the one-time code stays available as a way in
+  // when the password is forgotten, and as the recovery path generally.
+  const [method, setMethod] = useState('password'); // 'password' or 'otp'
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,6 +21,83 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   const ALLOWED_ADMIN_EMAILS = ['rasak@motokaapp.ng'];
+
+  // Shared by both sign-in paths. A Supabase session is not an admin session
+  // until the profile says so — this is the check that actually gates entry,
+  // not the email list above.
+  const completeAdminLogin = async (data) => {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_admin, is_suspended, first_name, last_name, user_id')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      setError('Failed to verify admin privileges');
+      await supabase.auth.signOut();
+      return;
+    }
+    if (!profile.is_admin) {
+      setError('Access denied: Admin privileges required');
+      await supabase.auth.signOut();
+      return;
+    }
+    if (profile.is_suspended) {
+      setError('Your account has been suspended');
+      await supabase.auth.signOut();
+      return;
+    }
+
+    const adminUser = {
+      id: data.user.id,
+      email: data.user.email,
+      name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+      user_id: profile.user_id,
+    };
+
+    localStorage.setItem('adminUser', JSON.stringify(adminUser));
+    localStorage.setItem('adminToken', data.session.access_token);
+    window.dispatchEvent(new CustomEvent('adminAuthChange', {
+      detail: { isAuthenticated: true, session: data.session },
+    }));
+
+    toast.success('Login successful!');
+    navigate('/admin/dashboard');
+  };
+
+  const handlePasswordLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    if (!ALLOWED_ADMIN_EMAILS.includes(email.trim().toLowerCase())) {
+      setError('Access denied: Unauthorized email address');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error || !data?.session) {
+        // Deliberately does not say which of the two was wrong — that would
+        // confirm to anyone guessing which admin addresses exist.
+        setError('Incorrect email or password');
+        setLoading(false);
+        return;
+      }
+
+      await completeAdminLogin(data);
+    } catch (err) {
+      console.error('Password login error:', err);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -76,52 +158,7 @@ const AdminLogin = () => {
       }
 
       if (data.session) {
-        // Check if user is admin
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('is_admin, is_suspended, first_name, last_name, user_id')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileError || !profile) {
-          setError('Failed to verify admin privileges');
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        }
-
-        if (!profile.is_admin) {
-          setError('Access denied: Admin privileges required');
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        }
-
-        if (profile.is_suspended) {
-          setError('Your account has been suspended');
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        }
-
-        // Store admin info
-        const adminUser = {
-          id: data.user.id,
-          email: data.user.email,
-          name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-          user_id: profile.user_id,
-        };
-        
-        localStorage.setItem('adminUser', JSON.stringify(adminUser));
-        localStorage.setItem('adminToken', data.session.access_token);
-        
-        // Trigger a custom event to notify AdminRoutes of the authentication change
-        window.dispatchEvent(new CustomEvent('adminAuthChange', { 
-          detail: { isAuthenticated: true, session: data.session } 
-        }));
-        
-        toast.success('Login successful!');
-        navigate('/admin/dashboard');
+        await completeAdminLogin(data);
       } else {
         setError('Authentication failed');
       }
@@ -148,7 +185,10 @@ const AdminLogin = () => {
         {/* Login Form */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           {step === 'email' ? (
-            <form onSubmit={handleSendOTP} className="space-y-4">
+            <form
+              onSubmit={method === 'password' ? handlePasswordLogin : handleSendOTP}
+              className="space-y-4"
+            >
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Admin Email
@@ -158,11 +198,44 @@ const AdminLogin = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="username"
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                   placeholder="Enter your admin email"
                   required
                 />
               </div>
+
+              {method === 'password' && (
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="current-password"
+                      className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
@@ -175,7 +248,23 @@ const AdminLogin = () => {
                 disabled={loading}
                 className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
               >
-                {loading ? 'Sending OTP...' : 'Send OTP'}
+                {loading
+                  ? (method === 'password' ? 'Signing in...' : 'Sending OTP...')
+                  : (method === 'password' ? 'Sign In' : 'Send OTP')}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod(method === 'password' ? 'otp' : 'password');
+                  setPassword('');
+                  setError('');
+                }}
+                className="w-full text-sm text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                {method === 'password'
+                  ? 'Sign in with a one-time code instead'
+                  : 'Sign in with a password instead'}
               </button>
             </form>
           ) : (
