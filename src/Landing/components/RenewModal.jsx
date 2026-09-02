@@ -13,6 +13,12 @@ import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPro
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 
+// Hackney Permit is a commercial-vehicle document, and a visitor on the landing
+// page has not told us their car type yet — leaving it ticked quietly added
+// NGN 4,000 to the total for everyone. The in-app flow (RenewLicense) already
+// drops it for private and government cars; this is the same rule for guests.
+const DEFAULT_OFF_ITEM_IDS = ["hackney_permit"];
+
 const NIGERIAN_STATES = [
   "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
   "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
@@ -81,10 +87,15 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     fetchRenewalItems()
       .then((items) => {
         setRenewalItems(items);
-        // Pre-select all items by default (Select All)
-        const allIds = items.map((i) => i.id);
-        setSelectedDocs(allIds);
-        setSelectAllDocs(true);
+        // Everything on by default except the items below. Select-all still
+        // ticks them; this is only what a visitor starts with.
+        const defaultIds = items
+          .filter((i) => i.required || !DEFAULT_OFF_ITEM_IDS.includes(i.id))
+          .map((i) => i.id);
+        setSelectedDocs(defaultIds);
+        // Same rule as handleToggleDoc: only true when every optional item is on.
+        const optionalIds = items.filter((i) => !i.required).map((i) => i.id);
+        setSelectAllDocs(optionalIds.every((id) => defaultIds.includes(id)));
       })
       .catch(() => toast.error("Failed to load renewal options"))
       .finally(() => setLoadingItems(false));
