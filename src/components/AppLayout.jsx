@@ -18,11 +18,14 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Dashboard", path: "/dashboard" },
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
-    { name: "Wallet", path: "/wallet" },
-    { name: "Referrals", path: "/referral" },
     { name: "Ladipo", path: "/ladipo" },
     // { name: "Traffic Rules", path: "/traffic-rules" },
-    { name: "Settings", path: "/settings" },
+  ];
+
+  const accountLinks = [
+    { name: "Wallet", path: "/wallet", icon: "solar:wallet-bold" },
+    { name: "Referrals", path: "/referral", icon: "solar:gift-bold" },
+    { name: "Settings", path: "/settings", icon: "proicons:settings" },
   ];
 
 
@@ -134,7 +137,7 @@ export default function AppLayout() {
   }, [isDropDownMenuOpen]);
 
   return (
-    <div className="flex items-center justify-center  flex-col min-h-screen" >{/* removed the background to allow the gradient to show  bg-[#F4F5FC]*/}
+    <div className="flex items-center justify-center  flex-col min-h-screen bg-[#F4F5FC]" >
       <div className="w-full max-w-4xl sm:mt-4 flex flex-col flex-1">
         {/* Header Navigation */}
         <header className="sticky top-0 z-10 h-16 bg-white shadow-sm sm:rounded-full">
@@ -299,16 +302,19 @@ export default function AppLayout() {
                         </div>
 
                         <div className="p-1.5">
-                          <Link
-                            to="/settings"
-                            onClick={() => setIsDropDownMenuOpen(false)}
-                            className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
-                              <Icon icon="proicons:settings" width="20" />
-                            </div>
-                            <span className="font-medium">Settings</span>
-                          </Link>
+                          {accountLinks.map((link) => (
+                            <Link
+                              key={link.path}
+                              to={link.path}
+                              onClick={() => setIsDropDownMenuOpen(false)}
+                              className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
+                                <Icon icon={link.icon} width="20" />
+                              </div>
+                              <span className="font-medium">{link.name}</span>
+                            </Link>
+                          ))}
 
                           <button
                             onClick={() => {
@@ -372,6 +378,24 @@ export default function AppLayout() {
             <div className="flex-1 overflow-y-auto px-4 py-6">
               <nav className="flex flex-col space-y-2">
                 {navLinks.map((link) => {
+                  const isActive = location.pathname.startsWith(link.path);
+                  return (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-[#F4F5FC] font-semibold text-[#2389E3]"
+                          : "text-[#05243F]/60 hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
+                <div className="my-2 border-t border-[#F4F5FC]" />
+                {accountLinks.map((link) => {
                   const isActive = location.pathname.startsWith(link.path);
                   return (
                     <Link

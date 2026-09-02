@@ -108,7 +108,7 @@ export default function LadipoLayout({
         </div>
       </div>
 
-      <div className="mx-4 max-w-4xl md:max-w-5xl h-full sm:mx-auto">{children}</div>
+      <div className="mx-auto w-full max-w-4xl md:max-w-5xl h-full px-4 sm:px-6 lg:px-8">{children}</div>
     </>
   );
 }
