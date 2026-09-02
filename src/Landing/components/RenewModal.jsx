@@ -13,6 +13,7 @@ import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPro
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../../components/shared/SearchableSelect";
 import { formatPlateForDisplay, isPlausiblePlate, normalizePlate, PLATE_ERROR } from "../../utils/plateNumber";
+import DigitalCopyNote from "../../components/shared/DigitalCopyNote";
 
 // Hackney Permit is a commercial-vehicle document, and a visitor on the landing
 // page has not told us their car type yet — leaving it ticked quietly added
@@ -911,6 +912,8 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                     >
                       {`₦${(totalAmount / 100).toLocaleString()} — Choose Payment`}
                     </button>
+
+                    <DigitalCopyNote className="mt-3" />
                   </div>
                 </div>
               </div>
