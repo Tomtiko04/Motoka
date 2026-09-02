@@ -401,6 +401,9 @@ export default function PaymentOptions() {
         // Backend response structure: { status: true, data: {...}, message: '...' }
         const responseData = initRes?.data || initRes;
         const paystackUrl = responseData?.authorization_url || responseData?.data?.authorization_url;
+        // Drives the inline popup. It is enough on its own — Paystack resolves
+        // the merchant from the access code, so no public key ships to the browser.
+        const paystackAccessCode = responseData?.access_code || responseData?.data?.access_code;
         const reference = responseData?.reference || responseData?.data?.reference || responseData?.transaction_id;
         // Paystack amount is in kobo from backend
         const amount = responseData?.amount || responseData?.data?.amount;
@@ -412,6 +415,7 @@ export default function PaymentOptions() {
               paystack: {
                 ...(prev?.paystack || {}),
                 authorization_url: paystackUrl,
+                access_code: paystackAccessCode || null,
                 reference,
               },
               // Store amount from Paystack response (in kobo)
@@ -596,13 +600,35 @@ export default function PaymentOptions() {
     return null;
   }, [paymentSession, location.search]);
 
-  // Handle Paystack payment - redirects to Paystack payment page
+  const loadPaystackInline = () =>
+    new Promise((resolve, reject) => {
+      if (window.PaystackPop) {
+        resolve(window.PaystackPop);
+        return;
+      }
+      const existing = document.querySelector('script[src="https://js.paystack.co/v2/inline.js"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(window.PaystackPop));
+        existing.addEventListener("error", reject);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://js.paystack.co/v2/inline.js";
+      script.async = true;
+      script.onload = () => resolve(window.PaystackPop);
+      script.onerror = () => reject(new Error("Failed to load Paystack checkout"));
+      document.body.appendChild(script);
+    });
+
+  // Opens Paystack over the page. Falls back to the old new-tab/redirect route
+  // if the inline script cannot load or the backend returned no access code.
   const handlePaystackPayment = async () => {
     try {
       const paystackUrl = paymentSession?.paystack?.authorization_url;
+      const accessCode = paymentSession?.paystack?.access_code;
       const reference = paymentSession?.paystack?.reference;
 
-      if (!paystackUrl) {
+      if (!paystackUrl && !accessCode) {
         toast.error('Payment not initialized. Please confirm your payment method first.');
         return;
       }
@@ -619,6 +645,24 @@ export default function PaymentOptions() {
       if (paymentSession?.type === PAYMENT_TYPES.LADIPO) {
         clearLadipoCart();
         window.location.href = paystackUrl;
+        return;
+      }
+
+      if (accessCode) {
+        try {
+          const PaystackPop = await loadPaystackInline();
+          if (PaystackPop) {
+            const popup = new PaystackPop();
+            popup.resumeTransaction(accessCode);
+            return;
+          }
+        } catch (inlineErr) {
+          console.warn("Paystack inline checkout unavailable, using redirect", inlineErr);
+        }
+      }
+
+      if (!paystackUrl) {
+        toast.error('Paystack checkout URL missing. Please retry.');
         return;
       }
 
