@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import RenewModal from '../components/RenewModal'
+import { formatPlateForDisplay, isPlausiblePlate, PLATE_ERROR } from '../../utils/plateNumber'
 import { motion } from 'framer-motion'
 import certifiedBadge from '../../assets/v2/certified-badge.svg'
 import doc1 from '../../assets/v2/doc-1.webp'
@@ -238,6 +239,10 @@ export default function Hero() {
       setMessage('Enter a plate number first.')
       return
     }
+    if (!isPlausiblePlate(plate)) {
+      setMessage(PLATE_ERROR)
+      return
+    }
     setMessage('')
     setRenewOpen(true)
   }
@@ -304,8 +309,14 @@ export default function Hero() {
                   id="plate"
                   type="text"
                   value={plate}
-                  onChange={(e) => setPlate(e.target.value)}
-                  placeholder="Enter Plate Number"
+                  // Hyphens are added as they type; the value stored and sent
+                  // stays normalised, so the display never changes the data.
+                  onChange={(e) => setPlate(formatPlateForDisplay(e.target.value))}
+                  placeholder="ABC-123-DE"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  maxLength={12}
                   className="w-full bg-transparent focus:outline-none"
                   style={{ fontWeight: 300, fontSize: 18, color: '#05243f' }}
                 />

@@ -12,6 +12,8 @@ import { saveGuestDeferredReminders } from "../../services/apiDeferredReminders"
 import PartialRenewalPromptModal from "../../components/shared/PartialRenewalPromptModal";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../../components/shared/SearchableSelect";
+import { formatPlateForDisplay, isPlausiblePlate, normalizePlate, PLATE_ERROR } from "../../utils/plateNumber";
+import DigitalCopyNote from "../../components/shared/DigitalCopyNote";
 
 // Hackney Permit is a commercial-vehicle document, and a visitor on the landing
 // page has not told us their car type yet — leaving it ticked quietly added
@@ -152,21 +154,18 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
 
   const isPlateLocked = Boolean(initialPlateNumber);
 
-  const formatPlateNumber = (value) => {
-    const cleaned = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-    if (cleaned.length <= 3) return cleaned;
-    if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 8)}`;
-  };
-
   const handlePlateChange = (e) => {
-    setPlateNumber(formatPlateNumber(e.target.value));
+    setPlateNumber(formatPlateForDisplay(e.target.value));
   };
 
   const handleSubmitStep1 = (e) => {
     e.preventDefault();
     if (!plateNumber.trim()) {
       toast.error("Please enter your plate number");
+      return;
+    }
+    if (!isPlausiblePlate(plateNumber)) {
+      toast.error(PLATE_ERROR);
       return;
     }
     if (!formData.name || !formData.phone || !formData.email || !formData.expiryDate) {
@@ -276,7 +275,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
     try {
       await saveGuestDeferredReminders({
         guest_email: formData.email,
-        plate_number: plateNumber.replace(/\s+/g, "").toUpperCase(),
+        plate_number: normalizePlate(plateNumber),
         reminders,
       });
     } catch (error) {
@@ -310,7 +309,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        plate_number: plateNumber.replace(/\s+/g, "").toUpperCase(),
+        plate_number: normalizePlate(plateNumber),
         expiry_date: formData.expiryDate,
         selected_items: selectedDocs,
         wants_delivery: wantsDelivery,
@@ -354,8 +353,8 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
   // Guest car detail for CarDetailsCard
   const guestCarDetail = {
     vehicle_model: formData.name ? `${formData.name}'s Vehicle` : "Vehicle",
-    plate_number: plateNumber,
-    registration_no: plateNumber,
+    plate_number: normalizePlate(plateNumber),
+    registration_no: normalizePlate(plateNumber),
     expiry_date: formData.expiryDate,
     vehicle_make: "Private",
     car_type: "private",
@@ -913,6 +912,8 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                     >
                       {`₦${(totalAmount / 100).toLocaleString()} — Choose Payment`}
                     </button>
+
+                    <DigitalCopyNote className="mt-3" />
                   </div>
                 </div>
               </div>
