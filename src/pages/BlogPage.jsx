@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import blogData from "../Data/blogs";
-import { computeSlug } from "../utils/computeSlug";
+import { computeSlug, findPostBySlug } from "../utils/computeSlug";
 import Seo from "../components/Seo";
 import { blogPostingSchema } from "../utils/schema";
 
@@ -9,9 +9,17 @@ import { blogPostingSchema } from "../utils/schema";
 export default function BlogPage() {
   const { slug } = useParams();
 
-  const blog = blogData.find((b) => computeSlug(b.title) === slug);
+  // Case-insensitive so the mixed-case URLs indexed before slugs were
+  // lowercased still resolve instead of 404ing.
+  const blog = findPostBySlug(blogData, slug);
   const prevBlog = blogData[blogData.indexOf(blog) - 1];
   const nextBlog = blogData[blogData.indexOf(blog) + 1];
+
+  // Canonical is built from the title, never from the slug in the URL. A
+  // visitor arriving on an old mixed-case link would otherwise self-canonicalise
+  // to that old URL, leaving both variants indexed and competing. Pointing at
+  // the computed slug consolidates them onto one.
+  const canonicalPath = blog ? `/blog/${computeSlug(blog.title)}` : `/blog/${slug}`;
 
   const jsonLd = useMemo(
     () =>
@@ -20,13 +28,13 @@ export default function BlogPage() {
             blogPostingSchema({
               title: blog.title,
               description: blog.content.slice(0, 160),
-              path: `/blog/${slug}`,
+              path: canonicalPath,
               date: blog.date,
               image: blog.image,
             }),
           ]
         : undefined,
-    [blog, slug],
+    [blog, canonicalPath],
   );
 
   if (!blog) {
@@ -39,7 +47,7 @@ export default function BlogPage() {
         <Seo
           title={blog.title}
           description={blog.content.slice(0, 160)}
-          path={`/blog/${slug}`}
+          path={canonicalPath}
           jsonLd={jsonLd}
         />
         {/* Image */}
