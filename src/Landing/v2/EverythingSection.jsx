@@ -109,10 +109,13 @@ function PhoneMock({ activeIndex, reduceMotion, widthClamp = 'clamp(240px, 35.1v
   // 562px cap — taller than a laptop viewport, which cropped the top of the
   // phone behind the header. When fitViewport is set, height leads instead and
   // width follows the aspect ratio, so the whole handset stays on screen.
-  // The /1.1 accounts for the landing's body zoom, which scales svh with it.
+  // The divisor accounts for the landing's body zoom, which scales svh with
+  // it. It has to track the zoom rather than assume 1.1: the zoom is now
+  // gated to >=1600px, so below that a fixed 1.1 shrank the phone ~6% for a
+  // zoom that was not being applied.
   const sizing = fitViewport
     ? {
-        height: `min(calc(100svh / 1.1 - 24px), calc((${widthClamp}) * 2012 / 1324))`,
+        height: `min(calc(100svh / var(--landing-zoom, 1.1) - 24px), calc((${widthClamp}) * 2012 / 1324))`,
         width: 'auto',
       }
     : { width: widthClamp }

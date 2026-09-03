@@ -252,11 +252,15 @@ body.landing-v2-active {
   background-color: #fff;
   background-image: none;
   --landing-gutter: clamp(40px, 6.5vw, 114px);
+  /* Components that must divide out the zoom read this rather than
+     hardcoding 1.1, which is wrong wherever the zoom is not applied. */
+  --landing-zoom: 1;
 }
 
 @media (min-width: 1600px) {
   body.landing-v2-active {
     zoom: 1.1;
+    --landing-zoom: 1.1;
   }
 }
 
