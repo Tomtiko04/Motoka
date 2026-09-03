@@ -307,7 +307,8 @@ export default function ReRegistration() {
               </span>
             </div>
             <p className="mt-1 text-xs text-[#05243F]/45">
-              Payable after your details are confirmed. Nothing is charged now.
+              The total, government fees and our service fee included. Payable
+              once your details are confirmed — nothing is charged now.
             </p>
           </div>
 

@@ -13,6 +13,10 @@
 // renewal-items catalogue and read the price from there. If the price is ever
 // shown from here while payment is taken from the server, the two can drift
 // and the customer sees one number and pays another.
+// This is an aggregated, all-in figure: government fees and Motoka's service
+// fee together, deliberately not itemised. Real costs vary by a few hundred
+// naira between vehicles, which is inside the rounding — so this is quoted
+// flat rather than as a range or a table.
 export const RE_REGISTRATION_FEE_NAIRA = 150000;
 
 export const RE_REGISTRATION_FEE_IS_PLACEHOLDER = true;
