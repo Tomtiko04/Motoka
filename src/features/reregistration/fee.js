@@ -18,19 +18,36 @@ export const RE_REGISTRATION_BASE_NAIRA = 150000;
 export const ARREARS_PER_YEAR_NAIRA = 5000;
 
 /**
- * Whole years elapsed between two dates.
+ * Years missed, counting any part of a year as a whole one.
  *
- * Counts completed years only: a licence eleven months overdue has not yet
- * missed a year. That is the literal reading of "every year missed", and it
- * errs toward under-charging, which is the safer direction for a quote shown
- * before anyone has agreed to anything.
+ * A single day overdue is one year missed — arrears are charged per year
+ * entered, not per year completed. So the day after a licence expires costs
+ * ₦5,000, and the day after its first anniversary costs ₦10,000.
+ *
+ * Both dates are compared at day granularity, so a licence expiring today is
+ * still current for the whole of today rather than tipping into arrears at
+ * midnight.
  */
-function completedYearsBetween(from, to) {
+function dayOnly(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function yearsMissedBetween(expiry, asOf) {
+  const from = dayOnly(expiry);
+  const to = dayOnly(asOf);
+  if (from >= to) return 0;
+
   let years = to.getFullYear() - from.getFullYear();
   const anniversary = new Date(from);
   anniversary.setFullYear(from.getFullYear() + years);
   if (anniversary > to) years -= 1;
-  return Math.max(0, years);
+
+  // Past the anniversary by any amount puts you into the next year.
+  const lastAnniversary = new Date(from);
+  lastAnniversary.setFullYear(from.getFullYear() + years);
+  if (lastAnniversary < to) years += 1;
+
+  return Math.max(1, years);
 }
 
 /**
@@ -57,7 +74,7 @@ export function quoteReRegistration({ expiryDate, asOf = new Date() }) {
     return { unknown: true, base, yearsMissed: 0, arrears: 0, total: null };
   }
 
-  if (expiry >= asOf) {
+  if (dayOnly(expiry) >= dayOnly(asOf)) {
     return {
       unknown: false,
       upToDate: true,
@@ -69,7 +86,7 @@ export function quoteReRegistration({ expiryDate, asOf = new Date() }) {
     };
   }
 
-  const yearsMissed = completedYearsBetween(expiry, asOf);
+  const yearsMissed = yearsMissedBetween(expiry, asOf);
   const arrears = yearsMissed * ARREARS_PER_YEAR_NAIRA;
 
   return {

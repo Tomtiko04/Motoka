@@ -237,11 +237,9 @@ export default function ReRegistration() {
                   <p className="text-sm font-semibold text-[#05243F]">
                     {quote.upToDate
                       ? "Papers are up to date"
-                      : quote.yearsMissed === 0
-                        ? "Expired, but under a year"
-                        : `${quote.yearsMissed} year${
-                            quote.yearsMissed === 1 ? "" : "s"
-                          } missed`}
+                      : `${quote.yearsMissed} year${
+                          quote.yearsMissed === 1 ? "" : "s"
+                        } missed`}
                   </p>
                   <p className="mt-1 text-xs text-[#05243F]/55">
                     Licence expired{" "}
@@ -252,9 +250,9 @@ export default function ReRegistration() {
                     })}
                     .{" "}
                     {quote.arrears > 0
-                      ? `Arrears of ₦${ARREARS_PER_YEAR_NAIRA.toLocaleString(
+                      ? `Arrears run at ₦${ARREARS_PER_YEAR_NAIRA.toLocaleString(
                           "en-NG",
-                        )} per year missed are settled with the transfer, and fall to the new owner.`
+                        )} for each year missed, counted from the day the licence lapsed. They are settled with the transfer and fall to the new owner.`
                       : "No arrears to settle."}
                   </p>
                 </div>
