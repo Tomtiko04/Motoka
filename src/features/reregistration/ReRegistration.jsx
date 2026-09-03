@@ -8,6 +8,7 @@ import {
   isFullVin,
   normaliseChassis,
 } from "../../utils/chassisNumber";
+import { RE_REGISTRATION_FEE_NAIRA } from "./fee";
 
 // The vehicle and current-owner details are already on the car record, so this
 // form does not ask for them again — it asks only for what re-registration
@@ -125,8 +126,8 @@ export default function ReRegistration() {
         />
         <p>
           <span className="font-semibold">Not accepting submissions yet.</span>{" "}
-          You can fill this in and see what re-registration needs, but nothing
-          is sent or saved until we connect it.
+          You can fill this in and see what re-registration needs and costs,
+          but nothing is sent, saved or charged until we connect it.
         </p>
       </div>
 
@@ -296,6 +297,20 @@ export default function ReRegistration() {
 
       {car && (
         <>
+          <div className="mb-4 rounded-2xl border border-[#E4E9F2] bg-white p-4">
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm text-[#05243F]/60">
+                Re-registration fee
+              </span>
+              <span className="text-lg font-bold text-[#05243F]">
+                ₦{RE_REGISTRATION_FEE_NAIRA.toLocaleString("en-NG")}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-[#05243F]/45">
+              Payable after your details are confirmed. Nothing is charged now.
+            </p>
+          </div>
+
           <button
             type="button"
             disabled={!ready}
