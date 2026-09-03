@@ -187,10 +187,17 @@ export default function OTPLogin() {
             <h2 className="text-2xl font-medium text-gray-900">
               {step === "email" ? "Login with OTP" : "Enter OTP Code"}
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              {step === "email"
-                ? "Enter your email to receive a one-time password"
-                : `We've sent a 6-digit code to ${email}. If you don't see it, please check your spam or junk folder.`}
+            <p className="mt-2 text-[14px] text-gray-600">
+              {step === "email" ? (
+                "Enter your email to receive a one-time password"
+              ) : (
+                <>
+                  {`We've sent a 6-digit code to ${email}. `}
+                  <span className="text-red-400">
+                    If you don't see it, please check your spam or junk folder.
+                  </span>
+                </>
+              )}
             </p>
             
           </div>
