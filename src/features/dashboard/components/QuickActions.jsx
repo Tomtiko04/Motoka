@@ -23,8 +23,7 @@ const quickActions = [
       />
     ),
     title: "Traffic\nRules",
-    // link: "/traffic-rules",
-    comingSoon: true,
+    link: "/traffic-rules",
   },
   {
     icon: (
