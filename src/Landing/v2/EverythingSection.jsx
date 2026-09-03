@@ -208,6 +208,12 @@ export default function EverythingSection() {
             col-start-1 row-start-1) so the phone has the list's full height
             to pin against instead of just its own short row. */}
         <div className="flex flex-col min-w-0 col-start-1 row-start-1 lg:col-auto lg:row-auto">
+          {/* Block height sets the scroll distance between features. On
+              desktop 50vh is the slack the sticky phone pins against, so it
+              stays. Below lg there is no phone — the block was 65vh of empty
+              space beside nothing. 26vh sits just above the block's own
+              content and above the observer's middle-20% band, so features
+              still activate one at a time without the dead scroll. */}
           {FEATURES.map((feature, index) => {
             const distance = Math.abs(index - activeIndex)
             return (
@@ -215,7 +221,7 @@ export default function EverythingSection() {
                 key={feature.title}
                 data-index={index}
                 ref={(el) => (featureRefs.current[index] = el)}
-                className="min-h-[65vh] lg:min-h-[50vh] flex flex-col justify-center transition-[filter,opacity] duration-500 ease-out"
+                className="min-h-[26vh] lg:min-h-[50vh] flex flex-col justify-center transition-[filter,opacity] duration-500 ease-out"
                 style={getBlurStyle(distance, reduceMotion)}
               >
                 <div className="flex flex-col lg:flex-row lg:items-center gap-[16px] lg:gap-[24px]">
