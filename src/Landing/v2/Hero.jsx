@@ -251,7 +251,7 @@ export default function Hero() {
     <section
       id="top"
       className="relative w-full overflow-hidden bg-[#daebfa]"
-      style={{ minHeight: 'clamp(580px, 82vh, 880px)' }}
+      style={{ minHeight: 'var(--hero-min-height, clamp(580px, 82vh, 880px))' }}
     >
       {/* Centered max-width shell */}
       <div className="relative mx-auto w-full max-w-[1920px] flex flex-col lg:flex-row lg:items-stretch">

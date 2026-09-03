@@ -259,3 +259,13 @@ body.landing-v2-active {
     zoom: 1.1;
   }
 }
+
+/* Without the zoom, the hero renders ~10% shorter, so 82vh no longer reaches
+   the fold and the next section peeks in under it. Between lg and the zoom
+   threshold, height the hero against the viewport minus the 63px header
+   instead. Mobile and >=1600 keep the 82vh rule untouched. */
+@media (min-width: 1024px) and (max-width: 1599px) {
+  body.landing-v2-active {
+    --hero-min-height: clamp(580px, calc(100svh - 63px), 880px);
+  }
+}
