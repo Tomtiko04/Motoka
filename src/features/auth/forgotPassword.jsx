@@ -126,7 +126,7 @@ const StepTwo = ({ nextStep, prevStep, email, setToken }) => {
           </h2>
           <p className="text-sm text-[#05243F]/40 sm:text-base">
             We have sent a verification code to your email address. Please enter
-            it below.
+            it below. If you don't see it, please check your spam or junk folder.
           </p>
         </div>
         <form className="mt-8 space-y-6" action="#" onSubmit={handleSubmit}>

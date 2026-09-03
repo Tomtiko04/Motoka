@@ -190,7 +190,7 @@ export default function OTPLogin() {
             <p className="mt-2 text-sm text-gray-600">
               {step === "email"
                 ? "Enter your email to receive a one-time password"
-                : `We've sent a 6-digit code to ${email}`}
+                : `We've sent a 6-digit code to ${email}. If you don't see it, please check your spam or junk folder.`}
             </p>
             
           </div>
