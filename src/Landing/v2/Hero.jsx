@@ -257,7 +257,7 @@ export default function Hero() {
       <div className="relative mx-auto w-full max-w-[1920px] flex flex-col lg:flex-row lg:items-stretch">
         {/* Left: text + form */}
         <div
-          className="relative z-20 flex flex-col gap-[clamp(28px,4vw,48px)] w-full lg:max-w-[min(46vw,920px)] xl:max-w-[clamp(560px,48vw,920px)] shrink-0"
+          className="relative z-20 flex flex-col gap-[clamp(28px,4vw,48px)] w-full lg:max-w-[clamp(680px,52vw,920px)] shrink-0"
           style={{
             paddingLeft: 'var(--landing-gutter, 40px)',
             paddingRight: 'clamp(24px, 2vw, 24px)',
@@ -267,10 +267,16 @@ export default function Hero() {
         >
           <div className="flex flex-col gap-[19px] items-start w-full" style={{ marginTop: '-16px' }}>
             <h1
-              className="w-full whitespace-normal 2xl:whitespace-nowrap"
+              className="w-full whitespace-normal lg:whitespace-nowrap"
               style={{
                 fontWeight: 500,
-                fontSize: 'clamp(40px, 4.4vw, 83.2px)',
+                // The two-line wrap is by design, held by lg:whitespace-nowrap
+                // above: "Your car's paperwork," needs 10.84x the font size,
+                // which is wider than the text column, so it overflows the
+                // column on purpose rather than breaking into four lines.
+                // Wrapping from 2xl instead of lg is what shrank this to four
+                // lines on 13" laptops.
+                fontSize: 'clamp(52px, 5.46vw, 83.2px)',
                 lineHeight: 1.2,
                 color: '#0e6fc6',
                 maxWidth: 'min(100%, 920px)',
