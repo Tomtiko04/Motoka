@@ -114,6 +114,22 @@ export default function ReRegistration() {
         </p>
       </header>
 
+      {/* The tile is live, so people arrive here before submissions work.
+          Saying so up front is the difference between a preview and a trap —
+          nobody should fill five uploads to find out at the end. */}
+      <div className="mb-6 flex gap-3 rounded-xl bg-[#FDF3E2] p-4 text-sm text-[#A86A00]">
+        <Icon
+          icon="solar:info-circle-bold"
+          fontSize={20}
+          className="mt-0.5 shrink-0"
+        />
+        <p>
+          <span className="font-semibold">Not accepting submissions yet.</span>{" "}
+          You can fill this in and see what re-registration needs, but nothing
+          is sent or saved until we connect it.
+        </p>
+      </div>
+
       {/* 1 — the vehicle */}
       <section className="mb-6">
         <h2 className="mb-3 text-sm font-semibold text-[#05243F]">
@@ -299,11 +315,12 @@ export default function ReRegistration() {
               that resolves into a success screen nothing received. */}
           {submitted && (
             <div className="mt-4 rounded-xl bg-[#FDF3E2] p-4 text-sm text-[#A86A00]">
-              <p className="font-semibold">Not connected yet</p>
+              <p className="font-semibold">
+                Everything needed is here — but nothing was sent.
+              </p>
               <p className="mt-1">
-                Your details are complete, but re-registration submissions
-                cannot be sent until the backend endpoint is live. Nothing has
-                been saved.
+                Re-registration submissions go live once the endpoint is
+                connected. Your uploads have not been saved.
               </p>
             </div>
           )}

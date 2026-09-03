@@ -11,10 +11,7 @@ const quickActions = [
   {
     icon: <Icon icon="solar:document-bold" fontSize={30} color="#2389E3" />,
     title: "Re-registration",
-    // Badge stays until a backend endpoint accepts a submission — the form is
-    // reachable at /re-registration for review in the meantime.
-    // link: "/re-registration",
-    comingSoon: true,
+    link: "/re-registration",
   },
   {
     icon: (
