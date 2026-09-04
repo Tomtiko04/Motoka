@@ -33,7 +33,7 @@ const quickActions = [
       />
     ),
     title: "FAQs/How can\nwe Help?",
-    link: "/faq",
+    link: "/help",
   },
   {
     icon: <Icon icon="mdi:car-pickup" fontSize={30} color="#2389E3" />,
