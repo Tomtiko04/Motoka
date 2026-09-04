@@ -25,7 +25,7 @@ function upsertMeta(selector, attrs) {
   Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
 }
 
-export default function Seo({ title, description, path = "/", jsonLd }) {
+export default function Seo({ title, description, path = "/", image, jsonLd }) {
   const url = absoluteUrl(path);
   const fullTitle = title
     ? title.includes("Motoka")
@@ -61,11 +61,24 @@ export default function Seo({ title, description, path = "/", jsonLd }) {
     if (fullTitle) {
       upsertMeta('meta[property="og:title"]', { property: "og:title", content: fullTitle });
     }
+    // A page that supplies its own image gets it; everything else falls back to
+    // the app icon. Without this every article shared as the same square logo,
+    // which on WhatsApp — where the card is the entire impression — made nine
+    // different posts look like one advert.
+    // absoluteUrl prefixes the site origin, so an image that is already a full
+    // URL — several posts still point at external hosts — must pass through
+    // untouched rather than becoming https://www.motokaapp.ng/https://...
+    const ogImage = image
+      ? /^https?:\/\//i.test(image)
+        ? image
+        : absoluteUrl(image)
+      : absoluteUrl("/icons/icon-512.png");
+
     upsertMeta('meta[property="og:image"]', {
       property: "og:image",
-      content: absoluteUrl("/icons/icon-512.png"),
+      content: ogImage,
     });
-  }, [fullTitle, description, url]);
+  }, [fullTitle, description, url, image]);
 
   // Structured data is removed on unmount — unlike the tags above it is not
   // overwritten by the next route, so leaving it would attach one page's
