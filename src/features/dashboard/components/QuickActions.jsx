@@ -10,9 +10,8 @@ const quickActions = [
   },
   {
     icon: <Icon icon="solar:document-bold" fontSize={30} color="#2389E3" />,
-    title: "Change of\nOwnership",
-    // link: "/ownership",
-    comingSoon: true,
+    title: "Re-registration",
+    link: "/re-registration",
   },
   {
     icon: (
@@ -23,8 +22,7 @@ const quickActions = [
       />
     ),
     title: "Traffic\nRules",
-    // link: "/traffic-rules",
-    comingSoon: true,
+    link: "/traffic-rules",
   },
   {
     icon: (
