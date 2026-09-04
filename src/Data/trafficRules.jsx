@@ -18,6 +18,12 @@
 //
 // One row is deliberately absent: item 27 of the inspection schedule falls on
 // a page break in the source scan and could not be read.
+//
+// One fine is deliberately blank. The gazette puts BRT corridor use at 20,000
+// / 30,000; published lists say 70,000. Rather than pick a side, the amount is
+// omitted while the offence, its demerit points and its additional penalty —
+// none of which are disputed — are still shown. Do not fill it in without a
+// dated source.
 
 export const TRAFFIC_RULES_SOURCE = {
   document: "Lagos State Transport Sector Reform Law \u2014 gazetted schedules",
@@ -478,7 +484,7 @@ const trafficRules = [
     "category": "RoadSigns&Markings",
     "title": "Use of BRT Lite corridor",
     "points": "3",
-    "fine": "₦20,000 / ₦30,000",
+    "fine": "",
     "additional": "6 months imprisonment / 1 year community service, in addition to LASDRI training"
   },
   {

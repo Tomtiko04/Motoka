@@ -9,7 +9,11 @@ import {
   normaliseChassis,
 } from "../../utils/chassisNumber";
 import { ARREARS_PER_YEAR_NAIRA, quoteReRegistration } from "./fee";
-import { buildWhatsAppUrl } from "../../constants/support";
+import {
+  buildWhatsAppUrl,
+  SUPPORT_PHONE_DISPLAY,
+  WHATSAPP_NUMBER,
+} from "../../constants/support";
 import toast from "react-hot-toast";
 
 // The vehicle and current-owner details are already on the car record, so this
@@ -168,10 +172,22 @@ export default function ReRegistration() {
     toast.success("WhatsApp is opening — tap Send to deliver the message.");
   }
 
+  // Opening WhatsApp is not sending it. Until the user says they sent it, the
+  // request may exist only on their screen, so the status must not claim we
+  // are checking. One tap is cheap; a customer waiting on a reply nobody
+  // received is not. When a submit endpoint exists, this is also the natural
+  // place to record the request server-side.
+  function confirmSent() {
+    if (!car || !check) return;
+    const record = { ...check, confirmedAt: new Date().toISOString() };
+    writeCheck(car.id, record);
+    setCheck(record);
+  }
+
   const missingDocs = DOCUMENTS.filter((d) => !files[d.key]).map((d) => d.label);
   const ready =
     car &&
-    check &&
+    check?.confirmedAt &&
     newOwner.name.trim() &&
     newOwner.address.trim() &&
     newOwner.phone.trim() &&
@@ -260,7 +276,7 @@ export default function ReRegistration() {
             2. Registration status
           </h2>
 
-          {check ? (
+          {check?.confirmedAt ? (
             <div className="rounded-xl bg-[#F4F5FC] p-4">
               <div className="flex items-start gap-3">
                 <Icon
@@ -282,14 +298,37 @@ export default function ReRegistration() {
                     </span>
                     .
                   </p>
-                  <button
-                    type="button"
-                    onClick={requestCheck}
-                    className="mt-2 text-xs font-semibold text-[#2389E3] underline"
-                  >
-                    Send the message again
-                  </button>
                 </div>
+              </div>
+            </div>
+          ) : check ? (
+            <div className="rounded-xl bg-[#FDF3E2] p-4">
+              <p className="text-sm font-semibold text-[#A86A00]">
+                Your message is waiting in WhatsApp
+              </p>
+              <p className="mt-1 text-xs text-[#A86A00]/85">
+                Tap Send there to start the check — we do not receive it until
+                you do. Reference{" "}
+                <span className="font-mono font-semibold">
+                  {check.reference}
+                </span>
+                .
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={confirmSent}
+                  className="rounded-full bg-[#05243F] px-4 py-2 text-xs font-semibold text-white"
+                >
+                  I have sent it
+                </button>
+                <button
+                  type="button"
+                  onClick={requestCheck}
+                  className="rounded-full border border-[#A86A00]/40 px-4 py-2 text-xs font-semibold text-[#A86A00]"
+                >
+                  Open WhatsApp again
+                </button>
               </div>
             </div>
           ) : (
@@ -315,6 +354,16 @@ export default function ReRegistration() {
                 <Icon icon="ic:baseline-whatsapp" fontSize={18} />
                 Request a check on WhatsApp
               </button>
+              <p className="mt-2 text-xs text-[#05243F]/45">
+                No WhatsApp? Call{" "}
+                <a
+                  href={`tel:+${WHATSAPP_NUMBER}`}
+                  className="font-semibold text-[#2389E3] underline"
+                >
+                  {SUPPORT_PHONE_DISPLAY}
+                </a>{" "}
+                and quote your plate number.
+              </p>
             </div>
           )}
         </section>
@@ -452,7 +501,7 @@ export default function ReRegistration() {
                 year missed
               </span>
               <span className="text-[#05243F]/60">
-                {quote.unknown || !check
+                {quote.unknown || !check?.confirmedAt
                   ? "to confirm"
                   : `₦${quote.arrears.toLocaleString("en-NG")} on our record`}
               </span>
@@ -484,7 +533,7 @@ export default function ReRegistration() {
           {!ready && (
             <p className="mt-2 text-center text-xs text-[#05243F]/45">
               Still needed:{" "}
-              {[!check ? "licence status check" : null, ...missingDocs]
+              {[!check?.confirmedAt ? "licence status check" : null, ...missingDocs]
                 .filter(Boolean)
                 .join(", ")}
             </p>
