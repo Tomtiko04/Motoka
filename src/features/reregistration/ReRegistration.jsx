@@ -9,6 +9,8 @@ import {
   normaliseChassis,
 } from "../../utils/chassisNumber";
 import { ARREARS_PER_YEAR_NAIRA, quoteReRegistration } from "./fee";
+import { buildWhatsAppUrl } from "../../constants/support";
+import toast from "react-hot-toast";
 
 // The vehicle and current-owner details are already on the car record, so this
 // form does not ask for them again — it asks only for what re-registration
@@ -36,6 +38,39 @@ const DOCUMENTS = [
   },
 ];
 
+// The licence expiry on a car record is whatever the owner typed when they
+// added it. It decides ₦5,000 a year, and the person paying can edit it — so
+// it is treated as indicative only. The figure that counts comes back from an
+// agent who checks with the licensing office.
+const CHECK_KEY = (carId) => `motoka_rereg_check_${carId}`;
+
+function readCheck(carId) {
+  try {
+    const raw = window.localStorage.getItem(CHECK_KEY(carId));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCheck(carId, value) {
+  try {
+    window.localStorage.setItem(CHECK_KEY(carId), JSON.stringify(value));
+  } catch {
+    // Private browsing, or storage disabled. The request still went to
+    // WhatsApp; we just cannot remember it locally.
+  }
+}
+
+function makeReference(plate) {
+  const tail = String(plate ?? "")
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(-4)
+    .toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `RR-${tail || "0000"}-${rand}`;
+}
+
 const FIELD =
   "w-full rounded-xl border border-[#E4E9F2] bg-white px-4 py-3 text-sm text-[#05243F] outline-none placeholder:text-[#05243F]/30 focus:border-[#2389E3]";
 
@@ -53,6 +88,7 @@ export default function ReRegistration() {
   const [reading, setReading] = useState(false);
   const [readError, setReadError] = useState(null);
   const [expiryOverride, setExpiryOverride] = useState("");
+  const [check, setCheck] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
   const car = useMemo(
@@ -66,6 +102,7 @@ export default function ReRegistration() {
     setChassis(normaliseChassis(picked?.chasis_no ?? ""));
     setChassisSource("record");
     setExpiryOverride("");
+    setCheck(readCheck(id));
   }
 
   // Typing seventeen characters off a stamped plate is the worst part of this
@@ -105,10 +142,36 @@ export default function ReRegistration() {
     [car, expiryOverride],
   );
 
+  function requestCheck() {
+    if (!car) return;
+    const reference = makeReference(car.registration_no);
+    const record = { reference, requestedAt: new Date().toISOString() };
+
+    window.open(
+      buildWhatsAppUrl([
+        "Hello Motoka, please confirm a vehicle's licence status for re-registration.",
+        "",
+        `Reference: ${reference}`,
+        `Plate number: ${car.registration_no ?? "—"}`,
+        `Vehicle: ${[car.vehicle_make, car.vehicle_model].filter(Boolean).join(" ") || "—"}`,
+        chassis ? `Chassis: ${chassis}` : null,
+        car.expiry_date ? `Expiry on our record: ${car.expiry_date}` : "No expiry date on our record",
+        "",
+        "Please confirm the last expiry date and how many years are outstanding.",
+      ]),
+      "_blank",
+      "noopener,noreferrer",
+    );
+
+    writeCheck(car.id, record);
+    setCheck(record);
+    toast.success("WhatsApp is opening — tap Send to deliver the message.");
+  }
+
   const missingDocs = DOCUMENTS.filter((d) => !files[d.key]).map((d) => d.label);
   const ready =
     car &&
-    !quote.unknown &&
+    check &&
     newOwner.name.trim() &&
     newOwner.address.trim() &&
     newOwner.phone.trim() &&
@@ -197,66 +260,61 @@ export default function ReRegistration() {
             2. Registration status
           </h2>
 
-          {quote.unknown ? (
-            <div className="rounded-xl bg-[#FDF3E2] p-4">
-              <p className="text-sm font-semibold text-[#A86A00]">
-                We need the last expiry date to price this
-              </p>
-              <p className="mt-1 text-xs text-[#A86A00]/80">
-                This vehicle has no licence expiry date on record. Enter it and
-                we will work out what is owed.
-              </p>
-              <label
-                htmlFor="expiry-override"
-                className="mt-3 mb-1 block text-xs text-[#05243F]/50"
-              >
-                Vehicle licence expiry date
-              </label>
-              <input
-                id="expiry-override"
-                type="date"
-                value={expiryOverride}
-                onChange={(e) => setExpiryOverride(e.target.value)}
-                className={FIELD}
-              />
-            </div>
-          ) : (
+          {check ? (
             <div className="rounded-xl bg-[#F4F5FC] p-4">
               <div className="flex items-start gap-3">
                 <Icon
-                  icon={
-                    quote.upToDate
-                      ? "solar:check-circle-bold"
-                      : "solar:danger-triangle-bold"
-                  }
+                  icon="solar:clock-circle-bold"
                   fontSize={22}
-                  color={quote.upToDate ? "#21B993" : "#A86A00"}
+                  color="#2389E3"
                   className="mt-0.5 shrink-0"
                 />
                 <div>
                   <p className="text-sm font-semibold text-[#05243F]">
-                    {quote.upToDate
-                      ? "Papers are up to date"
-                      : `${quote.yearsMissed} year${
-                          quote.yearsMissed === 1 ? "" : "s"
-                        } missed`}
+                    We are checking with the licensing office
                   </p>
                   <p className="mt-1 text-xs text-[#05243F]/55">
-                    Licence expired{" "}
-                    {quote.expiry.toLocaleDateString("en-NG", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                    .{" "}
-                    {quote.arrears > 0
-                      ? `Arrears run at ₦${ARREARS_PER_YEAR_NAIRA.toLocaleString(
-                          "en-NG",
-                        )} for each year missed, counted from the day the licence lapsed. They are settled with the transfer and fall to the new owner.`
-                      : "No arrears to settle."}
+                    Our agents confirm the last expiry date and what is
+                    outstanding, then come back to you with the exact total.
+                    Quote reference{" "}
+                    <span className="font-mono font-semibold text-[#05243F]">
+                      {check.reference}
+                    </span>
+                    .
                   </p>
+                  <button
+                    type="button"
+                    onClick={requestCheck}
+                    className="mt-2 text-xs font-semibold text-[#2389E3] underline"
+                  >
+                    Send the message again
+                  </button>
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="rounded-xl bg-[#F4FAFF] p-4">
+              <p className="text-sm font-semibold text-[#05243F]">
+                We confirm the licence status before quoting
+              </p>
+              <p className="mt-1 text-xs text-[#05243F]/55">
+                {quote.unknown
+                  ? "We have no expiry date for this vehicle, so the arrears cannot be worked out here."
+                  : `Our record says the licence expired ${quote.expiry.toLocaleDateString(
+                      "en-NG",
+                      { day: "numeric", month: "long", year: "numeric" },
+                    )}, but that date was entered by hand and is not proof.`}{" "}
+                An agent checks it against the licensing office so the total you
+                pay is the real one.
+              </p>
+              <button
+                type="button"
+                onClick={requestCheck}
+                className="mt-3 flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                <Icon icon="ic:baseline-whatsapp" fontSize={18} />
+                Request a check on WhatsApp
+              </button>
             </div>
           )}
         </section>
@@ -382,44 +440,36 @@ export default function ReRegistration() {
       {car && (
         <>
           <div className="mb-4 rounded-2xl border border-[#E4E9F2] bg-white p-4">
-            {quote.unknown ? (
-              <p className="text-sm text-[#05243F]/55">
-                Enter the licence expiry date above to see the price.
-              </p>
-            ) : (
-              <>
-                <div className="flex items-baseline justify-between text-sm">
-                  <span className="text-[#05243F]/60">Re-registration</span>
-                  <span className="text-[#05243F]">
-                    ₦{quote.base.toLocaleString("en-NG")}
-                  </span>
-                </div>
-                {quote.arrears > 0 && (
-                  <div className="mt-2 flex items-baseline justify-between text-sm">
-                    <span className="text-[#05243F]/60">
-                      Arrears · {quote.yearsMissed} year
-                      {quote.yearsMissed === 1 ? "" : "s"} × ₦
-                      {ARREARS_PER_YEAR_NAIRA.toLocaleString("en-NG")}
-                    </span>
-                    <span className="text-[#05243F]">
-                      ₦{quote.arrears.toLocaleString("en-NG")}
-                    </span>
-                  </div>
-                )}
-                <div className="mt-3 flex items-baseline justify-between border-t border-[#E4E9F2] pt-3">
-                  <span className="text-sm font-semibold text-[#05243F]">
-                    Total
-                  </span>
-                  <span className="text-lg font-bold text-[#05243F]">
-                    ₦{quote.total.toLocaleString("en-NG")}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-[#05243F]/45">
-                  Government fees and our service fee included. Payable once
-                  your details are confirmed — nothing is charged now.
-                </p>
-              </>
-            )}
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-[#05243F]/60">Re-registration</span>
+              <span className="text-[#05243F]">
+                ₦{quote.base.toLocaleString("en-NG")}
+              </span>
+            </div>
+            <div className="mt-2 flex items-baseline justify-between text-sm">
+              <span className="text-[#05243F]/60">
+                Arrears · ₦{ARREARS_PER_YEAR_NAIRA.toLocaleString("en-NG")} per
+                year missed
+              </span>
+              <span className="text-[#05243F]/60">
+                {quote.unknown || !check
+                  ? "to confirm"
+                  : `₦${quote.arrears.toLocaleString("en-NG")} on our record`}
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline justify-between border-t border-[#E4E9F2] pt-3">
+              <span className="text-sm font-semibold text-[#05243F]">
+                {quote.unknown || quote.arrears > 0 ? "From" : "Total"}
+              </span>
+              <span className="text-lg font-bold text-[#05243F]">
+                ₦{quote.base.toLocaleString("en-NG")}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-[#05243F]/45">
+              Government fees and our service fee included. Any arrears are
+              added once we have confirmed the licence status — we will tell
+              you the exact total before anything is charged.
+            </p>
           </div>
 
           <button
@@ -431,9 +481,12 @@ export default function ReRegistration() {
             Continue
           </button>
 
-          {!ready && missingDocs.length > 0 && (
+          {!ready && (
             <p className="mt-2 text-center text-xs text-[#05243F]/45">
-              Still needed: {missingDocs.join(", ")}
+              Still needed:{" "}
+              {[!check ? "licence status check" : null, ...missingDocs]
+                .filter(Boolean)
+                .join(", ")}
             </p>
           )}
 
