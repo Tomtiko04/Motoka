@@ -19,7 +19,7 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
     { name: "Ladipo", path: "/ladipo" },
-    // { name: "Traffic Rules", path: "/traffic-rules" },
+    { name: "Traffic Rules", path: "/traffic-rules" },
   ];
 
   const accountLinks = [
