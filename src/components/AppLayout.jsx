@@ -13,6 +13,8 @@ import RecentNotificationModal from "./RecentNotification.jsx";
 import useCartStore, { selectItemCount } from "../store/cartStore";
 import { authStorage } from "../utils/authStorage";
 import Mo from "../features/mo/Mo.jsx";
+import Avatar from "../features/settings/components/ui/avatar";
+import { useProfile as useProfileQuery } from "../features/profile/useProfilePicture";
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
@@ -42,6 +44,8 @@ export default function AppLayout() {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { imageUrl: profileImageUrl } = useProfileQuery();
 
   const userName = localStorage.getItem("userInfo")
     ? JSON.parse(localStorage.getItem("userInfo")).name
@@ -272,9 +276,14 @@ export default function AppLayout() {
                     onClick={handleDropDownMenu}
                     className="flex cursor-pointer items-center gap-2 rounded-full border border-[#F4F5FC] p-1.5 transition-all hover:bg-[#F4F5FC]"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#05243F]/5 text-[#05243F]">
-                      <Icon icon="si:user-alt-4-fill" width="18" height="18" />
-                    </div>
+                    {/* The user's own picture, from the cached profile query,
+                        so it follows them to any device they sign in on. */}
+                    <Avatar
+                      src={profileImageUrl}
+                      name={userName}
+                      alt={userName}
+                      size="small"
+                    />
                     <Icon
                       icon="ri:arrow-down-s-line"
                       className={`text-[#05243F]/60 transition-transform duration-200 ${
