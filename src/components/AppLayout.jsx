@@ -19,7 +19,6 @@ import Mo from "../features/mo/Mo.jsx";
     { name: "Licenses", path: "/licenses" },
     { name: "Garage", path: "/garage" },
     { name: "Ladipo", path: "/ladipo" },
-    { name: "Traffic Rules", path: "/traffic-rules" },
   ];
 
   const accountLinks = [
@@ -315,6 +314,17 @@ export default function AppLayout() {
                               <span className="font-medium">{link.name}</span>
                             </Link>
                           ))}
+
+                          <Link
+                            to="/traffic-rules"
+                            onClick={() => setIsDropDownMenuOpen(false)}
+                            className="group mt-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#05243F]/70 transition-colors hover:bg-[#F4F5FC] hover:text-[#05243F]"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F5FC] text-[#05243F]/60 transition-colors group-hover:bg-[#2389E3]/10 group-hover:text-[#2389E3]">
+                              <Icon icon="material-symbols:traffic-rounded" width="20" />
+                            </div>
+                            <span className="font-medium">Traffic Rules</span>
+                          </Link>
 
                           <button
                             onClick={() => {
