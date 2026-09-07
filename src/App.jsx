@@ -39,6 +39,7 @@ import LocalGovPaper from "./features/licenses/LocalGovPaper.jsx";
 import TintPermit from "./features/licenses/TintPermit.jsx";
 import IntlDriverLicense from "./features/licenses/IntlDriverLicense.jsx";
 import TrafficRules from "./features/trafficrules/TrafficRules.jsx";
+import Help from "./features/support/Help";
 import ReRegistration from "./features/reregistration/ReRegistration";
 import AuthLayout from "./features/auth/AuthLayout.jsx";
 import AppLayout from "./components/AppLayout";
@@ -306,6 +307,7 @@ export default function App() {
             <Route path="wallet/callback" element={<WalletCallback />} />
             <Route path="referral" element={<Referral />} />
             <Route path="traffic-rules" element={<TrafficRules />} />
+            <Route path="help" element={<Help />} />
             <Route path="re-registration" element={<ReRegistration />} />
             <Route
               path="payment"
