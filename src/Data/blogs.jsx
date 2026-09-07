@@ -1,11 +1,20 @@
 import blog4 from "../assets/images/Hand and iPhone 16 Pro.png";
+// Covers use Motoka's own photographs of Nigerian vehicle papers rather than
+// stock photography. The stock shots they replaced showed white hands, which
+// is wrong for a Nigerian readership, and generic foreign scenes that could
+// have illustrated any country's blog. These are owned, unmistakably local,
+// and contain no people at all.
+import coverVehicleLicence from "../assets/v2/doc-1.webp";
+import coverOwnership from "../assets/v2/doc-2.webp";
+import coverPlate from "../assets/v2/plate-card.webp";
+import coverInspection from "../assets/v2/doc-5.webp";
 const blogData=[
     {
     id: 1,
     title: "How to Keep Your Car Documents Safe in Nigeria",
     excerpt: "Learn the best practices for storing and managing your vehicle papers digitally.",
     content: "Keeping your car documents safe is essential for every vehicle owner in Nigeria. Whether it's your registration, insurance papers, or maintenance records, these documents are critical for proving ownership and compliance with regulations. In this guide, we'll explore the best practices for storing and managing your vehicle papers digitally to ensure they're always accessible when you need them. First, consider going digital. Instead of keeping physical copies in your glove compartment, take clear photos or scans of all your documents and store them in a secure digital format. This reduces the risk of loss or damage from weather, accidents, or theft. Use cloud storage services that offer encryption and backup features to protect your documents. Second, organize your documents systematically. Create folders for different document types: registration, insurance, maintenance records, and inspection reports. Include dates on all files so you can easily identify the most recent versions. Third, keep physical backups in a safe location. While digital storage is convenient, it's wise to maintain copies in a waterproof, fireproof safe at home or with your bank. This ensures you have access even if you face technical issues. Lastly, make sure to update your documents regularly. When you renew your insurance, change your registration, or complete major maintenance, immediately add the new documents to your digital storage. Staying organized now will save you countless headaches when you need to access important information.",
-    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=800",
+    image: coverOwnership,
     date: "Mar 20, 2026",
   },
   {
@@ -13,7 +22,7 @@ const blogData=[
     title: "Why Digital Vehicle Records Matter",
     excerpt: "Avoid fines and stress by keeping your car records organized and accessible.",
     content: "In today's fast-paced world, keeping track of physical documents is becoming increasingly difficult. For vehicle owners in Nigeria, digital records have become more important than ever. This blog explores why maintaining digital vehicle records is crucial for every car owner. Digital records ensure quick access during emergencies. Imagine being stopped by a traffic officer and needing to provide proof of insurance or registration. With digital records on your phone, you can instantly pull up these documents. This quick accessibility can help you avoid unnecessary fines and legal complications. Digital records also provide accountability and proof of maintenance. By keeping digital copies of all service records, inspection reports, and repair invoices, you can track your vehicle's maintenance history. This documentation is invaluable when selling your car, as it demonstrates to potential buyers that the vehicle has been well-maintained. Another advantage is the reduced risk of document loss or damage. Physical documents can be damaged by water, fire, or simply misplaced. Digital records stored in the cloud with proper backups are virtually immune to such risks. You can access them from anywhere, at any time, and they're always protected. Digital records also make tax and insurance claims easier. When you file an insurance claim for damage or theft, having organized digital records of the incident and your vehicle's condition can speed up the process and increase the likelihood of claim approval. Finally, digital records help you comply with regulations. Many Nigerian states now require proof of regular vehicle inspections and maintenance. Digital records make it easy to demonstrate compliance and avoid penalties.",
-        image: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=800",
+        image: coverVehicleLicence,
     date: "Mar 18, 2026",
   },
   {
@@ -21,7 +30,7 @@ const blogData=[
     title: "Top 5 Mistakes Car Owners Make",
     excerpt: "Don’t fall into these common traps when managing your vehicle documents.",
     content: "Managing vehicle documents can be overwhelming, and many car owners fall into common traps that can lead to costly mistakes. Here are the top 5 mistakes to avoid: Mistake #1: Not Keeping Copies of Important Documents. Many owners keep only one copy of their registration, insurance, and inspection certificates. If the original is lost or damaged, they're left scrambling. Always maintain multiple copies—physical and digital—stored in different locations. Mistake #2: Forgetting to Renew Documents on Time. It's easy to forget when your insurance or inspection certificate expires. Missing renewal deadlines can result in hefty fines and legal trouble. Set reminders on your phone for renewal dates and mark your calendar. Mistake #3: Mixing Up Old and New Documents. Car owners often keep both old and new versions of documents without clearly labeling which is current. This confusion can lead to presenting expired documents to authorities. Always date your documents clearly and purge old versions from your active storage. Mistake #4: Not Keeping Maintenance Records. Many owners skip keeping records of repairs and maintenance. This is a mistake because maintenance records are crucial for warranty claims, resale value, and proving compliance with service requirements. Keep detailed records of every service, repair, and inspection. Mistake #5: Storing Important Documents in Unsafe Locations. Never keep your original documents in your car's glove compartment where they can be stolen or damaged. Store originals in a safe at home or with your bank, and carry digital copies on your phone. By avoiding these common mistakes, you'll ensure that your vehicle documents are always in order and easily accessible whenever needed.",   
-    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=800",
+    image: coverPlate,
     date: "Mar 15, 2026",
   },
   {
@@ -194,7 +203,7 @@ The simple fix for most of these
 Nearly every mistake here comes down to the same root cause: timing and tracking. Start early, keep documents consistent, and have a system that tells you what is expiring and when — before it becomes a problem on the road.
 
 Motoka tracks each expiry date, flags it well in advance, and handles the renewal itself — so the timing problem and the paperwork problem get solved together.`,
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=800",
+    image: coverInspection,
     date: "Sep 2, 2026",
   },
   {
