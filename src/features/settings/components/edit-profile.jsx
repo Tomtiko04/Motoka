@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useProfile } from "../hooks/useProfile"
-import Avatar from "./ui/avatar"
+import ProfilePictureUploader from "../../profile/ProfilePictureUploader"
 import { toast } from "react-hot-toast"
 
 export default function EditProfile({ onNavigate }) {
@@ -101,9 +101,7 @@ export default function EditProfile({ onNavigate }) {
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-start gap-6 items-center justify-between mb-8">
-        <div className="relative">
-          <Avatar src={profileData?.image} alt={displayData.name} />
-        </div>
+        <ProfilePictureUploader name={displayData.name} />
         <div className="text-right">
           <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">{displayData.name}</h2>
           <p className="text-base font-normal text-[#05243F]/40 sm:text-lg">{displayData.email}</p>
