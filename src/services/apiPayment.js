@@ -79,13 +79,6 @@ export async function initializePaystackPayment(payload) {
   return data;
 }
 
-export async function getPaystackReference(transactionId) {
-  const { data } = await api.get(
-    `/payment/paystack/reference/${transactionId}`,
-  );
-  return data;
-}
-
 export async function checkExistingPayments(carSlug, paymentScheduleIds) {
   const { data } = await api.post("/payment/check-existing", {
     car_slug: carSlug,
@@ -101,13 +94,6 @@ export async function abandonPayment(reference, reason = 'User navigated away') 
   } catch {
     // Silent fail — best-effort cleanup, don't block navigation
   }
-}
-
-
-
-export async function initiateDriversLicensePayment(slug) {
-  const { data } = await api.post(`/driver-license/${slug}/initialize-payment`);
-  return data;
 }
 
 /**
