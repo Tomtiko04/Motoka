@@ -576,6 +576,10 @@ export default function RenewLicense() {
     const completePaymentData = {
       ...normalized,
       car_slug: carDetail?.slug,
+      // Must survive into PaymentOptions: re-inits there (gateway switch, wallet)
+      // rebuild the payload from this session object, and the backend records
+      // whatever renewal_state it gets — null if we drop it here.
+      renewal_state: renewalState || undefined,
       selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
       // Only include delivery details if provided
       ...(deliveryDetails.address.trim() !== "" &&
