@@ -606,23 +606,23 @@ export default function Signup() {
                       Sign Up
                     </button>
                   </div>
-                  <div className="flex justify-center gap-x-3 items-center">
-                    <span className="text-center text-sm font-normal text-[#05243F66] opacity-40">
-                      or Signup with
-                    </span>
+                  <div className="flex justify-center items-center">
                     <button
                       type="button"
                       onClick={() => loginWithGoogle()}
                       disabled={isSigningUp || isLoadingGoogle}
-                      className={`h-10 w-10 rounded-full bg-[#F4F5FC] transition-all duration-300 sm:h-12 sm:w-12 ${isSigningUp || isLoadingGoogle
+                      className={`flex items-center gap-2 rounded-full border border-[#E1E5EE] bg-transparent px-5 py-2.5 whitespace-nowrap transition-all duration-300 ${isSigningUp || isLoadingGoogle
                         ? "cursor-not-allowed opacity-50"
-                        : "hover:bg-[#FFF4DD] active:scale-95"
+                        : "hover:bg-[#F4F5FC]/50 active:scale-95"
                         }`}
                     >
+                      <span className="text-sm font-normal text-[#05243F] opacity-70 whitespace-nowrap">
+                        or Signup with
+                      </span>
                       <img
                         src="https://www.svgrepo.com/show/475656/google-color.svg"
                         alt="Google"
-                        className="mx-auto h-4 w-4"
+                        className="h-4 w-4"
                       />
                     </button>
                   </div>

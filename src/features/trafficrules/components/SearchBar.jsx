@@ -1,23 +1,20 @@
-import { useState } from "react";
 import { Search } from "lucide-react";
 
-export default function SearchBar({ onSearch, searchTerm, setSearchTerm }) {
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    onSearch(value);
-  };
-
+export default function SearchBar({ searchTerm, setSearchTerm }) {
   return (
     <div className="relative mb-1">
+      <label htmlFor="traffic-search" className="sr-only">
+        Search traffic offences
+      </label>
       <div className="flex items-center rounded-full bg-[#ECEFF8] px-4 py-2.5">
         <Search color="#2389E3" size={20} className="mr-1" />
         <input
-          type="text"
-          placeholder="search"
+          id="traffic-search"
+          type="search"
+          placeholder="Search offences"
           value={searchTerm}
-          onChange={handleChange}
-          className="ml-1 w-full bg-transparent text-base font-medium text-[#05243F]/60 outline-none placeholder:text-[#05243F]/30 hover:bg-[#FDF6E8] focus:bg-[#FDF6E8]"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="ml-1 w-full bg-transparent text-base font-medium text-[#05243F]/60 outline-none placeholder:text-[#05243F]/30"
         />
       </div>
     </div>

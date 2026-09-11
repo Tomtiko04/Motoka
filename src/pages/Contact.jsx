@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import Seo from "../components/Seo";
-
-const WHATSAPP_NUMBER = "2348128685978";
+import { WHATSAPP_NUMBER } from "../constants/support";
 
 const SOCIALS = [
   {

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
+import { api } from "../../../../services/apiClient";
 
 export default function VerifyTwoFactor({ onVerify, email, onClose, isVerifying }) {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -52,22 +53,14 @@ export default function VerifyTwoFactor({ onVerify, email, onClose, isVerifying 
     setTimeLeft(600);
     
     try {
-     
-      const response = await fetch("/api/2fa/resend-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      
-      const data = await response.json();
+      const { data } = await api.post("/2fa/send-code");
       if (data.success) {
         toast.success("Verification code resent!");
       } else {
         toast.error(data.message || "Failed to resend code");
       }
     } catch (error) {
-      toast.error("Failed to resend code");
+      toast.error(error.response?.data?.message || "Failed to resend code");
     }
   };
 

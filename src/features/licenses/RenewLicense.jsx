@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDeliveryQuote } from "../../hooks/useDeliveryQuote";
+import DigitalCopyNote from "../../components/shared/DigitalCopyNote";
 
 const NIGERIAN_STATES = [
   "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
@@ -575,6 +576,10 @@ export default function RenewLicense() {
     const completePaymentData = {
       ...normalized,
       car_slug: carDetail?.slug,
+      // Must survive into PaymentOptions: re-inits there (gateway switch, wallet)
+      // rebuild the payload from this session object, and the backend records
+      // whatever renewal_state it gets — null if we drop it here.
+      renewal_state: renewalState || undefined,
       selectedSchedules: getAvailableSchedules(), // Use only unpaid schedules
       // Only include delivery details if provided
       ...(deliveryDetails.address.trim() !== "" &&
@@ -1040,6 +1045,8 @@ export default function RenewLicense() {
                   </>
                 )}
               </button>
+
+              <DigitalCopyNote className="mt-3" />
 
               {/* Additional info for duplicate payments */}
               {existingPayments.length > 0 &&

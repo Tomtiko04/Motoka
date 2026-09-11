@@ -85,7 +85,7 @@ const AdminUserDetails = () => {
       );
 
       const data = await response.json();
-      if (data.status) {
+      if (data.status ?? data.success) {
         toast.success('User suspended successfully');
         fetchUserDetails();
       } else {
@@ -116,7 +116,7 @@ const AdminUserDetails = () => {
       );
 
       const data = await response.json();
-      if (data.status) {
+      if (data.status ?? data.success) {
         toast.success('User activated successfully');
         fetchUserDetails();
       } else {

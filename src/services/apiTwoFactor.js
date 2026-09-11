@@ -2,20 +2,36 @@ import { api } from "./apiClient.js";
 import { authStorage } from "../utils/authStorage";
 
 // Function to handle 2FA verification during login
-// Function to handle 2FA verification during login
-export async function verifyLoginTwoFactor(twoFactorToken, code) {
+export async function verifyLoginTwoFactor({ userId, tempToken, code }) {
   const { data } = await api.post("/2fa/verify-login", {
-    "2fa_token": twoFactorToken,
-    code
+    user_id: userId,
+    temp_token: tempToken,
+    code,
   });
 
-  if (data?.authorization?.token) {
-    authStorage.setToken(data.authorization.token);
-    // Clear any registration token after full login via 2FA
-    authStorage.removeRegistrationToken();
+  // Same session shape as /login: data.data.session.{access,refresh}_token
+  const token = data?.data?.session?.access_token;
+  const refreshTokenValue = data?.data?.session?.refresh_token;
+
+  if (!token) throw new Error("Invalid token response");
+
+  authStorage.setToken(token);
+  if (refreshTokenValue) {
+    localStorage.setItem("refresh_token", refreshTokenValue);
   }
 
-  return data;
+  if (data?.data?.user) {
+    const user = data.data.user;
+    authStorage.setUserInfo({
+      ...user,
+      name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email,
+    });
+  }
+
+  // Clear any registration token after full login via 2FA
+  authStorage.removeRegistrationToken();
+
+  return { ...data, authorization: { token }, user: data.data?.user };
 }
 
 // Enable 2FA via email
@@ -36,9 +52,9 @@ export async function verifyTwoFactorEmail(code) {
   return data;
 }
 
-// Verify 2FA code from mobile app
+// Verify 2FA code from mobile app (backend route is /2fa/verify-google)
 export async function verifyTwoFactorApp(code) {
-  const { data } = await api.post("/2fa/verify-app", { code });
+  const { data } = await api.post("/2fa/verify-google", { code });
   return data;
 }
 

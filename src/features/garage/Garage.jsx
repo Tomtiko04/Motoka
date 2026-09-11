@@ -22,6 +22,10 @@ export default function Garage() {
     navigate("/licenses/renew", { state: { carDetail } });
   }
 
+  function handleViewDocuments(carDetail) {
+    navigate("/documents", { state: { carId: carDetail?.id } });
+  }
+
   function handleAddCar() {
     navigate("/add-car");
   }
@@ -52,6 +56,7 @@ export default function Garage() {
                 isRenew={true}
                 carDetail={car}
                 onRenewClick={handleRenewLicense}
+                onViewDocumentsClick={handleViewDocuments}
               />
             ))
           ) : (

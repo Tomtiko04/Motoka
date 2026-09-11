@@ -6,6 +6,7 @@ import {
 } from "./useAuth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 function ForgotPassword() {
   const [stepcount, setStepcount] = useState(1);
@@ -120,13 +121,25 @@ const StepTwo = ({ nextStep, prevStep, email, setToken }) => {
   return (
     <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
+        <button
+          onClick={prevStep}
+          disabled={isVerifyingReset}
+          type="button"
+          className="mb-4 flex items-center text-sm font-medium text-[#2389E3] hover:text-[#05243F] disabled:cursor-not-allowed"
+        >
+          <FaArrowLeft className="mr-2" />
+          Back
+        </button>
         <div className="text-center">
           <h2 className="my-2 text-lg font-medium text-[#05243F] sm:text-xl">
             Enter Verification Code
           </h2>
-          <p className="text-sm text-[#05243F]/40 sm:text-base">
+          <p className="text-[14px] text-[#05243F]/40">
             We have sent a verification code to your email address. Please enter
-            it below.
+            it below.{" "}
+            <span className="text-red-400">
+              If you don't see it, please check your spam or junk folder.
+            </span>
           </p>
         </div>
         <form className="mt-8 space-y-6" action="#" onSubmit={handleSubmit}>
@@ -148,19 +161,6 @@ const StepTwo = ({ nextStep, prevStep, email, setToken }) => {
                 className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="Verification Code"
               />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <button
-                onClick={prevStep}
-                disabled={isVerifyingReset}
-                className="disable:cursor-not-allowed font-medium text-[#2389E3] hover:text-[#05243F]"
-                type="button"
-              >
-                Back
-              </button>
             </div>
           </div>
 
@@ -205,6 +205,15 @@ const StepThree = ({ prevStep, email, token }) => {
   return (
     <div className="flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-fadeIn w-full max-w-[380px] rounded-[20px] bg-white p-4 shadow-lg sm:max-w-[420px] sm:p-6 md:max-w-[460px] md:p-8">
+        <button
+          disabled={isResetingPassword}
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-4 flex items-center text-sm font-medium text-[#2389E3] hover:text-[#05243F] disabled:cursor-not-allowed"
+        >
+          <FaArrowLeft className="mr-2" />
+          Back
+        </button>
         <div className="text-center">
           <h2 className="my-2 text-lg font-medium text-[#05243F] sm:text-xl">
             Reset Your Password
@@ -247,19 +256,6 @@ const StepThree = ({ prevStep, email, token }) => {
                 className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="Confirm Password"
               />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <button
-                disabled={isResetingPassword}
-                className="font-medium text-[#2389E3] hover:text-[#05243F]"
-                type="button"
-                onClick={()=> navigate(-1)}
-              >
-                Back
-              </button>
             </div>
           </div>
 

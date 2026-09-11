@@ -23,6 +23,10 @@ export default function Dashboard() {
     navigate("/licenses/renew", { state: { carDetail } });
   }
 
+  function handleViewDocuments(carDetail) {
+    navigate("/documents", { state: { carId: carDetail?.id } });
+  }
+
   function handleGarage() {
     navigate("/garage");
   }
@@ -84,6 +88,7 @@ export default function Dashboard() {
                   carDetail={sortedCars[0]}
                   isRenew={true}
                   onRenewClick={handleRenewLicense}
+                  onViewDocumentsClick={handleViewDocuments}
                 />
               </div>
               <div className="hidden h-full md:block">
@@ -117,6 +122,7 @@ export default function Dashboard() {
                           carDetail={car}
                           isRenew={true}
                           onRenewClick={handleRenewLicense}
+                          onViewDocumentsClick={handleViewDocuments}
                         />
                       </div>
                     </SwiperSlide>
