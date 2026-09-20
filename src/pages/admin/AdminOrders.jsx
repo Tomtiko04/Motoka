@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ClipboardDocumentListIcon,
   MagnifyingGlassIcon,
@@ -8,6 +9,8 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import AdminGuestOrders from './AdminGuestOrders';
+import useNewOrdersDot from '../../hooks/useNewOrdersDot';
 
 // Canonical status values mirror the DB enum. Display labels (incl. "New"
 // for pending) live only here; the API never sees the labels and the UI
@@ -26,11 +29,19 @@ const STATUS_LABEL = {
   cancelled:  'Cancelled',
 };
 const STATUS_COLOR = {
-  pending:    'text-blue-600',
+  pending:    'text-[#2389E3]',
   processing: 'text-orange-600',
   completed:  'text-green-600',
   cancelled:  'text-red-600',
 };
+
+// The two order streams share this page: signed-in renewal orders and guest
+// checkout orders. `?tab=guest` selects the guest stream (same pattern as the
+// Ladipo `?tab=` pages); deep links to /admin/guest-orders redirect here.
+const ORDER_TABS = [
+  { value: 'orders', label: 'Orders' },
+  { value: 'guest',  label: 'Guest Orders' },
+];
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -41,8 +52,18 @@ const AdminOrders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
   const [perPage, setPerPage] = useState(15);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') === 'guest' ? 'guest' : 'orders';
+  const { signed: signedPending, guest: guestPending } = useNewOrdersDot();
 
   useEffect(() => {
+    // The guest stream renders <AdminGuestOrders/>, which fetches for
+    // itself — skip the signed-in fetch (and clear any first-mount
+    // spinner) while that tab is showing.
+    if (activeTab === 'guest') {
+      setLoading(false);
+      return;
+    }
     // Check if admin is authenticated
     const token = localStorage.getItem('adminToken');
     if (!token) {
@@ -50,7 +71,7 @@ const AdminOrders = () => {
       return;
     }
     fetchOrders();
-  }, [activeFilter, currentPage]);
+  }, [activeFilter, currentPage, activeTab]);
 
   const fetchOrders = async () => {
     try {
@@ -181,7 +202,7 @@ const AdminOrders = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]"></div>
         <div className="ml-4">
           <p className="text-sm text-gray-600">Loading orders...</p>
         </div>
@@ -202,6 +223,45 @@ const AdminOrders = () => {
         </div>
       </div>
 
+      {/* Orders / Guest orders switcher */}
+      <div className="flex gap-2" role="tablist" aria-label="Order type">
+        {ORDER_TABS.map((t) => {
+          const pending = t.value === 'guest' ? guestPending : signedPending;
+          const selected = activeTab === t.value;
+          return (
+            <button
+              key={t.value}
+              role="tab"
+              aria-selected={selected}
+              onClick={() => {
+                setCurrentPage(1);
+                setSearchTerm('');
+                if (t.value === 'guest') setSearchParams({ tab: 'guest' });
+                else setSearchParams({});
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                selected
+                  ? 'bg-[#2389E3] text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {t.label}
+              {pending > 0 && (
+                <span
+                  title={`${pending} new`}
+                  className={`h-2 w-2 rounded-full ${selected ? 'bg-white' : 'bg-[#2389E3]'}`}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {activeTab === 'guest' ? (
+        <AdminGuestOrders />
+      ) : (
+        <>
+
       {/* Search and Filter Bar */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -214,7 +274,7 @@ const AdminOrders = () => {
                 placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent"
               />
             </div>
           </div>
@@ -225,7 +285,7 @@ const AdminOrders = () => {
             <select
               value={activeFilter}
               onChange={(e) => handleFilterChange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -245,7 +305,7 @@ const AdminOrders = () => {
             onClick={() => handleFilterChange(f.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
               activeFilter === f.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#2389E3] text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -294,7 +354,7 @@ const AdminOrders = () => {
                     onClick={() => handleViewOrder(order)}
                   >
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <span className="text-blue-600 hover:text-blue-800 hover:underline">
+                      <span className="text-[#2389E3] hover:text-[#2389E3] hover:underline">
                         {order.id}
                       </span>
                     </td>
@@ -333,7 +393,7 @@ const AdminOrders = () => {
                           e.stopPropagation();
                           handleViewOrder(order);
                         }}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] hover:bg-[#2389E3] rounded-lg transition-colors"
                       >
                         Check Order
                       </button>
@@ -396,7 +456,7 @@ const AdminOrders = () => {
                       onClick={() => handlePageChange(page)}
                       className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                         currentPage === page
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-[#2389E3] text-white'
                           : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                       }`}
                     >
@@ -424,6 +484,8 @@ const AdminOrders = () => {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
 
     </div>

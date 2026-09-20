@@ -60,7 +60,7 @@ export default function AdminGuestOrderDetails() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function AdminGuestOrderDetails() {
     <div className="space-y-6">
       <button
         type="button"
-        onClick={() => navigate('/admin/guest-orders')}
+        onClick={() => navigate('/admin/orders?tab=guest')}
         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
       >
         <ArrowLeftIcon className="h-4 w-4 mr-1" />

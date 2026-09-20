@@ -4,6 +4,7 @@ import { supabase } from '../../config/supabaseClient';
 import { toast } from 'react-hot-toast';
 import Logo from "../../assets/images/motoka logo.svg";
 import useAdminActivityPing from "../../hooks/useAdminActivityPing";
+import useNewOrdersDot from "../../hooks/useNewOrdersDot";
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -30,8 +31,9 @@ import {
 // router on the backend. Re-add this entry when that API is built.
 const NAV_ITEMS = [
   { name: 'Dashboard',       href: '/admin/dashboard',                    icon: HomeIcon,                  exact: true },
+  // Guest orders live as a tab inside Orders (see AdminOrders) — no separate
+  // nav entry. The Orders item stays active for both streams.
   { name: 'Orders',          href: '/admin/orders',                       icon: ClipboardDocumentListIcon, exact: false },
-  { name: 'Guest Orders',    href: '/admin/guest-orders',                 icon: ClipboardDocumentListIcon, exact: false },
   { name: 'Payments',        href: '/admin/payments',                     icon: CreditCardIcon,            exact: false },
   { name: 'Cars',            href: '/admin/cars',                         icon: TruckIcon,                 exact: false },
   { name: 'Users',           href: '/admin/users',                        icon: UsersIcon,                 exact: false },
@@ -53,7 +55,7 @@ const LADIPO_ITEMS = [
   { name: 'Categories', href: '/admin/ladipo?tab=categories' },
 ];
 
-function NavItem({ item, active, onClick }) {
+function NavItem({ item, active, dot, onClick }) {
   const Icon = item.icon;
   return (
     <button
@@ -66,6 +68,12 @@ function NavItem({ item, active, onClick }) {
     >
       <Icon className={`h-4.5 w-4.5 shrink-0 ${active ? 'text-[#EBB950]' : 'text-white/40 group-hover:text-white/70'}`} style={{ width: 18, height: 18 }} />
       <span className="flex-1 truncate">{item.name}</span>
+      {dot && (
+        <span
+          title="New orders need attention"
+          className="h-2 w-2 shrink-0 rounded-full bg-[#2389E3]"
+        />
+      )}
       {active && <ChevronRightIcon style={{ width: 12, height: 12 }} className="text-[#EBB950]/60 shrink-0" />}
     </button>
   );
@@ -131,6 +139,7 @@ const AdminLayout = () => {
   const { soundOn, toggleSound, total: alertTotal } = useAdminActivityPing({
     enabled: !!adminUser,
   });
+  const { hasNew: hasNewOrders } = useNewOrdersDot({ enabled: !!adminUser });
 
   useEffect(() => {
     const applySession = async (session) => {
@@ -208,10 +217,18 @@ const AdminLayout = () => {
     }
   };
 
-  const isActive = (item) =>
-    item.exact
-      ? location.pathname === item.href
-      : location.pathname.startsWith(item.href);
+  const isActive = (item) => {
+    if (item.exact) return location.pathname === item.href;
+    // Guest order details still live at /admin/guest-orders/:orderId — keep
+    // the Orders entry highlighted there too.
+    if (item.href === '/admin/orders') {
+      return (
+        location.pathname.startsWith('/admin/orders') ||
+        location.pathname.startsWith('/admin/guest-orders')
+      );
+    }
+    return location.pathname.startsWith(item.href);
+  };
 
   const handleNav = (href) => {
     navigate(href);
@@ -259,6 +276,7 @@ const AdminLayout = () => {
             key={item.href}
             item={item}
             active={isActive(item)}
+            dot={item.href === '/admin/orders' && hasNewOrders}
             onClick={() => handleNav(item.href)}
           />
         ))}

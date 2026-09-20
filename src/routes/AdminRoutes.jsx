@@ -59,9 +59,9 @@ const AdminRoutes = () => {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#2389E3]/5 to-[#2389E3]/10 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full mb-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-[#2389E3] rounded-full mb-3">
             <svg className="w-7 h-7 text-white animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -87,7 +87,9 @@ const AdminRoutes = () => {
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="orders/:slug" element={<AdminOrderDetails />} />
-                <Route path="guest-orders" element={<AdminGuestOrders />} />
+                {/* Guest orders merged into Orders as ?tab=guest — keep the
+                    old list URL working for bookmarks, details stay nested. */}
+                <Route path="guest-orders" element={<Navigate to="/admin/orders?tab=guest" replace />} />
                 <Route path="guest-orders/:orderId" element={<AdminGuestOrderDetails />} />
                 <Route path="agents" element={<AdminAgents />} />
                 <Route path="agents/create" element={<CreateAgent />} />
