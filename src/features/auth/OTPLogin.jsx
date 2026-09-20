@@ -60,7 +60,7 @@ export default function OTPLogin() {
           <p className="text-gray-600 mb-4">{errorMessage}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-4 py-2 bg-[#2389E3] text-white rounded-lg"
           >
             Reload Page
           </button>
@@ -128,7 +128,7 @@ export default function OTPLogin() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading OTP Login...</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function OTPLogin() {
           <p className="text-gray-600 mb-4">Step value: {String(step)}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-4 py-2 bg-[#2389E3] text-white rounded-lg"
           >
             Reload Page
           </button>
@@ -162,7 +162,7 @@ export default function OTPLogin() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button 
             onClick={() => setError(null)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-4 py-2 bg-[#2389E3] text-white rounded-lg"
           >
             Try Again
           </button>
@@ -174,7 +174,7 @@ export default function OTPLogin() {
   try {
     return (
       <div className="flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-      <div className="animate-fadeIn flex max-h-[80vh] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row p-4 sm:p-0 sm:px-0">
+      <div className="animate-fadeIn flex max-h-[80vh] min-h-[510px] w-full max-w-[864px] md:w-[864px] flex-col-reverse justify-center md:justify-between gap-0 overflow-hidden rounded-[20px] bg-white md:flex-row p-4 sm:p-0 sm:px-0">
         <div className="hidden w-full md:block sm:w-1/2 shrink-0 border-r border-[#F2F2F2] " >
                   <LoginImage />
                 </div>
@@ -226,7 +226,7 @@ export default function OTPLogin() {
                     {...registerEmail("email")}
                     type="email"
                     autoComplete="email"
-                    // className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    // className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-[#2389E3] focus:z-10 sm:text-sm"
                     className={`appearance-none block w-full relative rounded-md sm:rounded-xl bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F] shadow-2xs transition-colors duration-300 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none pl-10 pr-3 sm:py-3 -z-0 focus:z-5 ${
                   isVerifyingOTP || isSendingOTP
                     ? "cursor-not-allowed opacity-50"
@@ -263,7 +263,7 @@ export default function OTPLogin() {
               <button
                 type="submit"
                 disabled={isSendingOTP}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-lg font-medium rounded-3xl text-white bg-[#2389E3] hover:bg-[#3795e7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-lg font-medium rounded-3xl text-white bg-[#2389E3] hover:bg-[#2389E3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2389E3] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSendingOTP ? (
                   <div className="flex items-center">
@@ -290,7 +290,7 @@ export default function OTPLogin() {
                     type="text"
                     maxLength="6"
                     autoComplete="one-time-code"
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-2xl font-mono tracking-widest"
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-[#2389E3] text-center text-2xl font-mono tracking-widest"
                     placeholder="000000"
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^0-9]/g, "");
@@ -316,7 +316,7 @@ export default function OTPLogin() {
               <button
                 type="submit"
                 disabled={isVerifyingOTP || otp.length !== 6}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#2389E3] hover:bg-[#2389E3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2389E3] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isVerifyingOTP ? (
                   <div className="flex items-center">
@@ -334,7 +334,7 @@ export default function OTPLogin() {
                   type="button"
                   onClick={handleResendOTP}
                   disabled={!canResend}
-                  className="text-sm text-[#2389E3] hover:text-[#45a0ee] disabled:text-gray-400 disabled:cursor-not-allowed"
+                  className="text-sm text-[#2389E3] hover:text-[#2389E3] disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
                   {canResend ? "Resend OTP" : `Resend in ${formatTime(otpTimer)}`}
                 </button>
@@ -353,13 +353,13 @@ export default function OTPLogin() {
           <div className="text-center space-y-2">
             <p className="text-sm text-gray-500">
               Don't have an account?{" "}
-              <Link to="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link to="/auth/signup" className="font-medium text-[#2389E3] hover:text-[#2389E3]">
                 Sign up
               </Link>
             </p>
             <p className="text-sm text-gray-500">
               Or?{" "}
-              <Link to="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link to="/auth/login" className="font-medium text-[#2389E3] hover:text-[#2389E3]">
                 Sign in with password
               </Link>
             </p>
@@ -379,7 +379,7 @@ export default function OTPLogin() {
           <p className="text-gray-600 mb-4">{errorMessage}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-4 py-2 bg-[#2389E3] text-white rounded-lg"
           >
             Reload Page
           </button>
