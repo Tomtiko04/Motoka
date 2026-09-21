@@ -169,7 +169,7 @@ const AdminOrderDetails = () => {
         body: JSON.stringify({ reason: 'Cancelled in error' }),
       });
       const data = await response.json();
-      if (data.status) {
+      if (data.status ?? data.success) {
         await fetchOrderDetails();
         toast.success(data.message || 'Order reopened');
       } else {

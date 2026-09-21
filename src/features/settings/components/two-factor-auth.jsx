@@ -31,7 +31,14 @@ export default function TwoFactorAuth({ onNavigate }) {
       if (response.success) {
         toast.success(`2FA enabled via ${selectedMethod === "email" ? "email" : "mobile app"}!`);
         if (selectedMethod === "email") {
-          toast.success("Please check your email for the verification code.");
+          toast.success(
+            <>
+              Please check your email for the verification code.{" "}
+              <span className="text-red-400">
+                If you don't see it, check your spam or junk folder.
+              </span>
+            </>
+          );
         }
         setShowVerification(true);
       } else {

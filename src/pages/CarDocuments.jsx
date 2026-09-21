@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import PagesLayout from "./components/PageLayout";
 import DocumentsNav from "../components/DocumentsNav";
 import DocumentPage from "./components/DocumentPage";
@@ -8,10 +9,15 @@ import LoadingSpinner from "../components/LoadingSpinner";
 
 function CarDocuments() {
   const { cars, isLoading } = useGetCars();
+  const location = useLocation();
+  const requestedCarId = location.state?.carId;
   const [selectedDocument, setSelectedDocument] = useState("");
   const [docType, setDocType] = useState("MyCar");
   const [showsidebar, setShowsidebar] = useState(true);
   const [activeCarIndex, setActiveCarIndex] = useState(0);
+  // Only honor the incoming carId once, the first time cars load — after
+  // that, manual tab switches (onCarChange) must not be overridden.
+  const appliedRequestedCarId = useRef(false);
 
   const onMyCarClick = () => {
     setDocType("MyCar");
@@ -28,6 +34,14 @@ function CarDocuments() {
   }, [cars?.cars]);
 
   const activeCar = carArray[activeCarIndex];
+
+  useEffect(() => {
+    if (appliedRequestedCarId.current) return;
+    if (!requestedCarId || carArray.length === 0) return;
+    const idx = carArray.findIndex((c) => c.id === requestedCarId);
+    if (idx !== -1) setActiveCarIndex(idx);
+    appliedRequestedCarId.current = true;
+  }, [requestedCarId, carArray]);
 
   return (
     <div className="px-0 sm:px-6 lg:px-8 h-full pb-5">

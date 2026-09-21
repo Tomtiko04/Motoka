@@ -142,7 +142,7 @@ const AdminUsers = () => {
 
       const data = await response.json();
 
-      if (data.status) {
+      if (data.status ?? data.success) {
         toast.success('User suspended successfully');
         fetchUsers();
       } else {
@@ -174,7 +174,7 @@ const AdminUsers = () => {
 
       const data = await response.json();
 
-      if (data.status) {
+      if (data.status ?? data.success) {
         toast.success('User activated successfully');
         fetchUsers();
       } else {

@@ -30,7 +30,7 @@ import PrivacyPolicy from "./components/privacy-policy"
 import AccountAppUsage from "./components/account-app-usage"
 import LicensingRegistration from "./components/licensing-registration"
 import AutocareMaintenance from "./components/autocare-maintenance"
-// import FAQs from "./components/faqs"
+import FAQs from "./components/faqs"
 
 export default function SettingsPage() {
   const [activePage, setActivePage] = useState("main")
@@ -40,9 +40,14 @@ export default function SettingsPage() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.settingsPage === "ladipo-orders") {
+    const target = location.state?.settingsPage
+    if (target === "ladipo-orders") {
       setActivePage("ladipo-orders")
       setExpandedSection("payment")
+      navigate(location.pathname, { replace: true, state: {} })
+    } else if (target === "faqs") {
+      setActivePage("faqs")
+      setExpandedSection("faqs")
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.state, location.pathname, navigate])
@@ -128,10 +133,7 @@ export default function SettingsPage() {
         {activePage === "live-chat" && <LiveChat onNavigate={handleNavigate} />}
 
         {/* FAQs */}
-        {/* {(activePage === "faqs" ||
-          activePage === "account-usage" ||
-          activePage === "licensing" ||
-          activePage === "autocare") && <FAQs onNavigate={handleNavigate} />} */}
+        {activePage === "faqs" && <FAQs onNavigate={handleNavigate} />}
         {activePage === "account-app-usage" && <AccountAppUsage onNavigate={handleNavigate} />}
         {activePage === "licensing-registration" && <LicensingRegistration onNavigate={handleNavigate} />}
         {activePage === "autocare-maintenance" && <AutocareMaintenance onNavigate={handleNavigate} />}

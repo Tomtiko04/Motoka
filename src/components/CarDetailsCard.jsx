@@ -41,8 +41,19 @@ const getExpiryStatusStyle = (expiryStatus) => {
       message: "Renewal in progress"
     };
   } else if (status === "overdue") {
-    return { 
-      bgColor: "#FFE8E8", 
+    // Past a year overdue, a raw day count stops being useful — switch to
+    // "1y+ overdue", "2y+ overdue", etc.
+    const daysOverdue = typeof effectiveDays === "number" ? Math.abs(effectiveDays) : null;
+    if (daysOverdue !== null && daysOverdue >= 365) {
+      const years = Math.floor(daysOverdue / 365);
+      return {
+        bgColor: "#FFE8E8",
+        dotColor: "#DB8888",
+        message: `${years}y+ overdue`
+      };
+    }
+    return {
+      bgColor: "#FFE8E8",
       dotColor: "#DB8888",
       message: effectiveLabel || "Overdue"
     };
@@ -78,6 +89,7 @@ const getExpiryStatusStyle = (expiryStatus) => {
 
 export default function CarDetailsCard({
   onRenewClick,
+  onViewDocumentsClick,
   carDetail,
   isRenew,
   onSelect,
@@ -93,6 +105,13 @@ export default function CarDetailsCard({
 
   const handleRenewClick = () => {
     onRenewClick(carDetail);
+  };
+
+  const handleViewDocumentsClick = () => {
+    // Fall back to renew if a caller forgot to wire this up, rather than
+    // silently doing nothing on click.
+    if (onViewDocumentsClick) onViewDocumentsClick(carDetail);
+    else onRenewClick(carDetail);
   };
 
   // Load car logo
@@ -126,6 +145,10 @@ export default function CarDetailsCard({
   const reminderMessage = statusStyle.message;
   const daysRemaining = expiryStatusData?.days_remaining;
   const expiryStatus = expiryStatusData?.status; // "reminder", "overdue", or "no_reminder"
+
+  // Same condition getExpiryStatusStyle uses for the green "Up to date"
+  // badge — no reminder/overdue window active and no renewal in progress.
+  const isUpToDate = !expiryStatus || expiryStatus === "no_reminder";
 
   return (
     <div
@@ -194,7 +217,7 @@ export default function CarDetailsCard({
 
       <div className={` ${!isRenew ? 'w-full' : 'flex items-center justify-between'}`}>
         <div
-          className={`flex w-full items-center gap-2 rounded-full px-3 md:w-auto ${!isRenew ? 'justify-start py-3' : 'justify-center py-1.5'}`}
+          className="flex w-fit items-center gap-2 rounded-full p-4"
           style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
@@ -210,10 +233,11 @@ export default function CarDetailsCard({
             className="w-full cursor-pointer whitespace-nowrap rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
             onClick={(e) => {
               e.stopPropagation();
-              handleRenewClick();
+              if (isUpToDate) handleViewDocumentsClick();
+              else handleRenewClick();
             }}
           >
-            Renew Now
+            {isUpToDate ? "View Documents" : "Renew Now"}
           </button>
         )}
       </div>

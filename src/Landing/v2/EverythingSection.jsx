@@ -109,10 +109,13 @@ function PhoneMock({ activeIndex, reduceMotion, widthClamp = 'clamp(240px, 35.1v
   // 562px cap — taller than a laptop viewport, which cropped the top of the
   // phone behind the header. When fitViewport is set, height leads instead and
   // width follows the aspect ratio, so the whole handset stays on screen.
-  // The /1.1 accounts for the landing's body zoom, which scales svh with it.
+  // The divisor accounts for the landing's body zoom, which scales svh with
+  // it. It has to track the zoom rather than assume 1.1: the zoom is now
+  // gated to >=1600px, so below that a fixed 1.1 shrank the phone ~6% for a
+  // zoom that was not being applied.
   const sizing = fitViewport
     ? {
-        height: `min(calc(100svh / 1.1 - 24px), calc((${widthClamp}) * 2012 / 1324))`,
+        height: `min(calc(100svh / var(--landing-zoom, 1.1) - 24px), calc((${widthClamp}) * 2012 / 1324))`,
         width: 'auto',
       }
     : { width: widthClamp }
@@ -205,6 +208,12 @@ export default function EverythingSection() {
             col-start-1 row-start-1) so the phone has the list's full height
             to pin against instead of just its own short row. */}
         <div className="flex flex-col min-w-0 col-start-1 row-start-1 lg:col-auto lg:row-auto">
+          {/* Block height sets the scroll distance between features. On
+              desktop 50vh is the slack the sticky phone pins against, so it
+              stays. Below lg there is no phone — the block was 65vh of empty
+              space beside nothing. 26vh sits just above the block's own
+              content and above the observer's middle-20% band, so features
+              still activate one at a time without the dead scroll. */}
           {FEATURES.map((feature, index) => {
             const distance = Math.abs(index - activeIndex)
             return (
@@ -212,7 +221,7 @@ export default function EverythingSection() {
                 key={feature.title}
                 data-index={index}
                 ref={(el) => (featureRefs.current[index] = el)}
-                className="min-h-[65vh] lg:min-h-[50vh] flex flex-col justify-center transition-[filter,opacity] duration-500 ease-out"
+                className="min-h-[26vh] lg:min-h-[50vh] flex flex-col justify-center transition-[filter,opacity] duration-500 ease-out"
                 style={getBlurStyle(distance, reduceMotion)}
               >
                 <div className="flex flex-col lg:flex-row lg:items-center gap-[16px] lg:gap-[24px]">
