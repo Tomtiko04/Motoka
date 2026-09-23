@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ClipboardDocumentListIcon,
-  UserGroupIcon,
   TruckIcon,
   CreditCardIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
   DocumentTextIcon,
   UsersIcon,
   CalendarDaysIcon,
+  HomeIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import {
@@ -20,18 +18,14 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from 'recharts';
 import config from '../../config/config';
 import GatewayHealthPanel from '../../components/admin/GatewayHealthPanel';
 import RenewalsSummary from '../../components/admin/RenewalsSummary';
-import { Pulse } from '../../components/admin/renewalsMetrics';
+import { PageHeader, StatCard, StatusBadge } from '../../components/admin/ui';
 
-function KpiNumber({ ready, children, className }) {
-  if (!ready) return <Pulse className="mt-1 h-8 w-24" />;
-  return <p className={className}>{children}</p>;
-}
+const formatNaira = (value) =>
+  `₦${Number(value || 0).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -39,6 +33,7 @@ const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
+  const [guestPaidOrders, setGuestPaidOrders] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [chartPeriod, setChartPeriod] = useState('monthly');
 
@@ -66,11 +61,12 @@ const AdminDashboard = () => {
         return null;
       });
 
-    const [statsData, ordersResult, txResult, allOrdersResult] = await Promise.all([
+    const [statsData, ordersResult, txResult, allOrdersResult, guestResult] = await Promise.all([
       statsPromise,
       fetch(`${config.getApiBaseUrl()}/admin/recent-orders`, { headers }).then(safeJson).catch(() => null),
       fetch(`${config.getApiBaseUrl()}/admin/recent-transactions`, { headers }).then(safeJson).catch(() => null),
       fetch(`${config.getApiBaseUrl()}/admin/orders?page=1&per_page=200`, { headers }).then(safeJson).catch(() => null),
+      fetch(`${config.getApiBaseUrl()}/admin/guest-orders?page=1&limit=100&status=payment_success`, { headers }).then(safeJson).catch(() => null),
     ]);
 
     if (ordersResult?.status) setRecentOrders(ordersResult.data);
@@ -80,6 +76,15 @@ const AdminDashboard = () => {
       ? (allOrdersResult.data?.data || allOrdersResult.data || [])
       : (ordersResult?.data || []);
     setAllOrders(orders);
+
+    // Paid guest renewals feed the revenue chart alongside user orders.
+    // Guest amounts are stored in kobo; normalise to naira here.
+    const guestOrders = (guestResult?.data?.orders || []).map((o) => ({
+      created_at: o.created_at,
+      amount: Number(o.total_amount || 0) / 100,
+      status: 'completed',
+    }));
+    setGuestPaidOrders(guestOrders);
 
     const allFailed = !statsData && !ordersResult && !txResult && !allOrdersResult;
     if (allFailed) toast.error('Failed to fetch dashboard data');
@@ -116,9 +121,9 @@ const AdminDashboard = () => {
   // Re-bucket whenever orders data or period changes — no extra fetch needed
   useEffect(() => {
     const source = allOrders.length > 0 ? allOrders : recentOrders;
-    const built = buildChartFromOrders(source, chartPeriod);
+    const built = buildChartFromOrders([...source, ...guestPaidOrders], chartPeriod);
     if (built.length > 0) setChartData(built);
-  }, [chartPeriod, allOrders, recentOrders]);
+  }, [chartPeriod, allOrders, recentOrders, guestPaidOrders]);
 
   // Helper function to format order status. Accepts canonical DB values
   // (pending|processing|completed|cancelled) and legacy aliases for
@@ -152,172 +157,76 @@ const AdminDashboard = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'New':
-        return 'text-blue-600';
-      case 'Done':
-        return 'text-blue-600';
-      case 'Declined':
-        return 'text-red-600';
-      default:
-        return 'text-gray-600';
-    }
+  const STATUS_TONE = {
+    'New': 'blue',
+    'In Progress': 'amber',
+    'Done': 'green',
+    'Cancelled': 'gray',
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-center">
-        <DocumentTextIcon className="h-6 w-6 text-gray-600 mr-2" />
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-      </div>
+      <PageHeader
+        icon={HomeIcon}
+        title="Dashboard"
+        subtitle="Revenue, orders, and renewals at a glance"
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
-        {/* Total Amount */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
-                ₦{stats ? parseFloat(stats.total_amount).toLocaleString() : '0'}
-              </KpiNumber>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <CreditCardIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
-                {stats ? stats.total_orders.toLocaleString() : '0'}
-              </KpiNumber>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Users */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
-                {stats ? stats.total_users.toLocaleString() : '0'}
-              </KpiNumber>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <UsersIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Cars */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
-                {stats ? stats.total_cars.toLocaleString() : '0'}
-              </KpiNumber>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <TruckIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+        <StatCard
+          icon={CreditCardIcon}
+          label="Total Revenue"
+          value={formatNaira(stats?.total_amount)}
+          hint={
+            Number(stats?.guest_revenue) > 0
+              ? `incl. ${formatNaira(stats.guest_revenue)} from guest renewals`
+              : null
+          }
+          color="green"
+          loading={!statsReady}
+        />
+        <StatCard
+          icon={ClipboardDocumentListIcon}
+          label="Total Orders"
+          value={stats ? Number(stats.total_orders).toLocaleString() : '0'}
+          hint={
+            Number(stats?.guest_paid_orders) > 0
+              ? `incl. ${Number(stats.guest_paid_orders).toLocaleString()} guest`
+              : null
+          }
+          loading={!statsReady}
+        />
+        <StatCard
+          icon={UsersIcon}
+          label="Total Users"
+          value={stats ? Number(stats.total_users).toLocaleString() : '0'}
+          loading={!statsReady}
+        />
+        <StatCard
+          icon={TruckIcon}
+          label="Total Cars"
+          value={stats ? Number(stats.total_cars).toLocaleString() : '0'}
+          loading={!statsReady}
+        />
         <Link
           to={
             stats?.expired_month
               ? `/admin/renewals?bucket=expired&month=${stats.expired_month}`
               : '/admin/renewals?bucket=expired'
           }
-          className="bg-white rounded-lg shadow-sm p-6 hover:bg-gray-50 transition-colors"
+          className="block rounded-xl transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Expired this month</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
-                {stats ? Number(stats.expired_cars_this_month || 0).toLocaleString() : '0'}
-              </KpiNumber>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
+          <StatCard
+            icon={CalendarDaysIcon}
+            label="Expired this month"
+            value={stats ? Number(stats.expired_cars_this_month || 0).toLocaleString() : '0'}
+            hint="View call list"
+            color="amber"
+            loading={!statsReady}
+            className="h-full"
+          />
         </Link>
-      </div>
-
-      {/* Order Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Pending Orders */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {stats ? stats.pending_orders.toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-              <span className="text-yellow-600 text-sm font-bold">!</span>
-            </div>
-          </div>
-        </div> */}
-
-        {/* In Progress Orders */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">In Progress</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {stats ? stats.in_progress_orders.toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 text-sm font-bold">→</span>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Completed Orders */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {stats ? stats.completed_orders.toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 text-sm font-bold">✓</span>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Declined Orders */}
-        {/* <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Declined</p>
-              <p className="text-2xl font-bold text-red-600">
-                {stats ? stats.declined_orders.toLocaleString() : '0'}
-              </p>
-            </div>
-            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-              <span className="text-red-600 text-sm font-bold">✗</span>
-            </div>
-          </div>
-        </div> */}
       </div>
 
       {/* Renewals — who is expiring and who is already paid up */}
@@ -329,7 +238,7 @@ const AdminDashboard = () => {
       {/* Chart and Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Chart */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Revenue & Orders</h3>
             <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
@@ -382,7 +291,7 @@ const AdminDashboard = () => {
                   }
                   contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }}
                 />
-                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2284DB" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="orders" dataKey="orders" name="Orders" fill="#93c5fd" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -394,29 +303,29 @@ const AdminDashboard = () => {
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-            <a href="/admin/orders" className="text-blue-600 text-sm font-medium">See More</a>
+            <Link to="/admin/orders" className="text-blue-600 text-sm font-medium hover:text-blue-700">See More</Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1">
             {recentOrders.length > 0 ? (
               recentOrders.slice(0, 5).map((order, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => window.location.href = `/admin/orders/${order.slug}`}
+                <Link
+                  key={index}
+                  to={`/admin/orders/${order.slug}`}
+                  className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div>
                     <p className="text-sm font-medium text-gray-900">
                       #{order.id} {formatOrderType(order.order_type)}
                     </p>
-                    <p className="text-sm text-gray-600">₦{parseFloat(order.amount).toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">{formatNaira(order.amount)}</p>
                   </div>
-                  <span className={`text-sm font-medium ${getStatusColor(formatOrderStatus(order.status))}`}>
+                  <StatusBadge tone={STATUS_TONE[formatOrderStatus(order.status)] || 'gray'}>
                     {formatOrderStatus(order.status)}
-                  </span>
-                </div>
+                  </StatusBadge>
+                </Link>
               ))
             ) : (
               <div className="text-center py-4">
@@ -428,34 +337,34 @@ const AdminDashboard = () => {
       </div>
 
       {/* Recent Transactions */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Transaction</h3>
-          <a href="/admin/payments" className="text-blue-600 text-sm font-medium">See More</a>
+          <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+          <Link to="/admin/payments" className="text-blue-600 text-sm font-medium hover:text-blue-700">See More</Link>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-1">
           {recentTransactions.length > 0 ? (
             recentTransactions.map((transaction, index) => (
-              <div
+              <Link
                 key={index}
-                className="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                onClick={() => window.location.href = '/admin/payments'}
+                to="/admin/payments"
+                className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50">
                   <DocumentTextIcon className="h-4 w-4 text-blue-600" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-gray-900">
                     {transaction.gateway_reference || transaction.id} {formatOrderType(transaction.payment_type || 'Payment')}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-500">
                     {new Date(transaction.created_at).toLocaleDateString('en-GB')}
                   </p>
                 </div>
-                <p className="text-sm font-medium text-blue-600">
-                  ₦{parseFloat(transaction.amount).toLocaleString()}
+                <p className="text-sm font-semibold tabular-nums text-gray-900">
+                  {formatNaira(transaction.amount)}
                 </p>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="text-center py-4">

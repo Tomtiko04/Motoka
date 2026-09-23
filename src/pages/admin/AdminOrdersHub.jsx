@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 import AdminOrders from './AdminOrders';
 import AdminGuestOrders from './AdminGuestOrders';
 import { adminListGuestOrders } from '../../services/apiDelivery';
 import config from '../../config/config';
+import { PageHeader } from '../../components/admin/ui';
 
 const LAST_SEEN_KEY = 'adminOrdersLastSeen';
 const POLL_MS = 60000;
@@ -90,6 +92,11 @@ export default function AdminOrdersHub() {
 
   return (
     <div className="space-y-6">
+      <PageHeader
+        icon={ClipboardDocumentListIcon}
+        title="Orders"
+        subtitle="Renewal orders from registered users and guests"
+      />
       <div className="flex gap-2 border-b border-gray-200">
         {tabs.map(({ key, label }) => {
           const isActive = key === activeTab;

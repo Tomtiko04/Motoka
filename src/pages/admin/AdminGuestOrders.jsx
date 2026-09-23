@@ -39,6 +39,13 @@ function hasDelivery(order) {
   return Boolean(order?.delivery_details?.address || Number(order?.delivery_fee) > 0);
 }
 
+// "Vehicle licence +2" — first item by name, the rest as a count.
+function summarizeItems(items) {
+  if (!Array.isArray(items) || items.length === 0) return '—';
+  const first = items[0]?.name || items[0]?.id;
+  return items.length > 1 ? `${first} +${items.length - 1}` : first;
+}
+
 export default function AdminGuestOrders() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -138,6 +145,7 @@ export default function AdminGuestOrders() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Guest</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plate</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivery</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -156,6 +164,7 @@ export default function AdminGuestOrders() {
                       <div className="text-xs text-gray-500">{order.guest_email}</div>
                     </td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">{order.plate_number}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{summarizeItems(order.items)}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{formatNairaFromKobo(order.total_amount)}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {hasDelivery(order) ? 'Yes' : 'No'}
