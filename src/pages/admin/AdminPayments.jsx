@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   CreditCardIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
+  BanknotesIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   EyeIcon,
   XMarkIcon,
   CheckCircleIcon,
@@ -13,6 +13,16 @@ import {
 import toast from 'react-hot-toast';
 import config from '../../config/config';
 import { markTransactionPaid, markTransactionFailed } from '../../services/apiAdminDocument';
+import {
+  PageHeader,
+  StatCard,
+  StatusBadge,
+  EmptyState,
+  CARD,
+  TH,
+  INPUT,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 
 const EMPTY_SUMMARY = {
   counts: { total: 0, successful: 0, pending: 0, failed: 0, abandoned: 0 },
@@ -43,7 +53,7 @@ const AdminPayments = () => {
   const statusOptions = [
     { value: 'All', label: 'All Transactions', color: 'gray' },
     { value: 'success', label: 'Successful', color: 'green' },
-    { value: 'pending', label: 'Pending', color: 'yellow' },
+    { value: 'pending', label: 'Pending', color: 'amber' },
     { value: 'failed', label: 'Failed', color: 'red' },
     { value: 'abandoned', label: 'Abandoned', color: 'gray' },
   ];
@@ -102,6 +112,7 @@ const AdminPayments = () => {
       style: 'currency',
       currency: 'NGN',
       minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -115,22 +126,18 @@ const AdminPayments = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      successful: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
-      approved: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
-      success: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
-      pending: { color: 'bg-blue-100 text-blue-800', label: 'Pending' },
-      failed: { color: 'bg-blue-100 text-blue-800', label: 'Failed' },
-      declined: { color: 'bg-blue-100 text-blue-800', label: 'Failed' },
-      abandoned: { color: 'bg-blue-100 text-blue-800', label: 'Abandoned' },
+      successful: { tone: 'green', label: 'Success' },
+      approved: { tone: 'green', label: 'Success' },
+      success: { tone: 'green', label: 'Success' },
+      pending: { tone: 'amber', label: 'Pending' },
+      failed: { tone: 'red', label: 'Failed' },
+      declined: { tone: 'red', label: 'Failed' },
+      abandoned: { tone: 'gray', label: 'Abandoned' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
-    
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-        {config.label}
-      </span>
-    );
+
+    return <StatusBadge tone={config.tone}>{config.label}</StatusBadge>;
   };
 
   const handleSearch = (e) => {
@@ -198,84 +205,59 @@ const AdminPayments = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center space-x-3">
-        <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-          <CreditCardIcon className="h-6 w-6 text-blue-600" />
-        </div>
-        <h1 className="text-xl font-semibold text-gray-900">Transaction</h1>
-      </div>
+      <PageHeader
+        icon={CreditCardIcon}
+        title="Payments"
+        subtitle="Money received, pending and failed across every gateway"
+      />
 
       {/* Summary Cards — real "money received" view, broken out by state */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Received */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Received</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(summary.amounts?.received ?? 0)}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {summary.counts?.successful ?? 0} successful
-              </p>
-            </div>
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <ArrowUpIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
+        <StatCard
+          icon={BanknotesIcon}
+          color="green"
+          label="Received"
+          value={formatCurrency(summary.amounts?.received ?? 0)}
+          hint={`${summary.counts?.successful ?? 0} successful`}
+        />
         {/* Pending — money that should be coming in but hasn't settled */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(summary.amounts?.pending ?? 0)}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {summary.counts?.pending ?? 0} awaiting payment
-              </p>
-            </div>
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
+        <StatCard
+          icon={ClockIcon}
+          color="amber"
+          label="Pending"
+          value={formatCurrency(summary.amounts?.pending ?? 0)}
+          hint={`${summary.counts?.pending ?? 0} awaiting payment`}
+        />
         {/* Failed / Abandoned (counts, not amounts) */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Failed / Abandoned</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {(summary.counts?.failed ?? 0) + (summary.counts?.abandoned ?? 0)}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {summary.counts?.failed ?? 0} failed · {summary.counts?.abandoned ?? 0} abandoned
-              </p>
-            </div>
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          icon={ExclamationTriangleIcon}
+          color="red"
+          label="Failed / Abandoned"
+          value={(summary.counts?.failed ?? 0) + (summary.counts?.abandoned ?? 0)}
+          hint={`${summary.counts?.failed ?? 0} failed · ${summary.counts?.abandoned ?? 0} abandoned`}
+        />
       </div>
 
       {/* Gateway sub-tiles */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm">
-          <p className="text-gray-500">Monipay</p>
-          <p className="text-lg font-semibold text-gray-900">{summary.by_gateway?.monipay ?? 0} txns</p>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm">
-          <p className="text-gray-500">Paystack</p>
-          <p className="text-lg font-semibold text-gray-900">{summary.by_gateway?.paystack ?? 0} txns</p>
-        </div>
+        <StatCard
+          icon={CreditCardIcon}
+          color="gray"
+          label="Monipay"
+          value={summary.by_gateway?.monipay ?? 0}
+          hint="transactions"
+        />
+        <StatCard
+          icon={CreditCardIcon}
+          color="gray"
+          label="Paystack"
+          value={summary.by_gateway?.paystack ?? 0}
+          hint="transactions"
+        />
       </div>
 
       {/* All Transactions Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className={CARD}>
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <h2 className="text-lg font-semibold text-gray-900">All Transactions</h2>
@@ -292,7 +274,7 @@ const AdminPayments = () => {
                   placeholder="Search transactions..."
                   value={searchTerm}
                   onChange={handleSearch}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className={`${INPUT} pl-10`}
                 />
               </div>
 
@@ -302,7 +284,7 @@ const AdminPayments = () => {
                   <button
                     key={option.value}
                     onClick={() => handleFilterChange(option.value)}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                       activeFilter === option.value
                         ? 'bg-blue-100 text-blue-700 border border-blue-200'
                         : 'text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -323,7 +305,7 @@ const AdminPayments = () => {
                 <button
                   key={g.value}
                   onClick={() => { setActiveGateway(g.value); setCurrentPage(1); }}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                     activeGateway === g.value
                       ? 'bg-gray-900 text-white'
                       : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
@@ -355,33 +337,17 @@ const AdminPayments = () => {
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Transaction ID
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Amount
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  Gateway
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className={`${TH} whitespace-nowrap`}>Transaction ID</th>
+                <th className={TH}>User</th>
+                <th className={TH}>Description</th>
+                <th className={`${TH} whitespace-nowrap`}>Amount</th>
+                <th className={TH}>Gateway</th>
+                <th className={TH}>Status</th>
+                <th className={TH}>Date</th>
+                <th className={TH}>Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-100">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
@@ -432,15 +398,9 @@ const AdminPayments = () => {
                       {formatCurrency(transaction.amount)}
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                        transaction.payment_gateway === 'monipay'
-                          ? 'bg-teal-100 text-teal-800'
-                          : transaction.payment_gateway === 'monicredit'
-                          ? 'bg-purple-100 text-purple-800'
-                          : 'bg-indigo-100 text-indigo-800'
-                      }`}>
+                      <StatusBadge tone={transaction.payment_gateway === 'monipay' ? 'blue' : 'gray'}>
                         {transaction.payment_gateway || 'paystack'}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap">
                       {getStatusBadge(transaction.status)}
@@ -466,7 +426,7 @@ const AdminPayments = () => {
                               onClick={() => handleMarkPaid(transaction.transaction_id)}
                               className={`p-1 rounded ${
                                 transaction.status === 'abandoned'
-                                  ? 'text-orange-600 hover:bg-orange-50'
+                                  ? 'text-amber-600 hover:bg-amber-50'
                                   : transaction.status === 'pending'
                                   ? 'text-green-600 hover:bg-green-50'
                                   : 'text-blue-600 hover:bg-blue-50'
@@ -498,9 +458,16 @@ const AdminPayments = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center">
-                    <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No transactions found</p>
+                  <td colSpan="8">
+                    <EmptyState
+                      icon={DocumentTextIcon}
+                      title="No transactions found"
+                      body={
+                        searchTerm || activeFilter !== 'All' || activeGateway !== 'all'
+                          ? 'Try adjusting your search or filter criteria.'
+                          : 'No transactions have been recorded yet.'
+                      }
+                    />
                   </td>
                 </tr>
               )}
@@ -518,14 +485,14 @@ const AdminPayments = () => {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${BTN_SECONDARY} !px-3`}
               >
                 Previous
               </button>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${BTN_SECONDARY} !px-3`}
               >
                 Next
               </button>
@@ -656,7 +623,10 @@ const AdminPayments = () => {
                     </div>
                   ) : (
                     <div className="border-t pt-4">
-                      <p className="text-xs text-orange-600 font-medium mb-3">⚠ No order linked to this transaction yet.</p>
+                      <p className="mb-3 flex items-center gap-1.5 text-xs font-medium text-amber-600">
+                        <ExclamationTriangleIcon className="h-4 w-4 shrink-0" />
+                        No order linked to this transaction yet.
+                      </p>
                     </div>
                   )}
 

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeftIcon,
   TrashIcon,
+  TruckIcon,
+  PencilSquareIcon,
   UserIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -20,6 +22,17 @@ import {
 import { toast } from 'react-hot-toast';
 import config from '../../config/config';
 import EditCarModal from '../../components/admin/EditCarModal';
+import {
+  PageHeader,
+  StatusBadge,
+  Spinner,
+  PageLoader,
+  EmptyState,
+  CARD,
+  INPUT,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 
 const formatAmount = (n) =>
   `₦${parseFloat(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -38,23 +51,19 @@ const formatScheduleName = (id) =>
 
 const StatusPill = ({ status }) => {
   const map = {
-    active:    { bg: 'bg-green-100 text-green-800',  label: 'Registered' },
-    approved:  { bg: 'bg-green-100 text-green-800',  label: 'Approved' },
-    unpaid:    { bg: 'bg-yellow-100 text-yellow-800', label: 'Renewal Due' },
-    expired:   { bg: 'bg-red-100 text-red-800',       label: 'Expired' },
-    pending:   { bg: 'bg-blue-100 text-blue-800',     label: 'Pending' },
-    completed: { bg: 'bg-green-100 text-green-800',   label: 'Completed' },
-    processing:{ bg: 'bg-orange-100 text-orange-800',label: 'In Progress' },
-    cancelled: { bg: 'bg-gray-100 text-gray-600',     label: 'Cancelled' },
-    successful:{ bg: 'bg-green-100 text-green-800',   label: 'Successful' },
-    failed:    { bg: 'bg-red-100 text-red-800',       label: 'Failed' },
+    active:    { tone: 'green', label: 'Registered' },
+    approved:  { tone: 'green', label: 'Approved' },
+    unpaid:    { tone: 'amber', label: 'Renewal Due' },
+    expired:   { tone: 'red',   label: 'Expired' },
+    pending:   { tone: 'blue',  label: 'Pending' },
+    completed: { tone: 'green', label: 'Completed' },
+    processing:{ tone: 'amber', label: 'In Progress' },
+    cancelled: { tone: 'gray',  label: 'Cancelled' },
+    successful:{ tone: 'green', label: 'Successful' },
+    failed:    { tone: 'red',   label: 'Failed' },
   };
-  const cfg = map[status?.toLowerCase()] || { bg: 'bg-gray-100 text-gray-700', label: status };
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.bg}`}>
-      {cfg.label}
-    </span>
-  );
+  const cfg = map[status?.toLowerCase()] || { tone: 'gray', label: status };
+  return <StatusBadge tone={cfg.tone}>{cfg.label}</StatusBadge>;
 };
 
 const DOC_CATEGORIES = [
@@ -68,16 +77,12 @@ const DOC_CATEGORIES = [
 
 const DocStatusPill = ({ status }) => {
   const map = {
-    pending:  { bg: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-    approved: { bg: 'bg-green-100 text-green-800',  label: 'Approved' },
-    rejected: { bg: 'bg-red-100 text-red-800',      label: 'Rejected' },
+    pending:  { tone: 'amber', label: 'Pending' },
+    approved: { tone: 'green', label: 'Approved' },
+    rejected: { tone: 'red',   label: 'Rejected' },
   };
-  const cfg = map[status?.toLowerCase()] || { bg: 'bg-gray-100 text-gray-700', label: status };
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.bg}`}>
-      {cfg.label}
-    </span>
-  );
+  const cfg = map[status?.toLowerCase()] || { tone: 'gray', label: status };
+  return <StatusBadge tone={cfg.tone}>{cfg.label}</StatusBadge>;
 };
 
 const AdminCarDetails = () => {
@@ -237,18 +242,16 @@ const AdminCarDetails = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!car) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-gray-500">Car not found</p>
-      </div>
+      <EmptyState
+        icon={TruckIcon}
+        title="Car not found"
+        body="The car you're looking for doesn't exist."
+      />
     );
   }
 
@@ -263,51 +266,40 @@ const AdminCarDetails = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/admin/cars')}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Car Details</h1>
-            <p className="text-sm text-gray-500">{car.registration_no || car.slug}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
-            Edit Car
-          </button>
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
-          >
-            <TrashIcon className="h-4 w-4" />
-            Delete Car
-          </button>
-        </div>
-      </div>
+      <button
+        onClick={() => navigate('/admin/cars')}
+        className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors"
+      >
+        <ArrowLeftIcon className="h-5 w-5" />
+      </button>
+      <PageHeader
+        icon={TruckIcon}
+        title="Car Details"
+        subtitle={car.registration_no || car.slug}
+        actions={
+          <>
+            <button onClick={() => setShowEditModal(true)} className={BTN_SECONDARY}>
+              <PencilSquareIcon className="h-4 w-4" />
+              Edit Car
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
+            >
+              <TrashIcon className="h-4 w-4" />
+              Delete Car
+            </button>
+          </>
+        }
+      />
 
       {/* Hero Card */}
-      <div className="overflow-hidden rounded-xl shadow">
-        <div className="bg-[#05243F] px-6 py-6">
+      <div className={`${CARD} overflow-hidden`}>
+        <div className="bg-blue-600 px-6 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/20 text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-9 w-9">
-                  <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 116 0h3a.75.75 0 00.75-.75V15z" />
-                  <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z" />
-                  <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
-                </svg>
+                <TruckIcon className="h-9 w-9" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -327,7 +319,7 @@ const AdminCarDetails = () => {
                 </span>
               )}
               {isUrgent && !isExpired && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500/30 px-3 py-1 text-xs font-semibold text-yellow-100">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 px-3 py-1 text-xs font-semibold text-amber-100">
                   <ClockIcon className="h-3.5 w-3.5" />
                   Expires in {daysLeft}d
                 </span>
@@ -343,7 +335,7 @@ const AdminCarDetails = () => {
           </div>
           <div className="bg-white px-4 py-3">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Expiry Date</p>
-            <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-700' : isUrgent ? 'text-yellow-600' : 'text-gray-900'}`}>
+            <p className={`mt-1 text-lg font-bold ${isExpired ? 'text-red-700' : isUrgent ? 'text-amber-600' : 'text-gray-900'}`}>
               {formatDate(car.expiry_date)}
             </p>
           </div>
@@ -356,11 +348,11 @@ const AdminCarDetails = () => {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Registration Info */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className={`${CARD} p-6`}>
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Registration Details</h3>
           <dl className="space-y-3">
             {[
-              ['Status', <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${car.registration_status === 'registered' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>{car.registration_status?.toUpperCase() || 'N/A'}</span>],
+              ['Status', <StatusBadge tone={car.registration_status === 'registered' ? 'green' : 'gray'}>{car.registration_status?.toUpperCase() || 'N/A'}</StatusBadge>],
               ['Chassis No.', car.chasis_no || 'N/A'],
               ['Engine No.', car.engine_no || 'N/A'],
               ['Date Issued', formatDate(car.date_issued)],
@@ -374,7 +366,7 @@ const AdminCarDetails = () => {
         </div>
 
         {/* Owner Info */}
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className={`${CARD} p-6`}>
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Owner Information</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -409,7 +401,7 @@ const AdminCarDetails = () => {
       </div>
 
       {/* Orders History */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={CARD}>
         <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <ClipboardDocumentListIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Order History</h3>
@@ -445,15 +437,12 @@ const AdminCarDetails = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-            <ClipboardDocumentListIcon className="h-10 w-10 mb-2 opacity-40" />
-            <p className="text-sm">No orders yet</p>
-          </div>
+          <EmptyState icon={ClipboardDocumentListIcon} title="No orders yet" />
         )}
       </div>
 
       {/* Transaction History */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={CARD}>
         <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <CreditCardIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Payment Transactions</h3>
@@ -476,15 +465,12 @@ const AdminCarDetails = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-            <CreditCardIcon className="h-10 w-10 mb-2 opacity-40" />
-            <p className="text-sm">No transactions yet</p>
-          </div>
+          <EmptyState icon={CreditCardIcon} title="No transactions yet" />
         )}
       </div>
 
       {/* Car Documents */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className={CARD}>
         <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
           <DocumentArrowUpIcon className="h-5 w-5 text-gray-400" />
           <h3 className="text-sm font-semibold text-gray-900">Car Documents</h3>
@@ -500,7 +486,7 @@ const AdminCarDetails = () => {
               <select
                 value={uploadCategory}
                 onChange={e => setUploadCategory(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={`${INPUT} bg-white`}
               >
                 {DOC_CATEGORIES.map(c => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -520,7 +506,7 @@ const AdminCarDetails = () => {
             <button
               type="submit"
               disabled={uploading || !uploadFile}
-              className="shrink-0 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className={`${BTN_PRIMARY} shrink-0`}
             >
               {uploading ? 'Uploading…' : 'Upload'}
             </button>
@@ -530,7 +516,7 @@ const AdminCarDetails = () => {
         {/* Document List */}
         {docsLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+            <Spinner />
           </div>
         ) : documents.length > 0 ? (
           <div className="divide-y divide-gray-50">
@@ -586,11 +572,11 @@ const AdminCarDetails = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-            <DocumentArrowUpIcon className="h-10 w-10 mb-2 opacity-40" />
-            <p className="text-sm">No documents uploaded yet</p>
-            <p className="text-xs mt-1">Use the form above to upload car documents</p>
-          </div>
+          <EmptyState
+            icon={DocumentArrowUpIcon}
+            title="No documents uploaded yet"
+            body="Use the form above to upload car documents"
+          />
         )}
       </div>
 

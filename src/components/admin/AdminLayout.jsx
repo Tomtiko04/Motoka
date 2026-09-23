@@ -240,15 +240,13 @@ const AdminLayout = () => {
 
   const Sidebar = () => (
     <aside className="flex h-full w-64 flex-col bg-[#05243F]">
-      {/* Logo */}
-      <div className="flex items-center gap-2 pl-3 pr-3 pt-8 pb-5 border-b border-white/8">
+      {/* Logo — single row so the mark, wordmark, and ADMIN chip share one centerline */}
+      <div className="flex items-center gap-2.5 px-4 pt-7 pb-5 border-b border-white/8">
         <img src={Logo} alt="Motoka" className="h-7 w-7 object-contain shrink-0" style={{height:28,width:28}} />
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-white leading-tight">Motoka</p>
-          <span className="inline-block mt-1 rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide bg-[#EBB950]/15 text-[#EBB950] leading-none">
-            ADMIN
-          </span>
-        </div>
+        <p className="text-base font-semibold text-white leading-none">Motoka</p>
+        <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide bg-[#EBB950]/15 text-[#EBB950] leading-none">
+          ADMIN
+        </span>
       </div>
 
       {/* Nav */}

@@ -8,6 +8,16 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import {
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  CARD,
+  TH,
+  INPUT,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 
 // Canonical status values mirror the DB enum. Display labels (incl. "New"
 // for pending) live only here; the API never sees the labels and the UI
@@ -25,11 +35,11 @@ const STATUS_LABEL = {
   completed:  'Completed',
   cancelled:  'Cancelled',
 };
-const STATUS_COLOR = {
-  pending:    'text-blue-600',
-  processing: 'text-orange-600',
-  completed:  'text-green-600',
-  cancelled:  'text-red-600',
+const STATUS_TONE = {
+  pending:    'blue',
+  processing: 'amber',
+  completed:  'green',
+  cancelled:  'gray',
 };
 
 const AdminOrders = () => {
@@ -83,7 +93,7 @@ const AdminOrders = () => {
       } else {
         toast.error('Failed to fetch orders');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch orders');
     } finally {
       setLoading(false);
@@ -179,31 +189,18 @@ const AdminOrders = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <div className="ml-4">
-          <p className="text-sm text-gray-600">Loading orders...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <ClipboardDocumentListIcon className="h-6 w-6 text-gray-600 mr-2" />
-          <h1 className="text-xl font-semibold text-gray-900">Orders</h1>
-        </div>
-        <div className="text-sm text-gray-500">
-          {totalOrders} total orders
-        </div>
+      {/* Hub provides the page header; keep only the count */}
+      <div className="text-right text-sm text-gray-500">
+        {totalOrders} total orders
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className={`${CARD} p-4`}>
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
@@ -214,7 +211,7 @@ const AdminOrders = () => {
                 placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`${INPUT} pl-10`}
               />
             </div>
           </div>
@@ -225,7 +222,7 @@ const AdminOrders = () => {
             <select
               value={activeFilter}
               onChange={(e) => handleFilterChange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -255,38 +252,22 @@ const AdminOrders = () => {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className={`${CARD} overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Purpose
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Renewal State
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className={TH}>Order ID</th>
+                <th className={TH}>Name</th>
+                <th className={TH}>Purpose</th>
+                <th className={TH}>Amount</th>
+                <th className={TH}>Location</th>
+                <th className={TH}>Renewal State</th>
+                <th className={TH}>Status</th>
+                <th className={TH}>Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-100">
               {filteredOrders.map((order, index) => (
                   <tr
                     key={index}
@@ -315,17 +296,15 @@ const AdminOrders = () => {
                         <span className="flex items-center gap-1.5">
                           {order.renewalState}
                           {order.renewalState === "Lagos" && (
-                            <span className="inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">
-                              Inspection
-                            </span>
+                            <StatusBadge tone="amber">Inspection</StatusBadge>
                           )}
                         </span>
                       ) : '—'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`text-sm font-medium ${STATUS_COLOR[order.status] || 'text-gray-600'}`}>
+                      <StatusBadge tone={STATUS_TONE[order.status] || 'gray'}>
                         {STATUS_LABEL[order.status] || order.status}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <button
@@ -333,7 +312,7 @@ const AdminOrders = () => {
                           e.stopPropagation();
                           handleViewOrder(order);
                         }}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                        className={BTN_PRIMARY}
                       >
                         Check Order
                       </button>
@@ -346,21 +325,20 @@ const AdminOrders = () => {
       </div>
 
       {filteredOrders.length === 0 && (
-        <div className="text-center py-12">
-          <ClipboardDocumentListIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-          <p className="text-gray-500">
-            {searchTerm || activeFilter !== 'All' 
+        <EmptyState
+          icon={ClipboardDocumentListIcon}
+          title="No orders found"
+          body={
+            searchTerm || activeFilter !== 'all'
               ? 'Try adjusting your search or filter criteria.'
               : 'No orders have been placed yet.'
-            }
-          </p>
-        </div>
+          }
+        />
       )}
 
       {/* Pagination */}
       {!loading && filteredOrders.length > 0 && totalPages > 1 && (
-        <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className={`${CARD} p-4`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Showing X to Y of Z results */}
             <div className="text-sm text-gray-700">
@@ -377,7 +355,7 @@ const AdminOrders = () => {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className={`${BTN_SECONDARY} !px-3`}
               >
                 <ChevronLeftIcon className="h-4 w-4" />
                 Previous
@@ -416,7 +394,7 @@ const AdminOrders = () => {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className={`${BTN_SECONDARY} !px-3`}
               >
                 Next
                 <ChevronRightIcon className="h-4 w-4" />

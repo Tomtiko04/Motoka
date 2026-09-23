@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { GiftIcon } from "@heroicons/react/24/outline";
 import {
   getAdminReferralSettings,
   updateAdminReferralSettings,
   listAdminReferrals,
 } from "../../services/apiAdminReferral";
+import {
+  PageHeader,
+  Card,
+  StatusBadge,
+  EmptyState,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  INPUT,
+  TH,
+  TD,
+} from "../../components/admin/ui";
 
 const koboToNaira = (kobo) => (Number(kobo || 0) / 100).toFixed(2);
 const nairaToKobo = (naira) => Math.round(parseFloat(naira) * 100);
@@ -16,6 +28,13 @@ const STATUS_OPTIONS = [
   { value: "rewarded", label: "Rewarded" },
   { value: "rejected", label: "Rejected" },
 ];
+
+const STATUS_TONES = {
+  pending: "amber",
+  qualified: "blue",
+  rewarded: "green",
+  rejected: "red",
+};
 
 export default function AdminReferral() {
   const [settings, setSettings] = useState(null);
@@ -114,16 +133,15 @@ export default function AdminReferral() {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[#05243F]">Referral Program</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Rewards credit both wallets after the referred user&apos;s first real purchase.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        icon={GiftIcon}
+        title="Referral Program"
+        subtitle="Rewards credit both wallets after the referred user's first real purchase."
+      />
 
-      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-[#05243F]">Bonus amounts</h2>
+      <Card className="p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Bonus amounts</h2>
         {loadingSettings ? (
           <div className="h-24 animate-pulse rounded-xl bg-gray-100" />
         ) : (
@@ -136,7 +154,7 @@ export default function AdminReferral() {
                 step="1"
                 value={referrerNaira}
                 onChange={(e) => setReferrerNaira(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-[#F4F5FC] px-3 py-2.5 text-[#05243F] focus:outline-none focus:ring-2 focus:ring-[#2389E3]/30"
+                className={INPUT}
               />
             </label>
             <label className="block text-sm">
@@ -147,7 +165,7 @@ export default function AdminReferral() {
                 step="1"
                 value={refereeNaira}
                 onChange={(e) => setRefereeNaira(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-[#F4F5FC] px-3 py-2.5 text-[#05243F] focus:outline-none focus:ring-2 focus:ring-[#2389E3]/30"
+                className={INPUT}
               />
             </label>
             <label className="block text-sm">
@@ -158,7 +176,7 @@ export default function AdminReferral() {
                 placeholder="Unlimited"
                 value={maxRewards}
                 onChange={(e) => setMaxRewards(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-[#F4F5FC] px-3 py-2.5 text-[#05243F] focus:outline-none focus:ring-2 focus:ring-[#2389E3]/30"
+                className={INPUT}
               />
             </label>
             <div className="flex flex-col justify-end gap-3">
@@ -167,7 +185,7 @@ export default function AdminReferral() {
                   type="checkbox"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-[#2389E3]"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600"
                 />
                 Program active
               </label>
@@ -175,7 +193,7 @@ export default function AdminReferral() {
                 type="button"
                 disabled={saving}
                 onClick={saveSettings}
-                className="rounded-xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1b6dbd] disabled:opacity-60"
+                className={BTN_PRIMARY}
               >
                 {saving ? "Saving…" : "Save settings"}
               </button>
@@ -187,15 +205,15 @@ export default function AdminReferral() {
             Last updated {new Date(settings.updated_at).toLocaleString("en-NG")}
           </p>
         )}
-      </div>
+      </Card>
 
-      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      <Card className="p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-[#05243F]">Referrals</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Referrals</h2>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-[#F4F5FC] px-3 py-2 text-sm text-[#05243F]"
+            className={`${INPUT} w-auto`}
           >
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value || "all"} value={o.value}>
@@ -212,43 +230,47 @@ export default function AdminReferral() {
             ))}
           </div>
         ) : list.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-500">No referrals found.</p>
+          <EmptyState
+            icon={GiftIcon}
+            title="No referrals found"
+            body="Referrals will appear here once users start sharing their codes."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 text-xs uppercase tracking-wide text-gray-400">
-                  <th className="px-3 py-2 font-medium">Referrer</th>
-                  <th className="px-3 py-2 font-medium">Referee</th>
-                  <th className="px-3 py-2 font-medium">Code</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
-                  <th className="px-3 py-2 font-medium">Rewards</th>
-                  <th className="px-3 py-2 font-medium">Attributed</th>
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className={TH}>Referrer</th>
+                  <th className={TH}>Referee</th>
+                  <th className={TH}>Code</th>
+                  <th className={TH}>Status</th>
+                  <th className={TH}>Rewards</th>
+                  <th className={TH}>Attributed</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {list.map((r) => (
-                  <tr key={r.id} className="border-b border-gray-50">
-                    <td className="px-3 py-3">
-                      <div className="font-medium text-[#05243F]">{r.referrer?.name || "—"}</div>
+                  <tr key={r.id}>
+                    <td className={TD}>
+                      <div className="font-medium text-gray-900">{r.referrer?.name || "—"}</div>
                       <div className="text-xs text-gray-400">{r.referrer?.email}</div>
                     </td>
-                    <td className="px-3 py-3">
-                      <div className="font-medium text-[#05243F]">{r.referee?.name || "—"}</div>
+                    <td className={TD}>
+                      <div className="font-medium text-gray-900">{r.referee?.name || "—"}</div>
                       <div className="text-xs text-gray-400">{r.referee?.email}</div>
                     </td>
-                    <td className="px-3 py-3 font-mono text-xs">{r.referral_code}</td>
-                    <td className="px-3 py-3">
-                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium capitalize text-gray-700">
+                    <td className={`${TD} font-mono text-xs`}>{r.referral_code}</td>
+                    <td className={TD}>
+                      <StatusBadge tone={STATUS_TONES[r.status] || "gray"} className="capitalize">
                         {r.status}
-                      </span>
+                      </StatusBadge>
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-600">
+                    <td className={`${TD} text-xs text-gray-600`}>
                       {r.status === "rewarded"
                         ? `₦${koboToNaira(r.referrer_reward_kobo)} / ₦${koboToNaira(r.referee_reward_kobo)}`
                         : "—"}
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-500">
+                    <td className={`${TD} text-xs text-gray-500`}>
                       {r.attributed_at
                         ? new Date(r.attributed_at).toLocaleString("en-NG")
                         : "—"}
@@ -270,7 +292,7 @@ export default function AdminReferral() {
                 type="button"
                 disabled={page <= 1}
                 onClick={() => loadList(page - 1)}
-                className="rounded-lg border px-3 py-1.5 disabled:opacity-40"
+                className={BTN_SECONDARY}
               >
                 Previous
               </button>
@@ -278,14 +300,14 @@ export default function AdminReferral() {
                 type="button"
                 disabled={page >= totalPages}
                 onClick={() => loadList(page + 1)}
-                className="rounded-lg border px-3 py-1.5 disabled:opacity-40"
+                className={BTN_SECONDARY}
               >
                 Next
               </button>
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

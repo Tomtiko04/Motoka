@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   UserGroupIcon,
   ArrowUpTrayIcon,
-  MapPinIcon,
+  CheckIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import { PageHeader, CARD, INPUT, BTN_PRIMARY } from '../../components/admin/ui';
 
 const CreateAgent = () => {
   const [formData, setFormData] = useState({
@@ -52,8 +53,8 @@ const CreateAgent = () => {
   const testApiConnection = async () => {
     try {
       const response = await fetch(`${config.getApiBaseUrl()}/test-cors`);
-      const data = await response.json();
-    } catch (error) {
+      await response.json();
+    } catch {
       toast.error('API connection test failed');
     }
   };
@@ -114,7 +115,7 @@ const CreateAgent = () => {
         setStates(data.data);
         setFilteredStates(data.data);
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch states');
     }
   };
@@ -134,7 +135,7 @@ const CreateAgent = () => {
         setBanks(data.data);
         setFilteredBanks(data.data);
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch banks');
     }
   };
@@ -194,7 +195,7 @@ const CreateAgent = () => {
           duration: 4000,
         });
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to verify account');
       setAccountVerified(false);
       // Show info that bank details are still saved
@@ -263,9 +264,10 @@ const CreateAgent = () => {
         }
         
         if (!testResponse.ok) {
-          const errorText = await testResponse.text();
+          await testResponse.text();
         }
-      } catch (error) {
+      } catch {
+        // Non-blocking token check
       }
 
       // Validate required fields
@@ -294,7 +296,7 @@ const CreateAgent = () => {
           toast.error(`An agent already exists for ${selectedState.name} state. Please select a different state.`);
           return;
         }
-      } catch (error) {
+      } catch {
         // Continue with creation if check fails (backend will handle validation)
         console.log('State check failed, continuing with backend validation');
       }
@@ -398,13 +400,14 @@ const CreateAgent = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center">
-        <UserGroupIcon className="h-6 w-6 text-gray-600 mr-2" />
-        <h1 className="text-xl font-semibold text-gray-900">Agents/Create Agent</h1>
-      </div>
+      <PageHeader
+        icon={UserGroupIcon}
+        title="Create Agent"
+        subtitle="Add a new agent to the network"
+      />
 
       {/* Form */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className={`${CARD} p-6`}>
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Fill Agent Details</h2>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -468,7 +471,7 @@ const CreateAgent = () => {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder="Enter first name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -484,7 +487,7 @@ const CreateAgent = () => {
                   value={formData.surname}
                   onChange={handleInputChange}
                   placeholder="Enter surname"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -500,7 +503,7 @@ const CreateAgent = () => {
                   value={formData.address}
                   onChange={handleInputChange}
                   placeholder="Enter address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -516,7 +519,7 @@ const CreateAgent = () => {
                   value={formData.location}
                   onChange={handleInputChange}
                   placeholder="Enter location"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -532,7 +535,7 @@ const CreateAgent = () => {
                   value={formData.accountNumber}
                   onChange={handleInputChange}
                   placeholder="Enter account number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -550,7 +553,7 @@ const CreateAgent = () => {
                     onChange={(e) => setBankSearchTerm(e.target.value)}
                     onFocus={() => setIsBankDropdownOpen(true)}
                     placeholder="Search and select bank..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className={INPUT}
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                     <ChevronDownIcon className="h-4 w-4 text-gray-400" />
@@ -558,7 +561,7 @@ const CreateAgent = () => {
                   </div>
                   
                   {isBankDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                       {filteredBanks.length > 0 ? (
                         filteredBanks.map((bank) => (
                           <div
@@ -587,19 +590,22 @@ const CreateAgent = () => {
                     type="button"
                     onClick={verifyAccount}
                     disabled={isVerifyingAccount}
-                    className={`w-full px-4 py-2 rounded-md text-sm font-medium ${
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       accountVerified
                         ? 'bg-green-100 text-green-800 border border-green-300'
-                        : isVerifyingAccount
-                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         : 'bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200'
                     }`}
                   >
-                    {isVerifyingAccount
-                      ? 'Verifying...'
-                      : accountVerified
-                      ? '✓ Account Verified'
-                      : 'Verify Account'}
+                    {isVerifyingAccount ? (
+                      'Verifying...'
+                    ) : accountVerified ? (
+                      <>
+                        <CheckIcon className="h-4 w-4" />
+                        Account Verified
+                      </>
+                    ) : (
+                      'Verify Account'
+                    )}
                   </button>
                   {accountVerified && formData.accountName && (
                     <p className="text-xs text-green-600 mt-1">
@@ -624,7 +630,7 @@ const CreateAgent = () => {
                     }}
                     onFocus={() => setIsStateDropdownOpen(true)}
                     placeholder="Search and select state..."
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className={`${INPUT} pr-10`}
                   />
                   <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <button
@@ -638,7 +644,7 @@ const CreateAgent = () => {
                 
                 {/* Dropdown */}
                 {isStateDropdownOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                     {filteredStates.length > 0 ? (
                       filteredStates.map((state) => (
                         <button
@@ -671,7 +677,7 @@ const CreateAgent = () => {
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   placeholder="Enter phone number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -687,7 +693,7 @@ const CreateAgent = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Enter email address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -720,10 +726,7 @@ const CreateAgent = () => {
 
           {/* Submit Button */}
           <div className="flex justify-end pt-6 border-t border-gray-200">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
-            >
+            <button type="submit" className={BTN_PRIMARY}>
               Create Agent
             </button>
           </div>
