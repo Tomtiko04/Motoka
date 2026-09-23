@@ -1,10 +1,34 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Icon } from '@iconify/react';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  UserIcon,
+  TrashIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+  CheckCircleIcon,
+  TruckIcon,
+  ClipboardDocumentListIcon,
+  ClockIcon,
+  BanknotesIcon,
+  PlusIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
 import AddCarModal from '../../components/admin/AddCarModal';
+import {
+  Card,
+  StatCard,
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  BTN_DANGER,
+} from '../../components/admin/ui';
 
 const AdminUserDetails = () => {
   const { userId } = useParams();
@@ -91,7 +115,7 @@ const AdminUserDetails = () => {
       } else {
         toast.error(data.message || 'Failed to suspend user');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to suspend user');
     } finally {
       setActionLoading(false);
@@ -122,7 +146,7 @@ const AdminUserDetails = () => {
       } else {
         toast.error(data.message || 'Failed to activate user');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to activate user');
     } finally {
       setActionLoading(false);
@@ -154,7 +178,7 @@ const AdminUserDetails = () => {
       } else {
         toast.error(data.message || 'Failed to delete user');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete user');
     } finally {
       setActionLoading(false);
@@ -176,40 +200,33 @@ const AdminUserDetails = () => {
     new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount || 0);
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-          <p className="text-sm text-gray-500">Loading user details...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center">
-        <Icon icon="mdi:account-off" className="h-16 w-16 text-gray-400" />
-        <p className="mt-4 text-base text-gray-500">User not found</p>
-        <button
-          onClick={handleBack}
-          className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-        >
-          Go Back
-        </button>
-      </div>
+      <EmptyState
+        icon={UserIcon}
+        title="User not found"
+        body="This user may have been removed, or the link is out of date."
+        action={
+          <button onClick={handleBack} className={BTN_PRIMARY}>
+            Back to Users
+          </button>
+        }
+      />
     );
   }
 
   return (
-    <div className="space-y-5 px-4 py-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <button
           onClick={handleBack}
           className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
         >
-          <Icon icon="mdi:arrow-left" className="h-4 w-4" />
+          <ArrowLeftIcon className="h-4 w-4" />
           <span>Back to Users</span>
         </button>
         {!user.deleted_at && (
@@ -218,27 +235,27 @@ const AdminUserDetails = () => {
               <button
                 onClick={handleActivate}
                 disabled={actionLoading}
-                className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               >
-                <Icon icon="mdi:lock-open" className="h-4 w-4" />
+                <LockOpenIcon className="h-4 w-4" />
                 <span>Activate</span>
               </button>
             ) : (
               <button
                 onClick={handleSuspend}
                 disabled={actionLoading}
-                className="flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               >
-                <Icon icon="mdi:lock" className="h-4 w-4" />
+                <LockClosedIcon className="h-4 w-4" />
                 <span>Suspend</span>
               </button>
             )}
             <button
               onClick={() => setDeleteModal(true)}
               disabled={actionLoading}
-              className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             >
-              <Icon icon="mdi:delete" className="h-4 w-4" />
+              <TrashIcon className="h-4 w-4" />
               <span>Delete</span>
             </button>
           </div>
@@ -246,7 +263,7 @@ const AdminUserDetails = () => {
       </div>
 
       {/* User Info Card */}
-      <div className="rounded-lg bg-white p-5 shadow-sm border border-gray-100">
+      <Card className="p-5">
         <div className="flex items-start gap-4">
           <div className="h-16 w-16 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
             <span className="text-xl font-semibold text-blue-600">
@@ -261,20 +278,20 @@ const AdminUserDetails = () => {
               </div>
               <div className="flex-shrink-0">
                 {user.deleted_at ? (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
-                    <Icon icon="mdi:delete" className="mr-1 h-3.5 w-3.5" />
+                  <StatusBadge tone="gray">
+                    <TrashIcon className="mr-1 h-3.5 w-3.5" />
                     Deleted
-                  </span>
+                  </StatusBadge>
                 ) : user.is_suspended ? (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700">
-                    <Icon icon="mdi:lock" className="mr-1 h-3.5 w-3.5" />
+                  <StatusBadge tone="red">
+                    <LockClosedIcon className="mr-1 h-3.5 w-3.5" />
                     Suspended
-                  </span>
+                  </StatusBadge>
                 ) : (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
-                    <Icon icon="mdi:check-circle" className="mr-1 h-3.5 w-3.5" />
+                  <StatusBadge tone="green">
+                    <CheckCircleIcon className="mr-1 h-3.5 w-3.5" />
                     Active
-                  </span>
+                  </StatusBadge>
                 )}
               </div>
             </div>
@@ -306,70 +323,47 @@ const AdminUserDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Total Cars</p>
-              <p className="text-2xl font-semibold text-gray-900">{user.cars_count || 0}</p>
-            </div>
-            <div className="rounded-full bg-blue-100 p-2.5">
-              <Icon icon="mdi:car" className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Total Orders</p>
-              <p className="text-2xl font-semibold text-gray-900">{user.orders_count || 0}</p>
-            </div>
-            <div className="rounded-full bg-green-100 p-2.5">
-              <Icon icon="mdi:clipboard-list" className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Pending Orders</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats?.pending_orders || 0}</p>
-            </div>
-            <div className="rounded-full bg-orange-100 p-2.5">
-              <Icon icon="mdi:clock" className="h-6 w-6 text-orange-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Total Spent</p>
-              <p className="text-lg font-semibold text-gray-900">{formatCurrency(stats?.total_spent)}</p>
-            </div>
-            <div className="rounded-full bg-purple-100 p-2.5">
-              <Icon icon="mdi:cash" className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          icon={TruckIcon}
+          label="Total Cars"
+          value={user.cars_count || 0}
+          color="blue"
+        />
+        <StatCard
+          icon={ClipboardDocumentListIcon}
+          label="Total Orders"
+          value={user.orders_count || 0}
+          color="green"
+        />
+        <StatCard
+          icon={ClockIcon}
+          label="Pending Orders"
+          value={stats?.pending_orders || 0}
+          color="amber"
+        />
+        <StatCard
+          icon={BanknotesIcon}
+          label="Total Spent"
+          value={formatCurrency(stats?.total_spent)}
+          color="gray"
+        />
       </div>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Cars */}
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+        <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-semibold text-gray-900">Recent Cars</h2>
             <button
               onClick={() => setShowAddCarModal(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+              className={BTN_PRIMARY}
             >
-              <Icon icon="mdi:plus" className="h-3.5 w-3.5" />
+              <PlusIcon className="h-4 w-4" />
               Add Car
             </button>
           </div>
@@ -392,22 +386,24 @@ const AdminUserDetails = () => {
                   <button
                     onClick={() => navigate(`/admin/cars/${car.slug}`)}
                     className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
+                    aria-label="View car"
                   >
-                    <Icon icon="mdi:arrow-right" className="h-5 w-5" />
+                    <ArrowRightIcon className="h-5 w-5" />
                   </button>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center">
-              <Icon icon="mdi:car-off" className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">No cars registered</p>
-            </div>
+            <EmptyState
+              icon={TruckIcon}
+              title="No cars registered"
+              body="Use Add Car to register a vehicle for this user."
+            />
           )}
-        </div>
+        </Card>
 
         {/* Recent Orders */}
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+        <Card className="p-5">
           <h2 className="text-base font-semibold text-gray-900 mb-3">Recent Orders</h2>
           {user.orders && user.orders.length > 0 ? (
             <div className="space-y-2">
@@ -427,19 +423,21 @@ const AdminUserDetails = () => {
                   <button
                     onClick={() => navigate(`/admin/orders/${order.slug}`)}
                     className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
+                    aria-label="View order"
                   >
-                    <Icon icon="mdi:arrow-right" className="h-5 w-5" />
+                    <ArrowRightIcon className="h-5 w-5" />
                   </button>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center">
-              <Icon icon="mdi:clipboard-off" className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">No orders found</p>
-            </div>
+            <EmptyState
+              icon={ClipboardDocumentListIcon}
+              title="No orders found"
+              body="Orders this user places will appear here."
+            />
           )}
-        </div>
+        </Card>
       </div>
 
       {/* Add Car Modal */}
@@ -462,10 +460,10 @@ const AdminUserDetails = () => {
       {/* Delete Confirmation Modal */}
       {deleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
             <div className="mb-4 flex items-center justify-center">
               <div className="rounded-full bg-red-100 p-2.5">
-                <Icon icon="mdi:alert" className="h-5 w-5 text-red-600" />
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
               </div>
             </div>
             <h3 className="mb-2 text-center text-base font-semibold text-gray-900">Delete User</h3>
@@ -477,14 +475,14 @@ const AdminUserDetails = () => {
               <button
                 onClick={() => setDeleteModal(false)}
                 disabled={actionLoading}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                className={`${BTN_SECONDARY} flex-1`}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={actionLoading}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                className={`${BTN_DANGER} flex-1`}
               >
                 {actionLoading ? 'Deleting...' : 'Delete'}
               </button>

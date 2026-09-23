@@ -7,6 +7,15 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import {
+  PageHeader,
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  TD,
+  TH,
+  CARD,
+} from '../../components/admin/ui';
 
 // Prices are stored in kobo in the DB. Display in Naira (divide by 100).
 const koboToNaira = (kobo) => (Number(kobo) / 100).toFixed(2);
@@ -108,31 +117,20 @@ const AdminVehicleDocs = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
-        <p className="ml-4 text-sm text-gray-600">Loading prices…</p>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <DocumentTextIcon className="h-6 w-6 text-gray-600" />
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Vehicle Document Prices</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Manage the prices charged for each document at renewal
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        icon={DocumentTextIcon}
+        title="Vehicle Document Prices"
+        subtitle="Manage the prices charged for each document at renewal"
+      />
 
       {/* Prices table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className={`${CARD} overflow-hidden`}>
         <div className="px-5 py-4 border-b border-gray-100">
           <p className="text-sm text-gray-500">
             Click the edit icon on any row to update its price. Prices are in <strong>Naira (₦)</strong>.
@@ -143,71 +141,63 @@ const AdminVehicleDocs = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Document
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Key
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Required
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Status
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Price (₦)
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100">
               {items.map((item) => {
                 const isEditing = editingKey === item.item_key;
                 return (
                   <tr key={item.item_key} className="hover:bg-gray-50 transition-colors">
                     {/* Document name */}
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className={`${TD} whitespace-nowrap`}>
                       <span className="text-sm font-medium text-gray-900">{item.name}</span>
                     </td>
 
                     {/* item_key */}
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className={`${TD} whitespace-nowrap`}>
                       <code className="text-xs bg-gray-100 text-gray-600 rounded px-2 py-0.5">
                         {item.item_key}
                       </code>
                     </td>
 
                     {/* Required badge */}
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className={`${TD} whitespace-nowrap`}>
                       {item.required ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                          Required
-                        </span>
+                        <StatusBadge tone="blue">Required</StatusBadge>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
-                          Optional
-                        </span>
+                        <StatusBadge tone="gray">Optional</StatusBadge>
                       )}
                     </td>
 
                     {/* Active badge */}
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className={`${TD} whitespace-nowrap`}>
                       {item.active ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                          Active
-                        </span>
+                        <StatusBadge tone="green">Active</StatusBadge>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
-                          Inactive
-                        </span>
+                        <StatusBadge tone="red">Inactive</StatusBadge>
                       )}
                     </td>
 
                     {/* Price — editable inline */}
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className={`${TD} whitespace-nowrap`}>
                       {isEditing ? (
                         <div className="flex items-center gap-1">
                           <span className="text-sm text-gray-500">₦</span>
@@ -219,7 +209,7 @@ const AdminVehicleDocs = () => {
                             onChange={(e) => setEditValue(e.target.value)}
                             onKeyDown={(e) => handleKeyDown(e, item)}
                             autoFocus
-                            className="w-32 border border-blue-400 rounded-md px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                           />
                         </div>
                       ) : (
@@ -232,14 +222,14 @@ const AdminVehicleDocs = () => {
                     </td>
 
                     {/* Actions */}
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className={`${TD} whitespace-nowrap`}>
                       {isEditing ? (
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => saveEdit(item)}
                             disabled={saving}
                             title="Save"
-                            className="flex items-center justify-center h-8 w-8 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-600 text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
                           >
                             {saving ? (
                               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -251,7 +241,7 @@ const AdminVehicleDocs = () => {
                             onClick={cancelEdit}
                             disabled={saving}
                             title="Cancel"
-                            className="flex items-center justify-center h-8 w-8 rounded-md border border-gray-300 text-gray-500 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                            className="flex items-center justify-center h-8 w-8 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 transition-colors"
                           >
                             <XMarkIcon className="h-4 w-4" />
                           </button>
@@ -260,7 +250,7 @@ const AdminVehicleDocs = () => {
                         <button
                           onClick={() => startEdit(item)}
                           title="Edit price"
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                          className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"
                         >
                           <PencilSquareIcon className="h-3.5 w-3.5" />
                           Edit
@@ -275,10 +265,7 @@ const AdminVehicleDocs = () => {
         </div>
 
         {items.length === 0 && (
-          <div className="text-center py-12">
-            <DocumentTextIcon className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">No document prices found</p>
-          </div>
+          <EmptyState icon={DocumentTextIcon} title="No document prices found" />
         )}
       </div>
 

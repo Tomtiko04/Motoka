@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
+import { Spinner, BTN_PRIMARY, INPUT } from '../../components/admin/ui';
 import Logo from "../../assets/images/motoka logo.svg";
 
 
@@ -171,7 +172,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-6">
@@ -199,7 +200,7 @@ const AdminLogin = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="username"
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  className={INPUT}
                   placeholder="Enter your admin email"
                   required
                 />
@@ -217,7 +218,7 @@ const AdminLogin = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       autoComplete="current-password"
-                      className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                      className={`${INPUT} pr-10`}
                       placeholder="Enter your password"
                       required
                     />
@@ -246,10 +247,11 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                className={`${BTN_PRIMARY} w-full`}
               >
+                {loading && <Spinner size="sm" className="border-white/40 border-t-white" />}
                 {loading
-                  ? (method === 'password' ? 'Signing in...' : 'Sending OTP...')
+                  ? (method === 'password' ? 'Signing in…' : 'Sending OTP…')
                   : (method === 'password' ? 'Sign In' : 'Send OTP')}
               </button>
 
@@ -271,9 +273,7 @@ const AdminLogin = () => {
             <form onSubmit={handleVerifyOTP} className="space-y-4">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-10 h-10 bg-green-100 rounded-full mb-3">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+                  <EnvelopeIcon className="w-5 h-5 text-green-600" />
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Check Your Email</h2>
 <p className="text-sm text-gray-600">
@@ -291,7 +291,7 @@ const AdminLogin = () => {
                     id="otp"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-center text-base tracking-widest placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className={`${INPUT} pr-10 text-center text-base tracking-widest`}
                     placeholder="000000"
                     maxLength="6"
                     required
@@ -320,9 +320,10 @@ const AdminLogin = () => {
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                  className={`${BTN_PRIMARY} w-full`}
                 >
-                  {loading ? 'Verifying...' : 'Verify OTP'}
+                  {loading && <Spinner size="sm" className="border-white/40 border-t-white" />}
+                  {loading ? 'Verifying…' : 'Verify OTP'}
                 </button>
 
                 <button

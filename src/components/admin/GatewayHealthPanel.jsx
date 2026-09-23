@@ -47,7 +47,7 @@ function GatewayRow({ name, data, isPrimary, isFallback, hasLiveData }) {
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5">
       <div className="flex min-w-0 items-center gap-2">
         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[status] || STATUS_DOT.unknown}`} />
-        <span className="font-medium capitalize text-gray-900">{name}</span>
+        <span className="text-sm font-medium capitalize text-gray-900">{name}</span>
         {isPrimary && (
           <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-800">
             Primary

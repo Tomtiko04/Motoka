@@ -1,6 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Icon } from '@iconify/react';
+import {
+  ArrowPathIcon,
+  ArrowUpTrayIcon,
+  ArrowsUpDownIcon,
+  Bars3Icon,
+  Bars4Icon,
+  BarsArrowDownIcon,
+  BarsArrowUpIcon,
+  BuildingStorefrontIcon,
+  MagnifyingGlassIcon,
+  PhotoIcon,
+  PlusIcon,
+  UserIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 import { useSearchParams } from 'react-router-dom';
 import {
   createAdminLadipoProduct,
@@ -21,6 +35,18 @@ import {
   updateAdminLadipoCategoryImage,
 } from '../../services/apiAdminLadipo';
 import { getLadipoCategories } from '../../services/apiLadipo';
+import {
+  BTN_DANGER,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  CARD,
+  EmptyState,
+  PageHeader,
+  PageLoader,
+  Spinner,
+  StatusBadge,
+  TH,
+} from '../../components/admin/ui';
 
 const ORDER_STATUSES = ['all', 'pending_payment', 'processing', 'out_for_delivery', 'delivered', 'cancelled'];
 const STATUS_PROGRESSIONS = {
@@ -176,14 +202,21 @@ function slaBadgeForOrder(order, adminName) {
   const hk = orderHandlerKey(order);
   const paidAt = order.paid_at ? new Date(order.paid_at).getTime() : null;
   const now = Date.now();
-  if (order.workflow_state === 'blocked') return { label: 'blocked', tone: 'bg-rose-100 text-rose-800' };
+  if (order.workflow_state === 'blocked') return { label: 'blocked', tone: 'bg-red-100 text-red-800' };
   if (!hk && paidAt && !Number.isNaN(paidAt) && now - paidAt > 15 * 60 * 1000) {
     return { label: 'unassigned 15m+', tone: 'bg-amber-100 text-amber-800' };
   }
   if (me && hk === me && isOrderStale(order)) {
-    return { label: 'mine stale', tone: 'bg-orange-100 text-orange-800' };
+    return { label: 'mine stale', tone: 'bg-amber-100 text-amber-800' };
   }
   return null;
+}
+
+function SortIcon({ active, direction }) {
+  if (!active) return <ArrowsUpDownIcon className="h-3 w-3 opacity-40" />;
+  return direction === 'asc'
+    ? <BarsArrowUpIcon className="h-3 w-3 opacity-40" />
+    : <BarsArrowDownIcon className="h-3 w-3 opacity-40" />;
 }
 
 export default function AdminLadipo() {
@@ -496,10 +529,10 @@ export default function AdminLadipo() {
     return [
       { label: 'New today', value: newToday, tone: 'text-blue-700 bg-blue-50' },
       { label: 'Needs action', value: needsAction, tone: 'text-amber-700 bg-amber-50' },
-      { label: 'Preparing', value: processing, tone: 'text-indigo-700 bg-indigo-50' },
-      { label: 'Out / Ready', value: outForDelivery, tone: 'text-purple-700 bg-purple-50' },
-      { label: 'Delivered today', value: deliveredToday, tone: 'text-emerald-700 bg-emerald-50' },
-      { label: 'Cancelled rate', value: `${cancellationRate}%`, tone: 'text-rose-700 bg-rose-50' },
+      { label: 'Preparing', value: processing, tone: 'text-blue-700 bg-blue-50' },
+      { label: 'Out / Ready', value: outForDelivery, tone: 'text-blue-700 bg-blue-50' },
+      { label: 'Delivered today', value: deliveredToday, tone: 'text-green-700 bg-green-50' },
+      { label: 'Cancelled rate', value: `${cancellationRate}%`, tone: 'text-red-700 bg-red-50' },
     ];
   }, [orders]);
 
@@ -1181,12 +1214,11 @@ export default function AdminLadipo() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#05243F]">Ladipo Admin</h1>
-          <p className="text-sm text-gray-500">Manage Ladipo orders and products in one place.</p>
-        </div>
-      </div>
+      <PageHeader
+        icon={BuildingStorefrontIcon}
+        title="Ladipo"
+        subtitle="Manage Ladipo orders and products in one place."
+      />
 
       {activeTab === 'orders' && (
         <div className="space-y-3">
@@ -1194,7 +1226,7 @@ export default function AdminLadipo() {
           {/* KPI strip */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
             {orderKpis.map((kpi) => (
-              <div key={kpi.label} className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
+              <div key={kpi.label} className={`${CARD} p-3`}>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">{kpi.label}</p>
                 <p className={`mt-1.5 inline-flex rounded-full px-2.5 py-0.5 text-sm font-bold ${kpi.tone}`}>
                   {kpi.value}
@@ -1215,7 +1247,7 @@ export default function AdminLadipo() {
           )}
 
           {/* ── Toolbar ── */}
-          <div className="space-y-2 rounded-xl bg-white p-3 shadow-sm">
+          <div className={`${CARD} space-y-2 p-3`}>
             {/* Row 1: identity + search + filter + refresh */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Admin identity */}
@@ -1223,11 +1255,11 @@ export default function AdminLadipo() {
                 onClick={openAdminNameModal}
                 className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   normalizeAdminName(adminDisplayName)
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
                     : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
                 }`}
               >
-                <Icon icon="solar:user-bold" className="h-3.5 w-3.5" />
+                <UserIcon className="h-3.5 w-3.5" />
                 {normalizeAdminName(adminDisplayName) ? adminDisplayName : 'Set your name'}
               </button>
 
@@ -1235,15 +1267,12 @@ export default function AdminLadipo() {
 
               {/* Search */}
               <div className="relative min-w-[200px] flex-1">
-                <Icon
-                  icon="solar:magnifer-linear"
-                  className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
-                />
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
                 <input
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
                   placeholder="Search order number…"
-                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
 
@@ -1251,7 +1280,7 @@ export default function AdminLadipo() {
               <select
                 value={orderStatus}
                 onChange={(e) => setOrderStatus(e.target.value)}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2284DB]"
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500"
               >
                 {ORDER_STATUSES.map((status) => (
                   <option key={status} value={status}>
@@ -1269,9 +1298,9 @@ export default function AdminLadipo() {
               <button
                 onClick={loadOrders}
                 disabled={ordersLoading}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#2284DB] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1d74c3] disabled:opacity-60"
+                className={BTN_PRIMARY}
               >
-                <Icon icon="solar:refresh-linear" className="h-3.5 w-3.5" />
+                <ArrowPathIcon className="h-4 w-4" />
                 Refresh
               </button>
 
@@ -1281,10 +1310,9 @@ export default function AdminLadipo() {
                 title={`Density: ${orderDensity}`}
                 className="rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"
               >
-                <Icon
-                  icon={orderDensity === 'compact' ? 'solar:list-bold' : 'solar:list-down-bold'}
-                  className="h-4 w-4"
-                />
+                {orderDensity === 'compact'
+                  ? <Bars4Icon className="h-4 w-4" />
+                  : <Bars3Icon className="h-4 w-4" />}
               </button>
             </div>
 
@@ -1296,8 +1324,8 @@ export default function AdminLadipo() {
                   onClick={() => setQuickOrderView(view.key)}
                   className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
                     quickOrderView === view.key
-                      ? 'border-[#2284DB] bg-[#2284DB] text-white'
-                      : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-[#2284DB]/40 hover:text-[#2284DB]'
+                      ? 'border-blue-600 bg-blue-600 text-white'
+                      : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-blue-600/40 hover:text-blue-600'
                   }`}
                 >
                   {view.label}
@@ -1310,7 +1338,7 @@ export default function AdminLadipo() {
           </div>
 
           {/* ── Bulk action bar ── */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-white px-3 py-2 shadow-sm">
+          <div className={`${CARD} flex flex-wrap items-center gap-2 px-3 py-2`}>
             <button
               onClick={toggleSelectAllVisible}
               className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50"
@@ -1320,7 +1348,7 @@ export default function AdminLadipo() {
                 : 'Select all'}
             </button>
             {selectedOrderNumbers.length > 0 && (
-              <span className="rounded-full bg-[#2284DB]/10 px-2 py-0.5 text-xs font-semibold text-[#2284DB]">
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
                 {selectedOrderNumbers.length} selected
               </span>
             )}
@@ -1333,7 +1361,7 @@ export default function AdminLadipo() {
                   key={status}
                   disabled={bulkSubmitting || selectedOrderNumbers.length === 0}
                   onClick={() => handleBulkStatusUpdate(status)}
-                  className="rounded-full border border-[#2284DB] px-3 py-1 text-[11px] font-semibold text-[#2284DB] hover:bg-[#2284DB] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  className={BTN_SECONDARY}
                 >
                   {bulkSubmitting ? '…' : `Bulk: ${
                     status === 'processing' ? 'Preparing'
@@ -1346,7 +1374,7 @@ export default function AdminLadipo() {
           </div>
 
           {/* ── Orders table ── */}
-          <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
+          <div className={`${CARD} overflow-x-auto`}>
             <table className="min-w-full">
               <thead className="border-b border-gray-100 bg-gray-50">
                 <tr>
@@ -1359,69 +1387,69 @@ export default function AdminLadipo() {
                       className="rounded border-gray-300"
                     />
                   </th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">Order</th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  <th className={TH}>Order</th>
+                  <th className={TH}>
                     <button onClick={() => toggleOrderSort('customer')} className="flex items-center gap-1 hover:text-gray-700">
                       Customer
-                      <Icon icon={orderSort.field === 'customer' ? (orderSort.direction === 'asc' ? 'solar:sort-from-top-to-bottom-bold' : 'solar:sort-from-bottom-to-top-bold') : 'solar:sort-outline'} className="h-3 w-3 opacity-40" />
+                      <SortIcon active={orderSort.field === 'customer'} direction={orderSort.direction} />
                     </button>
                   </th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  <th className={TH}>
                     <button onClick={() => toggleOrderSort('total_kobo')} className="flex items-center gap-1 hover:text-gray-700">
                       Amount
-                      <Icon icon={orderSort.field === 'total_kobo' ? (orderSort.direction === 'asc' ? 'solar:sort-from-top-to-bottom-bold' : 'solar:sort-from-bottom-to-top-bold') : 'solar:sort-outline'} className="h-3 w-3 opacity-40" />
+                      <SortIcon active={orderSort.field === 'total_kobo'} direction={orderSort.direction} />
                     </button>
                   </th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  <th className={TH}>
                     <button onClick={() => toggleOrderSort('status')} className="flex items-center gap-1 hover:text-gray-700">
                       Status
-                      <Icon icon={orderSort.field === 'status' ? (orderSort.direction === 'asc' ? 'solar:sort-from-top-to-bottom-bold' : 'solar:sort-from-bottom-to-top-bold') : 'solar:sort-outline'} className="h-3 w-3 opacity-40" />
+                      <SortIcon active={orderSort.field === 'status'} direction={orderSort.direction} />
                     </button>
                   </th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">Payment</th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">Handler</th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  <th className={TH}>Payment</th>
+                  <th className={TH}>Handler</th>
+                  <th className={TH}>
                     <button onClick={() => toggleOrderSort('updated_at')} className="flex items-center gap-1 hover:text-gray-700">
                       Updated
-                      <Icon icon={orderSort.field === 'updated_at' ? (orderSort.direction === 'asc' ? 'solar:sort-from-top-to-bottom-bold' : 'solar:sort-from-bottom-to-top-bold') : 'solar:sort-outline'} className="h-3 w-3 opacity-40" />
+                      <SortIcon active={orderSort.field === 'updated_at'} direction={orderSort.direction} />
                     </button>
                   </th>
-                  <th className="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500">Actions</th>
+                  <th className={TH}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-100">
                 {ordersLoading ? (
                   <tr>
                     <td colSpan={9} className="px-4 py-10 text-center">
                       <div className="inline-flex flex-col items-center gap-2 text-sm text-gray-400">
-                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+                        <Spinner size="md" />
                         Loading orders…
                       </div>
                     </td>
                   </tr>
                 ) : displayedOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-400">
-                      No orders found for this filter.
+                    <td colSpan={9} className="px-4">
+                      <EmptyState title="No orders found" body="No orders match this filter." />
                     </td>
                   </tr>
                 ) : (
                   displayedOrders.map((order) => {
                     const uiStatus = deriveUiOrderStatus(order);
-                    const statusBadge = {
-                      pending_payment: 'bg-amber-50 text-amber-700',
-                      processing:      'bg-blue-50 text-blue-700',
-                      out_for_delivery:'bg-purple-50 text-purple-700',
-                      delivered:       'bg-emerald-50 text-emerald-700',
-                      cancelled:       'bg-rose-50 text-rose-600',
-                    }[uiStatus] || 'bg-gray-100 text-gray-600';
+                    const statusTone = {
+                      pending_payment: 'amber',
+                      processing: 'blue',
+                      out_for_delivery: 'blue',
+                      delivered: 'green',
+                      cancelled: 'red',
+                    }[uiStatus] || 'gray';
 
-                    const payBadge = {
-                      paid:     'bg-emerald-50 text-emerald-700',
-                      pending:  'bg-amber-50 text-amber-700',
-                      failed:   'bg-rose-50 text-rose-600',
-                      refunded: 'bg-slate-100 text-slate-600',
-                    }[String(order.payment_status || '').toLowerCase()] || 'bg-gray-100 text-gray-500';
+                    const payTone = {
+                      paid: 'green',
+                      pending: 'amber',
+                      failed: 'red',
+                      refunded: 'gray',
+                    }[String(order.payment_status || '').toLowerCase()] || 'gray';
 
                     const sla = slaBadgeForOrder(order, adminDisplayName);
                     const meKey = handlerKeyForAdmin(adminDisplayName);
@@ -1449,7 +1477,7 @@ export default function AdminLadipo() {
 
                         {/* Order number */}
                         <td className={`px-3 ${rowPaddingClass}`}>
-                          <p className="font-mono text-xs font-semibold text-[#05243F]">{order.order_number}</p>
+                          <p className="font-mono text-xs font-semibold text-gray-900">{order.order_number}</p>
                           <p className="text-[10px] text-gray-400">{(order.items || []).length} item{(order.items || []).length !== 1 ? 's' : ''}</p>
                         </td>
 
@@ -1461,7 +1489,7 @@ export default function AdminLadipo() {
 
                         {/* Amount */}
                         <td className={`px-3 ${rowPaddingClass}`}>
-                          <p className="text-sm font-semibold text-[#05243F]">{order.total_naira}</p>
+                          <p className="text-sm font-semibold text-gray-900">{order.total_naira}</p>
                           {isHighValueOrder(order) && (
                             <span className="text-[10px] font-bold text-amber-600">HIGH VALUE</span>
                           )}
@@ -1470,9 +1498,9 @@ export default function AdminLadipo() {
                         {/* Status badge */}
                         <td className={`px-3 ${rowPaddingClass}`}>
                           <div className="flex flex-col gap-1">
-                            <span className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${statusBadge}`}>
+                            <StatusBadge tone={statusTone} className="w-fit capitalize">
                               {formatAdminStatusLabel(order, order.order_status)}
-                            </span>
+                            </StatusBadge>
                             <div className="flex flex-wrap gap-1">
                               {isOrderStale(order) && (
                                 <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-700">stale</span>
@@ -1486,9 +1514,9 @@ export default function AdminLadipo() {
 
                         {/* Payment badge */}
                         <td className={`px-3 ${rowPaddingClass}`}>
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${payBadge}`}>
+                          <StatusBadge tone={payTone} className="capitalize">
                             {(order.payment_status || 'pending').replace(/_/g, ' ')}
-                          </span>
+                          </StatusBadge>
                         </td>
 
                         {/* Handler */}
@@ -1497,10 +1525,10 @@ export default function AdminLadipo() {
                             <div className="flex flex-wrap items-center gap-1">
                               <span className="text-xs text-gray-700">{order.handled_by_name}</span>
                               {meKey && handlerKey === meKey && (
-                                <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-700">me</span>
+                                <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-green-700">me</span>
                               )}
                               {meKey && handlerKey && handlerKey !== meKey && (
-                                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-slate-500">other</span>
+                                <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-500">other</span>
                               )}
                             </div>
                           ) : (
@@ -1520,7 +1548,7 @@ export default function AdminLadipo() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openOrderDetails(order.order_number)}
-                              className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-600 hover:border-[#2284DB] hover:text-[#2284DB]"
+                              className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-600 hover:border-blue-600 hover:text-blue-600"
                             >
                               View
                             </button>
@@ -1529,7 +1557,7 @@ export default function AdminLadipo() {
                                 type="button"
                                 disabled={!assigneeApiReady || !capabilitiesChecked || !meKey}
                                 onClick={() => claimOrder(order.order_number)}
-                                className="rounded-full border border-emerald-300 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="rounded-full border border-green-300 px-2.5 py-1 text-[11px] font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 Claim
                               </button>
@@ -1565,7 +1593,7 @@ export default function AdminLadipo() {
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-xs text-gray-500 shadow-sm">
+          <div className={`${CARD} flex items-center justify-between px-4 py-3 text-xs text-gray-500`}>
             <p>
               Page {ordersMeta.current_page} of {Math.max(ordersMeta.last_page, 1)} · {ordersMeta.total} order{ordersMeta.total !== 1 ? 's' : ''}
             </p>
@@ -1595,17 +1623,14 @@ export default function AdminLadipo() {
           {/* ── LEFT: compact product list ── */}
           <div className="space-y-3">
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
+            <div className={`${CARD} flex flex-wrap items-center gap-2 p-3`}>
               <div className="relative min-w-[180px] flex-1">
-                <Icon
-                  icon="solar:magnifer-linear"
-                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                />
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   value={productQuery}
                   onChange={(e) => setProductQuery(e.target.value)}
                   placeholder="Search name, slug, product brand…"
-                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   aria-label="Search products"
                 />
               </div>
@@ -1614,7 +1639,7 @@ export default function AdminLadipo() {
                 onChange={(e) => setProductBrand(e.target.value)}
                 disabled={productFiltersLoading}
                 aria-label="Filter products by brand"
-                className="min-w-[150px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20 disabled:opacity-50"
+                className="min-w-[150px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
               >
                 <option value="">All product brands</option>
                 {productFilters.brands.map((brand) => <option key={brand} value={brand}>{brand}</option>)}
@@ -1624,7 +1649,7 @@ export default function AdminLadipo() {
                 onChange={(e) => setProductMake(e.target.value)}
                 disabled={productFiltersLoading}
                 aria-label="Filter products by compatible vehicle make"
-                className="min-w-[170px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20 disabled:opacity-50"
+                className="min-w-[170px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
               >
                 <option value="">All compatible vehicle makes</option>
                 {productFilters.makes.map((make) => <option key={make} value={make}>{make}</option>)}
@@ -1639,7 +1664,7 @@ export default function AdminLadipo() {
                   }}
                   className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                 >
-                  <Icon icon="solar:eraser-linear" className="h-3.5 w-3.5" />
+                  <XMarkIcon className="h-3.5 w-3.5" />
                   Clear
                 </button>
               )}
@@ -1647,41 +1672,47 @@ export default function AdminLadipo() {
                 type="button"
                 onClick={loadProducts}
                 disabled={productsLoading}
-                className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className={BTN_SECONDARY}
               >
-                <Icon icon="solar:refresh-linear" className="h-3.5 w-3.5" />
+                <ArrowPathIcon className="h-4 w-4" />
                 Refresh
               </button>
               <button
                 type="button"
                 onClick={resetProductForm}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#2284DB] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1d74c3]"
+                className={BTN_PRIMARY}
               >
-                <Icon icon="solar:add-circle-bold" className="h-3.5 w-3.5" />
+                <PlusIcon className="h-4 w-4" />
                 Add product
               </button>
-              <span className="ml-auto text-xs text-gray-400">
-                {productsLoading ? 'Loading…' : `${productsMeta.total} product${productsMeta.total === 1 ? '' : 's'}`}
-              </span>
+              {productsLoading ? (
+                <Spinner size="sm" className="ml-auto" />
+              ) : (
+                <span className="ml-auto text-xs text-gray-400">
+                  {`${productsMeta.total} product${productsMeta.total === 1 ? '' : 's'}`}
+                </span>
+              )}
             </div>
 
             {/* Rows */}
             <div className="space-y-1">
               {productsLoading ? (
                 <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-200 bg-white py-12 text-sm text-gray-400">
-                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" aria-hidden />
+                  <Spinner size="md" />
                   Loading products…
                 </div>
               ) : products.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-200 bg-white py-12 text-center text-sm text-gray-400">
-                  No products found.{' '}
-                  <button
-                    type="button"
-                    onClick={resetProductForm}
-                    className="font-semibold text-[#2284DB] hover:underline"
-                  >
-                    Add one.
-                  </button>
+                <div className="rounded-xl border border-dashed border-gray-200 bg-white">
+                  <EmptyState
+                    title="No products found"
+                    body="Adjust the search or filters, or add a new product."
+                    action={(
+                      <button type="button" onClick={resetProductForm} className={BTN_PRIMARY}>
+                        <PlusIcon className="h-4 w-4" />
+                        Add product
+                      </button>
+                    )}
+                  />
                 </div>
               ) : (
                 products.map((product) => {
@@ -1698,7 +1729,7 @@ export default function AdminLadipo() {
                       key={product.id}
                       className={`flex items-center gap-2.5 rounded-xl border bg-white px-3 py-2 shadow-sm transition-colors ${
                         isEditing || isViewing
-                          ? 'border-[#2284DB] ring-1 ring-[#2284DB]/20'
+                          ? 'border-blue-600 ring-1 ring-blue-600/20'
                           : 'border-gray-100 hover:border-gray-200'
                       }`}
                     >
@@ -1708,25 +1739,23 @@ export default function AdminLadipo() {
                           <img src={imgUrl} alt={product.name} className="h-full w-full object-contain" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-gray-300">
-                            <Icon icon="solar:gallery-remove-bold-duotone" className="h-4 w-4" />
+                            <PhotoIcon className="h-4 w-4" />
                           </div>
                         )}
                       </div>
 
                       {/* Name + meta */}
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold leading-tight text-[#05243F]">{product.name}</p>
+                        <p className="truncate text-sm font-semibold leading-tight text-gray-900">{product.name}</p>
                         <p className="truncate text-[11px] text-gray-400">
                           {[catLabel, product.brand].filter(Boolean).join(' · ') || product.slug}
                         </p>
                         <div className="mt-0.5 flex items-center gap-2 text-[11px]">
-                          <span className="font-semibold text-[#2284DB]">{formatPrice(product.inventory?.price_kobo)}</span>
+                          <span className="font-semibold text-blue-600">{formatPrice(product.inventory?.price_kobo)}</span>
                           <span className="text-gray-400">Stock: <span className="font-medium text-gray-600">{product.inventory?.stock_qty ?? 0}</span></span>
-                          <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                            product.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'
-                          }`}>
+                          <StatusBadge tone={product.is_active ? 'green' : 'gray'}>
                             {product.is_active ? 'Active' : 'Hidden'}
-                          </span>
+                          </StatusBadge>
                         </div>
                       </div>
 
@@ -1741,8 +1770,8 @@ export default function AdminLadipo() {
                           }}
                           className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                             isViewing
-                              ? 'border-[#2284DB] bg-[#2284DB] text-white'
-                              : 'border-gray-200 text-gray-600 hover:border-[#2284DB] hover:text-[#2284DB]'
+                              ? 'border-blue-600 bg-blue-600 text-white'
+                              : 'border-gray-200 text-gray-600 hover:border-blue-600 hover:text-blue-600'
                           }`}
                         >
                           View
@@ -1756,8 +1785,8 @@ export default function AdminLadipo() {
                           }}
                           className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                             isEditing
-                              ? 'border-[#2284DB] bg-[#2284DB] text-white'
-                              : 'border-gray-200 text-gray-600 hover:border-[#2284DB] hover:text-[#2284DB]'
+                              ? 'border-blue-600 bg-blue-600 text-white'
+                              : 'border-gray-200 text-gray-600 hover:border-blue-600 hover:text-blue-600'
                           }`}
                         >
                           Edit
@@ -1771,7 +1800,7 @@ export default function AdminLadipo() {
 
             {/* Pagination */}
             {products.length > 0 && (
-              <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-2 text-xs text-gray-500 shadow-sm">
+              <div className={`${CARD} flex items-center justify-between px-4 py-2 text-xs text-gray-500`}>
                 <p>Page {productsMeta.current_page} of {Math.max(productsMeta.last_page, 1)}</p>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -1796,7 +1825,7 @@ export default function AdminLadipo() {
           </div>
 
           {/* ── RIGHT: sidebar panel ── */}
-          <div className="rounded-xl border border-gray-100 bg-white shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+          <div className={`${CARD} lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto`}>
 
             {/* Panel mode tabs */}
             <div className="flex items-center gap-1.5 border-b border-gray-100 px-3 py-2.5">
@@ -1804,7 +1833,7 @@ export default function AdminLadipo() {
                 type="button"
                 onClick={resetProductForm}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  productPanelMode === 'add' ? 'bg-[#2284DB] text-white' : 'text-gray-500 hover:bg-gray-100'
+                  productPanelMode === 'add' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
                 + Add product
@@ -1826,7 +1855,7 @@ export default function AdminLadipo() {
                   className="ml-auto text-gray-400 hover:text-gray-700"
                   title="Close"
                 >
-                  <Icon icon="solar:close-circle-bold" className="h-4 w-4" />
+                  <XMarkIcon className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -1848,7 +1877,7 @@ export default function AdminLadipo() {
                       <img src={imgUrl} alt={vp.name} className="max-h-52 w-full object-contain" />
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-gray-300">
-                        <Icon icon="solar:gallery-remove-bold-duotone" className="h-14 w-14" />
+                        <PhotoIcon className="h-14 w-14" />
                         <span className="text-xs text-gray-400">No image</span>
                       </div>
                     )}
@@ -1857,12 +1886,10 @@ export default function AdminLadipo() {
                   {/* Name + status */}
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-base font-bold text-[#05243F]">{vp.name}</h3>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                        vp.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'
-                      }`}>
+                      <h3 className="text-base font-bold text-gray-900">{vp.name}</h3>
+                      <StatusBadge tone={vp.is_active ? 'green' : 'gray'} className="shrink-0">
                         {vp.is_active ? 'Active' : 'Hidden'}
-                      </span>
+                      </StatusBadge>
                     </div>
                     <p className="mt-0.5 font-mono text-[11px] text-gray-400">{vp.slug}</p>
                   </div>
@@ -1871,11 +1898,11 @@ export default function AdminLadipo() {
                   <div className="flex gap-4 rounded-xl bg-gray-50 px-4 py-3">
                     <div>
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">Price</p>
-                      <p className="text-base font-bold text-[#2284DB]">{formatPrice(vp.inventory?.price_kobo)}</p>
+                      <p className="text-base font-bold text-blue-600">{formatPrice(vp.inventory?.price_kobo)}</p>
                     </div>
                     <div className="ml-auto text-right">
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">Stock</p>
-                      <p className="text-base font-bold text-[#05243F]">{vp.inventory?.stock_qty ?? 0}</p>
+                      <p className="text-base font-bold text-gray-900">{vp.inventory?.stock_qty ?? 0}</p>
                     </div>
                   </div>
 
@@ -1926,7 +1953,7 @@ export default function AdminLadipo() {
                         setProductPanelMode('edit');
                         setViewingProduct(null);
                       }}
-                      className="flex-1 rounded-lg border border-[#2284DB] py-2 text-xs font-semibold text-[#2284DB] hover:bg-[#2284DB] hover:text-white"
+                      className={`${BTN_SECONDARY} flex-1`}
                     >
                       Edit product
                     </button>
@@ -1937,7 +1964,7 @@ export default function AdminLadipo() {
                         setViewingProduct(null);
                         setProductPanelMode('add');
                       }}
-                      className="flex-1 rounded-lg border border-rose-200 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                      className="flex-1 rounded-lg border border-red-200 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
                     >
                       Delete
                     </button>
@@ -1981,7 +2008,7 @@ export default function AdminLadipo() {
                       });
                     }}
                     placeholder="e.g. Front brake pads"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     required
                   />
                 </div>
@@ -1996,7 +2023,7 @@ export default function AdminLadipo() {
                           slugManuallyEdited.current = false;
                           setProductForm((prev) => ({ ...prev, slug: slugifyFromName(prev.name) }));
                         }}
-                        className="text-xs font-semibold text-[#2284DB] hover:underline"
+                        className="text-xs font-semibold text-blue-600 hover:underline"
                       >
                         Regenerate
                       </button>
@@ -2009,7 +2036,7 @@ export default function AdminLadipo() {
                       setProductForm((prev) => ({ ...prev, slug: e.target.value }));
                     }}
                     placeholder="unique-slug"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     required
                   />
                 </div>
@@ -2019,7 +2046,7 @@ export default function AdminLadipo() {
                   <select
                     value={productForm.category_id}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, category_id: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     required
                   >
                     <option value="">Select category</option>
@@ -2041,7 +2068,7 @@ export default function AdminLadipo() {
                     value={productForm.brand}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, brand: e.target.value }))}
                     placeholder="Optional"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
 
@@ -2052,7 +2079,7 @@ export default function AdminLadipo() {
                     onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Shown on the product page"
                     rows={3}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
 
@@ -2062,7 +2089,7 @@ export default function AdminLadipo() {
                     <select
                       value={productForm.condition}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, condition: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     >
                       <option value="new">New</option>
                       <option value="tokunbo">Tokunbo</option>
@@ -2074,7 +2101,7 @@ export default function AdminLadipo() {
                     <select
                       value={productForm.part_type}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, part_type: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                     >
                       <option value="aftermarket">Aftermarket</option>
                       <option value="oem">OEM</option>
@@ -2093,12 +2120,12 @@ export default function AdminLadipo() {
                       value={productForm.price_naira}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, price_naira: e.target.value }))}
                       placeholder="e.g. 15000"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                       required
                     />
                     {priceKoboPreview && (
                       <p className="text-[11px] text-gray-500">
-                        → <span className="font-semibold text-[#05243F]">{priceKoboPreview} kobo</span>
+                        → <span className="font-semibold text-gray-900">{priceKoboPreview} kobo</span>
                       </p>
                     )}
                   </div>
@@ -2110,7 +2137,7 @@ export default function AdminLadipo() {
                       step="1"
                       value={productForm.stock_qty}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, stock_qty: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                       required
                     />
                   </div>
@@ -2122,7 +2149,7 @@ export default function AdminLadipo() {
                     value={productForm.seller_label}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, seller_label: e.target.value }))}
                     placeholder="Motoka"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2284DB] focus:ring-2 focus:ring-[#2284DB]/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
 
@@ -2131,7 +2158,7 @@ export default function AdminLadipo() {
                     type="checkbox"
                     checked={productForm.is_universal}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, is_universal: e.target.checked }))}
-                    className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   Universal part (shows for all cars)
                 </label>
@@ -2151,7 +2178,7 @@ export default function AdminLadipo() {
                           type="checkbox"
                           checked={Boolean(productForm[key])}
                           onChange={(e) => setProductForm((prev) => ({ ...prev, [key]: e.target.checked }))}
-                          className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                         Feature in &quot;{label}&quot;
                       </label>
@@ -2165,7 +2192,7 @@ export default function AdminLadipo() {
                       <label className="text-xs font-medium uppercase tracking-wide text-gray-500">
                         Compatibility entries
                       </label>
-                      {compatibilityLoading && <span className="text-[11px] text-gray-400">Loading…</span>}
+                      {compatibilityLoading && <Spinner size="sm" />}
                     </div>
 
                     {compatibilityEntries.length === 0 ? (
@@ -2181,7 +2208,7 @@ export default function AdminLadipo() {
                             <button
                               type="button"
                               onClick={() => removeCompatibilityEntry(entry.id)}
-                              className="col-span-2 rounded-md border border-rose-200 text-rose-600 hover:bg-rose-50"
+                              className="col-span-2 rounded-md border border-red-200 text-red-600 hover:bg-red-50"
                             >
                               Remove
                             </button>
@@ -2195,32 +2222,32 @@ export default function AdminLadipo() {
                         value={compatibilityDraft.make}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, make: e.target.value }))}
                         placeholder="Make"
-                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
                       />
                       <input
                         value={compatibilityDraft.model}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, model: e.target.value }))}
                         placeholder="Model (optional)"
-                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
                       />
                       <input
                         type="number"
                         value={compatibilityDraft.year_min}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, year_min: e.target.value }))}
                         placeholder="Year min"
-                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
                       />
                       <input
                         type="number"
                         value={compatibilityDraft.year_max}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, year_max: e.target.value }))}
                         placeholder="Year max"
-                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2284DB]"
+                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
                       />
                       <button
                         type="button"
                         onClick={addCompatibilityEntry}
-                        className="col-span-2 rounded-lg bg-[#2284DB] px-2 py-2 text-xs font-semibold text-white hover:bg-[#1d74c3]"
+                        className="col-span-2 rounded-lg bg-blue-600 px-2 py-2 text-xs font-semibold text-white hover:bg-blue-700"
                       >
                         Add
                       </button>
@@ -2243,7 +2270,7 @@ export default function AdminLadipo() {
                       ) : editingProductCoverUrl ? (
                         <img src={editingProductCoverUrl} alt="" className="max-h-full max-w-full object-contain" />
                       ) : (
-                        <Icon icon="solar:gallery-add-bold-duotone" className="h-8 w-8 text-gray-300" />
+                        <PhotoIcon className="h-8 w-8 text-gray-300" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1 space-y-2">
@@ -2252,7 +2279,7 @@ export default function AdminLadipo() {
                         type="file"
                         accept="image/jpeg,image/jpg,image/png,image/webp"
                         onChange={(e) => setProductImageFile(e.target.files?.[0] || null)}
-                        className="w-full text-xs text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-[#2284DB] file:px-2.5 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-[#1d74c3]"
+                        className="w-full text-xs text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-600 file:px-2.5 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-700"
                       />
                       {productImageFile && (
                         <div className="flex items-center gap-2">
@@ -2260,7 +2287,7 @@ export default function AdminLadipo() {
                           <button
                             type="button"
                             onClick={clearPendingProductImage}
-                            className="shrink-0 text-[11px] font-semibold text-rose-500 hover:underline"
+                            className="shrink-0 text-[11px] font-semibold text-red-500 hover:underline"
                           >
                             Remove
                           </button>
@@ -2275,7 +2302,7 @@ export default function AdminLadipo() {
                     type="checkbox"
                     checked={productForm.is_active}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, is_active: e.target.checked }))}
-                    className="rounded border-gray-300 text-[#2284DB] focus:ring-[#2284DB]"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   Visible in Ladipo (active)
                 </label>
@@ -2284,7 +2311,7 @@ export default function AdminLadipo() {
                   <button
                     type="submit"
                     disabled={savingProduct}
-                    className="flex-1 rounded-lg bg-[#2284DB] py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#1d74c3] disabled:opacity-60"
+                    className={`${BTN_PRIMARY} flex-1`}
                   >
                     {savingProduct ? 'Saving…' : productPanelMode === 'edit' ? 'Save changes' : 'Create product'}
                   </button>
@@ -2292,7 +2319,7 @@ export default function AdminLadipo() {
                     <button
                       type="button"
                       onClick={resetProductForm}
-                      className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                      className={BTN_SECONDARY}
                     >
                       Cancel
                     </button>
@@ -2306,31 +2333,32 @@ export default function AdminLadipo() {
 
       {activeTab === 'collections' && (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+          <div className={`${CARD} flex flex-wrap items-center justify-between gap-3 p-4`}>
             <div>
-              <h2 className="text-base font-bold text-[#05243F]">Manual storefront collections</h2>
+              <h2 className="text-base font-bold text-gray-900">Manual storefront collections</h2>
               <p className="mt-1 text-xs text-gray-500">
                 Products appear here only when an admin enables a storefront section in the product editor.
               </p>
             </div>
-            <button type="button" onClick={loadCuratedProducts} disabled={curatedLoading} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
-              {curatedLoading ? 'Loading…' : 'Refresh'}
+            <button type="button" onClick={loadCuratedProducts} disabled={curatedLoading} className={BTN_SECONDARY}>
+              {curatedLoading ? <Spinner size="sm" /> : <ArrowPathIcon className="h-4 w-4" />}
+              Refresh
             </button>
           </div>
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {[
-              { key: 'essential', title: 'Essential Products', items: curatedProducts.essential, tone: 'text-[#2284DB]' },
-              { key: 'mustHave', title: 'Must Have', items: curatedProducts.mustHave, tone: 'text-violet-700' },
-              { key: 'featured', title: 'Featured', items: curatedProducts.featured, tone: 'text-emerald-700' },
+              { key: 'essential', title: 'Essential Products', items: curatedProducts.essential, tone: 'text-blue-600' },
+              { key: 'mustHave', title: 'Must Have', items: curatedProducts.mustHave, tone: 'text-gray-700' },
+              { key: 'featured', title: 'Featured', items: curatedProducts.featured, tone: 'text-green-700' },
               { key: 'bestsellers', title: 'Bestsellers', items: curatedProducts.bestsellers, tone: 'text-amber-700' },
-              { key: 'deals', title: 'Deals', items: curatedProducts.deals, tone: 'text-rose-700' },
+              { key: 'deals', title: 'Deals', items: curatedProducts.deals, tone: 'text-red-700' },
             ].map(({ key, title, items, tone }) => (
-              <section key={key} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+              <section key={key} className={`${CARD} p-4`}>
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className={`font-bold ${tone}`}>{title}</h3>
                   <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">{items.length}</span>
                 </div>
-                {curatedLoading ? <p className="py-6 text-center text-sm text-gray-400">Loading collection…</p> : items.length === 0 ? (
+                {curatedLoading ? <div className="flex justify-center py-6"><Spinner size="sm" /></div> : items.length === 0 ? (
                   <p className="py-6 text-center text-sm text-gray-400">No products manually selected yet.</p>
                 ) : (
                   <div className="space-y-2">
@@ -2340,10 +2368,10 @@ export default function AdminLadipo() {
                           {resolveAdminProductImageUrl(product) ? <img src={resolveAdminProductImageUrl(product)} alt="" className="h-full w-full object-contain" /> : null}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-[#05243F]">{product.name}</p>
+                          <p className="truncate text-sm font-semibold text-gray-900">{product.name}</p>
                           <p className="text-xs text-gray-500">{formatPrice(product.inventory?.price_kobo)} · Stock {product.inventory?.stock_qty ?? 0}</p>
                         </div>
-                        <button type="button" onClick={() => { selectTab('products'); startEditProduct(product); setProductPanelMode('edit'); }} className="text-xs font-semibold text-[#2284DB] hover:underline">Edit</button>
+                        <button type="button" onClick={() => { selectTab('products'); startEditProduct(product); setProductPanelMode('edit'); }} className="text-xs font-semibold text-blue-600 hover:underline">Edit</button>
                       </div>
                     ))}
                   </div>
@@ -2363,17 +2391,15 @@ export default function AdminLadipo() {
             <button
               onClick={loadAdminCategories}
               disabled={adminCategoriesLoading}
-              className="inline-flex items-center gap-1 rounded-lg bg-[#2284DB] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1d74c3] disabled:opacity-60"
+              className={BTN_PRIMARY}
             >
-              <Icon icon="solar:refresh-linear" className="h-3.5 w-3.5" />
+              <ArrowPathIcon className="h-4 w-4" />
               Refresh
             </button>
           </div>
 
           {adminCategoriesLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
-            </div>
+            <PageLoader />
           ) : (
             (() => {
               // Only main categories get images — subcategories render as
@@ -2386,20 +2412,20 @@ export default function AdminLadipo() {
                 const showUrlInput = categoryUrlInputId === cat.id;
 
                 return (
-                  <div key={cat.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col gap-3">
+                  <div key={cat.id} className={`${CARD} p-4 flex flex-col gap-3`}>
                     <div className="h-28 w-full overflow-hidden rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center">
                       {cat.image_url ? (
                         <img src={cat.image_url} alt={cat.name} className="h-full w-full object-contain" />
                       ) : (
                         <div className="flex flex-col items-center gap-1 text-gray-300">
-                          <Icon icon="solar:gallery-add-bold-duotone" className="h-8 w-8" />
+                          <PhotoIcon className="h-8 w-8" />
                           <span className="text-[11px]">No image</span>
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <p className="text-sm font-semibold text-[#05243F] truncate">{cat.name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{cat.name}</p>
                       <p className="text-[10px] text-gray-300 font-mono truncate mt-0.5">{cat.slug}</p>
                     </div>
 
@@ -2409,12 +2435,12 @@ export default function AdminLadipo() {
                           value={categoryUrlDraft}
                           onChange={(e) => setCategoryUrlDraft(e.target.value)}
                           placeholder="https://..."
-                          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#2284DB]"
+                          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
                         />
                         <button
                           onClick={() => handleCategoryUrlSave(cat.id)}
                           disabled={isUploading || !categoryUrlDraft.trim()}
-                          className="rounded-lg bg-[#2284DB] px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-[#1d74c3] disabled:opacity-50"
+                          className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                         >
                           Save
                         </button>
@@ -2422,18 +2448,18 @@ export default function AdminLadipo() {
                           onClick={() => { setCategoryUrlInputId(null); setCategoryUrlDraft(''); }}
                           className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-50"
                         >
-                          ✕
+                          <XMarkIcon className="h-4 w-4" />
                         </button>
                       </div>
                     )}
 
                     {!showUrlInput && (
                       <div className="flex gap-1.5">
-                        <label className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-[#2284DB] px-3 py-1.5 text-xs font-semibold text-[#2284DB] hover:bg-[#2284DB]/5 cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-blue-600 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           {isUploading ? (
-                            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+                            <Spinner size="sm" />
                           ) : (
-                            <Icon icon="solar:upload-linear" className="h-3.5 w-3.5" />
+                            <ArrowUpTrayIcon className="h-3.5 w-3.5" />
                           )}
                           {isUploading ? 'Uploading…' : 'Upload'}
                           <input
@@ -2467,8 +2493,8 @@ export default function AdminLadipo() {
                       {mainCats.map(renderCategoryCard)}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-gray-200 bg-white py-12 text-center text-sm text-gray-400">
-                      No categories found.
+                    <div className="rounded-xl border border-dashed border-gray-200 bg-white">
+                      <EmptyState title="No categories found" body="Categories will appear here once they exist in Ladipo." />
                     </div>
                   )}
                 </div>
@@ -2483,19 +2509,19 @@ export default function AdminLadipo() {
           <div className="h-full w-full max-w-2xl overflow-y-auto bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-[#05243F]">Order details</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Order details</h2>
                 <p className="text-sm text-gray-500">{selectedOrderNumber}</p>
               </div>
               <button
                 onClick={closeOrderDetails}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className={BTN_SECONDARY}
               >
                 Close
               </button>
             </div>
 
             {selectedOrderLoading ? (
-              <p className="py-8 text-sm text-gray-500">Loading order details...</p>
+              <PageLoader />
             ) : !selectedOrder ? (
               <p className="py-8 text-sm text-gray-500">Unable to load order details.</p>
             ) : (
@@ -2503,14 +2529,14 @@ export default function AdminLadipo() {
                 <div className="grid gap-3 rounded-xl bg-gray-50 p-4 md:grid-cols-2">
                   <div>
                     <p className="text-xs uppercase tracking-wide text-gray-500">Customer</p>
-                    <p className="text-sm font-semibold text-[#05243F]">{selectedOrder.user_name}</p>
+                    <p className="text-sm font-semibold text-gray-900">{selectedOrder.user_name}</p>
                     <p className="text-sm text-gray-600">{selectedOrder.user_email || 'No email'}</p>
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-wide text-gray-500">Totals</p>
                     <p className="text-sm text-gray-700">Subtotal: {formatPrice(selectedOrder.subtotal_kobo)}</p>
                     <p className="text-sm text-gray-700">Delivery: {formatPrice(selectedOrder.delivery_fee_kobo)}</p>
-                    <p className="text-sm font-semibold text-[#05243F]">Total: {selectedOrder.total_naira}</p>
+                    <p className="text-sm font-semibold text-gray-900">Total: {selectedOrder.total_naira}</p>
                   </div>
                 </div>
 
@@ -2522,7 +2548,7 @@ export default function AdminLadipo() {
                     ) : (
                       (selectedOrder.items || []).map((item, index) => (
                         <div key={`${item.inventory_id || item.part_id || index}`} className="rounded-lg border border-gray-200 p-3">
-                          <p className="text-sm font-semibold text-[#05243F]">{item.name || 'Item'}</p>
+                          <p className="text-sm font-semibold text-gray-900">{item.name || 'Item'}</p>
                           <p className="text-xs text-gray-500">
                             Qty: {item.quantity || 0} | Unit: {formatPrice(item.unit_price_kobo)} | Line total: {formatPrice(item.line_total_kobo)}
                           </p>
@@ -2586,7 +2612,7 @@ export default function AdminLadipo() {
                         || selectedOrder.workflow_state === 'blocked'
                       }
                       onClick={() => handleWorkflowUpdate('blocked', blockReasonDraft)}
-                      className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-full border border-red-300 bg-red-50 px-3 py-1 text-xs font-semibold text-red-800 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Mark blocked
                     </button>
@@ -2599,7 +2625,7 @@ export default function AdminLadipo() {
                         || selectedOrder.workflow_state !== 'blocked'
                       }
                       onClick={() => handleWorkflowUpdate('active', '')}
-                      className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-full border border-green-300 bg-green-50 px-3 py-1 text-xs font-semibold text-green-800 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Unblock
                     </button>
@@ -2614,7 +2640,7 @@ export default function AdminLadipo() {
                         type="button"
                         disabled={!assigneeApiReady || !capabilitiesChecked || !handlerKeyForAdmin(adminDisplayName)}
                         onClick={() => claimOrder(selectedOrder.order_number)}
-                        className="rounded-full border border-emerald-500 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full border border-green-500 px-3 py-1 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Claim order
                       </button>
@@ -2648,8 +2674,8 @@ export default function AdminLadipo() {
                         onClick={() => handleOrderStatusUpdate(selectedOrder.order_number, nextStatus)}
                         className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                           nextStatus === 'cancelled'
-                            ? 'border-rose-300 text-rose-800 hover:bg-rose-50'
-                            : 'border-[#2284DB] text-[#2284DB] hover:bg-[#2284DB] hover:text-white'
+                            ? 'border-red-300 text-red-800 hover:bg-red-50'
+                            : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
                         }`}
                       >
                         {formatNextActionLabel(selectedOrder, nextStatus)}
@@ -2668,8 +2694,8 @@ export default function AdminLadipo() {
 
       {showCancelReasonModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-            <h3 className="text-lg font-semibold text-[#05243F]">Cancel order</h3>
+          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900">Cancel order</h3>
             <p className="mt-1 text-sm text-gray-600">
               Provide a clear reason. This message will be sent to the customer via email and in-app notification.
             </p>
@@ -2682,7 +2708,7 @@ export default function AdminLadipo() {
               onChange={(e) => setCancelReason(e.target.value)}
               placeholder="Reason for cancellation (at least 10 characters)..."
               rows={4}
-              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-[#2284DB] focus:outline-none focus:ring-2 focus:ring-[#2284DB]/20"
+              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
             <p className="mt-2 text-xs text-gray-500">Minimum 10 characters. This text may be emailed to the customer.</p>
 
@@ -2704,12 +2730,12 @@ export default function AdminLadipo() {
               </div>
             )}
 
-            <div className="mt-6 flex justify-end gap-2 border-t border-rose-100 bg-rose-50/60 pt-4">
+            <div className="mt-6 flex justify-end gap-2 border-t border-red-100 bg-red-50/60 pt-4">
               <button
                 type="button"
                 onClick={closeCancelReasonModal}
                 disabled={cancelSubmitting}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                className={BTN_SECONDARY}
               >
                 Back
               </button>
@@ -2717,7 +2743,7 @@ export default function AdminLadipo() {
                 type="button"
                 onClick={confirmCancellation}
                 disabled={cancelSubmitting}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                className={BTN_DANGER}
               >
                 {cancelSubmitting ? 'Cancelling...' : 'Confirm cancel'}
               </button>
@@ -2728,8 +2754,8 @@ export default function AdminLadipo() {
 
       {showAdminNameModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-            <h3 className="text-lg font-semibold text-[#05243F]">Set admin name</h3>
+          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900">Set admin name</h3>
             <p className="mt-1 text-sm text-gray-600">
               This name is used for claim, release, and status actions to show who is handling each order.
             </p>
@@ -2738,21 +2764,21 @@ export default function AdminLadipo() {
               value={adminNameDraft}
               onChange={(e) => setAdminNameDraft(e.target.value)}
               placeholder="Enter your name"
-              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-[#2284DB] focus:outline-none focus:ring-2 focus:ring-[#2284DB]/20"
+              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
 
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={closeAdminNameModal}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className={BTN_SECONDARY}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={saveAdminName}
-                className="rounded-lg bg-[#2284DB] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1d74c3]"
+                className={BTN_PRIMARY}
               >
                 Save name
               </button>

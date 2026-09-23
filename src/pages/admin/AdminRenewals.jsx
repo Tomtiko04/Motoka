@@ -7,14 +7,27 @@ import {
   EnvelopeIcon,
   ArrowPathIcon,
   XMarkIcon,
+  BellAlertIcon,
+  ExclamationTriangleIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { listRenewals, listDeferredRenewals, getRenewalsSummary, markRenewalChannel } from '../../services/apiAdminRenewals';
 import {
   Pulse,
-  MetricNumber,
   ExpiredMonthChart,
   QueueCard,
 } from '../../components/admin/renewalsMetrics';
+import {
+  PageHeader,
+  StatCard,
+  StatusBadge,
+  EmptyState,
+  CARD,
+  TH,
+  INPUT,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 import { RENEWAL_QUEUES, monthTitle } from '../../components/admin/renewalsQueues';
 
 /**
@@ -54,38 +67,31 @@ const daysText = (daysLeft) => {
 function UrgencyBadge({ daysLeft, message, state }) {
   const inProgress = state === 'in_progress';
 
-  const style =
-    inProgress ? 'bg-blue-100 text-blue-800'
-    : daysLeft < 0 ? 'bg-red-100 text-red-800'
-    : daysLeft === 0 ? 'bg-orange-100 text-orange-800'
-    : daysLeft <= 7 ? 'bg-yellow-100 text-yellow-800'
-    : 'bg-blue-100 text-blue-800';
+  const tone =
+    inProgress ? 'blue'
+    : daysLeft < 0 ? 'red'
+    : daysLeft <= 7 ? 'amber'
+    : 'blue';
 
   return (
-    <span className={`inline-block text-xs font-semibold px-2 py-1 rounded whitespace-nowrap ${style}`}>
+    <StatusBadge tone={tone} className="whitespace-nowrap">
       {inProgress ? daysText(daysLeft) : message}
-    </span>
+    </StatusBadge>
   );
 }
 
 function RenewalStateBadge({ state, openOrder, cancelledOrder }) {
   if (state === 'in_progress') {
     return (
-      <span
-        className="inline-block rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800"
-        title={openOrder ? `Order ${openOrder} is open` : undefined}
-      >
-        Renewal in progress — don&apos;t call
+      <span title={openOrder ? `Order ${openOrder} is open` : undefined}>
+        <StatusBadge tone="blue">Renewal in progress — don&apos;t call</StatusBadge>
       </span>
     );
   }
   if (state === 'needs_review') {
     return (
-      <span
-        className="inline-block rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900"
-        title={cancelledOrder ? `Order ${cancelledOrder} was cancelled after payment` : undefined}
-      >
-        Paid but order cancelled — review
+      <span title={cancelledOrder ? `Order ${cancelledOrder} was cancelled after payment` : undefined}>
+        <StatusBadge tone="amber">Paid but order cancelled — review</StatusBadge>
       </span>
     );
   }
@@ -96,28 +102,28 @@ function RenewalsTableSkeleton() {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-sm">
-        <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+        <thead className="bg-gray-50">
           <tr>
             {['Vehicle', 'Customer', 'Contact', 'Expiry', 'Status', 'Channel'].map((label) => (
-              <th key={label} className="text-left font-semibold px-5 py-3">{label}</th>
+              <th key={label} className={TH}>{label}</th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
           {Array.from({ length: 8 }).map((_, i) => (
             <tr key={i}>
-              <td className="px-5 py-4">
+              <td className="px-4 py-4">
                 <Pulse className="h-4 w-28 mb-2" />
                 <Pulse className="h-3 w-40" />
               </td>
-              <td className="px-5 py-4"><Pulse className="h-4 w-32" /></td>
-              <td className="px-5 py-4">
+              <td className="px-4 py-4"><Pulse className="h-4 w-32" /></td>
+              <td className="px-4 py-4">
                 <Pulse className="h-3 w-36 mb-2" />
                 <Pulse className="h-3 w-24" />
               </td>
-              <td className="px-5 py-4"><Pulse className="h-4 w-20" /></td>
-              <td className="px-5 py-4"><Pulse className="h-6 w-28 rounded-full" /></td>
-              <td className="px-5 py-4"><Pulse className="h-6 w-24" /></td>
+              <td className="px-4 py-4"><Pulse className="h-4 w-20" /></td>
+              <td className="px-4 py-4"><Pulse className="h-6 w-28 rounded-full" /></td>
+              <td className="px-4 py-4"><Pulse className="h-6 w-24" /></td>
             </tr>
           ))}
         </tbody>
@@ -159,7 +165,7 @@ function MarkChannelModal({ pending, confirming, onCancel, onConfirm }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="mark-channel-title"
-        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -192,7 +198,7 @@ function MarkChannelModal({ pending, confirming, onCancel, onConfirm }) {
             type="button"
             onClick={onCancel}
             disabled={confirming}
-            className="px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40"
+            className={`${BTN_SECONDARY} !px-3 !py-1.5`}
           >
             Cancel
           </button>
@@ -200,7 +206,7 @@ function MarkChannelModal({ pending, confirming, onCancel, onConfirm }) {
             type="button"
             onClick={onConfirm}
             disabled={confirming}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            className={`${BTN_PRIMARY} !px-3 !py-1.5`}
           >
             {confirming ? 'Saving…' : `Confirm ${label}`}
           </button>
@@ -219,7 +225,7 @@ function RenewalChannelCell({ row, disabled, onMark }) {
           type="button"
           disabled={disabled}
           onClick={() => onMark(row, 'internal')}
-          className="px-2 py-1 text-[11px] font-semibold rounded-md border border-blue-200 text-blue-800 bg-blue-50 hover:bg-blue-100 disabled:opacity-40"
+          className="px-2 py-1 text-[11px] font-semibold rounded-lg border border-blue-200 text-blue-800 bg-blue-50 hover:bg-blue-100 disabled:opacity-40"
         >
           Internal
         </button>
@@ -227,7 +233,7 @@ function RenewalChannelCell({ row, disabled, onMark }) {
           type="button"
           disabled={disabled}
           onClick={() => onMark(row, 'external')}
-          className="px-2 py-1 text-[11px] font-semibold rounded-md border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40"
+          className="px-2 py-1 text-[11px] font-semibold rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40"
         >
           External
         </button>
@@ -403,39 +409,44 @@ const AdminRenewals = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Renewals</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Overdue licences and customers to contact before papers lapse.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={refresh}
-          disabled={metricsLoading || tableLoading}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50"
-        >
-          <ArrowPathIcon className={`h-4 w-4 ${metricsLoading || tableLoading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        icon={BellAlertIcon}
+        title="Renewals"
+        subtitle="Overdue licences and customers to contact before papers lapse."
+        actions={
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={metricsLoading || tableLoading}
+            className={`${BTN_SECONDARY} !px-3 !py-1.5 text-xs`}
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${metricsLoading || tableLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-lg bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Overdue</p>
-          <MetricNumber loading={metricsLoading} value={summary?.expired_total} />
-          <p className="mt-1 text-sm text-gray-500">Licences already expired</p>
-        </div>
-        <div className="rounded-lg bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Lapsed this month</p>
-          <MetricNumber loading={metricsLoading} value={summary?.expired_this_month} />
-          <p className="mt-1 text-sm text-gray-500">{metricsLoading ? 'Calendar month' : thisMonthLabel}</p>
-        </div>
+        <StatCard
+          icon={ExclamationTriangleIcon}
+          color="red"
+          label="Overdue"
+          value={summary?.expired_total ?? 0}
+          hint="Licences already expired"
+          loading={metricsLoading}
+        />
+        <StatCard
+          icon={CalendarDaysIcon}
+          color="amber"
+          label="Lapsed this month"
+          value={summary?.expired_this_month ?? 0}
+          hint={metricsLoading ? 'Calendar month' : thisMonthLabel}
+          loading={metricsLoading}
+        />
       </div>
 
       {!isDeferred && (
-        <div className="rounded-lg bg-white p-5 shadow-sm">
+        <div className={`${CARD} p-5`}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Expired by month</p>
@@ -448,7 +459,7 @@ const AdminRenewals = () => {
             <select
               value={month}
               onChange={(e) => selectMonth(e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="">All months</option>
               {byMonth.map((m) => (
@@ -508,51 +519,52 @@ const AdminRenewals = () => {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search plate, vehicle, owner name, email or phone…"
-              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`${INPUT} pl-9`}
             />
           </form>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className={`${CARD} overflow-hidden`}>
         {tableLoading ? (
           <RenewalsTableSkeleton />
         ) : rows.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-sm font-medium text-gray-900">Nothing here</p>
-            <p className="text-sm text-gray-500 mt-1">
-              {isDeferred
+          <EmptyState
+            icon={BellAlertIcon}
+            title="Nothing here"
+            body={
+              isDeferred
                 ? 'No customers have asked to be reminded about a document.'
                 : search
                   ? 'No matches for that search in this group.'
                   : month
                     ? 'No expired licences in that month.'
-                    : 'No vehicles fall into this group right now.'}
-            </p>
-          </div>
+                    : 'No vehicles fall into this group right now.'
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left font-semibold px-5 py-3">
+                  <th className={TH}>
                     {isDeferred ? 'Document' : 'Vehicle'}
                   </th>
-                  <th className="text-left font-semibold px-5 py-3">Customer</th>
-                  <th className="text-left font-semibold px-5 py-3">Contact</th>
-                  <th className="text-left font-semibold px-5 py-3">
+                  <th className={TH}>Customer</th>
+                  <th className={TH}>Contact</th>
+                  <th className={TH}>
                     {isDeferred ? 'Requested' : 'Expiry ↓'}
                   </th>
-                  <th className="text-left font-semibold px-5 py-3">Status</th>
+                  <th className={TH}>Status</th>
                   {!isDeferred && (
-                    <th className="text-left font-semibold px-5 py-3">Channel</th>
+                    <th className={TH}>Channel</th>
                   )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {rows.map(row => (
                   <tr key={row.car_id || row.id} className="hover:bg-gray-50">
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-4 py-4 align-top">
                       <p className="font-semibold text-gray-900">
                         {isDeferred ? row.document_name : (row.registration_no || '—')}
                       </p>
@@ -561,20 +573,20 @@ const AdminRenewals = () => {
                       </p>
                     </td>
 
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-4 py-4 align-top">
                       <p className="text-gray-900">{row.owner?.name || '—'}</p>
                       {row.owner?.is_guest && (
-                        <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
+                        <StatusBadge tone="gray" className="uppercase tracking-wide">
                           Guest
-                        </span>
+                        </StatusBadge>
                       )}
                     </td>
 
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-4 py-4 align-top">
                       <ContactLinks email={row.owner?.email} phone={row.owner?.phone} />
                     </td>
 
-                    <td className="px-5 py-4 align-top whitespace-nowrap text-gray-700">
+                    <td className="px-4 py-4 align-top whitespace-nowrap text-gray-700">
                       {formatDate(isDeferred ? row.requested_at : row.expiry_date)}
                       {isDeferred && row.expiry_date && (
                         <p className="text-xs text-gray-500 mt-0.5">
@@ -583,7 +595,7 @@ const AdminRenewals = () => {
                       )}
                     </td>
 
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-4 py-4 align-top">
                       {isDeferred ? (
                         <span className="text-xs text-gray-600">
                           {row.custom_reason || String(row.reason || '').replace(/_/g, ' ')}
@@ -610,7 +622,7 @@ const AdminRenewals = () => {
                     </td>
 
                     {!isDeferred && (
-                      <td className="px-5 py-4 align-top">
+                      <td className="px-4 py-4 align-top">
                         <RenewalChannelCell
                           row={row}
                           disabled={markingId === row.car_id}
@@ -635,7 +647,7 @@ const AdminRenewals = () => {
                 type="button"
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 hover:bg-gray-50"
+                className={`${BTN_SECONDARY} !px-3 !py-1.5 text-xs`}
               >
                 Previous
               </button>
@@ -643,7 +655,7 @@ const AdminRenewals = () => {
                 type="button"
                 onClick={() => setPage(p => Math.min(pagination.total_pages, p + 1))}
                 disabled={page >= pagination.total_pages}
-                className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 hover:bg-gray-50"
+                className={`${BTN_SECONDARY} !px-3 !py-1.5 text-xs`}
               >
                 Next
               </button>

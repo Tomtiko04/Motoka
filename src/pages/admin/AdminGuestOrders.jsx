@@ -9,6 +9,15 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { adminListGuestOrders } from '../../services/apiDelivery';
+import {
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  CARD,
+  TH,
+  INPUT,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'All' },
@@ -17,10 +26,10 @@ const STATUS_FILTERS = [
   { value: 'payment_failed', label: 'Failed' },
 ];
 
-const STATUS_COLOR = {
-  payment_success: 'text-green-600',
-  pending_payment: 'text-orange-600',
-  payment_failed: 'text-red-600',
+const STATUS_TONE = {
+  payment_success: 'green',
+  pending_payment: 'amber',
+  payment_failed: 'red',
 };
 
 const STATUS_LABEL = {
@@ -84,15 +93,10 @@ export default function AdminGuestOrders() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <ClipboardDocumentListIcon className="h-6 w-6 text-gray-600 mr-2" />
-          <h1 className="text-xl font-semibold text-gray-900">Guest orders</h1>
-        </div>
-        <div className="text-sm text-gray-500">{totalOrders} total</div>
-      </div>
+      {/* Hub provides the page header; keep only the count */}
+      <div className="text-right text-sm text-gray-500">{totalOrders} total</div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className={`${CARD} p-4`}>
         <div className="flex flex-col sm:flex-row gap-4">
           <form
             className="flex-1"
@@ -109,7 +113,7 @@ export default function AdminGuestOrders() {
                 placeholder="Search plate, email, or name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`${INPUT} pl-10`}
               />
             </div>
           </form>
@@ -121,7 +125,7 @@ export default function AdminGuestOrders() {
                 setActiveFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -134,25 +138,23 @@ export default function AdminGuestOrders() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
-        </div>
+        <PageLoader />
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className={`${CARD} overflow-hidden`}>
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Guest</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plate</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivery</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className={TH}>Guest</th>
+                  <th className={TH}>Plate</th>
+                  <th className={TH}>Items</th>
+                  <th className={TH}>Amount</th>
+                  <th className={TH}>Delivery</th>
+                  <th className={TH}>Status</th>
+                  <th className={TH}>Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {orders.map((order) => (
                   <tr
                     key={order.id}
@@ -170,9 +172,9 @@ export default function AdminGuestOrders() {
                       {hasDelivery(order) ? 'Yes' : 'No'}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-sm font-medium ${STATUS_COLOR[order.payment_status] || 'text-gray-600'}`}>
+                      <StatusBadge tone={STATUS_TONE[order.payment_status] || 'gray'}>
                         {STATUS_LABEL[order.payment_status] || order.payment_status}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">
                       {order.created_at ? new Date(order.created_at).toLocaleDateString('en-GB') : '—'}
@@ -183,7 +185,15 @@ export default function AdminGuestOrders() {
             </table>
           </div>
           {orders.length === 0 && (
-            <div className="text-center py-12 text-gray-500">No guest orders found.</div>
+            <EmptyState
+              icon={ClipboardDocumentListIcon}
+              title="No guest orders found"
+              body={
+                submittedSearch || activeFilter !== 'all'
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'No guest orders have been placed yet.'
+              }
+            />
           )}
         </div>
       )}
@@ -194,7 +204,8 @@ export default function AdminGuestOrders() {
             type="button"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="p-2 rounded-lg border border-gray-200 disabled:opacity-40"
+            className={`${BTN_SECONDARY} !p-2`}
+            aria-label="Previous page"
           >
             <ChevronLeftIcon className="h-4 w-4" />
           </button>
@@ -205,7 +216,8 @@ export default function AdminGuestOrders() {
             type="button"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
-            className="p-2 rounded-lg border border-gray-200 disabled:opacity-40"
+            className={`${BTN_SECONDARY} !p-2`}
+            aria-label="Next page"
           >
             <ChevronRightIcon className="h-4 w-4" />
           </button>

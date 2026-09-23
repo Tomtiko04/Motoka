@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon } from '@iconify/react';
+import {
+  UsersIcon,
+  UserPlusIcon,
+  MagnifyingGlassIcon,
+  TrashIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+  CheckCircleIcon,
+  EyeIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
 import config from '../../config/config';
 import AddUserModal from '../../components/admin/AddUserModal';
+import {
+  PageHeader,
+  Card,
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  BTN_DANGER,
+  TH,
+} from '../../components/admin/ui';
 
 const AdminUsers = () => {
   const navigate = useNavigate();
@@ -19,20 +40,6 @@ const AdminUsers = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
 
-  const mapUser = (row) => ({
-    userId: row.user_id || row.id,
-    id: row.id,
-    name: row.first_name && row.last_name ? `${row.first_name} ${row.last_name}`.trim() : row.full_name || row.name || row.email || 'N/A',
-    email: row.email || 'N/A',
-    phone: row.phone_number || row.phone || '',
-    is_suspended: row.is_suspended || false,
-    deleted_at: row.deleted_at || null,
-    created_at: row.created_at,
-    cars_count: row.cars_count || 0,
-    plates: row.plates || [],
-    orders_count: row.orders_count || 0,
-  });
-
   useEffect(() => {
     fetchUsers();
   }, [currentPage, searchTerm, statusFilter, sortFilter]);
@@ -41,7 +48,7 @@ const AdminUsers = () => {
     try {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         navigate('/admin/login');
         return;
@@ -191,25 +198,25 @@ const AdminUsers = () => {
   const getStatusBadge = (user) => {
     if (user.deleted_at) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
-          <Icon icon="mdi:delete" className="mr-1 h-3 w-3" />
+        <StatusBadge tone="gray">
+          <TrashIcon className="mr-1 h-3 w-3" />
           Deleted
-        </span>
+        </StatusBadge>
       );
     }
     if (user.is_suspended) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-          <Icon icon="mdi:lock" className="mr-1 h-3 w-3" />
+        <StatusBadge tone="red">
+          <LockClosedIcon className="mr-1 h-3 w-3" />
           Suspended
-        </span>
+        </StatusBadge>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-        <Icon icon="mdi:check-circle" className="mr-1 h-3 w-3" />
+      <StatusBadge tone="green">
+        <CheckCircleIcon className="mr-1 h-3 w-3" />
         Active
-      </span>
+      </StatusBadge>
     );
   };
 
@@ -224,29 +231,24 @@ const AdminUsers = () => {
   };
 
   return (
-    <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Users</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage all registered users</p>
-        </div>
-        <button
-          onClick={() => setShowAddUser(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
-        >
-          <Icon icon="mdi:account-plus" className="h-4 w-4" />
-          Add User
-        </button>
-      </div>
+      <PageHeader
+        icon={UsersIcon}
+        title="Users"
+        subtitle="Manage all registered users"
+        actions={
+          <button onClick={() => setShowAddUser(true)} className={BTN_PRIMARY}>
+            <UserPlusIcon className="h-4 w-4" />
+            Add User
+          </button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Icon
-            icon="mdi:magnify"
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search by name, email, or phone..."
@@ -285,48 +287,34 @@ const AdminUsers = () => {
       </div>
 
       {/* Users Table */}
-      <div className="overflow-hidden rounded-lg bg-white shadow">
+      <Card className="overflow-hidden">
         {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-              <p className="text-sm text-gray-500">Loading users...</p>
-            </div>
-          </div>
+          <PageLoader />
         ) : users.length === 0 ? (
-          <div className="flex h-64 flex-col items-center justify-center">
-            <Icon icon="mdi:account-off" className="h-16 w-16 text-gray-400" />
-            <p className="mt-4 text-sm text-gray-500">No users found</p>
-          </div>
+          <EmptyState
+            icon={UsersIcon}
+            title="No users found"
+            body={
+              searchTerm || statusFilter !== 'all'
+                ? 'No users match your search or filters. Try adjusting them.'
+                : 'Users will appear here once they register.'
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    User
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Contact
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Plate No.
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Cars
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Joined
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Actions
-                  </th>
+                  <th className={TH}>User</th>
+                  <th className={TH}>Contact</th>
+                  <th className={TH}>Plate No.</th>
+                  <th className={TH}>Status</th>
+                  <th className={TH}>Cars</th>
+                  <th className={TH}>Joined</th>
+                  <th className={`${TH} text-right`}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-gray-100 bg-white">
                 {users.map((user) => (
                   <tr key={user.userId} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-4 py-3">
@@ -374,7 +362,7 @@ const AdminUsers = () => {
                       {getStatusBadge(user)}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm">
-                      <span className="font-medium text-gray-900">{user.cars_count || 0}</span>
+                      <span className="font-medium tabular-nums text-gray-900">{user.cars_count || 0}</span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                       {formatDate(user.created_at)}
@@ -385,8 +373,9 @@ const AdminUsers = () => {
                           onClick={() => handleViewUser(user.id)}
                           className="text-blue-600 hover:text-blue-900"
                           title="View details"
+                          aria-label="View details"
                         >
-                          <Icon icon="mdi:eye" className="h-5 w-5" />
+                          <EyeIcon className="h-5 w-5" />
                         </button>
                         {!user.deleted_at && (
                           <>
@@ -396,17 +385,19 @@ const AdminUsers = () => {
                                 disabled={actionLoading}
                                 className="text-green-600 hover:text-green-900 disabled:opacity-50"
                                 title="Activate user"
+                                aria-label="Activate user"
                               >
-                                <Icon icon="mdi:lock-open" className="h-5 w-5" />
+                                <LockOpenIcon className="h-5 w-5" />
                               </button>
                             ) : (
                               <button
                                 onClick={() => handleSuspendUser(user.id)}
                                 disabled={actionLoading}
-                                className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
+                                className="text-amber-600 hover:text-amber-800 disabled:opacity-50"
                                 title="Suspend user"
+                                aria-label="Suspend user"
                               >
-                                <Icon icon="mdi:lock" className="h-5 w-5" />
+                                <LockClosedIcon className="h-5 w-5" />
                               </button>
                             )}
                             <button
@@ -414,8 +405,9 @@ const AdminUsers = () => {
                               disabled={actionLoading}
                               className="text-red-600 hover:text-red-900 disabled:opacity-50"
                               title="Delete user"
+                              aria-label="Delete user"
                             >
-                              <Icon icon="mdi:delete" className="h-5 w-5" />
+                              <TrashIcon className="h-5 w-5" />
                             </button>
                           </>
                         )}
@@ -427,7 +419,7 @@ const AdminUsers = () => {
             </table>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Pagination */}
       {!loading && users.length > 0 && totalPages > 1 && (
@@ -435,7 +427,7 @@ const AdminUsers = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className={BTN_SECONDARY}
           >
             Previous
           </button>
@@ -447,7 +439,7 @@ const AdminUsers = () => {
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className={BTN_SECONDARY}
           >
             Next
           </button>
@@ -465,10 +457,10 @@ const AdminUsers = () => {
       {/* Delete Confirmation Modal */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-center">
               <div className="rounded-full bg-red-100 p-3">
-                <Icon icon="mdi:alert" className="h-6 w-6 text-red-600" />
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
               </div>
             </div>
             <h3 className="mb-2 text-center text-lg font-semibold text-gray-900">
@@ -483,14 +475,14 @@ const AdminUsers = () => {
               <button
                 onClick={() => setDeleteModal({ isOpen: false, user: null })}
                 disabled={actionLoading}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`${BTN_SECONDARY} flex-1`}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={actionLoading}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`${BTN_DANGER} flex-1`}
               >
                 {actionLoading ? 'Deleting...' : 'Delete'}
               </button>

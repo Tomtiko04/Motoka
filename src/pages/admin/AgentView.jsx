@@ -8,13 +8,10 @@ import {
   BanknotesIcon,
   DocumentTextIcon,
   PencilIcon,
-  TrashIcon,
   XMarkIcon,
   CheckIcon,
   ExclamationTriangleIcon,
   ArrowLeftIcon,
-  EyeIcon,
-  EyeSlashIcon,
   ArrowUpTrayIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -22,6 +19,17 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import {
+  PageHeader,
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  CARD,
+  INPUT,
+  TH,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 
 const AgentView = () => {
   const { uuid } = useParams();
@@ -31,9 +39,7 @@ const AgentView = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showNINImages, setShowNINImages] = useState({ front: false, back: false });
-  const [currentPage, setCurrentPage] = useState({ payments: 1, orders: 1 });
   const [activeTab, setActiveTab] = useState('overview');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -138,7 +144,7 @@ const AgentView = () => {
         setStates(data.data);
         setFilteredStates(data.data);
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch states');
     }
   };
@@ -158,7 +164,7 @@ const AgentView = () => {
         setBanks(data.data);
         setFilteredBanks(data.data);
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch banks');
     }
   };
@@ -222,7 +228,7 @@ const AgentView = () => {
           duration: 4000,
         });
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to verify account');
       setAccountVerified(false);
     } finally {
@@ -335,7 +341,7 @@ const AgentView = () => {
         toast.error(data.message || 'Failed to fetch agent details');
         navigate('/admin/agents');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch agent details');
       navigate('/admin/agents');
     } finally {
@@ -359,11 +365,10 @@ const AgentView = () => {
       if (data.status) {
         setAgent(data.data);
         toast.success(data.message);
-        setShowStatusModal(false);
       } else {
         toast.error(data.message || 'Failed to update status');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to update status');
     }
   };
@@ -504,19 +509,28 @@ const AgentView = () => {
       } else {
         toast.error(data.message || 'Failed to update agent');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to update agent');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusTone = (status) => {
     switch (status) {
-      case 'active': return 'text-green-600 bg-green-100';
-      case 'suspended': return 'text-yellow-600 bg-yellow-100';
-      case 'deleted': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'active': return 'green';
+      case 'suspended': return 'amber';
+      case 'deleted': return 'red';
+      default: return 'gray';
+    }
+  };
+
+  const getStatusTextColor = (status) => {
+    switch (status) {
+      case 'active': return 'text-green-600';
+      case 'suspended': return 'text-amber-600';
+      case 'deleted': return 'text-red-600';
+      default: return 'text-gray-600';
     }
   };
 
@@ -530,77 +544,67 @@ const AgentView = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!agent) {
     return (
-      <div className="text-center py-12">
-        <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Agent not found</h3>
-        <p className="text-gray-500">The agent you're looking for doesn't exist.</p>
-        <button
-          onClick={() => navigate('/admin/agents')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          Back to Agents
-        </button>
-      </div>
+      <EmptyState
+        icon={UserIcon}
+        title="Agent not found"
+        body="The agent you're looking for doesn't exist."
+        action={
+          <button onClick={() => navigate('/admin/agents')} className={BTN_PRIMARY}>
+            Back to Agents
+          </button>
+        }
+      />
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate('/admin/agents')}
-            className="mr-4 p-2 hover:bg-gray-100 rounded-md"
-          >
-            <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">{agent.first_name} {agent.last_name}</h1>
-            <p className="text-sm text-gray-600">Agent Details</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(agent.status)}`}>
-            {getStatusIcon(agent.status)}
-            <span className="ml-1 capitalize">{agent.status}</span>
-          </span>
-          
-          <button
-            onClick={handleOpenEditModal}
-            className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-          >
-            <PencilIcon className="h-3 w-3 mr-1.5" />
-            Edit
-          </button>
-          
-          {/* Status Dropdown */}
-          <div className="relative">
-            <select
-              value={agent.status}
-              onChange={(e) => handleStatusUpdate(e.target.value)}
-              className="appearance-none bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 pr-6 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
-            >
-              <option value="active" className="bg-white text-gray-900">Active</option>
-              <option value="suspended" className="bg-white text-gray-900">Suspended</option>
-              <option value="deleted" className="bg-white text-gray-900">Deleted</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <ExclamationTriangleIcon className="h-3 w-3 text-white" />
+      <button
+        onClick={() => navigate('/admin/agents')}
+        className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 transition-colors"
+      >
+        <ArrowLeftIcon className="h-5 w-5" />
+      </button>
+      <PageHeader
+        icon={UserGroupIcon}
+        title={`${agent.first_name} ${agent.last_name}`}
+        subtitle="Agent Details"
+        actions={
+          <>
+            <StatusBadge tone={getStatusTone(agent.status)} className="gap-1">
+              {getStatusIcon(agent.status)}
+              <span className="capitalize">{agent.status}</span>
+            </StatusBadge>
+
+            <button onClick={handleOpenEditModal} className={BTN_PRIMARY}>
+              <PencilIcon className="h-4 w-4" />
+              Edit
+            </button>
+
+            {/* Status Dropdown */}
+            <div className="relative">
+              <select
+                value={agent.status}
+                onChange={(e) => handleStatusUpdate(e.target.value)}
+                className="appearance-none rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 pr-7 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium transition-colors"
+              >
+                <option value="active" className="bg-white text-gray-900">Active</option>
+                <option value="suspended" className="bg-white text-gray-900">Suspended</option>
+                <option value="deleted" className="bg-white text-gray-900">Deleted</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <ChevronDownIcon className="h-3.5 w-3.5 text-white" />
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -626,7 +630,7 @@ const AgentView = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Agent Info */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className={`${CARD} p-6`}>
               <h3 className="text-base font-semibold text-gray-900 mb-4">Personal Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -662,7 +666,7 @@ const AgentView = () => {
             </div>
 
             {/* Banking Information */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className={`${CARD} p-6`}>
               <h3 className="text-base font-semibold text-gray-900 mb-4">Banking Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -682,7 +686,7 @@ const AgentView = () => {
 
             {/* NIN Documents */}
             {(agent.nin_front_image || agent.nin_back_image) && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className={`${CARD} p-6`}>
                 <h3 className="text-base font-semibold text-gray-900 mb-4">NIN Documents</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {agent.nin_front_image && (
@@ -692,7 +696,7 @@ const AgentView = () => {
                         <img
                           src={`${config.getApiBaseUrl().replace('/api', '')}/${agent.nin_front_image}`}
                           alt="NIN Front"
-                          className="w-full h-32 object-cover rounded-md cursor-pointer"
+                          className="w-full h-32 object-cover rounded-lg cursor-pointer"
                           onClick={() => setShowNINImages(prev => ({ ...prev, front: !prev.front }))}
                         />
                       </div>
@@ -705,7 +709,7 @@ const AgentView = () => {
                         <img
                           src={`${config.getApiBaseUrl().replace('/api', '')}/${agent.nin_back_image}`}
                           alt="NIN Back"
-                          className="w-full h-32 object-cover rounded-md cursor-pointer"
+                          className="w-full h-32 object-cover rounded-lg cursor-pointer"
                           onClick={() => setShowNINImages(prev => ({ ...prev, back: !prev.back }))}
                         />
                       </div>
@@ -717,7 +721,7 @@ const AgentView = () => {
 
             {/* Notes */}
             {agent.notes && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className={`${CARD} p-6`}>
                 <h3 className="text-base font-semibold text-gray-900 mb-4">Notes</h3>
                 <p className="text-sm text-gray-900">{agent.notes}</p>
               </div>
@@ -726,7 +730,7 @@ const AgentView = () => {
 
           {/* Profile Card */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className={`${CARD} p-6 text-center`}>
               <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
                 {agent.profile_image ? (
                   <img
@@ -743,15 +747,15 @@ const AgentView = () => {
               <h3 className="text-lg font-semibold text-gray-900">{agent.first_name} {agent.last_name}</h3>
               <p className="text-sm text-gray-600">{agent.email}</p>
               <div className="mt-4">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(agent.status)}`}>
+                <StatusBadge tone={getStatusTone(agent.status)} className="gap-1">
                   {getStatusIcon(agent.status)}
-                  <span className="ml-1 capitalize">{agent.status}</span>
-                </span>
+                  <span className="capitalize">{agent.status}</span>
+                </StatusBadge>
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className={`${CARD} p-6`}>
               <h3 className="text-base font-semibold text-gray-900 mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
@@ -764,7 +768,7 @@ const AgentView = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Status</span>
-                  <span className={`text-sm font-medium capitalize ${getStatusColor(agent.status).split(' ')[0]}`}>
+                  <span className={`text-sm font-medium capitalize ${getStatusTextColor(agent.status)}`}>
                     {agent.status}
                   </span>
                 </div>
@@ -775,22 +779,29 @@ const AgentView = () => {
       )}
 
       {activeTab === 'payments' && (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className={CARD}>
           <div className="px-4 py-3 border-b border-gray-200">
             <h3 className="text-base font-semibold text-gray-900">Payment History</h3>
           </div>
+          {payments.length === 0 ? (
+            <EmptyState
+              icon={BanknotesIcon}
+              title="No payments yet"
+              body="Payments recorded for this agent will appear here."
+            />
+          ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className={TH}>Order ID</th>
+                  <th className={TH}>Amount</th>
+                  <th className={TH}>Commission</th>
+                  <th className={TH}>Status</th>
+                  <th className={TH}>Date</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {payments.map((payment, index) => (
                   <tr key={index}>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
@@ -803,11 +814,9 @@ const AgentView = () => {
                       ₦{parseFloat(payment.commission_amount).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        payment.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <StatusBadge tone={payment.status === 'paid' ? 'green' : 'amber'}>
                         {payment.status}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                       {new Date(payment.created_at).toLocaleDateString()}
@@ -817,26 +826,34 @@ const AgentView = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
       )}
 
       {activeTab === 'orders' && (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className={CARD}>
           <div className="px-4 py-3 border-b border-gray-200">
             <h3 className="text-base font-semibold text-gray-900">Order History</h3>
           </div>
+          {orders.length === 0 ? (
+            <EmptyState
+              icon={DocumentTextIcon}
+              title="No orders yet"
+              body="Orders handled by this agent will appear here."
+            />
+          ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className={TH}>Order ID</th>
+                  <th className={TH}>Type</th>
+                  <th className={TH}>Amount</th>
+                  <th className={TH}>Status</th>
+                  <th className={TH}>Date</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {orders.map((order, index) => (
                   <tr key={index}>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
@@ -849,13 +866,13 @@ const AgentView = () => {
                       ₦{parseFloat(order.amount).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <StatusBadge tone={
+                        order.status === 'completed' ? 'green' :
+                        order.status === 'pending' ? 'amber' :
+                        'red'
+                      }>
                         {order.status}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                       {new Date(order.created_at).toLocaleDateString()}
@@ -865,13 +882,14 @@ const AgentView = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
       )}
 
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+          <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-xl bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
@@ -946,7 +964,7 @@ const AgentView = () => {
                         value={editForm.first_name}
                         onChange={(e) => setEditForm(prev => ({ ...prev, first_name: e.target.value }))}
                         placeholder="Enter first name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                         required
                       />
                     </div>
@@ -962,7 +980,7 @@ const AgentView = () => {
                         value={editForm.last_name}
                         onChange={(e) => setEditForm(prev => ({ ...prev, last_name: e.target.value }))}
                         placeholder="Enter last name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                         required
                       />
                     </div>
@@ -978,7 +996,7 @@ const AgentView = () => {
                         value={editForm.address}
                         onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
                         placeholder="Enter address"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                       />
                     </div>
 
@@ -993,7 +1011,7 @@ const AgentView = () => {
                         value={editForm.lga}
                         onChange={(e) => setEditForm(prev => ({ ...prev, lga: e.target.value }))}
                         placeholder="Enter location"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                       />
                     </div>
 
@@ -1009,21 +1027,22 @@ const AgentView = () => {
                           value={editForm.account_number}
                           onChange={(e) => setEditForm(prev => ({ ...prev, account_number: e.target.value }))}
                           placeholder="Enter account number"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className={`${INPUT} flex-1`}
                         />
                         <button
                           type="button"
                           onClick={verifyAccount}
                           disabled={isVerifyingAccount || !editForm.account_number || !selectedBank}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                          className={`${BTN_PRIMARY} shrink-0`}
                         >
                           {isVerifyingAccount ? 'Verifying...' : 'Verify'}
                         </button>
                       </div>
                       {accountVerified && editForm.account_name && (
-                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                          <p className="text-sm text-green-800">
-                            ✓ Verified: {editForm.account_name}
+                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                          <p className="flex items-center gap-1 text-sm text-green-800">
+                            <CheckIcon className="h-4 w-4 shrink-0" />
+                            Verified: {editForm.account_name}
                           </p>
                         </div>
                       )}
@@ -1044,7 +1063,7 @@ const AgentView = () => {
                           }}
                           onFocus={() => setIsStateDropdownOpen(true)}
                           placeholder="Search and select state..."
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className={`${INPUT} pr-10`}
                         />
                         <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <button
@@ -1058,7 +1077,7 @@ const AgentView = () => {
                       
                       {/* Dropdown */}
                       {isStateDropdownOpen && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                           {filteredStates.length > 0 ? (
                             filteredStates.map((state) => (
                               <button
@@ -1090,7 +1109,7 @@ const AgentView = () => {
                         value={editForm.phone}
                         onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                         placeholder="Enter phone number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                       />
                     </div>
 
@@ -1105,7 +1124,7 @@ const AgentView = () => {
                         value={editForm.email}
                         onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                         placeholder="Enter email address"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                         required
                       />
                     </div>
@@ -1125,7 +1144,7 @@ const AgentView = () => {
                           }}
                           onFocus={() => setIsBankDropdownOpen(true)}
                           placeholder="Search and select bank..."
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className={`${INPUT} pr-10`}
                         />
                         <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <button
@@ -1139,7 +1158,7 @@ const AgentView = () => {
                       
                       {/* Bank Dropdown */}
                       {isBankDropdownOpen && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                           {filteredBanks.length > 0 ? (
                             filteredBanks.map((bank) => (
                               <button
@@ -1171,7 +1190,7 @@ const AgentView = () => {
                         value={editForm.account_name}
                         onChange={(e) => setEditForm(prev => ({ ...prev, account_name: e.target.value }))}
                         placeholder="Enter account name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                       />
                     </div>
 
@@ -1210,7 +1229,7 @@ const AgentView = () => {
                         onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
                         rows={3}
                         placeholder="Enter any additional notes..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className={INPUT}
                       />
                     </div>
                   </div>
@@ -1221,14 +1240,14 @@ const AgentView = () => {
                   <button
                     type="button"
                     onClick={() => setShowEditModal(false)}
-                    className="px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 mr-3 text-sm"
+                    className={`${BTN_SECONDARY} mr-3`}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded-md font-medium transition-colors text-sm"
+                    className={BTN_PRIMARY}
                   >
                     {isSubmitting ? 'Updating...' : 'Update Agent'}
                   </button>
@@ -1243,7 +1262,7 @@ const AgentView = () => {
       {/* NIN Image Modal */}
       {(showNINImages.front || showNINImages.back) && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-xl bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-medium text-gray-900">
@@ -1260,7 +1279,7 @@ const AgentView = () => {
               <img
                 src={`${config.getApiBaseUrl().replace('/api', '')}/${showNINImages.front ? agent.nin_front_image : agent.nin_back_image}`}
                 alt={showNINImages.front ? 'NIN Front' : 'NIN Back'}
-                className="w-full h-auto rounded-md"
+                className="w-full h-auto rounded-lg"
               />
             </div>
           </div>

@@ -21,6 +21,19 @@ import {
   searchAdminUsers,
   getUserCarsForUpload,
 } from '../../services/apiAdminDocument';
+import {
+  PageHeader,
+  StatusBadge,
+  Spinner,
+  PageLoader,
+  EmptyState,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  BTN_DANGER,
+  INPUT,
+  TH,
+  CARD,
+} from '../../components/admin/ui';
 
 const DOC_CATEGORIES = [
   'Registration Certificate',
@@ -33,18 +46,17 @@ const DOC_CATEGORIES = [
   'Other',
 ];
 
-const StatusBadge = ({ status }) => {
-  const styles = {
-    pending: 'bg-amber-100 text-amber-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-  };
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
-      {status}
-    </span>
-  );
+const STATUS_TONES = {
+  pending: 'amber',
+  approved: 'green',
+  rejected: 'red',
 };
+
+const DocStatusBadge = ({ status }) => (
+  <StatusBadge tone={STATUS_TONES[status] || 'gray'} className="capitalize">
+    {status}
+  </StatusBadge>
+);
 
 // UserSearch — debounced search input that shows a dropdown of users
 const UserSearch = ({ onSelect }) => {
@@ -86,11 +98,11 @@ const UserSearch = ({ onSelect }) => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search by name, email or phone…"
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+        className={INPUT}
       />
       {searching && (
         <div className="absolute right-3 top-2.5">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <Spinner size="sm" />
         </div>
       )}
       {open && results.length > 0 && (
@@ -268,23 +280,20 @@ const AdminDocuments = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <DocumentTextIcon className="h-6 w-6 text-gray-600" />
-          <h1 className="text-xl font-semibold text-gray-900">Documents</h1>
-          <span className="text-sm text-gray-400">({total})</span>
-        </div>
-        <button
-          onClick={() => setUploadModal(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
-        >
-          <PlusIcon className="h-4 w-4" />
-          Upload for User
-        </button>
-      </div>
+      <PageHeader
+        icon={DocumentTextIcon}
+        title="Documents"
+        subtitle={`${total} documents`}
+        actions={
+          <button onClick={() => setUploadModal(true)} className={BTN_PRIMARY}>
+            <PlusIcon className="h-4 w-4" />
+            Upload for User
+          </button>
+        }
+      />
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className={`${CARD} p-4`}>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -293,7 +302,7 @@ const AdminDocuments = () => {
               placeholder="Filter by name or email…"
               value={nameSearch}
               onChange={(e) => setNameSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -301,7 +310,7 @@ const AdminDocuments = () => {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="all">All statuses</option>
               <option value="pending">Pending</option>
@@ -311,7 +320,7 @@ const AdminDocuments = () => {
             <select
               value={typeFilter}
               onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="all">All types</option>
               <option value="car">Car</option>
@@ -322,28 +331,31 @@ const AdminDocuments = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className={`${CARD} overflow-hidden`}>
         {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-          </div>
+          <PageLoader />
         ) : filteredDocs.length === 0 ? (
-          <div className="py-16 text-center text-gray-400">
-            <DocumentTextIcon className="h-10 w-10 mx-auto mb-2" />
-            No documents found
-          </div>
+          <EmptyState
+            icon={DocumentTextIcon}
+            title="No documents found"
+            body={
+              nameSearch.trim() || statusFilter !== 'all' || typeFilter !== 'all'
+                ? 'Try adjusting your filters'
+                : undefined
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">User</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
+                  <th className={TH}>User</th>
+                  <th className={TH}>Type</th>
+                  <th className={TH}>Category</th>
+                  <th className={TH}>Description</th>
+                  <th className={TH}>Status</th>
+                  <th className={TH}>Date</th>
+                  <th className={TH.replace('text-left', 'text-right')}>Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -369,7 +381,7 @@ const AdminDocuments = () => {
                       <td className="px-4 py-3 text-sm text-gray-500 max-w-[180px]">
                         <span className="truncate block" title={doc.description}>{doc.description || '—'}</span>
                       </td>
-                      <td className="px-4 py-3"><StatusBadge status={doc.status} /></td>
+                      <td className="px-4 py-3"><DocStatusBadge status={doc.status} /></td>
                       <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">
                         {doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-GB') : '—'}
                       </td>
@@ -454,7 +466,7 @@ const AdminDocuments = () => {
             {/* Status info + actions */}
             <div className="px-5 py-3 border-t flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <StatusBadge status={previewDoc.status} />
+                <DocStatusBadge status={previewDoc.status} />
                 {previewDoc.rejection_reason && (
                   <span className="text-xs text-red-500 italic">"{previewDoc.rejection_reason}"</span>
                 )}
@@ -493,20 +505,20 @@ const AdminDocuments = () => {
               value={rejectModal.reason}
               onChange={(e) => setRejectModal((m) => ({ ...m, reason: e.target.value }))}
               placeholder="Reason (optional)…"
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm resize-none mb-4"
+              className={`${INPUT} resize-none mb-4`}
               rows={3}
             />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setRejectModal({ open: false, doc: null, reason: '' })}
-                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                className={BTN_SECONDARY}
               >
                 Cancel
               </button>
               <button
                 onClick={handleRejectConfirm}
                 disabled={actionLoading}
-                className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
+                className={BTN_DANGER}
               >
                 Confirm Reject
               </button>
@@ -552,7 +564,7 @@ const AdminDocuments = () => {
                 <select
                   value={uploadForm.document_type}
                   onChange={(e) => setUploadForm((f) => ({ ...f, document_type: e.target.value, car_id: '' }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className={INPUT}
                 >
                   <option value="car">Car Document</option>
                   <option value="driver_license">Driver License</option>
@@ -571,7 +583,7 @@ const AdminDocuments = () => {
                     <select
                       value={uploadForm.car_id}
                       onChange={(e) => setUploadForm((f) => ({ ...f, car_id: e.target.value }))}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      className={INPUT}
                       required
                     >
                       <option value="">Choose a car…</option>
@@ -591,7 +603,7 @@ const AdminDocuments = () => {
                 <select
                   value={uploadForm.document_category}
                   onChange={(e) => setUploadForm((f) => ({ ...f, document_category: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className={INPUT}
                 >
                   <option value="">Select category…</option>
                   {DOC_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -606,7 +618,7 @@ const AdminDocuments = () => {
                   value={uploadForm.description}
                   onChange={(e) => setUploadForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="e.g. Renewed vehicle license 2026"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className={INPUT}
                 />
               </div>
 
@@ -619,24 +631,16 @@ const AdminDocuments = () => {
                   type="file"
                   accept="image/*,application/pdf"
                   onChange={(e) => setUploadForm((f) => ({ ...f, file: e.target.files?.[0] || null }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className={INPUT}
                   required
                 />
               </div>
 
               <div className="flex gap-2 justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={resetUploadModal}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
-                >
+                <button type="button" onClick={resetUploadModal} className={BTN_SECONDARY}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
-                >
+                <button type="submit" disabled={actionLoading} className={BTN_PRIMARY}>
                   {actionLoading ? 'Uploading…' : 'Upload'}
                 </button>
               </div>

@@ -13,8 +13,20 @@ import {
   DocumentIcon,
   ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import {
+  PageHeader,
+  StatusBadge,
+  Spinner,
+  PageLoader,
+  EmptyState,
+  CARD,
+  INPUT,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+} from '../../components/admin/ui';
 import config from '../../config/config';
 import { adminCreateShipment } from '../../services/apiDelivery';
 import ShipmentTracker from '../../components/delivery/ShipmentTracker';
@@ -269,28 +281,28 @@ const AdminOrderDetails = () => {
     // Handle undefined or null status
     if (!status) {
       return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          <ClockIcon className="w-4 h-4 mr-2" />
+        <StatusBadge tone="gray" className="gap-1.5">
+          <ClockIcon className="w-4 h-4" />
           UNKNOWN
-        </span>
+        </StatusBadge>
       );
     }
 
     const statusConfig = {
-      pending:    { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon,        label: 'NEW' },
-      processing: { color: 'bg-blue-100 text-blue-800',     icon: ClockIcon,        label: 'IN PROGRESS' },
-      completed:  { color: 'bg-green-100 text-green-800',   icon: CheckCircleIcon,  label: 'COMPLETED' },
-      cancelled:  { color: 'bg-red-100 text-red-800',       icon: XCircleIcon,      label: 'CANCELLED' },
+      pending:    { tone: 'amber', icon: ClockIcon,       label: 'NEW' },
+      processing: { tone: 'blue',  icon: ClockIcon,       label: 'IN PROGRESS' },
+      completed:  { tone: 'green', icon: CheckCircleIcon, label: 'COMPLETED' },
+      cancelled:  { tone: 'red',   icon: XCircleIcon,     label: 'CANCELLED' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
-        <Icon className="w-4 h-4 mr-2" />
+      <StatusBadge tone={config.tone} className="gap-1.5">
+        <Icon className="w-4 h-4" />
         {config.label}
-      </span>
+      </StatusBadge>
     );
   };
 
@@ -305,57 +317,48 @@ const AdminOrderDetails = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!order) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900">Order not found</h3>
-        <p className="text-gray-500 mt-2">The order you're looking for doesn't exist.</p>
-      </div>
+      <EmptyState
+        icon={ClipboardDocumentListIcon}
+        title="Order not found"
+        body="The order you're looking for doesn't exist."
+      />
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate('/admin/orders')}
-            className="mr-4 p-2 text-gray-400 hover:text-gray-600"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Order Details</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Order #{order.slug?.substring(0, 8)}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={printOrderPDF}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4" />
-            Download PDF
-          </button>
-          {getStatusBadge(order?.status)}
-        </div>
-      </div>
+      <button
+        onClick={() => navigate('/admin/orders')}
+        className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+      >
+        <ArrowLeftIcon className="h-5 w-5" />
+      </button>
+      <PageHeader
+        icon={ClipboardDocumentListIcon}
+        title="Order Details"
+        subtitle={`Order #${order.slug?.substring(0, 8)}`}
+        actions={
+          <>
+            <button onClick={printOrderPDF} className={BTN_SECONDARY}>
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              Download PDF
+            </button>
+            {getStatusBadge(order?.status)}
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Order Information */}
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Order Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -399,7 +402,7 @@ const AdminOrderDetails = () => {
           </div>
 
           {/* Customer Information */}
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Customer Information</h3>
             <div className="space-y-4">
               <div className="flex items-center">
@@ -419,7 +422,7 @@ const AdminOrderDetails = () => {
           </div>
 
           {/* Vehicle Information */}
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Vehicle Information</h3>
             <div className="space-y-4">
               <div className="flex items-center">
@@ -448,7 +451,7 @@ const AdminOrderDetails = () => {
 
           {/* Plate / License Information */}
           {(order.plate_type || order.plate_sub_type || order.car?.preferred_name || order.license_type) && (
-            <div className="bg-white shadow rounded-lg p-6">
+            <div className={`${CARD} p-6`}>
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {order.order_type === 'driver_license' ? 'License Details' : 'Plate Details'}
               </h3>
@@ -495,7 +498,7 @@ const AdminOrderDetails = () => {
 
           {/* Renewal State */}
           {order.renewal_state && (
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Renewal Information</h3>
             <div className="flex items-center gap-3">
               <div>
@@ -515,7 +518,7 @@ const AdminOrderDetails = () => {
 
           {/* Delivery Information */}
           {order.delivery_address && (
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Delivery Information</h3>
             <div className="space-y-4">
               <div className="flex items-start">
@@ -553,7 +556,7 @@ const AdminOrderDetails = () => {
                         step="0.1"
                         value={actualWeightKg}
                         onChange={(e) => setActualWeightKg(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        className={`${INPUT} mt-1`}
                         placeholder="Leave blank to use estimate"
                       />
                     </label>
@@ -585,7 +588,7 @@ const AdminOrderDetails = () => {
                           setShipmentBusy(false);
                         }
                       }}
-                      className="w-full bg-slate-800 text-white py-2 px-4 rounded-lg hover:bg-slate-900 disabled:opacity-50 text-sm font-medium"
+                      className={`${BTN_PRIMARY} w-full`}
                     >
                       {shipmentBusy ? 'Generating…' : 'Generate waybill'}
                     </button>
@@ -601,7 +604,7 @@ const AdminOrderDetails = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Order Actions */}
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Order Actions</h3>
 
             <div className="space-y-3">
@@ -613,7 +616,7 @@ const AdminOrderDetails = () => {
                   <button
                     onClick={() => handleStatusUpdate('processing')}
                     disabled={statusUpdating}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                    className={`${BTN_PRIMARY} w-full`}
                   >
                     {statusUpdating ? 'Updating...' : 'Mark In Progress'}
                   </button>
@@ -642,7 +645,7 @@ const AdminOrderDetails = () => {
                       <select
                         value={uploadCategory}
                         onChange={(e) => setUploadCategory(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className={`${INPUT} bg-white`}
                       >
                         {DOC_CATEGORIES.map((c) => (
                           <option key={c.value} value={c.value}>{c.label}</option>
@@ -658,7 +661,7 @@ const AdminOrderDetails = () => {
                       <button
                         onClick={handleDocumentUpload}
                         disabled={uploading || !uploadFile}
-                        className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        className={`${BTN_PRIMARY} w-full`}
                       >
                         {uploading ? 'Uploading…' : 'Upload'}
                       </button>
@@ -666,7 +669,7 @@ const AdminOrderDetails = () => {
                     {/* Uploaded docs list */}
                     {docsLoading ? (
                       <div className="flex justify-center py-3 border-t border-gray-100">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                        <Spinner size="sm" />
                       </div>
                     ) : documents.length > 0 && (
                       <div className="border-t border-gray-100 divide-y divide-gray-50">
@@ -728,7 +731,7 @@ const AdminOrderDetails = () => {
                   <button
                     onClick={handleReopenOrder}
                     disabled={statusUpdating}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                    className={`${BTN_PRIMARY} w-full`}
                   >
                     {statusUpdating ? 'Reopening…' : 'Reopen Order'}
                   </button>
@@ -738,7 +741,7 @@ const AdminOrderDetails = () => {
           </div>
 
           {/* Payment Information */}
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className={`${CARD} p-6`}>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -751,7 +754,7 @@ const AdminOrderDetails = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Status</span>
-                <span className={`text-sm font-medium ${order.payment?.status === 'successful' || order.payment?.status === 'SUCCESSFUL' ? 'text-green-600' : 'text-yellow-600'}`}>
+                <span className={`text-sm font-medium ${order.payment?.status === 'successful' || order.payment?.status === 'SUCCESSFUL' ? 'text-green-600' : 'text-amber-600'}`}>
                   {order.payment?.status?.toUpperCase() || '—'}
                 </span>
               </div>
