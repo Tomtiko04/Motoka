@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import config from '../../config/config';
+import { PageHeader, PageLoader, EmptyState, CARD } from '../../components/admin/ui';
 
 const AdminAgents = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const AdminAgents = () => {
       if (data.status) {
         setAgents(data.data.data || []);
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch agents');
     } finally {
       setLoading(false);
@@ -75,7 +76,7 @@ const AdminAgents = () => {
         });
         setAgentPayments(paymentsByAgent);
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch agent payments');
     }
   };
@@ -109,20 +110,17 @@ const AdminAgents = () => {
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-center">
-        <UserGroupIcon className="h-6 w-6 text-gray-600 mr-2" />
-        <h1 className="text-xl font-semibold text-gray-900">Agents</h1>
-      </div>
+      <PageHeader
+        icon={UserGroupIcon}
+        title="Agents"
+        subtitle="Field agents and their payment totals"
+      />
 
       {/* Filter Tabs */}
       <div className="flex space-x-2">
@@ -146,7 +144,7 @@ const AdminAgents = () => {
         {filteredAgents.map((agent) => (
           <div 
             key={agent.id} 
-            className="bg-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+            className={`${CARD} p-6 hover:shadow-md transition-shadow cursor-pointer group`}
             onClick={() => navigate(`/admin/agents/${agent.uuid}`)}
           >
             <div className="text-center">
@@ -164,7 +162,7 @@ const AdminAgents = () => {
                   />
                 ) : null}
                 <div 
-                  className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+                  className="w-full h-full bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
                   style={{ display: agent.profile_image ? 'none' : 'flex' }}
                 >
                   {agent.name.split(' ').map(n => n[0]).join('').toUpperCase()}
@@ -172,12 +170,12 @@ const AdminAgents = () => {
               </div>
               
               {/* Name */}
-              <h3 className="text-lg font-semibold text-gray-600 mb-2 truncate">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 truncate">
                 {agent.name}
               </h3>
-              
+
               {/* Total Amount */}
-              <p className="text-xl font-bold text-gray-600 mb-3">
+              <p className="text-xl font-bold tabular-nums text-gray-900 mb-3">
                 {agent.amount}
               </p>
               
@@ -193,22 +191,20 @@ const AdminAgents = () => {
 
       {/* Empty State */}
       {filteredAgents.length === 0 && (
-        <div className="text-center py-12">
-          <UserGroupIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No agents found</h3>
-          <p className="text-gray-500">
-            No agents have been created yet. Create your first agent to get started.
-          </p>
-        </div>
+        <EmptyState
+          icon={UserGroupIcon}
+          title="No agents found"
+          body="No agents have been created yet. Create your first agent to get started."
+        />
       )}
 
       {/* Create New Agent Card */}
       <div className="flex justify-center mt-8">
         <div 
           onClick={() => navigate('/admin/agents/create')}
-          className="bg-gray-50 rounded-2xl border-2 border-dashed border-blue-400 p-8 max-w-sm w-full text-center hover:bg-blue-50 hover:border-blue-500 transition-all duration-300 cursor-pointer group"
+          className="bg-white rounded-xl border-2 border-dashed border-blue-400 p-8 max-w-sm w-full text-center hover:bg-blue-50 hover:border-blue-500 transition-colors cursor-pointer group"
         >
-          <div className="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+          <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-blue-700 transition-colors">
             <PlusIcon className="h-10 w-10 text-white" />
           </div>
           <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Create New Agent</h3>

@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminLogin from '../pages/admin/AdminLogin';
 import AdminDashboard from '../pages/admin/AdminDashboard';
-import AdminOrders from '../pages/admin/AdminOrders';
+import AdminOrdersHub from '../pages/admin/AdminOrdersHub';
 import AdminOrderDetails from '../pages/admin/AdminOrderDetails';
 import AdminAgents from '../pages/admin/AdminAgents';
 import CreateAgent from '../pages/admin/CreateAgent';
@@ -19,7 +19,7 @@ import AdminWallets from '../pages/admin/AdminWallets.jsx';
 import AdminRenewals from '../pages/admin/AdminRenewals.jsx';
 import AdminLadipo from '../pages/admin/AdminLadipo.jsx';
 import AdminVehicleDocs from '../pages/admin/AdminVehicleDocs.jsx';
-import AdminGuestOrders from '../pages/admin/AdminGuestOrders.jsx';
+
 import AdminGuestOrderDetails from '../pages/admin/AdminGuestOrderDetails.jsx';
 import AdminReferral from '../pages/admin/AdminReferral.jsx';
 
@@ -85,9 +85,9 @@ const AdminRoutes = () => {
       >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="orders" element={<AdminOrders />} />
+                <Route path="orders" element={<AdminOrdersHub />} />
                 <Route path="orders/:slug" element={<AdminOrderDetails />} />
-                <Route path="guest-orders" element={<AdminGuestOrders />} />
+                <Route path="guest-orders" element={<Navigate to="/admin/orders?tab=guest" replace />} />
                 <Route path="guest-orders/:orderId" element={<AdminGuestOrderDetails />} />
                 <Route path="agents" element={<AdminAgents />} />
                 <Route path="agents/create" element={<CreateAgent />} />

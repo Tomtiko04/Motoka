@@ -6,8 +6,7 @@ import {
   ChevronRightIcon,
   XMarkIcon,
   EyeIcon,
-  CheckCircleIcon,
-  XCircleIcon,
+  IdentificationIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import {
@@ -15,19 +14,29 @@ import {
   getAdminDriverLicenseApplication,
   updateAdminDriverLicenseApplicationStatus,
 } from '../../services/apiAdminDocument';
+import {
+  PageHeader,
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  TH,
+  CARD,
+} from '../../components/admin/ui';
 
-const STATUS_COLORS = {
-  draft:     'bg-gray-100 text-gray-700',
-  submitted: 'bg-blue-100 text-blue-800',
-  approved:  'bg-green-100 text-green-800',
-  rejected:  'bg-red-100 text-red-800',
-  expired:   'bg-amber-100 text-amber-700',
+const STATUS_TONES = {
+  draft:     'gray',
+  submitted: 'blue',
+  approved:  'green',
+  rejected:  'red',
+  expired:   'amber',
 };
 
-const StatusBadge = ({ status }) => (
-  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${STATUS_COLORS[status] || 'bg-gray-100 text-gray-700'}`}>
+const AppStatusBadge = ({ status }) => (
+  <StatusBadge tone={STATUS_TONES[status] || 'gray'} className="capitalize">
     {status}
-  </span>
+  </StatusBadge>
 );
 
 const TYPE_LABELS = { new: 'New License', renew: 'Renewal' };
@@ -87,30 +96,32 @@ function DetailPanel({ applicationId, onClose, onStatusUpdated }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3">
-          <h2 className="text-lg font-semibold text-[#05243F]">Application Detail</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Application Detail</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-gray-100">
             <XMarkIcon className="h-5 w-5 text-gray-500" />
           </button>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
-          </div>
+          <PageLoader />
         ) : !app ? (
-          <p className="px-6 py-10 text-center text-sm text-gray-500">Application not found.</p>
+          <EmptyState
+            icon={IdentificationIcon}
+            title="Application not found"
+            body="It may have been deleted, or the link is out of date."
+          />
         ) : (
           <div className="px-6 py-6 space-y-6">
             {/* Header */}
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <p className="text-base font-semibold text-[#05243F]">{app.full_name || '—'}</p>
+                <p className="text-base font-semibold text-gray-900">{app.full_name || '—'}</p>
                 <p className="text-xs text-gray-500">{app.user_email || app.user_id}</p>
               </div>
-              <StatusBadge status={app.status} />
-              <span className="text-xs bg-[#F4F5FC] text-[#05243F] px-2 py-0.5 rounded-full">
+              <AppStatusBadge status={app.status} />
+              <StatusBadge tone="gray">
                 {TYPE_LABELS[app.application_type] || app.application_type}
-              </span>
+              </StatusBadge>
             </div>
 
             {/* Photos */}
@@ -189,12 +200,12 @@ function DetailPanel({ applicationId, onClose, onStatusUpdated }) {
 
             {/* Status update (only when submitted or needs action) */}
             {['submitted', 'approved', 'rejected'].includes(app.status) && (
-              <div className="rounded-xl bg-[#F9FAFC] border border-[#E1E6F4] p-4 space-y-3">
-                <p className="text-sm font-semibold text-[#05243F]">Update Status</p>
+              <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-3">
+                <p className="text-sm font-semibold text-gray-900">Update Status</p>
                 <select
                   value={selectedStatus}
                   onChange={e => setSelectedStatus(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-[#05243F] focus:outline-none focus:ring-2 focus:ring-[#2284DB]"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">— Select new status —</option>
                   {app.status !== 'approved' && <option value="approved">Approved</option>}
@@ -206,20 +217,17 @@ function DetailPanel({ applicationId, onClose, onStatusUpdated }) {
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-[#05243F] focus:outline-none focus:ring-2 focus:ring-[#2284DB] resize-none"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
                 <div className="flex gap-3">
                   <button
                     onClick={handleUpdateStatus}
                     disabled={!selectedStatus || updating}
-                    className="flex-1 rounded-full bg-[#2284DB] py-2.5 text-sm font-semibold text-white hover:bg-[#1a6bb8] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`flex-1 ${BTN_PRIMARY}`}
                   >
                     {updating ? 'Updating...' : 'Save Status'}
                   </button>
-                  <button
-                    onClick={onClose}
-                    className="rounded-full border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-                  >
+                  <button onClick={onClose} className={BTN_SECONDARY}>
                     Cancel
                   </button>
                 </div>
@@ -274,18 +282,18 @@ export default function AdminDriverLicenseApplications() {
 
   const clearSearch = () => { setSearch(''); setSearchInput(''); };
 
+  const filtered = !!(search || statusFilter || typeFilter);
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#05243F]">Driver License Applications</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {pagination.total} application{pagination.total !== 1 ? 's' : ''} total
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        icon={IdentificationIcon}
+        title="Driver License Applications"
+        subtitle={`${pagination.total} application${pagination.total !== 1 ? 's' : ''} total`}
+      />
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-wrap gap-3 items-end">
+      <div className={`${CARD} p-4 flex flex-wrap gap-3 items-end`}>
         <form onSubmit={handleSearch} className="flex gap-2 flex-1 min-w-[200px]">
           <div className="relative flex-1">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -294,13 +302,10 @@ export default function AdminDriverLicenseApplications() {
               placeholder="Search by name..."
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2284DB]"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-[#2284DB] text-white text-sm font-semibold rounded-lg hover:bg-[#1a6bb8]"
-          >
+          <button type="submit" className={BTN_PRIMARY}>
             Search
           </button>
           {search && (
@@ -315,7 +320,7 @@ export default function AdminDriverLicenseApplications() {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2284DB]"
+            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All statuses</option>
             <option value="draft">Draft</option>
@@ -327,7 +332,7 @@ export default function AdminDriverLicenseApplications() {
           <select
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
-            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2284DB]"
+            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All types</option>
             <option value="new">New License</option>
@@ -337,49 +342,49 @@ export default function AdminDriverLicenseApplications() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className={`overflow-hidden ${CARD}`}>
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
-          </div>
+          <PageLoader />
         ) : applications.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 text-sm">
-            No applications found
-          </div>
+          <EmptyState
+            icon={IdentificationIcon}
+            title="No applications found"
+            body={filtered ? 'Try adjusting your search or filters.' : 'Applications will appear here once users apply for a driver license.'}
+          />
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
+            <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
                   {['Applicant', 'Type', 'Status', 'Payment', 'Submitted', 'Actions'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th key={h} className={TH}>
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-100">
                 {applications.map(app => (
                   <tr key={app.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-[#05243F]">{app.full_name || '—'}</p>
+                      <p className="text-sm font-medium text-gray-900">{app.full_name || '—'}</p>
                       <p className="text-xs text-gray-400">{app.phone || ''}</p>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {TYPE_LABELS[app.application_type] || app.application_type}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={app.status} />
+                      <AppStatusBadge status={app.status} />
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {app.renewal_orders ? (
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                        <StatusBadge tone="green">
                           Paid · #{app.renewal_orders.id}
-                        </span>
+                        </StatusBadge>
                       ) : app.status === 'submitted' ? (
-                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                        <StatusBadge tone="amber">
                           Awaiting payment
-                        </span>
+                        </StatusBadge>
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}
@@ -390,7 +395,7 @@ export default function AdminDriverLicenseApplications() {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => setSelectedId(app.id)}
-                        className="flex items-center gap-1 text-xs font-medium text-[#2284DB] hover:underline"
+                        className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
                       >
                         <EyeIcon className="h-3.5 w-3.5" />
                         View

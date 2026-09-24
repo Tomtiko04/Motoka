@@ -1,30 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowPathIcon, BoltIcon } from '@heroicons/react/24/outline';
 import config from '../../config/config';
+import { StatusBadge } from './ui';
 
 /**
  * Payment gateway health — surfaces GET /admin/gateways/health and
- * GET /admin/metrics/payments, which the backend has always exposed but no
- * admin screen ever rendered.
+ * GET /admin/metrics/payments as a compact status strip.
  *
- * Answers the question ops actually has during a payment incident: is a gateway
- * down, has its circuit breaker tripped, and are we currently failing over?
+ * One row per gateway. When the backend's health monitor isn't running
+ * (0 checks, stale readings) the strip says "no live data" in neutral grey
+ * instead of screaming red about a gateway that's merely unmeasured —
+ * red is reserved for a gateway the monitor has actually seen fail.
  */
 
 const REFRESH_MS = 30000; // matches the backend health monitor's check interval
 
-const STATUS_STYLES = {
-  healthy:  { dot: 'bg-green-500',  text: 'text-green-700',  chip: 'bg-green-50 border-green-200' },
-  degraded: { dot: 'bg-yellow-500', text: 'text-yellow-700', chip: 'bg-yellow-50 border-yellow-200' },
-  unhealthy:{ dot: 'bg-red-500',    text: 'text-red-700',    chip: 'bg-red-50 border-red-200' },
-  unknown:  { dot: 'bg-gray-400',   text: 'text-gray-600',   chip: 'bg-gray-50 border-gray-200' },
+const STATUS_DOT = {
+  healthy: 'bg-green-500',
+  degraded: 'bg-amber-500',
+  unhealthy: 'bg-red-500',
+  unknown: 'bg-gray-300',
 };
 
-const BREAKER_STYLES = {
-  closed:    'bg-green-100 text-green-800',
-  half_open: 'bg-yellow-100 text-yellow-800',
-  'half-open': 'bg-yellow-100 text-yellow-800',
-  open:      'bg-red-100 text-red-800',
+const BREAKER_TONE = {
+  closed: 'green',
+  half_open: 'amber',
+  'half-open': 'amber',
+  open: 'red',
 };
 
 function timeAgo(iso) {
@@ -36,78 +38,53 @@ function timeAgo(iso) {
   return `${Math.floor(secs / 3600)}h ago`;
 }
 
-function GatewayCard({ name, data, isPrimary, isFallback }) {
-  const style = STATUS_STYLES[data?.status] || STATUS_STYLES.unknown;
+function GatewayRow({ name, data, isPrimary, isFallback, hasLiveData }) {
+  const status = hasLiveData ? data?.status || 'unknown' : 'unknown';
   const breakerState = data?.circuitBreaker?.state || 'closed';
-  const breakerStyle = BREAKER_STYLES[breakerState] || BREAKER_STYLES.closed;
-  const successRate = Number(data?.successRate ?? 0);
+  const measuredDown = hasLiveData && (!data?.available || status === 'unhealthy');
 
   return (
-    <div className={`rounded-lg border p-4 ${style.chip}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${style.dot}`} />
-          <span className="font-semibold text-gray-900 capitalize truncate">{name}</span>
-          {isPrimary && (
-            <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 shrink-0">
-              Primary
-            </span>
-          )}
-          {isFallback && (
-            <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 shrink-0">
-              Fallback
-            </span>
-          )}
-        </div>
-        <span className={`text-xs font-medium ${style.text} capitalize shrink-0`}>
-          {data?.status || 'unknown'}
-        </span>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[status] || STATUS_DOT.unknown}`} />
+        <span className="text-sm font-medium capitalize text-gray-900">{name}</span>
+        {isPrimary && (
+          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-800">
+            Primary
+          </span>
+        )}
+        {isFallback && (
+          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">
+            Fallback
+          </span>
+        )}
       </div>
 
-      {!data?.available && (
-        <p className="mt-2 text-xs font-medium text-red-700">
-          Not accepting traffic — payments are routing elsewhere.
-        </p>
-      )}
-
-      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-        <div>
-          <dt className="text-gray-500">Success rate</dt>
-          <dd className="font-semibold text-gray-900">{successRate.toFixed(1)}%</dd>
-        </div>
-        <div>
-          <dt className="text-gray-500">Checks</dt>
-          <dd className="font-semibold text-gray-900">
-            {data?.successCount ?? 0}/{data?.totalChecks ?? 0}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-gray-500">Avg response</dt>
-          <dd className="font-semibold text-gray-900">
-            {Math.round(Number(data?.averageResponseTime ?? 0))}ms
-          </dd>
-        </div>
-        <div>
-          <dt className="text-gray-500">Last check</dt>
-          <dd className="font-semibold text-gray-900">{timeAgo(data?.lastCheck)}</dd>
-        </div>
-      </dl>
-
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-black/5 pt-2">
-        <span className="text-xs text-gray-500">Circuit breaker</span>
-        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded capitalize ${breakerStyle}`}>
-          {String(breakerState).replace('_', ' ')}
+      <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+        {hasLiveData ? (
+          <>
+            <span>
+              {Number(data?.successRate ?? 0).toFixed(1)}% ok ·{' '}
+              {Math.round(Number(data?.averageResponseTime ?? 0))}ms · checked {timeAgo(data?.lastCheck)}
+            </span>
+            {measuredDown && (
+              <span className="font-medium text-red-700">not accepting traffic</span>
+            )}
+            {data?.consecutiveFailures > 0 && (
+              <span className="font-medium text-red-700">
+                {data.consecutiveFailures} consecutive failure{data.consecutiveFailures === 1 ? '' : 's'}
+              </span>
+            )}
+          </>
+        ) : (
+          <span>no live data</span>
+        )}
+        <StatusBadge tone={BREAKER_TONE[breakerState] || 'gray'}>
+          breaker {String(breakerState).replace('_', ' ')}
           {data?.circuitBreaker?.failureCount > 0 &&
             ` · ${data.circuitBreaker.failureCount}/${data.circuitBreaker.threshold}`}
-        </span>
+        </StatusBadge>
       </div>
-
-      {data?.consecutiveFailures > 0 && (
-        <p className="mt-2 text-xs text-red-700">
-          {data.consecutiveFailures} consecutive failure{data.consecutiveFailures === 1 ? '' : 's'}
-          {data?.lastFailure ? ` · last ${timeAgo(data.lastFailure)}` : ''}
-        </p>
-      )}
     </div>
   );
 }
@@ -152,23 +129,27 @@ const GatewayHealthPanel = () => {
   }, [fetchHealth]);
 
   const gateways = health?.gateways ? Object.entries(health.gateways) : [];
-  const anyDown = gateways.some(([, g]) => !g.available || g.status !== 'healthy');
-  const monitorRunning = health?.statistics?.healthMonitor?.isRunning;
+  const monitorRunning = Boolean(health?.statistics?.healthMonitor?.isRunning);
+  // Only trust (and alarm on) readings the monitor is actively producing.
+  const hasLiveData = (g) => monitorRunning && Number(g?.totalChecks ?? 0) > 0;
+  const anyDown = gateways.some(([, g]) => hasLiveData(g) && (!g.available || g.status !== 'healthy'));
+  const anyLive = gateways.some(([, g]) => hasLiveData(g));
+
+  const txTotal = Number(metrics?.transactions?.total ?? 0);
+  const alerts =
+    Number(metrics?.webhooks?.signatureFailed ?? 0) > 0 ||
+    Number(metrics?.amountValidation?.mismatches ?? 0) > 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <BoltIcon className="h-5 w-5 text-gray-400" />
-          <h2 className="text-lg font-semibold text-gray-900">Payment Gateways</h2>
+          <h2 className="text-base font-semibold text-gray-900">Payment gateways</h2>
           {!loading && !error && (
-            <span
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
-                anyDown ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-              }`}
-            >
-              {anyDown ? 'Attention needed' : 'All healthy'}
-            </span>
+            <StatusBadge tone={anyDown ? 'red' : anyLive ? 'green' : 'gray'}>
+              {anyDown ? 'Attention needed' : anyLive ? 'All healthy' : 'No live data'}
+            </StatusBadge>
           )}
         </div>
 
@@ -181,85 +162,64 @@ const GatewayHealthPanel = () => {
           <button
             type="button"
             onClick={fetchHealth}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
             disabled={loading}
           >
-            <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>
       </div>
 
-      {loading && !health && <p className="text-sm text-gray-500">Loading gateway health…</p>}
-
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
+      {loading && !health && (
+        <div className="mt-3 space-y-2">
+          <div className="h-9 animate-pulse rounded-lg bg-gray-100" />
+          <div className="h-9 animate-pulse rounded-lg bg-gray-100" />
+        </div>
       )}
+
+      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
       {health && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-2 divide-y divide-gray-100">
             {gateways.map(([name, data]) => (
-              <GatewayCard
+              <GatewayRow
                 key={name}
                 name={name}
                 data={data}
                 isPrimary={health.primary === name}
                 isFallback={health.fallback === name}
+                hasLiveData={hasLiveData(data)}
               />
             ))}
           </div>
 
-          {monitorRunning === false && (
-            <p className="mt-3 text-xs text-red-700">
-              Health monitor is not running — the readings above are stale.
+          {!anyLive && (
+            <p className="mt-1 text-xs text-gray-400">
+              The health monitor isn't reporting from this instance — statuses show the last known
+              configuration, not live probes.
             </p>
           )}
 
-          {metrics && (
-            <div className="mt-5 border-t border-gray-100 pt-4">
-              <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                <h3 className="text-sm font-semibold text-gray-900">Payment activity</h3>
-                {/* These counters live in the API process's memory, so they zero out on
-                    every deploy/restart and reflect one instance only. Labelled so the
-                    numbers are never mistaken for all-time totals — Payments is the
-                    source of truth for those. */}
-                <span className="text-xs text-gray-400">since last API restart · this instance</span>
-              </div>
-              <dl className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div>
-                  <dt className="text-xs text-gray-500">Attempted</dt>
-                  <dd className="text-lg font-bold text-gray-900">
-                    {metrics.transactions?.total ?? 0}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-gray-500">Successful</dt>
-                  <dd className="text-lg font-bold text-green-600">
-                    {metrics.transactions?.successful ?? 0}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-gray-500">Failed</dt>
-                  <dd className="text-lg font-bold text-red-600">
-                    {metrics.transactions?.failed ?? 0}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-gray-500">Success rate</dt>
-                  <dd className="text-lg font-bold text-gray-900">
-                    {Number(metrics.calculated?.successRate ?? 0).toFixed(1)}%
-                  </dd>
-                </div>
-              </dl>
-
-              {(metrics.webhooks?.signatureFailed > 0 || metrics.amountValidation?.mismatches > 0) && (
-                <p className="mt-3 text-xs text-red-700">
-                  {metrics.webhooks?.signatureFailed > 0 &&
-                    `${metrics.webhooks.signatureFailed} webhook signature failure(s). `}
-                  {metrics.amountValidation?.mismatches > 0 &&
-                    `${metrics.amountValidation.mismatches} amount mismatch(es).`}
-                </p>
+          {(txTotal > 0 || alerts) && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-gray-100 pt-3 text-xs text-gray-500">
+              <span className="font-medium text-gray-700">Activity since restart:</span>
+              <span>{txTotal} attempted</span>
+              <span className="text-green-700">{metrics.transactions?.successful ?? 0} ok</span>
+              <span className={Number(metrics.transactions?.failed ?? 0) > 0 ? 'text-red-700' : ''}>
+                {metrics.transactions?.failed ?? 0} failed
+              </span>
+              <span>{Number(metrics.calculated?.successRate ?? 0).toFixed(1)}% success</span>
+              {Number(metrics?.webhooks?.signatureFailed ?? 0) > 0 && (
+                <span className="font-medium text-red-700">
+                  {metrics.webhooks.signatureFailed} webhook signature failure(s)
+                </span>
+              )}
+              {Number(metrics?.amountValidation?.mismatches ?? 0) > 0 && (
+                <span className="font-medium text-red-700">
+                  {metrics.amountValidation.mismatches} amount mismatch(es)
+                </span>
               )}
             </div>
           )}

@@ -16,6 +16,16 @@ import {
 import config from '../../config/config';
 import AddCarModal from '../../components/admin/AddCarModal';
 import BulkImportModal from '../../components/admin/BulkImportModal';
+import {
+  PageHeader,
+  StatusBadge,
+  PageLoader,
+  EmptyState,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  TH,
+  CARD,
+} from '../../components/admin/ui';
 
 const AdminCars = () => {
   const navigate = useNavigate();
@@ -91,19 +101,15 @@ const AdminCars = () => {
   };
 
   const STATUS_MAP = {
-    active:   { color: 'bg-green-100 text-green-800',  label: 'Registered' },
-    approved: { color: 'bg-green-100 text-green-800',  label: 'Approved' },
-    unpaid:   { color: 'bg-yellow-100 text-yellow-800', label: 'Renewal Due' },
-    expired:  { color: 'bg-red-100 text-red-800',       label: 'Expired' },
+    active:   { tone: 'green', label: 'Registered' },
+    approved: { tone: 'green', label: 'Approved' },
+    unpaid:   { tone: 'amber', label: 'Renewal Due' },
+    expired:  { tone: 'red',   label: 'Expired' },
   };
 
   const getStatusBadge = (status) => {
-    const cfg = STATUS_MAP[status] || { color: 'bg-gray-100 text-gray-700', label: status };
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.color}`}>
-        {cfg.label}
-      </span>
-    );
+    const cfg = STATUS_MAP[status] || { tone: 'gray', label: status };
+    return <StatusBadge tone={cfg.tone}>{cfg.label}</StatusBadge>;
   };
 
   const formatDate = (dateString) => {
@@ -132,31 +138,26 @@ const AdminCars = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Cars</h1>
-          <p className="mt-1 text-sm text-gray-500">View and manage all registered vehicles</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowBulkImport(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <ArrowUpTrayIcon className="h-4 w-4" />
-            Bulk Import
-          </button>
-          <button
-            onClick={() => setShowAddCar(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Add Car
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={TruckIcon}
+        title="Cars"
+        subtitle="View and manage all registered vehicles"
+        actions={
+          <>
+            <button onClick={() => setShowBulkImport(true)} className={BTN_SECONDARY}>
+              <ArrowUpTrayIcon className="h-4 w-4" />
+              Bulk Import
+            </button>
+            <button onClick={() => setShowAddCar(true)} className={BTN_PRIMARY}>
+              <PlusIcon className="h-4 w-4" />
+              Add Car
+            </button>
+          </>
+        }
+      />
 
       {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-lg shadow space-y-3">
+      <div className={`${CARD} p-4 space-y-3`}>
         {/* Search */}
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative flex-1">
@@ -166,21 +167,14 @@ const AdminCars = () => {
               placeholder="Search by make, model, reg number, or owner..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
+          <button type="submit" className={BTN_PRIMARY}>
             Search
           </button>
           {searchTerm && (
-            <button
-              type="button"
-              onClick={handleSearchClear}
-              className="px-3 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <button type="button" onClick={handleSearchClear} className={BTN_SECONDARY}>
               Clear
             </button>
           )}
@@ -193,7 +187,7 @@ const AdminCars = () => {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -205,7 +199,7 @@ const AdminCars = () => {
             <select
               value={carTypeFilter}
               onChange={(e) => { setCarTypeFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               {carTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -217,7 +211,7 @@ const AdminCars = () => {
             <select
               value={sortFilter}
               onChange={(e) => { setSortFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="recently_added">Recently Added</option>
               <option value="a_z">A - Z</option>
@@ -243,48 +237,48 @@ const AdminCars = () => {
       </div>
 
       {/* Cars Table */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className={`${CARD} overflow-hidden`}>
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-          </div>
+          <PageLoader />
         ) : cars.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <TruckIcon className="h-12 w-12 text-gray-300 mb-3" />
-            <p className="text-sm font-medium">No cars found</p>
-            {(searchTerm || statusFilter !== 'all' || carTypeFilter !== 'all') && (
-              <p className="text-xs text-gray-400 mt-1">Try adjusting your filters</p>
-            )}
-          </div>
+          <EmptyState
+            icon={TruckIcon}
+            title="No cars found"
+            body={
+              searchTerm || statusFilter !== 'all' || carTypeFilter !== 'all'
+                ? 'Try adjusting your filters'
+                : undefined
+            }
+          />
         ) : null}
         <div className={`overflow-x-auto${cars.length === 0 || loading ? ' hidden' : ''}`}>
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Vehicle
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Owner
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Registration
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Date Added
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Expiry Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className={TH}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100">
               {cars.map((car) => (
                 <tr key={car.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 whitespace-nowrap">
