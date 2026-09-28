@@ -1,5 +1,6 @@
 import { api } from "./apiClient";
 import { upsertDriverLicenseApplication } from "./apiDriverLicenseApplication";
+import { getAttribution } from "../utils/attribution";
 
 /**
  * Get driver license prices (new / renew) from backend.
@@ -26,6 +27,7 @@ export async function getDriversLicensePaymentOptions() {
 export async function initializeDriverLicensePayment(payload) {
   const { data } = await api.post("/payments/initialize", {
     ...payload,
+    attribution: getAttribution(),
     payment_type: "driver_license",
     payment_gateway: payload.payment_gateway || "monipay",
   });

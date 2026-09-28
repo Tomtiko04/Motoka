@@ -1,10 +1,11 @@
 // Monicredit Payment API Service
 
 import { api } from "./apiClient";
+import { getAttribution } from "../utils/attribution";
 
 // Initialize Payment via backend
 export async function initiateMonicreditPayment(paymentData) {
-  const payload = { ...paymentData, payment_gateway: 'monicredit' };
+  const payload = { ...paymentData, attribution: getAttribution(), payment_gateway: 'monicredit' };
   const res = await api.post("/payments/initialize", payload);
   if (!res.data.status) throw new Error(res.data.message || "Payment initialization failed");
   return res.data;

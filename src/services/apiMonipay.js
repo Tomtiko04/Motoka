@@ -1,8 +1,10 @@
 import { api } from "./apiClient";
+import { getAttribution } from "../utils/attribution";
 
 export async function initializeMonipayPayment(paymentData) {
   const payload = {
     ...paymentData,
+    attribution: getAttribution(),
     payment_gateway: "monipay",
   };
   const { data } = await api.post("/payments/initialize", payload);

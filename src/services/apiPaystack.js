@@ -1,4 +1,5 @@
 import { api } from "./apiClient";
+import { getAttribution } from "../utils/attribution";
 
 /**
  * Initialize Paystack payment
@@ -9,6 +10,7 @@ export async function initializePaystackPayment(paymentData) {
   // Ensure payment_gateway is set to 'paystack'
   const payload = {
     ...paymentData,
+    attribution: getAttribution(),
     payment_gateway: 'paystack'
   };
   const { data } = await api.post("/payments/initialize", payload);

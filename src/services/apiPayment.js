@@ -1,9 +1,11 @@
 import { api } from "./apiClient";
+import { getAttribution } from "../utils/attribution";
 
 export async function initializePayment(payload) {
   // If payment_gateway is not specified, default to 'monipay' to match backend default
   const paymentPayload = {
     ...payload,
+    attribution: getAttribution(),
     payment_gateway: payload.payment_gateway || 'monipay'
   };
   const { data } = await api.post("/payments/initialize", paymentPayload);
@@ -73,7 +75,7 @@ export async function getPaymentReceipt(paymentType, identifier) {
 
 // Paystack: initialize and verify
 export async function initializePaystackPayment(payload) {
-  const { data } = await api.post("/paystack/initialize", payload, {
+  const { data } = await api.post("/paystack/initialize", { ...payload, attribution: getAttribution() }, {
     headers: { "Content-Type": "application/json" },
   });
   return data;
@@ -119,6 +121,7 @@ export async function initiateDriversLicensePayment(slug) {
 export async function initializePlatePayment(payload) {
   const { data } = await api.post('/payments/initialize', {
     ...payload,
+    attribution: getAttribution(),
     payment_type: 'plate_number',
     payment_gateway: payload.payment_gateway || 'monipay'
   });
@@ -134,6 +137,7 @@ export async function initializePlatePayment(payload) {
 export async function initializeDriverLicensePayment(payload) {
   const { data } = await api.post('/payments/initialize', {
     ...payload,
+    attribution: getAttribution(),
     payment_type: 'driver_license',
     payment_gateway: payload.payment_gateway || 'monipay'
   });

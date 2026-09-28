@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import { getAttribution } from '../utils/attribution';
 import config from '../config/config';
 
 // Bare axios instance — no auth interceptors
@@ -47,7 +48,7 @@ export async function fetchLGAs(stateCode) {
  * @param {string} payload.payment_gateway  - "monipay" | "paystack"
  */
 export async function initGuestRenewal(payload) {
-  const { data } = await guestApi.post('/guest/renewals', payload);
+  const { data } = await guestApi.post('/guest/renewals', { ...payload, attribution: getAttribution() });
   return data.data;
 }
 
