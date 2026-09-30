@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BsStars } from 'react-icons/bs';
-import { FiX, FiUpload, FiCheck, FiAlertCircle, FiImage } from 'react-icons/fi';
+import { FiX, FiUpload, FiCheck, FiAlertCircle, FiImage, FiCamera } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import PropTypes from 'prop-types';
 import { supabase } from '../config/supabaseClient';
 import config from '../config/config';
+import sampleLicense from '../assets/v2/doc-1.webp';
 
 const FIELD_LABELS = {
   ownerName: 'Owner Name',
@@ -30,7 +31,95 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
   const [result, setResult] = useState(null); // { data, fieldsFound }
   const [error, setError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [step, setStep] = useState('coach'); // 'coach' | 'upload' | 'camera'
+  const [cameraError, setCameraError] = useState(null);
   const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+  // Every open starts at the coach step
+  useEffect(() => {
+    if (isOpen) {
+      setStep('coach');
+    }
+  }, [isOpen]);
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  // Live camera only while on the camera step
+  useEffect(() => {
+    let cancelled = false;
+    const startCamera = async () => {
+      setCameraError(null);
+      stopCamera();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false,
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setCameraError(
+            err?.name === 'NotAllowedError'
+              ? 'Camera access was blocked. Please allow camera access or upload a photo instead.'
+              : 'Could not start the camera on this device. Please upload a photo instead.'
+          );
+        }
+      }
+    };
+    if (isOpen && step === 'camera') {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => {
+      cancelled = true;
+      stopCamera();
+    };
+  }, [isOpen, step]);
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'vehicle-license-photo.jpg', { type: 'image/jpeg' });
+        acceptFile(file);
+        setStep('upload');
+      },
+      'image/jpeg',
+      0.92
+    );
+  };
+
+  // Every open starts at the coach step
+  useEffect(() => {
+    if (isOpen) {
+      setStep('coach');
+    }
+  }, [isOpen]);
 
   const reset = () => {
     setSelectedFile(null);
@@ -46,6 +135,7 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
 
   const handleClose = () => {
     if (isProcessing) return;
+    stopCamera();
     reset();
     onClose();
   };
@@ -177,7 +267,11 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
             <div>
               <h2 className="text-base font-semibold text-[#05243F]">Smart Auto Fill</h2>
               <p className="text-xs text-[#05243F]/50 mt-0.5">
-                Upload a vehicle document — AI will read only what it can clearly see.
+                {step === 'coach'
+                  ? 'Grab your vehicle license — here is what to look for.'
+                  : step === 'camera'
+                    ? 'Point your camera at the vehicle license.'
+                    : 'Upload a vehicle document — AI will read only what it can clearly see.'}
               </p>
             </div>
           </div>
@@ -194,6 +288,57 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
+          {/* Coach step — find your vehicle license */}
+          {step === 'coach' && (
+            <div className="space-y-4">
+              <p className="text-sm text-[#05243F]">
+                Please find your <span className="font-semibold">vehicle license</span> — the
+                document issued for your car. Take a clear photo of it now, or upload
+                one you already have, and Smart Auto Fill will complete this form for you.
+              </p>
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                <img
+                  src={sampleLicense}
+                  alt="Sample vehicle license"
+                  className="w-full object-contain"
+                />
+              </div>
+              <p className="text-xs text-gray-400 text-center">
+                Sample only — your own license may look slightly different.
+              </p>
+            </div>
+          )}
+
+          {/* Camera step — live viewfinder */}
+          {step === 'camera' && (
+            <div className="space-y-4">
+              <p className="text-sm text-[#05243F]">
+                Point your camera at the <span className="font-semibold">vehicle license</span> and
+                capture a clear, well-lit photo.
+              </p>
+              <div className="relative rounded-xl overflow-hidden bg-black aspect-[4/3]">
+                <video
+                  ref={videoRef}
+                  playsInline
+                  muted
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                {/* Frame guide */}
+                {!cameraError && (
+                  <div className="pointer-events-none absolute inset-6 rounded-lg border-2 border-dashed border-white/70" />
+                )}
+              </div>
+              {cameraError && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                  <FiAlertCircle className="text-red-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-700">{cameraError}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 'upload' && (
+          <>
           {/* Drop zone */}
           {!result && (
             <div
@@ -203,10 +348,10 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
               onClick={() => fileInputRef.current?.click()}
               className={`relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 p-6 min-h-[180px] ${
                 isDragging
-                  ? 'border-[#2389E3] bg-blue-50'
+                  ? 'border-[#2389E3] bg-[#2389E3]/5'
                   : selectedFile
                     ? 'border-green-400 bg-green-50'
-                    : 'border-gray-200 bg-gray-50 hover:border-[#2389E3] hover:bg-blue-50/30'
+                    : 'border-gray-200 bg-gray-50 hover:border-[#2389E3] hover:bg-[#2389E3]/5'
               }`}
             >
               <input
@@ -259,11 +404,11 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
 
           {/* Processing */}
           {isProcessing && (
-            <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-3 p-4 bg-[#2389E3]/5 rounded-lg border border-[#2389E3]/20">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#2389E3] border-t-transparent flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-blue-800">Analysing your document…</p>
-                <p className="text-xs text-blue-600 mt-0.5">AI is reading the image. This takes a few seconds.</p>
+                <p className="text-sm font-medium text-[#2389E3]">Analysing your document…</p>
+                <p className="text-xs text-[#2389E3] mt-0.5">AI is reading the image. This takes a few seconds.</p>
               </div>
             </div>
           )}
@@ -326,10 +471,69 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
               )}
             </div>
           )}
+          </>
+          )}
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+          {step === 'coach' ? (
+            <>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Skip
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep('upload')}
+                className="px-4 py-2 text-sm font-medium text-[#2389E3] bg-white border border-[#2389E3]/40 rounded-lg hover:bg-[#2389E3]/5 transition-colors flex items-center gap-2"
+              >
+                <FiUpload className="h-4 w-4" />
+                Upload
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep('camera')}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors flex items-center gap-2"
+              >
+                <FiCamera className="h-4 w-4" />
+                Take Photo
+              </button>
+            </>
+          ) : step === 'camera' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setStep('coach')}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Back
+              </button>
+              {cameraError ? (
+                <button
+                  type="button"
+                  onClick={() => setStep('upload')}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors flex items-center gap-2"
+                >
+                  <FiUpload className="h-4 w-4" />
+                  Upload Instead
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={capturePhoto}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors flex items-center gap-2"
+                >
+                  <FiCamera className="h-4 w-4" />
+                  Capture
+                </button>
+              )}
+            </>
+          ) : (
+          <>
           <button
             type="button"
             onClick={handleClose}
@@ -344,7 +548,7 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
               type="button"
               onClick={processDocument}
               disabled={!selectedFile || isProcessing}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#1e7bc7] transition-colors disabled:opacity-40 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors disabled:opacity-40 flex items-center gap-2"
             >
               <FiUpload className="h-4 w-4" />
               {isProcessing ? 'Analysing…' : 'Analyse Document'}
@@ -359,6 +563,8 @@ const AutoFillModal = ({ isOpen, onClose, onAutoFill, formData }) => {
               Apply {found.length} field{found.length > 1 ? 's' : ''} to form
             </button>
           ) : null}
+          </>
+          )}
         </div>
       </div>
     </div>
