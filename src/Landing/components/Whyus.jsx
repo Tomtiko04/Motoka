@@ -49,7 +49,7 @@ function Whyus() {
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#ffffff]">
                   <Icon
                     icon={item.iconName}
-                    className="h-6 w-6 text-[#2388E1]"
+                    className="h-6 w-6 text-[#2389E3]"
                   />
                 </div>
 
@@ -113,7 +113,7 @@ function Whyus() {
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2389E31C]">
                     <Icon
                       icon={item.iconName}
-                      className="h-6 w-6 text-[#2388E1]"
+                      className="h-6 w-6 text-[#2389E3]"
                     />
                   </div>
 
@@ -166,7 +166,7 @@ function Whyus() {
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#2389E31C]">
                   <Icon
                     icon={item.iconName}
-                    className="h-6 w-6 text-[#2388E1]"
+                    className="h-6 w-6 text-[#2389E3]"
                   />
                 </div>
 

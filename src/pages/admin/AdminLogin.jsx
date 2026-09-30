@@ -171,7 +171,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#2389E3]/5 to-[#2389E3]/10 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-6">
@@ -199,7 +199,7 @@ const AdminLogin = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="username"
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent transition duration-200"
                   placeholder="Enter your admin email"
                   required
                 />
@@ -217,7 +217,7 @@ const AdminLogin = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       autoComplete="current-password"
-                      className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                      className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent transition duration-200"
                       placeholder="Enter your password"
                       required
                     />
@@ -246,7 +246,7 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                className="w-full bg-[#2389E3] text-white py-2.5 px-4 rounded-lg hover:bg-[#2389E3] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
               >
                 {loading
                   ? (method === 'password' ? 'Signing in...' : 'Sending OTP...')
@@ -260,7 +260,7 @@ const AdminLogin = () => {
                   setPassword('');
                   setError('');
                 }}
-                className="w-full text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                className="w-full text-sm text-[#2389E3] hover:text-[#2389E3] hover:underline"
               >
                 {method === 'password'
                   ? 'Sign in with a one-time code instead'
@@ -291,7 +291,7 @@ const AdminLogin = () => {
                     id="otp"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-center text-base tracking-widest placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg text-center text-base tracking-widest placeholder:text-gray-400 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent transition duration-200"
                     placeholder="000000"
                     maxLength="6"
                     required
@@ -320,7 +320,7 @@ const AdminLogin = () => {
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                  className="w-full bg-[#2389E3] text-white py-2.5 px-4 rounded-lg hover:bg-[#2389E3] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}
                 </button>

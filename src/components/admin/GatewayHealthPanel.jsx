@@ -49,7 +49,7 @@ function GatewayCard({ name, data, isPrimary, isFallback }) {
           <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${style.dot}`} />
           <span className="font-semibold text-gray-900 capitalize truncate">{name}</span>
           {isPrimary && (
-            <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 shrink-0">
+            <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-[#2389E3]/10 text-[#2389E3] shrink-0">
               Primary
             </span>
           )}

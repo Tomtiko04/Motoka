@@ -479,7 +479,7 @@ export default function PaymentOptions() {
         <div className="relative mb-6 flex h-12 items-center sm:h-12">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF] sm:h-8 sm:w-8"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10 sm:h-8 sm:w-8"
           >
             <IoIosArrowBack className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
@@ -588,7 +588,7 @@ export default function PaymentOptions() {
                     {walletDetails.newBalance}
                   </span>
                 </div>
-                <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
+                <button className="mt-5 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] md:mt-10">
                   N35,000 Pay Now
                 </button>
               </div>
@@ -606,7 +606,7 @@ export default function PaymentOptions() {
                     <h3 className="text-sm font-normal text-[#05243F]/40">
                       Transfer
                     </h3>
-                    <p className="mt-2 text-4xl font-semibold text-[#2284DB]">
+                    <p className="mt-2 text-4xl font-semibold text-[#2389E3]">
                       ₦{paymentData.total_amount || paymentData.amount}
                     </p>
                     <p className="mt-3 text-[15px] text-[#05243F]/40">
@@ -664,7 +664,7 @@ export default function PaymentOptions() {
                     </div>
                   </div>
                   <button
-                    className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] disabled:opacity-50"
+                    className="mt-5 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F] disabled:opacity-50"
                     onClick={handleVerifyBankTransfer}
                     disabled={verifying}
                   >
@@ -708,7 +708,7 @@ export default function PaymentOptions() {
                   <span className="text-sm font-normal text-[#05243F]/40">
                     Amount
                   </span>
-                  <p className="mt-1 text-4xl font-semibold text-[#2284DB]">
+                  <p className="mt-1 text-4xl font-semibold text-[#2389E3]">
                     N35,000
                   </p>
                   <p className="mt-2 text-[15px] text-[#05243F]/40">
@@ -843,7 +843,7 @@ export default function PaymentOptions() {
                   </div>
                 </div>
               </div>
-              <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+              <button className="mt-5 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
                 Make Payment
               </button>
             </div>
@@ -856,12 +856,12 @@ export default function PaymentOptions() {
               </h2>
               {monicreditLoading ? (
                 <div className="flex min-h-[300px] flex-col items-center justify-center">
-                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">
+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2389E3]">
                     Loading...
                   </span>
                   {/* Optional: Add a spinner below */}
                   <svg
-                    className="h-8 w-8 animate-spin text-[#2284DB]"
+                    className="h-8 w-8 animate-spin text-[#2389E3]"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -897,7 +897,7 @@ export default function PaymentOptions() {
                     <ol className="list-inside list-decimal space-y-1 text-base text-[#697C8C]">
                       <li>
                         Click the{" "}
-                        <span className="font-semibold text-[#2284DB]">
+                        <span className="font-semibold text-[#2389E3]">
                           Proceed to Monicredit Payment
                         </span>{" "}
                         button below.
@@ -910,7 +910,7 @@ export default function PaymentOptions() {
                   </div>
                   {monicreditAuthUrl && (
                     <button
-                      className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white"
+                      className="mt-5 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white"
                       onClick={openMonicreditPayment}
                     >
                       Proceed to Monicredit Payment
@@ -928,7 +928,7 @@ export default function PaymentOptions() {
               </h2>
               {paystackLoading ? (
                 <div className="flex min-h-[200px] flex-col items-center justify-center">
-                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2284DB]">
+                  <span className="mb-2 animate-pulse text-3xl font-bold text-[#2389E3]">
                     Loading...
                   </span>
                 </div>
@@ -943,7 +943,7 @@ export default function PaymentOptions() {
                   )}
                   {paystackAuthUrl && (
                     <button
-                      className="mt-2 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white"
+                      className="mt-2 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white"
                       onClick={openPaystackPayment}
                     >
                       Proceed to Paystack Payment
@@ -961,7 +961,7 @@ export default function PaymentOptions() {
                     </div>
                   </div>
                   <button
-                    className="mt-4 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white disabled:opacity-50"
+                    className="mt-4 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white disabled:opacity-50"
                     onClick={handleVerifyPaystack}
                     disabled={verifying || !paystackReference}
                   >
@@ -1040,7 +1040,7 @@ export default function PaymentOptions() {
                         paymentData.selectedSchedules.length > 1 && (
                           <div className="flex justify-between">
                             <span>Documents:</span>
-                            <span className="font-semibold text-blue-600">
+                            <span className="font-semibold text-[#2389E3]">
                               {paymentData.selectedSchedules.length} items
                             </span>
                           </div>
@@ -1116,7 +1116,7 @@ export default function PaymentOptions() {
                     <button
                       onClick={handlePaystackPayment}
                       disabled={isPaystackInitializing}
-                      className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex w-full items-center justify-center rounded-lg bg-[#2389E3] px-4 py-3 text-sm font-semibold text-white hover:bg-[#2389E3] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPaystackInitializing ? (
                         <>

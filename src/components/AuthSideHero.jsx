@@ -7,7 +7,7 @@ const AuthSideHero = ({
     className = "" 
 }) => {
     return (
-        <div className={`hidden md:block w-1/2 relative overflow-hidden bg-[#E5F0FF] ${className}`}>
+        <div className={`hidden md:block w-1/2 relative overflow-hidden bg-[#2389E3]/10 ${className}`}>
             <div className="flex flex-col w-full items-center justify-center h-full">
                 <div className="absolute w-full flex items-center justify-center overflow-hidden h-full relative">
                     <img src={imgSrc} alt={altText} className="block w-full h-full object-cover" />

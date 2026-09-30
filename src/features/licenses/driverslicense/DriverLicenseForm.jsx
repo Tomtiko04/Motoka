@@ -141,7 +141,7 @@ export default function DriverLicenseForm() {
     return (
       <LicenseLayout title="Driver's License" subTitle="Loading..." mainContentTitle="">
         <div className="flex justify-center py-12">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
         </div>
       </LicenseLayout>
     );
@@ -159,7 +159,7 @@ export default function DriverLicenseForm() {
         <div className="flex items-start gap-4">
           <div
             onClick={() => passportInputRef.current?.click()}
-            className="flex h-[120px] w-[120px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2284DB] hover:bg-[#EBF4FD]"
+            className="flex h-[120px] w-[120px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2389E3] hover:bg-[#EBF4FD]"
           >
             <input
               ref={passportInputRef}
@@ -171,12 +171,12 @@ export default function DriverLicenseForm() {
             {passportPreview ? (
               <img src={passportPreview} alt="Passport" className="h-full w-full object-cover" />
             ) : (
-              <Icon icon="lets-icons:add-round" fontSize={32} color="#2284DB" />
+              <Icon icon="lets-icons:add-round" fontSize={32} color="#2389E3" />
             )}
           </div>
           <div className="flex-1 pt-2">
             <p className="text-sm font-medium text-[#05243F]">Upload Passport Photograph</p>
-            <p className="mt-2 text-xl font-bold text-[#2284DB]">
+            <p className="mt-2 text-xl font-bold text-[#2389E3]">
               ₦{Number(priceNew).toLocaleString()}
             </p>
           </div>
@@ -197,14 +197,14 @@ export default function DriverLicenseForm() {
                     onClick={() => setSelectedDuration(p.duration)}
                     className={`flex flex-col items-center rounded-xl border-2 px-3 py-3 text-center transition-colors ${
                       active
-                        ? "border-[#2284DB] bg-[#EBF4FD]"
-                        : "border-[#E1E6F4] bg-white hover:border-[#2284DB]/40"
+                        ? "border-[#2389E3] bg-[#EBF4FD]"
+                        : "border-[#E1E6F4] bg-white hover:border-[#2389E3]/40"
                     }`}
                   >
-                    <span className={`text-sm font-semibold ${active ? "text-[#2284DB]" : "text-[#05243F]"}`}>
+                    <span className={`text-sm font-semibold ${active ? "text-[#2389E3]" : "text-[#05243F]"}`}>
                       {label}
                     </span>
-                    <span className={`mt-1 text-xs ${active ? "text-[#2284DB]/80" : "text-[#05243F]/50"}`}>
+                    <span className={`mt-1 text-xs ${active ? "text-[#2389E3]/80" : "text-[#05243F]/50"}`}>
                       ₦{Number(p.price).toLocaleString()}
                     </span>
                   </button>
@@ -225,7 +225,7 @@ export default function DriverLicenseForm() {
                 value={form[f.name] ?? ""}
                 onChange={handleChange}
                 placeholder={f.placeholder}
-                className="w-full rounded-lg border border-[#E1E6F4] bg-white px-4 py-2.5 text-sm text-[#05243F] placeholder:text-[#697C8C]/60 focus:border-[#2284DB] focus:outline-none focus:ring-1 focus:ring-[#2284DB]"
+                className="w-full rounded-lg border border-[#E1E6F4] bg-white px-4 py-2.5 text-sm text-[#05243F] placeholder:text-[#697C8C]/60 focus:border-[#2389E3] focus:outline-none focus:ring-1 focus:ring-[#2389E3]"
               />
             </div>
           ))}
@@ -233,7 +233,7 @@ export default function DriverLicenseForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] disabled:opacity-60"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#2389E3] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#2389E3] disabled:opacity-60"
           >
             {isSubmitting ? "Saving..." : "Confirm and Proceed"}
             <Icon icon="mdi:arrow-right" className="text-lg" />

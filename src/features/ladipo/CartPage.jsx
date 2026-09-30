@@ -26,7 +26,7 @@ function CartPage() {
           </div>
           <Link
             to="/ladipo"
-            className="bg-[#2389E3] px-8 py-3 rounded-full text-white text-sm font-semibold hover:bg-[#1a7acf] transition-all active:scale-[0.98] cursor-pointer"
+            className="bg-[#2389E3] px-8 py-3 rounded-full text-white text-sm font-semibold hover:bg-[#2389E3] transition-all active:scale-[0.98] cursor-pointer"
           >
             Browse Parts
           </Link>
@@ -91,7 +91,7 @@ function CartPage() {
                   </span>
                   <button
                     onClick={() => setQty(item.inventoryId, item.quantity + 1)}
-                    className="w-8 h-8 rounded-full bg-[#2389E3] flex items-center justify-center text-white hover:bg-[#1a7acf] transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-[#2389E3] flex items-center justify-center text-white hover:bg-[#2389E3] transition-colors cursor-pointer"
                   >
                     <Icon icon="lucide:plus" width="14" />
                   </button>
@@ -108,7 +108,7 @@ function CartPage() {
             ))}
 
             {/* Subtotal bar */}
-            <div className="flex items-center justify-between px-5 py-4 bg-[#CBE1FC]">
+            <div className="flex items-center justify-between px-5 py-4 bg-[#2389E3]/20">
               <span className="text-[14px] font-bold text-[#05243F]">Subtotal</span>
               <span className="text-[14px] font-bold text-[#05243F]">
                 ₦{(totalKobo / 100).toLocaleString("en-NG")}
@@ -120,7 +120,7 @@ function CartPage() {
           <div className="flex justify-center">
             <button
               onClick={() => navigate("/ladipo/checkout")}
-              className="w-[220px] bg-[#2389E3] hover:bg-[#1a7acf] text-white font-bold text-[15px] py-3.5 rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-md shadow-[#2389E3]/30"
+              className="w-[220px] bg-[#2389E3] hover:bg-[#2389E3] text-white font-bold text-[15px] py-3.5 rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-md shadow-[#2389E3]/30"
             >
               Checkout
             </button>

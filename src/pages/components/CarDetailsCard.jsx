@@ -33,7 +33,7 @@ const getExpiryStatusStyle = (expiryStatus) => {
     // Renewal order in progress
     return {
       bgColor: "#E3F2FD",
-      dotColor: "#2196F3",
+      dotColor: "#2389E3",
       message: "Renewal in progress"
     };
   } else if (status === "overdue") {
@@ -126,7 +126,7 @@ export default function CarDetailsCard({
   
   return (
     <div
-      className={`cursor-pointer rounded-2xl px-4 py-5 ${selectedCarId === carDetail.id ? "bg-[#45A1F2]" : "bg-white"}`}
+      className={`cursor-pointer rounded-2xl px-4 py-5 ${selectedCarId === carDetail.id ? "bg-[#2389E3]" : "bg-white"}`}
       onClick={handleSelect}
       role="button"
     >

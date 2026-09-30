@@ -125,7 +125,7 @@ export default function AutoRenewalSettings({ onNavigate }) {
           <p className="mt-1 text-xs text-gray-500">Add a car first to set up auto-renewal.</p>
           <button
             onClick={() => navigate("/garage")}
-            className="mt-4 rounded-full bg-[#2389E3] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1a6dba] transition-all"
+            className="mt-4 rounded-full bg-[#2389E3] px-4 py-2 text-xs font-semibold text-white hover:bg-[#2389E3] transition-all"
           >
             Go to Garage
           </button>

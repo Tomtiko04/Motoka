@@ -142,7 +142,7 @@ export default function PartialRenewalPromptModal({
           <button
             type="button"
             onClick={() => onConfirm(buildPayload())}
-            className="rounded-full bg-[#2284DB] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1B6CB3]"
+            className="rounded-full bg-[#2389E3] px-5 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]"
           >
             Confirm &amp; Pay
           </button>

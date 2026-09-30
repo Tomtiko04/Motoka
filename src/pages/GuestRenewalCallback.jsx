@@ -169,7 +169,7 @@ export default function GuestRenewalCallback() {
         {/* Status icon */}
         {status === "polling" && (
           <>
-            <div className="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-[#E5F3FF]">
+            <div className="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-[#2389E3]/10">
               <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#2389E3] border-t-transparent" />
             </div>
             <h2 className="text-xl font-semibold text-[#05243F] mb-2">Waiting for Payment</h2>
@@ -201,7 +201,7 @@ export default function GuestRenewalCallback() {
             </p>
             <button
               onClick={() => window.history.back()}
-              className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors"
+              className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors"
             >
               Try Again
             </button>
@@ -244,7 +244,7 @@ export default function GuestRenewalCallback() {
                 <button
                   type="submit"
                   disabled={resendLoading}
-                  className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors disabled:opacity-50"
+                  className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors disabled:opacity-50"
                 >
                   {resendLoading ? "Sending…" : "Resend My Receipt"}
                 </button>
@@ -275,7 +275,7 @@ export default function GuestRenewalCallback() {
             </p>
             <button
               onClick={() => navigate("/")}
-              className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors"
+              className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors"
             >
               Back to Home
             </button>

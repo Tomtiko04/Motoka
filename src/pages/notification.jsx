@@ -144,7 +144,7 @@
 //               key={index}
 //               className={`rounded-full transition-[.5s] px-6 py-1.5 text-[16px] cursor-pointer ${
 //                 notificationsCategory === category
-//                   ? "bg-[#2389E3] text-white hover:bg-[#1b6dbb]"
+//                   ? "bg-[#2389E3] text-white hover:bg-[#2389E3]"
 //                   : "bg-[#F0F2F4] text-[#697C8C] hover:bg-[#dcddde]"
 //               }`}
 //               onClick={() => setNotificationsCategory(category)}
@@ -372,7 +372,7 @@ export default function Notification() {
             type="button"
             onClick={handleMarkAllRead}
             disabled={!visibleUnreadCount || markAllMutation.isLoading}
-            className="text-sm font-semibold text-[#2389E3] transition-colors hover:text-[#1b6dbb] disabled:text-[#94A3B8]"
+            className="text-sm font-semibold text-[#2389E3] transition-colors hover:text-[#2389E3] disabled:text-[#94A3B8]"
           >
             {markAllMutation.isLoading ? "Marking read..." : "Mark all read"}
           </button>

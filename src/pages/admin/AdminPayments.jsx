@@ -115,13 +115,13 @@ const AdminPayments = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      successful: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
-      approved: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
-      success: { color: 'bg-blue-100 text-blue-800', label: 'Success' },
-      pending: { color: 'bg-blue-100 text-blue-800', label: 'Pending' },
-      failed: { color: 'bg-blue-100 text-blue-800', label: 'Failed' },
-      declined: { color: 'bg-blue-100 text-blue-800', label: 'Failed' },
-      abandoned: { color: 'bg-blue-100 text-blue-800', label: 'Abandoned' },
+      successful: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Success' },
+      approved: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Success' },
+      success: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Success' },
+      pending: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Pending' },
+      failed: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Failed' },
+      declined: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Failed' },
+      abandoned: { color: 'bg-[#2389E3]/10 text-[#2389E3]', label: 'Abandoned' },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -199,8 +199,8 @@ const AdminPayments = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center space-x-3">
-        <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-          <CreditCardIcon className="h-6 w-6 text-blue-600" />
+        <div className="h-10 w-10 bg-[#2389E3]/10 rounded-lg flex items-center justify-center">
+          <CreditCardIcon className="h-6 w-6 text-[#2389E3]" />
         </div>
         <h1 className="text-xl font-semibold text-gray-900">Transaction</h1>
       </div>
@@ -212,15 +212,15 @@ const AdminPayments = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Received</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[#2389E3]">
                 {formatCurrency(summary.amounts?.received ?? 0)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {summary.counts?.successful ?? 0} successful
               </p>
             </div>
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <ArrowUpIcon className="h-5 w-5 text-blue-600" />
+            <div className="h-8 w-8 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <ArrowUpIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -230,15 +230,15 @@ const AdminPayments = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[#2389E3]">
                 {formatCurrency(summary.amounts?.pending ?? 0)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {summary.counts?.pending ?? 0} awaiting payment
               </p>
             </div>
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-blue-600" />
+            <div className="h-8 w-8 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <ArrowDownIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -248,15 +248,15 @@ const AdminPayments = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Failed / Abandoned</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[#2389E3]">
                 {(summary.counts?.failed ?? 0) + (summary.counts?.abandoned ?? 0)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {summary.counts?.failed ?? 0} failed · {summary.counts?.abandoned ?? 0} abandoned
               </p>
             </div>
-            <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <ArrowDownIcon className="h-5 w-5 text-blue-600" />
+            <div className="h-8 w-8 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <ArrowDownIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -292,7 +292,7 @@ const AdminPayments = () => {
                   placeholder="Search transactions..."
                   value={searchTerm}
                   onChange={handleSearch}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#2389E3] focus:border-[#2389E3] sm:text-sm"
                 />
               </div>
 
@@ -304,7 +304,7 @@ const AdminPayments = () => {
                     onClick={() => handleFilterChange(option.value)}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                       activeFilter === option.value
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        ? 'bg-[#2389E3]/10 text-[#2389E3] border border-[#2389E3]/20'
                         : 'text-gray-700 hover:bg-gray-100 border border-gray-200'
                     }`}
                   >
@@ -343,7 +343,7 @@ const AdminPayments = () => {
                 type="checkbox"
                 checked={includeDuplicates}
                 onChange={(e) => { setIncludeDuplicates(e.target.checked); setCurrentPage(1); }}
-                className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-3.5 w-3.5 rounded border-gray-300 text-[#2389E3] focus:ring-[#2389E3]"
               />
               Show duplicates
             </label>
@@ -437,7 +437,7 @@ const AdminPayments = () => {
                           ? 'bg-teal-100 text-teal-800'
                           : transaction.payment_gateway === 'monicredit'
                           ? 'bg-purple-100 text-purple-800'
-                          : 'bg-indigo-100 text-indigo-800'
+                          : 'bg-[#2389E3]/10 text-[#2389E3]'
                       }`}>
                         {transaction.payment_gateway || 'paystack'}
                       </span>
@@ -454,7 +454,7 @@ const AdminPayments = () => {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleViewTransaction(transaction.transaction_id)}
-                          className="p-1 rounded text-blue-600 hover:bg-blue-50"
+                          className="p-1 rounded text-[#2389E3] hover:bg-[#2389E3]/5"
                           title="View transaction details"
                           aria-label="View"
                         >
@@ -469,7 +469,7 @@ const AdminPayments = () => {
                                   ? 'text-orange-600 hover:bg-orange-50'
                                   : transaction.status === 'pending'
                                   ? 'text-green-600 hover:bg-green-50'
-                                  : 'text-blue-600 hover:bg-blue-50'
+                                  : 'text-[#2389E3] hover:bg-[#2389E3]/5'
                               }`}
                               title={
                                 transaction.status === 'abandoned'
@@ -682,7 +682,7 @@ const AdminPayments = () => {
                     <div className="border-t pt-4">
                       <button
                         onClick={() => handleMarkPaid(selectedTransaction.reference)}
-                        className="w-full py-2 px-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                        className="w-full py-2 px-3 text-sm font-medium text-white bg-[#2389E3] hover:bg-[#2389E3] rounded-lg"
                       >
                         Create Missing Order
                       </button>

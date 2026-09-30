@@ -78,7 +78,7 @@ export function ExpiredMonthChart({
           {data.map((m) => (
             <Cell
               key={m.month}
-              fill={selected === m.month ? '#1D4ED8' : '#2284DB'}
+              fill={selected === m.month ? '#2389E3' : '#2389E3'}
             />
           ))}
         </Bar>
@@ -99,7 +99,7 @@ export function QueueCard({
 }) {
   const className = `rounded-lg border p-4 text-left transition-colors ${
     active
-      ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+      ? 'border-[#2389E3] bg-[#2389E3]/5 ring-1 ring-[#2389E3]'
       : 'border-gray-100 bg-white hover:bg-gray-50'
   }`;
 
@@ -109,7 +109,7 @@ export function QueueCard({
       <MetricNumber
         loading={loading}
         value={count}
-        className={`mt-1 text-2xl font-bold tabular-nums ${active ? 'text-blue-700' : 'text-gray-900'}`}
+        className={`mt-1 text-2xl font-bold tabular-nums ${active ? 'text-[#2389E3]' : 'text-gray-900'}`}
       />
       {hint && <p className="mt-1 text-[11px] text-gray-400">{hint}</p>}
     </>

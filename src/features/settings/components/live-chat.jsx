@@ -12,7 +12,7 @@ export default function LiveChat({ onNavigate }) {
             placeholder="Info@Example.com"
             className="block w-full rounded-lg bg-[#FFF] px-4 py-4 text-sm text-[#05243F] placeholder:text-[#05243F]/40 hover:bg-[#FFF4DD]/50 focus:bg-[#FFF4DD] focus:outline-none transition-all duration-200"
           />
-          <button className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-3 rounded-r-md transition-colors">
+          <button className="bg-[#2389E3] hover:bg-[#2389E3] text-white px-4 py-3 rounded-r-md transition-colors">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"

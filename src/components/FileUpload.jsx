@@ -91,7 +91,7 @@ const FileUpload = ({
 
   const getFileIcon = (file) => {
     if (file.type.startsWith('image/')) {
-      return <FiImage className="h-6 w-6 text-blue-500" />;
+      return <FiImage className="h-6 w-6 text-[#2389E3]" />;
     }
     return <FiFile className="h-6 w-6 text-gray-500" />;
   };

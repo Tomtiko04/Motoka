@@ -25,7 +25,7 @@ export default function MarketingPage({
         {ctaLabel && ctaTo ? (
           <Link
             to={ctaTo}
-            className="mt-10 inline-flex rounded-[10px] bg-[#2389E3] px-6 py-3 text-base font-semibold text-white hover:bg-[#126cbb]"
+            className="mt-10 inline-flex rounded-[10px] bg-[#2389E3] px-6 py-3 text-base font-semibold text-white hover:bg-[#2389E3]"
           >
             {ctaLabel}
           </Link>

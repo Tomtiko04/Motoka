@@ -250,7 +250,7 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="relative w-full overflow-hidden bg-[#daebfa]"
+      className="relative w-full overflow-hidden bg-[#2389E3]/15"
       style={{ minHeight: 'var(--hero-min-height, clamp(580px, 82vh, 880px))' }}
     >
       {/* Centered max-width shell */}
@@ -278,7 +278,7 @@ export default function Hero() {
                 // lines on 13" laptops.
                 fontSize: 'clamp(52px, 5.46vw, 83.2px)',
                 lineHeight: 1.2,
-                color: '#0e6fc6',
+                color: '#2389E3',
                 maxWidth: 'min(100%, 920px)',
               }}
             >

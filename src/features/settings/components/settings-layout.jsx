@@ -102,7 +102,7 @@ export default function SettingsLayout({
             <ChevronLeft className="h-5 w-5 text-gray-600" />
           </button>
           <div className="flex items-center text-xl font-medium">
-            <Cog className="mr-2 h-5 w-5 text-sky-500" />
+            <Cog className="mr-2 h-5 w-5 text-[#2389E3]" />
             <h1 className="text-center text-xl font-medium md:text-2xl">
               {(() => {
                 const { section, page } = getTitleParts();

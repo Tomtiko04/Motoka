@@ -155,9 +155,9 @@ const AdminDashboard = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'New':
-        return 'text-blue-600';
+        return 'text-[#2389E3]';
       case 'Done':
-        return 'text-blue-600';
+        return 'text-[#2389E3]';
       case 'Declined':
         return 'text-red-600';
       default:
@@ -180,12 +180,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-[#2389E3]">
                 ₦{stats ? parseFloat(stats.total_amount).toLocaleString() : '0'}
               </KpiNumber>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <CreditCardIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <CreditCardIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -195,12 +195,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-[#2389E3]">
                 {stats ? stats.total_orders.toLocaleString() : '0'}
               </KpiNumber>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <ClipboardDocumentListIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -210,12 +210,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-[#2389E3]">
                 {stats ? stats.total_users.toLocaleString() : '0'}
               </KpiNumber>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <UsersIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <UsersIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -225,12 +225,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Cars</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-[#2389E3]">
                 {stats ? stats.total_cars.toLocaleString() : '0'}
               </KpiNumber>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <TruckIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <TruckIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -246,12 +246,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Expired this month</p>
-              <KpiNumber ready={statsReady} className="text-2xl font-bold text-blue-600">
+              <KpiNumber ready={statsReady} className="text-2xl font-bold text-[#2389E3]">
                 {stats ? Number(stats.expired_cars_this_month || 0).toLocaleString() : '0'}
               </KpiNumber>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <CalendarDaysIcon className="h-5 w-5 text-[#2389E3]" />
             </div>
           </div>
         </Link>
@@ -279,12 +279,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">In Progress</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[#2389E3]">
                 {stats ? stats.in_progress_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 text-sm font-bold">→</span>
+            <div className="w-8 h-8 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <span className="text-[#2389E3] text-sm font-bold">→</span>
             </div>
           </div>
         </div> */}
@@ -294,12 +294,12 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[#2389E3]">
                 {stats ? stats.completed_orders.toLocaleString() : '0'}
               </p>
             </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 text-sm font-bold">✓</span>
+            <div className="w-8 h-8 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+              <span className="text-[#2389E3] text-sm font-bold">✓</span>
             </div>
           </div>
         </div> */}
@@ -342,7 +342,7 @@ const AdminDashboard = () => {
                   key={opt.value}
                   onClick={() => setChartPeriod(opt.value)}
                   className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    chartPeriod === opt.value ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    chartPeriod === opt.value ? 'bg-[#2389E3] text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   {opt.label}
@@ -382,8 +382,8 @@ const AdminDashboard = () => {
                   }
                   contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }}
                 />
-                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2284DB" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="orders" dataKey="orders" name="Orders" fill="#93c5fd" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2389E3" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="orders" dataKey="orders" name="Orders" fill="#[2389E3]/40" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -397,7 +397,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-            <a href="/admin/orders" className="text-blue-600 text-sm font-medium">See More</a>
+            <a href="/admin/orders" className="text-[#2389E3] text-sm font-medium">See More</a>
           </div>
           <div className="space-y-3">
             {recentOrders.length > 0 ? (
@@ -431,7 +431,7 @@ const AdminDashboard = () => {
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Recent Transaction</h3>
-          <a href="/admin/payments" className="text-blue-600 text-sm font-medium">See More</a>
+          <a href="/admin/payments" className="text-[#2389E3] text-sm font-medium">See More</a>
         </div>
         <div className="space-y-3">
           {recentTransactions.length > 0 ? (
@@ -441,8 +441,8 @@ const AdminDashboard = () => {
                 className="flex items-center space-x-3 py-2 px-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={() => window.location.href = '/admin/payments'}
               >
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <DocumentTextIcon className="h-4 w-4 text-blue-600" />
+                <div className="w-8 h-8 bg-[#2389E3]/10 rounded-full flex items-center justify-center">
+                  <DocumentTextIcon className="h-4 w-4 text-[#2389E3]" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
@@ -452,7 +452,7 @@ const AdminDashboard = () => {
                     {new Date(transaction.created_at).toLocaleDateString('en-GB')}
                   </p>
                 </div>
-                <p className="text-sm font-medium text-blue-600">
+                <p className="text-sm font-medium text-[#2389E3]">
                   ₦{parseFloat(transaction.amount).toLocaleString()}
                 </p>
               </div>

@@ -154,7 +154,7 @@ export default function RecentNotificationModal({ setNotificationsModal }) {
         <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-center">
           <button
             type="button"
-            className="text-xs font-semibold text-[#2389E3] hover:text-[#1a6dba] hover:underline cursor-pointer transition-colors"
+            className="text-xs font-semibold text-[#2389E3] hover:text-[#2389E3] hover:underline cursor-pointer transition-colors"
             onClick={() => {
               navigate("/notifications");
               setNotificationsModal(false);

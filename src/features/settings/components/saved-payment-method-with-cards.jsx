@@ -80,7 +80,7 @@ export default function SavedPaymentMethodWithCards({ onNavigate }) {
         <button
           type="button"
           disabled={!selectedId}
-          className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#1a6dba] disabled:opacity-40 active:scale-95"
+          className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#2389E3] disabled:opacity-40 active:scale-95"
         >
           Confirm
         </button>

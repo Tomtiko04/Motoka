@@ -538,7 +538,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
               <div className="p-6 md:p-8 relative">
                 <button
                   onClick={handleBack}
-                  className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+                  className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
@@ -624,7 +624,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                     <button
                       onClick={handleConfirmPayment}
                       disabled={submitting}
-                      className="w-full rounded-full bg-[#2284DB] py-3 text-base font-semibold text-white transition-all hover:bg-[#1B6CB3] disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="w-full rounded-full bg-[#2389E3] py-3 text-base font-semibold text-white transition-all hover:bg-[#2389E3] disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {submitting ? (
                         <>
@@ -650,7 +650,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
               <div className="p-6 md:p-8">
                 <button
                   onClick={handleBack}
-                  className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+                  className="absolute left-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
@@ -908,7 +908,7 @@ export default function RenewModal({ isOpen, onClose, initialPlateNumber }) {
                     <button
                       onClick={handleProceedToPayment}
                       disabled={!isFormValid()}
-                      className="mt-6 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="mt-6 w-full rounded-full bg-[#2389E3] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#2389E3] disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {`₦${(totalAmount / 100).toLocaleString()} — Choose Payment`}
                     </button>

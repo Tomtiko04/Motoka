@@ -40,7 +40,7 @@ export default function CarDetailsModal() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 bg-[#DCEFFF] p-6">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-[#2389E3]/10 p-6">
           <div className="flex items-center gap-3">
             <Icon icon="ion:car-sport-sharp" fontSize={30} color="#2389E3" />
             <h2 className="text-lg font-bold text-[#05243F]">

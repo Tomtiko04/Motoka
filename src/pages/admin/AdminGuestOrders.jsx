@@ -102,7 +102,7 @@ export default function AdminGuestOrders() {
                 placeholder="Search plate, email, or name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent"
               />
             </div>
           </form>
@@ -114,7 +114,7 @@ export default function AdminGuestOrders() {
                 setActiveFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -128,7 +128,7 @@ export default function AdminGuestOrders() {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]" />
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">

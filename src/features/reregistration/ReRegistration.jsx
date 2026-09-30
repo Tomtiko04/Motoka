@@ -525,7 +525,7 @@ export default function ReRegistration() {
             type="button"
             disabled={!ready}
             onClick={() => setSubmitted(true)}
-            className="w-full rounded-full bg-[#2389E3] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#1B72C0] disabled:cursor-not-allowed disabled:bg-[#2389E3]/30"
+            className="w-full rounded-full bg-[#2389E3] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#2389E3] disabled:cursor-not-allowed disabled:bg-[#2389E3]/30"
           >
             Continue
           </button>

@@ -64,15 +64,15 @@ export default function SavedPaymentMethod({ onNavigate }) {
             <p className="mb-4 text-center text-sm text-gray-500 md:text-base">
               Add and manage your payment methods. Save your card for easy auto-renewal payments.
             </p>
-            <div className="mb-6 flex items-center justify-center rounded-lg border border-sky-200 bg-white p-4 md:p-6 md:mb-8">
+            <div className="mb-6 flex items-center justify-center rounded-lg border border-[#2389E3]/20 bg-white p-4 md:p-6 md:mb-8">
               <p className="text-sm text-gray-400 md:text-base">No saved payment methods yet</p>
             </div>
-            <div className="mb-6 flex items-center justify-center rounded-lg border border-sky-200 bg-white p-4 md:mb-8">
+            <div className="mb-6 flex items-center justify-center rounded-lg border border-[#2389E3]/20 bg-white p-4 md:mb-8">
               <button
                 onClick={() => onNavigate("add-card")}
-                className="flex items-center gap-2 text-sky-500"
+                className="flex items-center gap-2 text-[#2389E3]"
               >
-                <Plus className="h-4 w-4 rounded-full bg-sky-500 text-white" />
+                <Plus className="h-4 w-4 rounded-full bg-[#2389E3] text-white" />
                 <span className="text-sm font-semibold text-[#05243F]/95">
                   Add a Bank Card/Account
                 </span>
@@ -82,7 +82,7 @@ export default function SavedPaymentMethod({ onNavigate }) {
           <div className="pt-5 md:mt-8">
             <button
               onClick={() => onNavigate("add-card")}
-              className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#1a6dba] active:scale-95"
+              className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-95"
             >
               Add a Bank Card/Account
             </button>

@@ -73,7 +73,7 @@ export default function SubcategoriesNav({ subcategories = [], mainCategory }) {
                   <button
                     onClick={() => handleSubcategoryClick(subcategory)}
                     className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 ${isActive
-                        ? "bg-white text-[#1A7ACF]"
+                        ? "bg-white text-[#2389E3]"
                         : "bg-transparent text-[#8B98A5] hover:text-[#05243F]"
                       }`}
                   >

@@ -173,7 +173,7 @@ export default function Contact() {
           </div>
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#2389E3] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[#126cbb] sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#2389E3] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[#2389E3] sm:w-auto"
           >
             <Icon icon="ic:baseline-whatsapp" width={22} height={22} />
             Send on WhatsApp

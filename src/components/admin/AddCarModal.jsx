@@ -47,7 +47,7 @@ function Field({ label, id, required, error, hint, children }) {
 }
 
 function inputCls(hasError) {
-  return `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
+  return `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none transition-colors ${
     hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'
   }`;
 }
@@ -80,7 +80,7 @@ function MakeSelect({ value, onChange, error }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
+        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none ${
           error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
         }`}
       >
@@ -97,7 +97,7 @@ function MakeSelect({ value, onChange, error }) {
               placeholder="Search make..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none"
             />
           </div>
           <ul className="max-h-48 overflow-y-auto">
@@ -109,8 +109,8 @@ function MakeSelect({ value, onChange, error }) {
                   <button
                     type="button"
                     onClick={() => select(make)}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                      value === make ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#2389E3]/5 hover:text-[#2389E3] transition-colors ${
+                      value === make ? 'bg-[#2389E3]/5 text-[#2389E3] font-medium' : 'text-gray-700'
                     }`}
                   >
                     {make}
@@ -163,7 +163,7 @@ function ModelSelect({ make, value, onChange, error }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         disabled={!make}
-        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
+        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none ${
           error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
@@ -180,7 +180,7 @@ function ModelSelect({ make, value, onChange, error }) {
               placeholder="Search model..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none"
             />
           </div>
           <ul className="max-h-48 overflow-y-auto">
@@ -192,8 +192,8 @@ function ModelSelect({ make, value, onChange, error }) {
                   <button
                     type="button"
                     onClick={() => select(model)}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                      value === model ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#2389E3]/5 hover:text-[#2389E3] transition-colors ${
+                      value === model ? 'bg-[#2389E3]/5 text-[#2389E3] font-medium' : 'text-gray-700'
                     }`}
                   >
                     {model}
@@ -207,7 +207,7 @@ function ModelSelect({ make, value, onChange, error }) {
             <button
               type="button"
               onClick={() => select(query)}
-              className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 border-t border-gray-100 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-[#2389E3] hover:bg-[#2389E3]/5 border-t border-gray-100 transition-colors"
             >
               Use "{query}"
             </button>
@@ -371,15 +371,15 @@ export default function AddCarModal({ onClose, onSuccess, preselectedUser = null
           <div className="flex items-center gap-2">
             {[1, 2].map((s) => (
               <React.Fragment key={s}>
-                <div className={`flex items-center gap-1.5 text-xs font-medium ${s <= step ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`flex items-center gap-1.5 text-xs font-medium ${s <= step ? 'text-[#2389E3]' : 'text-gray-400'}`}>
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold ${
-                    s < step ? 'bg-blue-600 text-white' : s === step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+                    s < step ? 'bg-[#2389E3] text-white' : s === step ? 'bg-[#2389E3] text-white' : 'bg-gray-200 text-gray-500'
                   }`}>
                     {s < step ? <CheckCircleIcon className="w-4 h-4" /> : s}
                   </div>
                   {s === 1 ? 'Select User' : 'Car Details'}
                 </div>
-                {s < 2 && <div className={`flex-1 h-0.5 rounded ${step > s ? 'bg-blue-600' : 'bg-gray-200'}`} />}
+                {s < 2 && <div className={`flex-1 h-0.5 rounded ${step > s ? 'bg-[#2389E3]' : 'bg-gray-200'}`} />}
               </React.Fragment>
             ))}
           </div>
@@ -399,11 +399,11 @@ export default function AddCarModal({ onClose, onSuccess, preselectedUser = null
                   placeholder="Search by name, email, or phone number..."
                   value={userQuery}
                   onChange={(e) => setUserQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none"
                 />
                 {userLoading && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2389E3]" />
                   </div>
                 )}
               </div>
@@ -422,17 +422,17 @@ export default function AddCarModal({ onClose, onSuccess, preselectedUser = null
                         setForm((f) => ({ ...f, name_of_owner: u.name, phone_number: u.phone_number || '' }));
                         setStep(2);
                       }}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left group"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-[#2389E3] hover:bg-[#2389E3]/5 transition-all text-left group"
                     >
-                      <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
-                        <UserIcon className="h-5 w-5 text-blue-600" />
+                      <div className="w-9 h-9 rounded-full bg-[#2389E3]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#2389E3]/20 transition-colors">
+                        <UserIcon className="h-5 w-5 text-[#2389E3]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{u.name || 'Unknown'}</p>
                         <p className="text-xs text-gray-500 truncate">{u.email}</p>
                         {u.phone_number && <p className="text-xs text-gray-400">{u.phone_number}</p>}
                       </div>
-                      <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
+                      <span className="text-xs text-[#2389E3] font-medium opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
                     </button>
                   ))}
                 </div>
@@ -460,13 +460,13 @@ export default function AddCarModal({ onClose, onSuccess, preselectedUser = null
           {step === 2 && (
             <form id="add-car-form" onSubmit={handleSubmit} className="space-y-4">
               {/* Selected user banner */}
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <UserIcon className="h-4 w-4 text-blue-600" />
+              <div className="flex items-center gap-3 p-3 bg-[#2389E3]/5 rounded-xl border border-[#2389E3]/20">
+                <div className="w-8 h-8 rounded-full bg-[#2389E3]/10 flex items-center justify-center flex-shrink-0">
+                  <UserIcon className="h-4 w-4 text-[#2389E3]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-blue-900">{selectedUser?.name}</p>
-                  <p className="text-xs text-blue-600">{selectedUser?.email}</p>
+                  <p className="text-sm font-medium text-[#2389E3]">{selectedUser?.name}</p>
+                  <p className="text-xs text-[#2389E3]">{selectedUser?.email}</p>
                 </div>
               </div>
 
@@ -646,7 +646,7 @@ export default function AddCarModal({ onClose, onSuccess, preselectedUser = null
               type="submit"
               form="add-car-form"
               disabled={submitting}
-              className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {submitting && <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />}
               {submitting ? 'Adding...' : 'Add Car'}

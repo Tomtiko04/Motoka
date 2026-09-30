@@ -71,7 +71,7 @@ export default function PlateOrderSummary() {
         </p>
         <button
           onClick={() => navigate("/licenses/plate-number")}
-          className="rounded-full bg-[#2284DB] px-6 py-2 text-sm font-semibold text-white"
+          className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white"
         >
           Go Back
         </button>
@@ -149,7 +149,7 @@ export default function PlateOrderSummary() {
       <div className="relative mb-8 flex h-12 items-center">
         <button
           onClick={() => navigate(-1)}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
         >
           <IoIosArrowBack className="h-5 w-5" />
         </button>
@@ -210,7 +210,7 @@ export default function PlateOrderSummary() {
             <span className="text-sm font-medium text-[#05243F]/70">
               {delivery.wantsDelivery ? "Total (incl. delivery)" : "Total Amount"}
             </span>
-            <span className="text-2xl font-bold text-[#2284DB]">
+            <span className="text-2xl font-bold text-[#2389E3]">
               {formatNaira(totalNaira)}
             </span>
           </div>
@@ -239,7 +239,7 @@ export default function PlateOrderSummary() {
       <button
         onClick={handleProceedToPayment}
         disabled={!canProceed}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2389E3] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#2389E3] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
         Proceed to Payment
         <Icon icon="mdi:arrow-right" className="text-lg" />

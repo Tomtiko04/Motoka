@@ -943,7 +943,7 @@ export default function PaymentOptions() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-[#2389E3]"></div>
           <p className="mt-4 text-gray-600">Loading payment options...</p>
         </div>
       </div>
@@ -982,7 +982,7 @@ export default function PaymentOptions() {
         <div className="relative mb-6 flex h-12 items-center sm:h-12">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF] sm:h-8 sm:w-8"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10 sm:h-8 sm:w-8"
           >
             <IoIosArrowBack className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
@@ -1072,7 +1072,7 @@ export default function PaymentOptions() {
                   <button
                     onClick={handlePayFromWallet}
                     disabled={walletPaying}
-                    className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6fc2] active:scale-[0.99] disabled:opacity-60 md:mt-10"
+                    className="mt-5 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-[0.99] disabled:opacity-60 md:mt-10"
                   >
                     {walletPaying ? "Processing…" : `${walletDetails.renewalCost} Pay Now`}
                   </button>
@@ -1083,7 +1083,7 @@ export default function PaymentOptions() {
                     </p>
                     <button
                       onClick={() => navigate("/wallet")}
-                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6fc2]"
+                      className="w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#2389E3]"
                     >
                       Top up wallet
                     </button>
@@ -1106,7 +1106,7 @@ export default function PaymentOptions() {
                   <p className="text-xs text-amber-700 mb-3">{monipayInitError}</p>
                   <button
                     onClick={handleSwitchToPaystack}
-                    className="w-full rounded-full bg-[#2284DB] py-2 text-sm font-semibold text-white hover:bg-[#1a6fc2] transition-colors"
+                    className="w-full rounded-full bg-[#2389E3] py-2 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors"
                   >
                     Pay via Paystack instead
                   </button>
@@ -1135,7 +1135,7 @@ export default function PaymentOptions() {
                     <button
                       onClick={handleConfirmPaymentMethod}
                       disabled={isInitializing}
-                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6bb8] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#2389E3] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isInitializing ? (
                         <span className="flex items-center justify-center">
@@ -1177,7 +1177,7 @@ export default function PaymentOptions() {
                   <button
                     onClick={handleMonipayPayment}
                     disabled={(!paymentSession?.monipay?.authorization_url && !paymentSession?.monipay?.access_code) || isProcessing}
-                    className="flex w-full items-center justify-center rounded-full bg-[#2284DB] px-4 py-3 text-base font-semibold text-white hover:bg-[#1a6bb8] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center justify-center rounded-full bg-[#2389E3] px-4 py-3 text-base font-semibold text-white hover:bg-[#2389E3] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <>
@@ -1206,7 +1206,7 @@ export default function PaymentOptions() {
                   <span className="text-sm font-normal text-[#05243F]/40">
                     Amount
                   </span>
-                  <p className="mt-1 text-4xl font-semibold text-[#2284DB]">
+                  <p className="mt-1 text-4xl font-semibold text-[#2389E3]">
                     N35,000
                   </p>
                   <p className="mt-2 text-[15px] text-[#05243F]/40">
@@ -1338,7 +1338,7 @@ export default function PaymentOptions() {
                   </div>
                 </div>
               </div>
-              <button className="mt-5 w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
+              <button className="mt-5 w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#FDF6E8] hover:text-[#05243F]">
                 Make Payment
               </button>
             </div>
@@ -1371,7 +1371,7 @@ export default function PaymentOptions() {
                     <button
                       onClick={handleConfirmPaymentMethod}
                       disabled={isInitializing}
-                      className="w-full rounded-full bg-[#2284DB] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#1a6bb8] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full rounded-full bg-[#2389E3] py-3 text-center text-base font-semibold text-white transition-all hover:bg-[#2389E3] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isInitializing ? (
                         <span className="flex items-center justify-center">
@@ -1425,7 +1425,7 @@ export default function PaymentOptions() {
                       {paymentSession?.items?.length > 1 && (
                         <div className="flex justify-between">
                           <span>Documents:</span>
-                          <span className="font-semibold text-blue-600">
+                          <span className="font-semibold text-[#2389E3]">
                             {paymentSession.items.length} items
                           </span>
                         </div>
@@ -1436,7 +1436,7 @@ export default function PaymentOptions() {
                   <button
                     onClick={handlePaystackPayment}
                     disabled={!paymentSession?.paystack?.authorization_url || isProcessing}
-                    className="flex w-full items-center justify-center rounded-full bg-[#2284DB] px-4 py-3 text-base font-semibold text-white hover:bg-[#1a6bb8] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center justify-center rounded-full bg-[#2389E3] px-4 py-3 text-base font-semibold text-white hover:bg-[#2389E3] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <>

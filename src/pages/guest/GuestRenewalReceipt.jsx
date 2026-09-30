@@ -183,7 +183,7 @@ export default function GuestRenewalReceipt() {
           <button
             onClick={handleResend}
             disabled={resending || resent}
-            className="w-full rounded-full border border-[#2389E3] bg-white py-3 text-sm font-semibold text-[#2389E3] transition-colors hover:bg-[#E5F3FF] disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full rounded-full border border-[#2389E3] bg-white py-3 text-sm font-semibold text-[#2389E3] transition-colors hover:bg-[#2389E3]/10 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {resending ? <RefreshCw className="h-4 w-4 animate-spin" /> : null}
             {resent ? "Receipt sent to your email ✓" : "Resend Receipt to Email"}

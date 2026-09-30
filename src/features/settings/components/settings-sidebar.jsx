@@ -160,8 +160,8 @@ export default function SettingsSidebar({
                     key={item.page}
                     className={`flex cursor-pointer items-center justify-between px-4 py-2 ${
                       isActive(item.page)
-                        ? "text-blue-600"
-                        : "text-gray-600 hover:text-sky-600"
+                        ? "text-[#2389E3]"
+                        : "text-gray-600 hover:text-[#2389E3]"
                     }`}
                     onClick={() =>
                       item.tab
@@ -172,8 +172,8 @@ export default function SettingsSidebar({
                     <span
                       className={`text-sm font-semibold ${
                         isActive(item.page)
-                          ? "text-blue-600"
-                          : "text-gray-600 hover:text-sky-600"
+                          ? "text-[#2389E3]"
+                          : "text-gray-600 hover:text-[#2389E3]"
                       }`}
                     >
                       {item.label}

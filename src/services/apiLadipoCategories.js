@@ -35,7 +35,7 @@ const CATEGORY_VISUALS = {
     eyebrow: "Power & Electrics",
     blurb: "Batteries, bulbs, alternators, and starters for reliable power.",
     accentFrom: "#0A2A50",
-    accentTo: "#1565C0",
+    accentTo: "#2389E3",
   },
   "car-accessories": {
     image: "https://autofactorng.com/images/category/vhZYJ0wKwMtDAgBqFDvhEXaWMif1WtqnF5gsgC1j.jpg",
@@ -58,7 +58,7 @@ const CATEGORY_VISUALS = {
     eyebrow: "Ride Control",
     blurb: "Control arms, linkages, struts, ball joints, and bushings.",
     accentFrom: "#10263E",
-    accentTo: "#3F86C6",
+    accentTo: "#2389E3",
   },
   "spare-parts-engine-parts": {
     image: "https://autofactorng.com/images/category/vhZYJ0wKwMtDAgBqFDvhEXaWMif1WtqnF5gsgC1j.jpg",
@@ -109,7 +109,7 @@ const CATEGORY_VISUALS = {
     eyebrow: "Clean Fuel",
     blurb: "Inline and in-tank fuel filters to protect injectors.",
     accentFrom: "#1A1A3A",
-    accentTo: "#3A5EC2",
+    accentTo: "#2389E3",
   },
   "servicing-parts-timing-belts": {
     image: "https://autofactorng.com/images/category/vhZYJ0wKwMtDAgBqFDvhEXaWMif1WtqnF5gsgC1j.jpg",
@@ -194,7 +194,7 @@ const CATEGORY_VISUALS = {
     eyebrow: "Looking Good",
     blurb: "Body kits, car covers, wipers, and exterior trim.",
     accentFrom: "#0A1A2A",
-    accentTo: "#0D47A1",
+    accentTo: "#2389E3",
   },
 };
 

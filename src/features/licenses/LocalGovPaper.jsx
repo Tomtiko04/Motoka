@@ -81,13 +81,13 @@ export default function LocalGovPaper() {
                 className="hidden"
               />
               <span>
-                <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
               </span>
               <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                 Upload Vehicle Licenses
               </p>
               {formData.vehiclelicense && (
-                <p className="mt-2 text-center text-xs text-[#45A1F2]">
+                <p className="mt-2 text-center text-xs text-[#2389E3]">
                   {formData.vehiclelicense.name}
                 </p>
               )}

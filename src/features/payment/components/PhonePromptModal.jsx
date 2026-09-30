@@ -75,7 +75,7 @@ export default function PhonePromptModal({
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-base font-semibold text-white transition-all duration-300 hover:bg-[#1B6FB8] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-base font-semibold text-white transition-all duration-300 hover:bg-[#2389E3] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {saving ? "Saving…" : "Save & continue"}
           </button>

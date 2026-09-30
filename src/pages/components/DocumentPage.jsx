@@ -62,7 +62,7 @@ function DocumentPage({
                   onClick={() => onCarChange(idx)}
                   className={`flex flex-shrink-0 cursor-pointer items-center justify-between rounded-[10px] w-[calc(50%-5px)] min-w-[140px] gap-2 px-3 py-2.5 transition-all shadow-sm ${
                     car?.id === c.id 
-                      ? "bg-[#45A1F2] text-white scale-[1.02]" 
+                      ? "bg-[#2389E3] text-white scale-[1.02]" 
                       : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#e8ebf5]"
                   }`}
                 >

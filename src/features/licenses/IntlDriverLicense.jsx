@@ -157,13 +157,13 @@ export default function InternationalDriversLicense() {
             >
               <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-12">
                 <span>
-                  <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                  <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                 </span>
                 <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                   Upload Existing Nigeria <br /> Driver's license
                 </p>
                 {formData.driversLicense && (
-                  <p className="mt-2 text-center text-xs text-[#45A1F2]">
+                  <p className="mt-2 text-center text-xs text-[#2389E3]">
                     {formData.driversLicense.name}
                   </p>
                 )}
@@ -175,7 +175,7 @@ export default function InternationalDriversLicense() {
               Tap
               <span
                 onClick={() => setNoLicense(true)}
-                className="ml-1 cursor-pointer text-[#2284DB] underline"
+                className="ml-1 cursor-pointer text-[#2389E3] underline"
               >
                 here
               </span>{" "}
@@ -207,13 +207,13 @@ export default function InternationalDriversLicense() {
             >
               <div className="flex flex-col items-center justify-center rounded-[20px] bg-[#F4F5FC] p-8">
                 <span>
-                  <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                  <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                 </span>
                 <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                   Upload Passport Photograph
                 </p>
                 {formData.passportPhoto && (
-                  <p className="mt-2 text-center text-xs text-[#45A1F2]">
+                  <p className="mt-2 text-center text-xs text-[#2389E3]">
                     {formData.passportPhoto.name}
                   </p>
                 )}

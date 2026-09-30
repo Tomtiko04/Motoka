@@ -372,7 +372,7 @@ export default function RenewLicense() {
         <div className="relative mt-3 mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+            className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
           >
             <FaArrowLeft className="h-5 w-5" />
           </button>
@@ -435,7 +435,7 @@ export default function RenewLicense() {
                 {loadingPayments ? (
                   <div className="mx-auto my-10 flex items-center justify-center">
                     <div>
-                      <ClipLoader color="#2284DB" />
+                      <ClipLoader color="#2389E3" />
                     </div>
                   </div>
                 ) : (
@@ -455,8 +455,8 @@ export default function RenewLicense() {
                           isAlreadyPaid
                             ? "cursor-not-allowed bg-gray-200 text-gray-500"
                             : isSelected
-                              ? "bg-[#2284DB] text-white"
-                              : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#E5F3FF]"
+                              ? "bg-[#2389E3] text-white"
+                              : "bg-[#F4F5FC] text-[#05243F] hover:bg-[#2389E3]/10"
                         } `}
                       >
                         {doc}
@@ -594,7 +594,7 @@ export default function RenewLicense() {
                   !isFormValid() ||
                   duplicateCheckLoading
                 }
-                className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
+                className="mt-2 w-full rounded-full bg-[#2389E3] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#2389E3] disabled:opacity-50"
               >
                 {duplicateCheckLoading ? (
                   "Checking for existing payments..."

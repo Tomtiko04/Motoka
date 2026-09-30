@@ -32,10 +32,10 @@ export default function ContactSupport({ onNavigate }) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 bg-white border border-sky-500 text-sky-500 py-3 px-4 rounded-md transition-colors">
+            <button className="flex items-center justify-center gap-2 bg-white border border-[#2389E3] text-[#2389E3] py-3 px-4 rounded-md transition-colors">
               <Mail className="h-5 w-5" />
             </button>
-            <button className="flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-md transition-colors">
+            <button className="flex items-center justify-center gap-2 bg-[#2389E3] hover:bg-[#2389E3] text-white py-3 px-4 rounded-md transition-colors">
               <Phone className="h-5 w-5" />
             </button>
           </div>

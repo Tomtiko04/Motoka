@@ -9,7 +9,7 @@ export default function TintPermit() {
       subTitle="All licenses are issued by government, we are only an agent that helps you with the process."
     >
       <div className="w-full max-w-[380px] mx-auto ">
-        <h5 className="text-center text-base font-semibold text-[#2284DB] mb-3">
+        <h5 className="text-center text-base font-semibold text-[#2389E3] mb-3">
           Contact US
         </h5>
         <form className="flex flex-col items-center justify-center w-full">

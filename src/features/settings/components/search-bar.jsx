@@ -10,7 +10,7 @@ export default function SearchBar({ value = "", onChange }) {
         <label htmlFor="settings-search" className="sr-only">
           Search settings
         </label>
-        <Search className="mr-1 shrink-0 text-[#45A1F2]" size={20} />
+        <Search className="mr-1 shrink-0 text-[#2389E3]" size={20} />
         <input
           type="search"
           id="settings-search"
@@ -29,7 +29,7 @@ export default function SearchBar({ value = "", onChange }) {
             Clear
           </button>
         ) : (
-          <span className="shrink-0 rounded-full bg-[#45A1F2] px-4 py-2 text-sm text-white">
+          <span className="shrink-0 rounded-full bg-[#2389E3] px-4 py-2 text-sm text-white">
             Search
           </span>
         )}

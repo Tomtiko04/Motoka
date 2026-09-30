@@ -48,7 +48,7 @@ export default function Wallet() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => setFundOpen(true)}
-              className="flex items-center gap-2 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] active:scale-[0.98]"
+              className="flex items-center gap-2 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-[0.98]"
             >
               <Plus className="h-4 w-4" /> Add money
             </button>

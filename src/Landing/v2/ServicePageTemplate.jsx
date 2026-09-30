@@ -34,12 +34,12 @@ export default function ServicePageTemplate({
   return (
     <>
       <Seo title={seoTitle} description={seoDescription} path={seoPath} jsonLd={jsonLd} />
-      <section className="bg-[#daebfa]" style={{ paddingTop: 96, paddingBottom: 96 }}>
+      <section className="bg-[#2389E3]/15" style={{ paddingTop: 96, paddingBottom: 96 }}>
         <div style={{ paddingLeft: 'clamp(24px, 7.9vw, 114px)', paddingRight: 'clamp(24px, 7.9vw, 114px)', maxWidth: 820 }}>
-          <p style={{ fontWeight: 600, fontSize: 12, letterSpacing: '0.1em', color: '#0e6fc6', textTransform: 'uppercase', marginBottom: 12 }}>
+          <p style={{ fontWeight: 600, fontSize: 12, letterSpacing: '0.1em', color: '#2389E3', textTransform: 'uppercase', marginBottom: 12 }}>
             {eyebrow}
           </p>
-          <h1 style={{ fontWeight: 500, fontSize: 'clamp(32px, 4.5vw, 50.9px)', color: '#0e6fc6', lineHeight: 1.15 }}>{h1}</h1>
+          <h1 style={{ fontWeight: 500, fontSize: 'clamp(32px, 4.5vw, 50.9px)', color: '#2389E3', lineHeight: 1.15 }}>{h1}</h1>
           <p style={{ marginTop: 20, fontSize: 18, lineHeight: 1.6, color: '#05243f' }}>{subcopy}</p>
           <Link
             to={ctaTo}

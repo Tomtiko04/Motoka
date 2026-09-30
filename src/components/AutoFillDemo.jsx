@@ -55,7 +55,7 @@ const AutoFillDemo = () => {
             <h1 className="text-2xl font-bold text-gray-900">Auto-Fill Demo</h1>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[#2389E3] text-white rounded-lg hover:bg-[#2389E3] transition-colors"
             >
               <FiUpload className="h-4 w-4" />
               Auto Fill
@@ -72,7 +72,7 @@ const AutoFillDemo = () => {
                   type="text"
                   value={formData[key] || ''}
                   onChange={(e) => handleFieldChange(key, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
                   placeholder={`Enter ${label.toLowerCase()}`}
                 />
               </div>

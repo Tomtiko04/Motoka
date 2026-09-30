@@ -114,7 +114,7 @@ function Categories({ onBrowseAll, isBrowseAllActive = false }) {
           >
             <div className={`h-[60px] w-[84px] rounded-[90px] border flex items-center justify-center text-base font-bold transition-all ${
               isBrowseAllActive
-                ? "bg-[#1A7ACF] text-white border-[#2284DB]"
+                ? "bg-[#2389E3] text-white border-[#2389E3]"
                 : "bg-[#F4F5FC] text-[#05243F] border-[#D3D9DE4D] group-hover:bg-[#E8EDFA]"
             }`}>
               All

@@ -98,7 +98,7 @@ function WalletDrawer({ userId, onClose, onChanged }) {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" /></div>
+          <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" /></div>
         ) : (
           <div className="space-y-6 px-5 py-5">
             {/* Balance */}
@@ -131,12 +131,12 @@ function WalletDrawer({ userId, onClose, onChanged }) {
               <div className="relative mb-3">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#05243F]">₦</span>
                 <input type="number" min="1" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-7 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2284DB]" />
+                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-7 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]" />
               </div>
               <textarea rows={2} placeholder="Reason (required — e.g. refund for duplicate charge #257)" value={reason} onChange={(e) => setReason(e.target.value)}
-                className="mb-3 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2284DB]" />
+                className="mb-3 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]" />
               <button onClick={applyAdjust} disabled={busy}
-                className="w-full rounded-full bg-[#2284DB] py-2.5 text-sm font-semibold text-white hover:bg-[#1a6bb8] disabled:opacity-50">
+                className="w-full rounded-full bg-[#2389E3] py-2.5 text-sm font-semibold text-white hover:bg-[#2389E3] disabled:opacity-50">
                 {busy ? 'Applying…' : `Apply ${direction}`}
               </button>
             </div>
@@ -220,7 +220,7 @@ export default function AdminWallets() {
       {/* Liability stat */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EAF4FD] text-[#2284DB]"><BanknotesIcon className="h-6 w-6" /></span>
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EAF4FD] text-[#2389E3]"><BanknotesIcon className="h-6 w-6" /></span>
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Total liability (owed to users)</p>
             <p className="text-2xl font-bold text-[#05243F]">{stats ? naira(stats.total_liability_kobo) : '—'}</p>
@@ -267,16 +267,16 @@ export default function AdminWallets() {
         <div className="relative flex-1">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input type="text" placeholder="Search by name or email…" value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2284DB]" />
+            className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]" />
         </div>
-        <button type="submit" className="rounded-lg bg-[#2284DB] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1a6bb8]">Search</button>
+        <button type="submit" className="rounded-lg bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]">Search</button>
         {search && <button type="button" onClick={() => { setSearch(''); setSearchInput(''); }} className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"><XMarkIcon className="h-4 w-4 text-gray-500" /></button>}
       </form>
 
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         {loading ? (
-          <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" /></div>
+          <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" /></div>
         ) : wallets.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-400">No wallets found</div>
         ) : (
@@ -299,7 +299,7 @@ export default function AdminWallets() {
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${w.status === 'frozen' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-800'}`}>{w.status}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => setSelectedUserId(w.user_id)} className="flex items-center gap-1 text-xs font-medium text-[#2284DB] hover:underline">
+                      <button onClick={() => setSelectedUserId(w.user_id)} className="flex items-center gap-1 text-xs font-medium text-[#2389E3] hover:underline">
                         <EyeIcon className="h-3.5 w-3.5" /> Manage
                       </button>
                     </td>

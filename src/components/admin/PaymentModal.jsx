@@ -116,7 +116,7 @@ const PaymentModal = ({ isOpen, onClose, order, agent, onPaymentInitiated }) => 
               </div>
 
               {/* Agent Details */}
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-[#2389E3]/5 rounded-lg p-4">
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Agent Details</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -218,7 +218,7 @@ const PaymentModal = ({ isOpen, onClose, order, agent, onPaymentInitiated }) => 
               </div>
               
               {agentDetails && (
-                <div className="bg-blue-50 rounded-lg p-4 text-left">
+                <div className="bg-[#2389E3]/5 rounded-lg p-4 text-left">
                   <h4 className="font-medium text-gray-900 mb-2">Agent Payment Details:</h4>
                   <div className="space-y-1 text-sm">
                     <div><span className="font-medium">Name:</span> {agentDetails.name}</div>
@@ -293,7 +293,7 @@ const PaymentModal = ({ isOpen, onClose, order, agent, onPaymentInitiated }) => 
           ) : (
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#2389E3] border border-transparent rounded-md hover:bg-[#2389E3]"
             >
               Close
             </button>

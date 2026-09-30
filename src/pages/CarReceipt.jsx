@@ -31,10 +31,10 @@ export default function CarReceipt() {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 shadow-xl max-w-md w-full text-center">
-          <div className="text-2xl font-bold text-blue-600 mb-4">Processing Payment</div>
-          <div className="text-4xl font-bold text-blue-600 mb-2">Loading...</div>
+          <div className="text-2xl font-bold text-[#2389E3] mb-4">Processing Payment</div>
+          <div className="text-4xl font-bold text-[#2389E3] mb-2">Loading...</div>
           <div className="text-sm text-gray-500 mb-6">Kindly hold on for a second</div>
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#2389E3] border-t-transparent mx-auto"></div>
         </div>
       </div>
     );
@@ -48,7 +48,7 @@ export default function CarReceipt() {
           <div className="text-sm text-gray-600 mb-6">{error.message}</div>
           <button
             onClick={() => navigate(-1)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-[#2389E3] text-white px-6 py-2 rounded-lg hover:bg-[#2389E3] transition-colors"
           >
             Go Back
           </button>
@@ -66,7 +66,7 @@ export default function CarReceipt() {
           <div className="text-xl font-bold text-gray-600 mb-4">No receipt found</div>
           <button
             onClick={() => navigate(-1)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-[#2389E3] text-white px-6 py-2 rounded-lg hover:bg-[#2389E3] transition-colors"
           >
             Go Back
           </button>
@@ -111,8 +111,8 @@ export default function CarReceipt() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
         {/* Decorative curved band at top */}
-        <div className="relative h-2 bg-gradient-to-r from-blue-600 to-green-500">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-green-500 rounded-t-2xl"></div>
+        <div className="relative h-2 bg-gradient-to-r from-[#2389E3] to-green-500">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2389E3] via-[#2389E3] to-green-500 rounded-t-2xl"></div>
         </div>
 
         {/* Success indicator */}
@@ -123,7 +123,7 @@ export default function CarReceipt() {
             </svg>
           </div>
           <h1 className="text-xl font-bold text-gray-800 mb-2">Payment Receipt</h1>
-          <div className="text-3xl font-bold text-blue-600 mb-2">{formatCurrency(payment.amount)}</div>
+          <div className="text-3xl font-bold text-[#2389E3] mb-2">{formatCurrency(payment.amount)}</div>
           <div className="text-base font-semibold text-gray-800 mb-1">Payment Successful</div>
           <div className="text-xs text-gray-500">Thanks for trusting us.</div>
         </div>
@@ -239,21 +239,21 @@ export default function CarReceipt() {
         <div className="px-8 pb-8 space-y-2">
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="w-full bg-[#2389E3] text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-[#2389E3] transition-colors"
           >
             Go to Dashboard
           </button>
           <button
             onClick={() => window.print()}
-            className="w-full border border-blue-600 text-blue-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-600 hover:text-white transition-colors"
+            className="w-full border border-[#2389E3] text-[#2389E3] py-2 px-4 rounded-lg text-sm font-medium hover:bg-[#2389E3] hover:text-white transition-colors"
           >
             Print Receipt
           </button>
         </div>
 
         {/* Decorative curved band at bottom */}
-        <div className="relative h-2 bg-gradient-to-r from-blue-600 to-green-500">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-green-500 to-green-400 rounded-b-2xl"></div>
+        <div className="relative h-2 bg-gradient-to-r from-[#2389E3] to-green-500">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2389E3] via-green-500 to-green-400 rounded-b-2xl"></div>
         </div>
       </div>
     </div>

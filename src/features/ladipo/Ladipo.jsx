@@ -563,7 +563,7 @@ export default function Ladipo() {
             <button
               type="button"
               onClick={openCatalog}
-              className="inline-flex items-center justify-center rounded-full bg-[#2389E3] px-6 py-3 text-[14px] font-bold text-white hover:bg-[#1a7acf] transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center rounded-full bg-[#2389E3] px-6 py-3 text-[14px] font-bold text-white hover:bg-[#2389E3] transition-colors cursor-pointer"
             >
               Shop all parts
             </button>
@@ -579,7 +579,7 @@ export default function Ladipo() {
                 <button
                   type="button"
                   onClick={activeCollection ? exitCollection : () => setShowCatalog(false)}
-                  className="text-[12px] text-[#2389E3] hover:text-[#1a7acf] font-semibold cursor-pointer whitespace-nowrap"
+                  className="text-[12px] text-[#2389E3] hover:text-[#2389E3] font-semibold cursor-pointer whitespace-nowrap"
                 >
                   Back
                 </button>
@@ -802,7 +802,7 @@ export default function Ladipo() {
                 <div className="flex flex-col items-center gap-2">
                   <button
                     onClick={clearAllFilters}
-                    className="text-[14px] text-white bg-[#2389E3] hover:bg-[#1a7acf] font-semibold px-4 py-2 rounded-[10px] cursor-pointer transition-colors"
+                    className="text-[14px] text-white bg-[#2389E3] hover:bg-[#2389E3] font-semibold px-4 py-2 rounded-[10px] cursor-pointer transition-colors"
                   >
                     Clear all filters
                   </button>

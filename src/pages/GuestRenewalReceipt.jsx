@@ -155,7 +155,7 @@ export default function GuestRenewalReceipt() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F4F5FC] p-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center">
-          <div className="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-[#E5F3FF]">
+          <div className="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-[#2389E3]/10">
             <Icon icon="solar:letter-bold" fontSize={36} className="text-[#2389E3]" />
           </div>
           <h2 className="text-xl font-semibold text-[#05243F] mb-2">Find Your Receipt</h2>
@@ -189,7 +189,7 @@ export default function GuestRenewalReceipt() {
               <button
                 type="submit"
                 disabled={findLoading}
-                className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors disabled:opacity-50"
+                className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors disabled:opacity-50"
               >
                 {findLoading ? "Sending…" : "Send My Receipt"}
               </button>
@@ -220,7 +220,7 @@ export default function GuestRenewalReceipt() {
           <p className="text-sm text-[#697C8C] mb-6">
             This receipt link is invalid or the payment has not been confirmed yet.
           </p>
-          <button onClick={() => navigate("/")} className="rounded-full bg-[#2389E3] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors">
+          <button onClick={() => navigate("/")} className="rounded-full bg-[#2389E3] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors">
             Back to Home
           </button>
         </div>
@@ -304,12 +304,12 @@ export default function GuestRenewalReceipt() {
             <div className="px-6 pb-6 flex flex-col gap-3">
               {receipt.hasLinkedAccount ? (
                 <>
-                  <div className="rounded-xl bg-[#E5F3FF] border border-[#2389E3]/20 px-4 py-3 text-sm text-[#104675]">
+                  <div className="rounded-xl bg-[#2389E3]/10 border border-[#2389E3]/20 px-4 py-3 text-sm text-[#104675]">
                     This renewal has been linked to your Motoka account. Log in to view it on your dashboard.
                   </div>
                   <button
                     onClick={() => navigate("/auth/login")}
-                    className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors"
+                    className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors"
                   >
                     Log In to Your Account
                   </button>
@@ -317,7 +317,7 @@ export default function GuestRenewalReceipt() {
               ) : (
                 <button
                   onClick={() => setStep("signup")}
-                  className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors"
+                  className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors"
                 >
                   Create Account to Track Documents
                 </button>
@@ -391,7 +391,7 @@ export default function GuestRenewalReceipt() {
               <button
                 type="submit"
                 disabled={signupLoading}
-                className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#1B6CB3] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white hover:bg-[#2389E3] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {signupLoading ? (
                   <>

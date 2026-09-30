@@ -75,7 +75,7 @@ export default function BlogPage() {
           {prevBlog ? (
             <Link to={`/blog/${computeSlug(prevBlog.title)}`} className="group">
               <p className="text-sm text-gray-400">← Previous</p>
-              <p className="font-medium group-hover:text-blue-600 text-sm">
+              <p className="font-medium group-hover:text-[#2389E3] text-sm">
                 {prevBlog.title}
               </p>
             </Link>
@@ -85,7 +85,7 @@ export default function BlogPage() {
           {nextBlog ? (
             <Link to={`/blog/${computeSlug(nextBlog.title)}`} className="text-right group">
               <p className="text-sm text-gray-400">Next →</p>
-              <p className="font-medium group-hover:text-blue-600 text-sm">
+              <p className="font-medium group-hover:text-[#2389E3] text-sm">
                 {nextBlog.title}
               </p>
             </Link>

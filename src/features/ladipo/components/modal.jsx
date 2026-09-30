@@ -264,7 +264,7 @@ function ProductModal() {
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 px-4 py-3 bg-[#2389E3] text-white rounded-full font-bold text-[13px] hover:bg-[#1a7acf] transition-colors cursor-pointer"
+                  className="flex-1 px-4 py-3 bg-[#2389E3] text-white rounded-full font-bold text-[13px] hover:bg-[#2389E3] transition-colors cursor-pointer"
                 >
                   Buy Now
                 </button>

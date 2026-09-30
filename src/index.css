@@ -5,12 +5,12 @@
    scale already referenced below, so the two do not collide. */
 @theme {
   --color-brand-blue: #2389e3;
-  --color-brand-blue-dark: #0e6fc6;
+  --color-brand-blue-dark: #2389E3;
   --color-brand-navy: #05243f;
   --color-brand-gold: #ebb850;
   --color-brand-green: #21b993;
   --color-brand-mint: #5df8d0;
-  --color-brand-bg: #daebfa;
+  --color-brand-bg: #[2389E3]/15;
 }
 
 .services-scroll::-webkit-scrollbar {
@@ -106,7 +106,7 @@ body {
   border-radius: 9999px;
 }
 .ladipo-receipt-scroll::-webkit-scrollbar-thumb:hover {
-  background: #1a7acf;
+  background: #2389E3;
 }
 
 img {

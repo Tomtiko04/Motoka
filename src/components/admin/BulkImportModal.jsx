@@ -166,17 +166,17 @@ export default function BulkImportModal({ onClose, onSuccess }) {
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
 
           {/* Template download */}
-          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-200">
+          <div className="flex items-center justify-between p-3 bg-[#2389E3]/5 rounded-xl border border-[#2389E3]/20">
             <div className="flex items-center gap-2">
-              <DocumentTextIcon className="h-5 w-5 text-blue-600" />
+              <DocumentTextIcon className="h-5 w-5 text-[#2389E3]" />
               <div>
-                <p className="text-sm font-medium text-blue-900">Download the CSV template</p>
-                <p className="text-xs text-blue-600">Fill it in and upload below — includes sample rows</p>
+                <p className="text-sm font-medium text-[#2389E3]">Download the CSV template</p>
+                <p className="text-xs text-[#2389E3]">Fill it in and upload below — includes sample rows</p>
               </div>
             </div>
             <button
               onClick={downloadTemplate}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2389E3] text-white text-xs font-medium rounded-lg hover:bg-[#2389E3] transition-colors"
             >
               <DocumentArrowDownIcon className="h-3.5 w-3.5" />
               Template
@@ -212,7 +212,7 @@ export default function BulkImportModal({ onClose, onSuccess }) {
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                dragOver ? 'border-blue-400 bg-blue-50' : file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                dragOver ? 'border-[#2389E3] bg-[#2389E3]/5' : file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-[#2389E3] hover:bg-[#2389E3]/5'
               }`}
             >
               <input
@@ -311,7 +311,7 @@ export default function BulkImportModal({ onClose, onSuccess }) {
 
               <button
                 onClick={reset}
-                className="w-full py-2 text-sm text-blue-600 font-medium border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+                className="w-full py-2 text-sm text-[#2389E3] font-medium border border-[#2389E3] rounded-lg hover:bg-[#2389E3]/5 transition-colors"
               >
                 Import another file
               </button>
@@ -333,7 +333,7 @@ export default function BulkImportModal({ onClose, onSuccess }) {
             <button
               onClick={handleSubmit}
               disabled={!file || uploading}
-              className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {uploading && <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />}
               {uploading ? 'Importing...' : 'Import Cars'}
@@ -342,7 +342,7 @@ export default function BulkImportModal({ onClose, onSuccess }) {
         )}
         {result && (
           <div className="flex justify-end px-6 py-4 border-t border-gray-100 bg-gray-50">
-            <button onClick={onClose} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+            <button onClick={onClose} className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors">
               Done
             </button>
           </div>

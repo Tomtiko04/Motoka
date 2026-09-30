@@ -30,7 +30,7 @@ function Field({ label, id, required, error, hint, children }) {
 }
 
 function inputCls(hasError) {
-  return `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
+  return `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none transition-colors ${
     hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'
   }`;
 }
@@ -55,7 +55,7 @@ function MakeSelect({ value, onChange, error }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-blue-500 outline-none ${
+        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-[#2389E3] outline-none ${
           error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
         }`}
       >
@@ -71,7 +71,7 @@ function MakeSelect({ value, onChange, error }) {
               placeholder="Search make..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2389E3] outline-none"
             />
           </div>
           <ul className="max-h-48 overflow-y-auto">
@@ -82,8 +82,8 @@ function MakeSelect({ value, onChange, error }) {
                   <button
                     type="button"
                     onClick={() => { onChange(make); setQuery(''); setOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                      value === make ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#2389E3]/5 hover:text-[#2389E3] transition-colors ${
+                      value === make ? 'bg-[#2389E3]/5 text-[#2389E3] font-medium' : 'text-gray-700'
                     }`}
                   >
                     {make}
@@ -128,7 +128,7 @@ function ModelSelect({ make, value, onChange, error }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-blue-500 outline-none ${
+        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-[#2389E3] outline-none ${
           error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
         }`}
       >
@@ -144,7 +144,7 @@ function ModelSelect({ make, value, onChange, error }) {
               placeholder="Search model..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2389E3] outline-none"
             />
           </div>
           <ul className="max-h-48 overflow-y-auto">
@@ -155,8 +155,8 @@ function ModelSelect({ make, value, onChange, error }) {
                   <button
                     type="button"
                     onClick={() => { onChange(model); setQuery(''); setOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                      value === model ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#2389E3]/5 hover:text-[#2389E3] transition-colors ${
+                      value === model ? 'bg-[#2389E3]/5 text-[#2389E3] font-medium' : 'text-gray-700'
                     }`}
                   >
                     {model}
@@ -169,7 +169,7 @@ function ModelSelect({ make, value, onChange, error }) {
             <button
               type="button"
               onClick={() => { onChange(query); setQuery(''); setOpen(false); }}
-              className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 border-t border-gray-100 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-[#2389E3] hover:bg-[#2389E3]/5 border-t border-gray-100 transition-colors"
             >
               Use "{query}"
             </button>
@@ -440,7 +440,7 @@ export default function EditCarModal({ car, onClose, onSuccess }) {
             type="submit"
             form="edit-car-form"
             disabled={submitting}
-            className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {submitting && <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />}
             {submitting ? 'Saving...' : 'Save Changes'}

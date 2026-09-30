@@ -118,7 +118,7 @@ export default function GuestRenewalCallback() {
             {receiptToken && orderId ? (
               <Link
                 to={`/guest/renewal/receipt?orderId=${orderId}&token=${receiptToken}`}
-                className="inline-block w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1B6CB3]"
+                className="inline-block w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#2389E3]"
               >
                 View Receipt
               </Link>

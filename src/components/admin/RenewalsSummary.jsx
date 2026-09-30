@@ -49,7 +49,7 @@ const RenewalsSummary = () => {
             <p className="text-xs text-gray-500">Overdue papers and who to call next</p>
           </div>
         </div>
-        <Link to="/admin/renewals?bucket=expired" className="text-xs font-medium text-blue-600 hover:underline">
+        <Link to="/admin/renewals?bucket=expired" className="text-xs font-medium text-[#2389E3] hover:underline">
           Open call list
         </Link>
       </div>

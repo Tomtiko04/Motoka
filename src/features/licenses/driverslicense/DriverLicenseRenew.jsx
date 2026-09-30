@@ -129,7 +129,7 @@ export default function DriverLicenseRenew() {
     return (
       <LicenseLayout title="Driver's License" subTitle="Loading..." mainContentTitle="">
         <div className="flex justify-center py-12">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
         </div>
       </LicenseLayout>
     );
@@ -165,7 +165,7 @@ export default function DriverLicenseRenew() {
               placeholder="12345678"
               className="flex-1 bg-transparent text-sm text-[#05243F] placeholder:text-[#697C8C]/60 focus:outline-none"
             />
-            <span className="ml-2 text-sm font-semibold text-[#2284DB]">
+            <span className="ml-2 text-sm font-semibold text-[#2389E3]">
               ₦{Number(priceRenew).toLocaleString()}
             </span>
           </div>
@@ -176,7 +176,7 @@ export default function DriverLicenseRenew() {
               onChange={(e) => setDateOfBirth(e.target.value)}
               className="flex-1 bg-transparent text-sm text-[#05243F] focus:outline-none"
             />
-            <span className="ml-2 text-sm font-semibold text-[#2284DB]">
+            <span className="ml-2 text-sm font-semibold text-[#2389E3]">
               ₦{Number(priceRenew).toLocaleString()}
             </span>
           </div>
@@ -187,7 +187,7 @@ export default function DriverLicenseRenew() {
               onChange={(e) => setDateOfExpiry(e.target.value)}
               className="flex-1 bg-transparent text-sm text-[#05243F] focus:outline-none"
             />
-            <span className="ml-2 text-sm font-semibold text-[#2284DB]">
+            <span className="ml-2 text-sm font-semibold text-[#2389E3]">
               ₦{Number(priceRenew).toLocaleString()}
             </span>
           </div>
@@ -213,7 +213,7 @@ export default function DriverLicenseRenew() {
           )}
           <div
             onClick={() => licenseInputRef.current?.click()}
-            className="flex h-[111px] cursor-pointer flex-col items-center justify-center rounded-[17px] border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2284DB] hover:bg-[#EBF4FD]"
+            className="flex h-[111px] cursor-pointer flex-col items-center justify-center rounded-[17px] border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2389E3] hover:bg-[#EBF4FD]"
           >
             <input
               ref={licenseInputRef}
@@ -222,7 +222,7 @@ export default function DriverLicenseRenew() {
               onChange={handleLicenseFileSelect}
               className="hidden"
             />
-            <Icon icon="lets-icons:add-round" fontSize={28} color="#2284DB" />
+            <Icon icon="lets-icons:add-round" fontSize={28} color="#2389E3" />
             <p className="mt-1 text-sm font-semibold text-[#05243F]">Upload Driver's License</p>
           </div>
         </div>
@@ -252,14 +252,14 @@ export default function DriverLicenseRenew() {
                     onClick={() => setSelectedDuration(p.duration)}
                     className={`flex flex-col items-center rounded-xl border-2 px-3 py-3 text-center transition-colors ${
                       active
-                        ? "border-[#2284DB] bg-[#EBF4FD]"
-                        : "border-[#E1E6F4] bg-white hover:border-[#2284DB]/40"
+                        ? "border-[#2389E3] bg-[#EBF4FD]"
+                        : "border-[#E1E6F4] bg-white hover:border-[#2389E3]/40"
                     }`}
                   >
-                    <span className={`text-sm font-semibold ${active ? "text-[#2284DB]" : "text-[#05243F]"}`}>
+                    <span className={`text-sm font-semibold ${active ? "text-[#2389E3]" : "text-[#05243F]"}`}>
                       {label}
                     </span>
-                    <span className={`mt-1 text-xs ${active ? "text-[#2284DB]/80" : "text-[#05243F]/50"}`}>
+                    <span className={`mt-1 text-xs ${active ? "text-[#2389E3]/80" : "text-[#05243F]/50"}`}>
                       ₦{Number(p.price).toLocaleString()}
                     </span>
                   </button>
@@ -272,7 +272,7 @@ export default function DriverLicenseRenew() {
         <button
           onClick={handleConfirmAndProceed}
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2389E3] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#2389E3] disabled:opacity-60"
         >
           {isSubmitting ? "Uploading..." : "Confirm and Proceed"}
           <Icon icon="mdi:arrow-right" className="text-lg" />

@@ -18,7 +18,7 @@ export default function LicenseLayout({
         <div className="relative mt-3 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-1/4 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+            className="absolute top-1/4 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
           >
             <IoIosArrowBack className="h-5 w-5" />
           </button>

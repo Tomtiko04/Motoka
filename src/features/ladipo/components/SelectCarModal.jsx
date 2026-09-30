@@ -120,7 +120,7 @@ export default function SelectCarModal({
         <button
           onClick={() => onProceed(localCar)}
           disabled={!localCar}
-          className="w-full rounded-full bg-[#2389E3] py-4 text-[16px] font-bold text-white transition-colors hover:bg-[#1A7ACF] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          className="w-full rounded-full bg-[#2389E3] py-4 text-[16px] font-bold text-white transition-colors hover:bg-[#2389E3] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           Proceed to Ladipo
         </button>

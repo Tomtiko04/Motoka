@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { useLadipoPaymentModalStore } from "../../../store/ladipoPaymentModalStore";
 
-const BLUE = "#2185D5";
+const BLUE = "#2389E3";
 const CORAL = "#F06464";
 const NAVY = "#001B39";
 const GREY = "#9EABB7";
@@ -146,7 +146,7 @@ function ReceiptHeaderDecor() {
     <>
       <div
         className="pointer-events-none absolute -left-1 top-1/2 h-16 w-7 -translate-y-1/2 rounded-r-full opacity-90"
-        style={{ background: `linear-gradient(180deg, ${BLUE}, #4A9FE8)` }}
+        style={{ background: `linear-gradient(180deg, ${BLUE}, #2389E3)` }}
         aria-hidden
       />
       <div

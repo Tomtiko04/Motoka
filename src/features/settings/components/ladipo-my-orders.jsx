@@ -27,8 +27,8 @@ function formatKobo(kobo) {
 
 function statusStyle(statusKey) {
   if (statusKey === "awaiting_payment") return "text-amber-700 bg-amber-50";
-  if (statusKey === "confirmed") return "text-blue-700 bg-blue-50";
-  if (statusKey === "processing") return "text-indigo-700 bg-indigo-50";
+  if (statusKey === "confirmed") return "text-[#2389E3] bg-[#2389E3]/5";
+  if (statusKey === "processing") return "text-[#2389E3] bg-[#2389E3]/5";
   if (statusKey === "out_for_delivery") return "text-purple-700 bg-purple-50";
   if (statusKey === "delivered") return "text-emerald-700 bg-emerald-50";
   if (statusKey === "cancelled") return "text-red-700 bg-red-50";
@@ -270,7 +270,7 @@ export default function LadipoMyOrders({ onNavigate }) {
       <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 md:space-y-4">
         {loading ? (
           <div className="my-10 flex items-center justify-center">
-            <ClipLoader color="#2284DB" size={40} />
+            <ClipLoader color="#2389E3" size={40} />
           </div>
         ) : error ? (
           <div className="my-6 rounded-lg border border-amber-100 bg-amber-50 p-4 text-sm text-amber-900">
@@ -309,7 +309,7 @@ export default function LadipoMyOrders({ onNavigate }) {
                         {statusLabel}
                       </span>
                       {order.source === "renewal" && (
-                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs text-sky-700">
+                        <span className="rounded-full bg-[#2389E3]/5 px-2 py-0.5 text-xs text-[#2389E3]">
                           Documents
                         </span>
                       )}
@@ -340,7 +340,7 @@ export default function LadipoMyOrders({ onNavigate }) {
                     )}
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="text-sm font-semibold text-sky-600">
+                    <p className="text-sm font-semibold text-[#2389E3]">
                       {formatKobo(order.total_kobo)}
                     </p>
                   </div>
@@ -365,14 +365,14 @@ export default function LadipoMyOrders({ onNavigate }) {
                           <span
                             className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold ${
                               active
-                                ? "bg-[#2284DB] text-white"
+                                ? "bg-[#2389E3] text-white"
                                 : "bg-gray-200 text-gray-500"
-                            } ${current ? "ring-2 ring-[#2284DB]/25" : ""}`}
+                            } ${current ? "ring-2 ring-[#2389E3]/25" : ""}`}
                           >
                             {index + 1}
                           </span>
                           {index < timelineSteps.length - 1 && (
-                            <span className={`h-0.5 flex-1 ${timelineStep > index ? "bg-[#2284DB]" : "bg-gray-200"}`} />
+                            <span className={`h-0.5 flex-1 ${timelineStep > index ? "bg-[#2389E3]" : "bg-gray-200"}`} />
                           )}
                         </div>
                       );
@@ -396,7 +396,7 @@ export default function LadipoMyOrders({ onNavigate }) {
                     <button
                       type="button"
                       onClick={() => handleRetryPayment(order)}
-                      className="rounded-full bg-[#2284DB] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1A73C2]"
+                      className="rounded-full bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2389E3]"
                     >
                       {statusKey === "payment_failed" ? "Retry payment" : "Pay now"}
                     </button>
@@ -404,7 +404,7 @@ export default function LadipoMyOrders({ onNavigate }) {
                   {order.track_path && (
                     <Link
                       to={order.track_path}
-                      className="rounded-full border border-[#2284DB]/40 bg-[#F0F7FF] px-3 py-1.5 text-xs font-semibold text-[#2284DB] hover:bg-[#E6F2FF]"
+                      className="rounded-full border border-[#2389E3]/40 bg-[#F0F7FF] px-3 py-1.5 text-xs font-semibold text-[#2389E3] hover:bg-[#E6F2FF]"
                     >
                       Track package
                     </Link>

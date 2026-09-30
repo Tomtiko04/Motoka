@@ -64,7 +64,7 @@ export default function PrivacyPolicy({ onNavigate, activeTab }) {
       )}
 
       {activeTab === "security" && (
-        <div className="space-y-6 bg-white p-6 rounded-lg border-2 border-sky-200">
+        <div className="space-y-6 bg-white p-6 rounded-lg border-2 border-[#2389E3]/20">
           <div>
             <h3 className="font-medium text-sm md:text-base mb-3 mt-2">Data Storage and Retention</h3>
             <p className="text-sm text-gray-600 pl-4">

@@ -55,7 +55,7 @@ export default function LanguageRegion({ onNavigate }) {
             <button
                className={`flex-1 py-2 text-sm md:text-base ${
                 activeTab === "language"
-                  ? "bg-sky-500 text-white rounded-l-full"
+                  ? "bg-[#2389E3] text-white rounded-l-full"
                   : "bg-white text-gray-700 border border-gray-200 rounded-l-full"
               }`}
               onClick={() => setActiveTab("language")}
@@ -65,7 +65,7 @@ export default function LanguageRegion({ onNavigate }) {
             <button
               className={`flex-1 py-2 text-sm md:text-base ${
                 activeTab === "region"
-                  ? "bg-sky-500 text-white rounded-r-full"
+                  ? "bg-[#2389E3] text-white rounded-r-full"
                   : "bg-white text-gray-700 border border-gray-200 rounded-r-full"
               }`}
               onClick={() => setActiveTab("region")}
@@ -79,7 +79,7 @@ export default function LanguageRegion({ onNavigate }) {
               <div className="flex items-center">
                 <span className="font-medium text-sm md:text-base">English</span>
               </div>
-              <div className="h-5 w-5 rounded-full border border-sky-500 bg-sky-500 flex items-center justify-center text-white">
+              <div className="h-5 w-5 rounded-full border border-[#2389E3] bg-[#2389E3] flex items-center justify-center text-white">
                 <span className="text-xs">✓</span>
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function LanguageRegion({ onNavigate }) {
             <button
               className={`flex-1 py-2 text-sm md:text-base ${
                 activeTab === "language"
-                  ? "bg-sky-500 text-white rounded-l-full"
+                  ? "bg-[#2389E3] text-white rounded-l-full"
                   : "bg-white text-gray-700 border border-gray-200 rounded-l-full"
               }`}
               onClick={() => setActiveTab("language")}
@@ -140,7 +140,7 @@ export default function LanguageRegion({ onNavigate }) {
             </button>
             <button className={`flex-1 py-2 text-sm md:text-base ${
                 activeTab === "region"
-                  ? "bg-sky-500 text-white rounded-r-full"
+                  ? "bg-[#2389E3] text-white rounded-r-full"
                   : "bg-white text-gray-700 border border-gray-200 rounded-r-full"
               }`} onClick={() => setActiveTab("region")}>
               Region
@@ -153,7 +153,7 @@ export default function LanguageRegion({ onNavigate }) {
                 <span className="mr-2">🇳🇬</span>
                 <span className="font-medium text-sm md:text-base">Nigeria</span>
               </div>
-              <div className="h-5 w-5 rounded-full border border-sky-500 bg-sky-500 flex items-center justify-center text-white">
+              <div className="h-5 w-5 rounded-full border border-[#2389E3] bg-[#2389E3] flex items-center justify-center text-white">
                 <span className="text-xs">✓</span>
               </div>
             </div>

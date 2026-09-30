@@ -38,7 +38,7 @@ function WalletDemoChip() {
       </button>
       <Link
         to="/wallet"
-        className="text-sm sm:text-lg font-semibold text-[#2B8DED] transition-opacity hover:opacity-90"
+        className="text-sm sm:text-lg font-semibold text-[#2389E3] transition-opacity hover:opacity-90"
         title="Open wallet"
       >
         {amount}
@@ -88,7 +88,7 @@ export default function LadipoLayout({
               <button
                 type="button"
                 onClick={goBack}
-                className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+                className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
               >
                 <IoIosArrowBack className="h-5 w-5" />
               </button>

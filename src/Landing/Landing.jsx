@@ -32,7 +32,7 @@ function ScrollToTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-8 right-8 z-50 rounded-full bg-[#2388E1] text-white px-4 py-3 shadow-lg hover:bg-[#126cbb] transition"
+      className="fixed bottom-8 right-8 z-50 rounded-full bg-[#2389E3] text-white px-4 py-3 shadow-lg hover:bg-[#2389E3] transition"
       aria-label="Scroll to top"
     >
       ↑

@@ -137,7 +137,7 @@ export default function VehiclePaper() {
                       }`}
                   >
                     {React.cloneElement(icon, {
-                      className: "h-6 w-6 text-[#2284DB]",
+                      className: "h-6 w-6 text-[#2389E3]",
                     })}
                   </div>
                 ))}

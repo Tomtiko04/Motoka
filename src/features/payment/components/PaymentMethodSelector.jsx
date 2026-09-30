@@ -26,8 +26,8 @@ const PaymentMethodSelector = ({ methods, selectedMethod, onSelectMethod, disabl
             onClick={() => !disabled && onSelectMethod(method)}
             className={`p-4 border rounded-md cursor-pointer transition-colors ${
               selectedMethod === method
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-blue-300'
+                ? 'border-[#2389E3] bg-[#2389E3]/5'
+                : 'border-gray-300 hover:border-[#2389E3]'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="flex items-center">

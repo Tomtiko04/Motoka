@@ -58,7 +58,7 @@ export default function OrderList({
       <button
         onClick={() => onProceed?.({ total, items, orderDetails })}
         disabled={isLoading}
-        className="mt-6 w-full rounded-full bg-[#2284DB] py-4 text-center text-base font-semibold text-white transition-all hover:bg-[#1B6CB3] disabled:opacity-50"
+        className="mt-6 w-full rounded-full bg-[#2389E3] py-4 text-center text-base font-semibold text-white transition-all hover:bg-[#2389E3] disabled:opacity-50"
       >
         {isLoading ? (
           <span className="flex items-center justify-center">

@@ -193,7 +193,7 @@ export default function EverythingSection() {
         <h2 className="font-medium text-[35.6px] lg:text-[50.9px] text-white leading-normal max-w-[560px] shrink-0">
           Everything your car needs, all in one place
         </h2>
-        <p className="font-light text-[18px] leading-[28px] text-[#cae3f9] max-w-[420px]">
+        <p className="font-light text-[18px] leading-[28px] text-[#2389E3]/20 max-w-[420px]">
           From renewals to repairs, Motoka brings the services car owners juggle across offices and phone numbers
           into a single dashboard.
         </p>
@@ -234,7 +234,7 @@ export default function EverythingSection() {
                   </div>
                   <div className="flex flex-col gap-[10px]">
                     <h3 className="font-medium text-[32px] lg:text-[40px] text-white">{feature.title}</h3>
-                    <p className="font-light text-[14.4px] lg:text-[18px] leading-[22.4px] lg:leading-[28px] text-[#cae3f9] lg:max-w-[435px]">
+                    <p className="font-light text-[14.4px] lg:text-[18px] leading-[22.4px] lg:leading-[28px] text-[#2389E3]/20 lg:max-w-[435px]">
                       {feature.description}
                     </p>
                   </div>

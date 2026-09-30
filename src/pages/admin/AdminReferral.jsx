@@ -175,7 +175,7 @@ export default function AdminReferral() {
                 type="button"
                 disabled={saving}
                 onClick={saveSettings}
-                className="rounded-xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1b6dbd] disabled:opacity-60"
+                className="rounded-xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2389E3] disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Save settings"}
               </button>

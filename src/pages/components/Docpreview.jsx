@@ -191,7 +191,7 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
               <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">
                 <Icon icon="mdi:file-pdf-box" width="56" className="text-slate-400" />
                 <p>PDF preview is not available in this browser.</p>
-                <a href={imageSrc} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                <a href={imageSrc} target="_blank" rel="noreferrer" className="text-[#2389E3] underline">
                   Open PDF in a new tab
                 </a>
               </div>
@@ -225,7 +225,7 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
         <button 
           onClick={handleDownload}
           disabled={!selectedDocument} 
-          className="group flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[#2284DB] text-sm text-[#ffffff] hover:bg-[#1b6dbd] disabled:opacity-30 transition-all shadow-md active:scale-95"
+          className="group flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[#2389E3] text-sm text-[#ffffff] hover:bg-[#2389E3] disabled:opacity-30 transition-all shadow-md active:scale-95"
         >
           <Icon icon="solar:download-bold" width="18" />
           <span>Download</span>
@@ -256,7 +256,7 @@ function DocPreview({ selectedDocument, docType, setShowsidebar, car }) {
                 <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
                   <Icon icon="mdi:file-pdf-box" width="56" className="text-slate-400" />
                   <p>PDF preview is not available in this browser.</p>
-                  <a href={imageSrc} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                  <a href={imageSrc} target="_blank" rel="noreferrer" className="text-[#2389E3] underline">
                     Open PDF in a new tab
                   </a>
                 </div>

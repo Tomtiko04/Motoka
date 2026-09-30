@@ -188,7 +188,7 @@ export default function PushNotification() {
           type="button"
           disabled={saving}
           onClick={handleConfirm}
-          className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-[#1a6db8] focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 active:scale-95 disabled:opacity-60"
+          className="w-full rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-[#2389E3] focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 active:scale-95 disabled:opacity-60"
         >
           {saving ? "Saving..." : "Confirm"}
         </button>

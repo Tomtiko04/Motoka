@@ -37,7 +37,7 @@ const getExpiryStatusStyle = (expiryStatus) => {
     // Renewal order in progress
     return {
       bgColor: "#E3F2FD",
-      dotColor: "#2196F3",
+      dotColor: "#2389E3",
       message: "Renewal in progress"
     };
   } else if (status === "overdue") {

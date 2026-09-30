@@ -41,7 +41,7 @@ export default function TermsCondition({ onNavigate }) {
             id="agree"
             checked={agreed}
             onChange={() => setAgreed(!agreed)}
-            className="h-4 w-4 text-sky-500 focus:ring-sky-400 border-gray-300 rounded"
+            className="h-4 w-4 text-[#2389E3] focus:ring-[#2389E3] border-gray-300 rounded"
           />
           <label htmlFor="agree" className="ml-2 block text-sm text-black">
             I agree with the above Terms and Conditions
@@ -51,7 +51,7 @@ export default function TermsCondition({ onNavigate }) {
 
           <button
             className={`w-full px-4 py-3 text-base font-semibold text-white transition-all duration-300 rounded-3xl transition-colors ${
-              agreed ? "bg-sky-500 hover:bg-sky-600 text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              agreed ? "bg-[#2389E3] hover:bg-[#2389E3] text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
             disabled={!agreed}
           >

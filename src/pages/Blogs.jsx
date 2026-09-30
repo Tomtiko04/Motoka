@@ -45,7 +45,7 @@ export default function BlogsPage() {
                     {blog.date}
                   </p>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-[#2389E3]">
                     {blog.title}
                   </h3>
 
@@ -53,7 +53,7 @@ export default function BlogsPage() {
                     {blog.content}
                   </p>
 
-                  <span className="text-blue-600 text-sm font-medium mt-3 inline-block">
+                  <span className="text-[#2389E3] text-sm font-medium mt-3 inline-block">
                     Read more →
                   </span>
                 </div>

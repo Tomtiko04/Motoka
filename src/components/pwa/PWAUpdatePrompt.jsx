@@ -38,7 +38,7 @@ const PWAUpdatePrompt = () => {
         <button
           type="button"
           onClick={() => updateServiceWorker(true)}
-          className="rounded-md bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a7acf]"
+          className="rounded-md bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2389E3]"
         >
           Update
         </button>

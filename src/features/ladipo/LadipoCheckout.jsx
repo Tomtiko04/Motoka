@@ -396,7 +396,7 @@ export default function LadipoCheckout() {
                 <button
                   type="submit"
                   disabled={loading || !isCheckoutReady}
-                  className="w-full mt-4 bg-[#2389E3] py-3.5 rounded-[12px] text-white font-semibold text-[15px] hover:bg-[#1a7acf] transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full mt-4 bg-[#2389E3] py-3.5 rounded-[12px] text-white font-semibold text-[15px] hover:bg-[#2389E3] transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? (
                     <>

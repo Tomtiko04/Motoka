@@ -147,7 +147,7 @@ const AdminCars = () => {
           </button>
           <button
             onClick={() => setShowAddCar(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors"
           >
             <PlusIcon className="h-4 w-4" />
             Add Car
@@ -166,12 +166,12 @@ const AdminCars = () => {
               placeholder="Search by make, model, reg number, or owner..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-[#2389E3] text-white text-sm font-medium rounded-lg hover:bg-[#2389E3] transition-colors"
           >
             Search
           </button>
@@ -193,7 +193,7 @@ const AdminCars = () => {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -205,7 +205,7 @@ const AdminCars = () => {
             <select
               value={carTypeFilter}
               onChange={(e) => { setCarTypeFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
             >
               {carTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -217,7 +217,7 @@ const AdminCars = () => {
             <select
               value={sortFilter}
               onChange={(e) => { setSortFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
             >
               <option value="recently_added">Recently Added</option>
               <option value="a_z">A - Z</option>
@@ -234,7 +234,7 @@ const AdminCars = () => {
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-[#2389E3] hover:text-[#2389E3] font-medium"
             >
               Reset all filters
             </button>
@@ -246,7 +246,7 @@ const AdminCars = () => {
       <div className="bg-white shadow rounded-lg overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#2389E3]"></div>
           </div>
         ) : cars.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
@@ -290,8 +290,8 @@ const AdminCars = () => {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                          <TruckIcon className="h-6 w-6 text-blue-600" />
+                        <div className="h-10 w-10 rounded-lg bg-[#2389E3]/10 flex items-center justify-center">
+                          <TruckIcon className="h-6 w-6 text-[#2389E3]" />
                         </div>
                       </div>
                       <div className="ml-4">
@@ -343,7 +343,7 @@ const AdminCars = () => {
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                     <a
                       href={`/admin/cars/${car.slug}`}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-[#2389E3] hover:text-[#2389E3]"
                     >
                       <EyeIcon className="h-4 w-4" />
                     </a>

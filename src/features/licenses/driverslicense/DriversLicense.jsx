@@ -282,7 +282,7 @@ export default function DriversLicense() {
     return (
       <LicenseLayout title="Driver's License" subTitle="Loading...">
         <div className="flex justify-center py-12">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
         </div>
       </LicenseLayout>
     );
@@ -341,7 +341,7 @@ export default function DriversLicense() {
               <button
                 type="button"
                 onClick={handleResume}
-                className="shrink-0 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1b6dbd] active:scale-[0.98]"
+                className="shrink-0 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-[0.98]"
               >
                 Continue to payment
               </button>
@@ -356,7 +356,7 @@ export default function DriversLicense() {
                 </p>
                 <div
                   onClick={() => passportInputRef.current?.click()}
-                  className="flex h-[120px] w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2284DB] hover:bg-[#EBF4FD]"
+                  className="flex h-[120px] w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2389E3] hover:bg-[#EBF4FD]"
                 >
                   <input
                     ref={passportInputRef}
@@ -372,7 +372,7 @@ export default function DriversLicense() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <Icon icon="lets-icons:add-round" fontSize={32} color="#2284DB" />
+                    <Icon icon="lets-icons:add-round" fontSize={32} color="#2389E3" />
                   )}
                 </div>
               </div>
@@ -391,14 +391,14 @@ export default function DriversLicense() {
                           onClick={() => setSelectedNewDuration(p.duration)}
                           className={`flex flex-col items-center rounded-xl border-2 px-3 py-3 text-center transition-colors ${
                             active
-                              ? "border-[#2284DB] bg-[#EBF4FD]"
-                              : "border-[#E1E6F4] bg-white hover:border-[#2284DB]/40"
+                              ? "border-[#2389E3] bg-[#EBF4FD]"
+                              : "border-[#E1E6F4] bg-white hover:border-[#2389E3]/40"
                           }`}
                         >
-                          <span className={`text-sm font-semibold ${active ? "text-[#2284DB]" : "text-[#05243F]"}`}>
+                          <span className={`text-sm font-semibold ${active ? "text-[#2389E3]" : "text-[#05243F]"}`}>
                             {durationLabel(p.duration)}
                           </span>
-                          <span className={`mt-1 text-xs ${active ? "text-[#2284DB]/80" : "text-[#05243F]/50"}`}>
+                          <span className={`mt-1 text-xs ${active ? "text-[#2389E3]/80" : "text-[#05243F]/50"}`}>
                             ₦{Number(p.price).toLocaleString()}
                           </span>
                         </button>
@@ -466,7 +466,7 @@ export default function DriversLicense() {
                   )}
                   <div
                     onClick={() => licenseInputRef.current?.click()}
-                    className="flex h-[111px] cursor-pointer flex-col items-center justify-center rounded-[17px] border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2284DB] hover:bg-[#EBF4FD]"
+                    className="flex h-[111px] cursor-pointer flex-col items-center justify-center rounded-[17px] border-2 border-dashed border-[#E1E6F4] bg-[#F4F5FC] transition-colors hover:border-[#2389E3] hover:bg-[#EBF4FD]"
                   >
                     <input
                       ref={licenseInputRef}
@@ -475,7 +475,7 @@ export default function DriversLicense() {
                       onChange={handleLicenseFileSelect}
                       className="hidden"
                     />
-                    <Icon icon="lets-icons:add-round" fontSize={28} color="#2284DB" />
+                    <Icon icon="lets-icons:add-round" fontSize={28} color="#2389E3" />
                     <p className="mt-1 text-sm font-semibold text-[#05243F]">
                       {licenseFile ? licenseFile.name : "Upload Driver's License"}
                     </p>
@@ -497,14 +497,14 @@ export default function DriversLicense() {
                           onClick={() => setSelectedRenewDuration(p.duration)}
                           className={`flex flex-col items-center rounded-xl border-2 px-3 py-3 text-center transition-colors ${
                             active
-                              ? "border-[#2284DB] bg-[#EBF4FD]"
-                              : "border-[#E1E6F4] bg-white hover:border-[#2284DB]/40"
+                              ? "border-[#2389E3] bg-[#EBF4FD]"
+                              : "border-[#E1E6F4] bg-white hover:border-[#2389E3]/40"
                           }`}
                         >
-                          <span className={`text-sm font-semibold ${active ? "text-[#2284DB]" : "text-[#05243F]"}`}>
+                          <span className={`text-sm font-semibold ${active ? "text-[#2389E3]" : "text-[#05243F]"}`}>
                             {durationLabel(p.duration)}
                           </span>
-                          <span className={`mt-1 text-xs ${active ? "text-[#2284DB]/80" : "text-[#05243F]/50"}`}>
+                          <span className={`mt-1 text-xs ${active ? "text-[#2389E3]/80" : "text-[#05243F]/50"}`}>
                             ₦{Number(p.price).toLocaleString()}
                           </span>
                         </button>
@@ -520,7 +520,7 @@ export default function DriversLicense() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#2284DB] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#1a6bb8] disabled:opacity-60"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#2389E3] py-4 text-base font-semibold text-white shadow-md transition-all hover:bg-[#2389E3] disabled:opacity-60"
           >
             {isSubmitting ? "Submitting..." : "Submit application"}
             <Icon icon="mdi:arrow-right" className="text-lg" />

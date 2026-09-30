@@ -102,7 +102,7 @@ export default function TwoFactorAuth({ onNavigate }) {
               type="radio"
               id="mobile-app"
               name="2fa-method"
-              className="h-4 w-4 text-sky-500 focus:ring-sky-400 cursor-pointer"
+              className="h-4 w-4 text-[#2389E3] focus:ring-[#2389E3] cursor-pointer"
               checked={selectedMethod === "mobile-app"}
               onChange={() => setSelectedMethod("mobile-app")}
             />
@@ -122,7 +122,7 @@ export default function TwoFactorAuth({ onNavigate }) {
               type="radio"
               id="email"
               name="2fa-method"
-              className="h-4 w-4 text-sky-500 focus:ring-sky-400 cursor-pointer"
+              className="h-4 w-4 text-[#2389E3] focus:ring-[#2389E3] cursor-pointer"
               checked={selectedMethod === "email"}
               onChange={() => setSelectedMethod("email")}
             />

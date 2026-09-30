@@ -43,16 +43,16 @@ export default function PaymentReceipt() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-900 p-4">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
-          <div className="mb-4 text-2xl font-bold text-blue-600">
+          <div className="mb-4 text-2xl font-bold text-[#2389E3]">
             Processing Payment
           </div>
-          <div className="mb-2 text-4xl font-bold text-blue-600">
+          <div className="mb-2 text-4xl font-bold text-[#2389E3]">
             Loading...
           </div>
           <div className="mb-6 text-sm text-gray-500">
             Kindly hold on for a second
           </div>
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#2389E3] border-t-transparent"></div>
         </div>
       </div>
     );
@@ -68,7 +68,7 @@ export default function PaymentReceipt() {
           <div className="mb-6 text-sm text-gray-600">{error.message}</div>
           <button
             onClick={() => navigate(-1)}
-            className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+            className="rounded-lg bg-[#2389E3] px-6 py-2 text-white transition-colors hover:bg-[#2389E3]"
           >
             Go Back
           </button>
@@ -88,7 +88,7 @@ export default function PaymentReceipt() {
           </div>
           <button
             onClick={() => navigate(-1)}
-            className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+            className="rounded-lg bg-[#2389E3] px-6 py-2 text-white transition-colors hover:bg-[#2389E3]"
           >
             Go Back
           </button>
@@ -135,8 +135,8 @@ export default function PaymentReceipt() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl">
         {/* Decorative curved band at top */}
-        <div className="relative h-2 bg-gradient-to-r from-blue-600 to-green-500">
-          <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-green-500"></div>
+        <div className="relative h-2 bg-gradient-to-r from-[#2389E3] to-green-500">
+          <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-r from-[#2389E3] via-[#2389E3] to-green-500"></div>
         </div>
 
         {/* Success indicator */}
@@ -159,7 +159,7 @@ export default function PaymentReceipt() {
           <h1 className="mb-2 text-xl font-bold text-gray-800">
             Payment Receipt
           </h1>
-          <div className="mb-2 text-3xl font-bold text-blue-600">
+          <div className="mb-2 text-3xl font-bold text-[#2389E3]">
             {formatCurrency(payment.amount)}
           </div>
           <div className="mb-1 text-base font-semibold text-gray-800">
@@ -339,21 +339,21 @@ export default function PaymentReceipt() {
         <div className="space-y-2 px-8 pb-8">
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="w-full rounded-lg bg-[#2389E3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2389E3]"
           >
             Go to Dashboard
           </button>
           <button
             onClick={() => window.print()}
-            className="w-full rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
+            className="w-full rounded-lg border border-[#2389E3] px-4 py-2 text-sm font-medium text-[#2389E3] transition-colors hover:bg-[#2389E3] hover:text-white"
           >
             Print Receipt
           </button>
         </div>
 
         {/* Decorative curved band at bottom */}
-        <div className="relative h-2 bg-gradient-to-r from-blue-600 to-green-500">
-          <div className="absolute inset-0 rounded-b-2xl bg-gradient-to-r from-blue-600 via-green-500 to-green-400"></div>
+        <div className="relative h-2 bg-gradient-to-r from-[#2389E3] to-green-500">
+          <div className="absolute inset-0 rounded-b-2xl bg-gradient-to-r from-[#2389E3] via-green-500 to-green-400"></div>
         </div>
       </div>
     </div>

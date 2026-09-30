@@ -59,7 +59,7 @@ function Categories() {
         "Through Motoka, users can conveniently explore verified vendors, compare options, and purchase quality parts that meet safety and performance standards.",
       image: category4,
       iconName: "mynaui:cart-solid",
-      bgColor: "#2287E0",
+      bgColor: "#2389E3",
       button: "shop now"
     },
     {
@@ -187,7 +187,7 @@ function Categories() {
                   className={`relative h-full rounded-[20px] p-10 pt-12 shadow-md transition-transform duration-300 ${item.id === 4 ? "text-white" : "text-[#05243F]"} ${activeIndex+1===item.id ? "scale-100" : "scale-96 opacity-80"}`}
                   style={{ backgroundColor: item.bgColor }}
                 >
-                  <div className="absolute top-8 right-8 flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#45A1F2]">
+                  <div className="absolute top-8 right-8 flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#2389E3]">
                     <Icon
                       icon={item.iconName}
                       className="z-10 h-[39px] w-[39px] text-white"
@@ -243,7 +243,7 @@ function Categories() {
                   }`}
                   style={{ backgroundColor: item.bgColor }}
                 >
-                  <div className="absolute top-4 right-4 flex h-[70px] w-[70px] items-center justify-center rounded-full bg-[#45A1F2]">
+                  <div className="absolute top-4 right-4 flex h-[70px] w-[70px] items-center justify-center rounded-full bg-[#2389E3]">
                     <Icon
                       icon={item.iconName}
                       className="z-10 h-[36px] w-[36px] text-white"

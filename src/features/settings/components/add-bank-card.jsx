@@ -81,7 +81,7 @@ function CardTab({ onNavigate }) {
         )}
         <button
           onClick={() => onNavigate("payment")}
-          className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1a6dba] active:scale-95"
+          className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-95"
         >
           Back to Saved Methods
         </button>
@@ -128,7 +128,7 @@ function CardTab({ onNavigate }) {
         type="button"
         onClick={handleAddCard}
         disabled={!selectedId || isTokenizing}
-        className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1a6dba] disabled:opacity-40 active:scale-95"
+        className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2389E3] disabled:opacity-40 active:scale-95"
       >
         {isTokenizing ? "Redirecting to Paystack…" : "Add Card via Paystack"}
       </button>
@@ -194,7 +194,7 @@ function BankAccountTab() {
       <button
         type="button"
         onClick={handleSave}
-        className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1a6dba] active:scale-95"
+        className="w-full rounded-3xl bg-[#2389E3] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-95"
       >
         Save Account
       </button>

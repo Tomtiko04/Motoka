@@ -233,7 +233,7 @@ const AdminUsers = () => {
         </div>
         <button
           onClick={() => setShowAddUser(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#2389E3] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#2389E3] transition-colors"
         >
           <Icon icon="mdi:account-plus" className="h-4 w-4" />
           Add User
@@ -255,7 +255,7 @@ const AdminUsers = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-[#2389E3] focus:outline-none focus:ring-1 focus:ring-[#2389E3]"
           />
         </div>
         <select
@@ -264,7 +264,7 @@ const AdminUsers = () => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-[#2389E3] focus:outline-none focus:ring-1 focus:ring-[#2389E3]"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -277,7 +277,7 @@ const AdminUsers = () => {
             setSortFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-[#2389E3] focus:outline-none focus:ring-1 focus:ring-[#2389E3]"
         >
           <option value="recently_added">Recently Added</option>
           <option value="a_z">A - Z</option>
@@ -331,8 +331,8 @@ const AdminUsers = () => {
                   <tr key={user.userId} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center">
-                        <div className="h-9 w-9 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
-                          <span className="text-xs font-semibold text-blue-600">
+                        <div className="h-9 w-9 flex-shrink-0 rounded-full bg-[#2389E3]/10 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-[#2389E3]">
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </span>
                         </div>
@@ -383,7 +383,7 @@ const AdminUsers = () => {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleViewUser(user.id)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-[#2389E3] hover:text-[#2389E3]"
                           title="View details"
                         >
                           <Icon icon="mdi:eye" className="h-5 w-5" />

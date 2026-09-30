@@ -468,7 +468,7 @@ const CreateAgent = () => {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder="Enter first name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -484,7 +484,7 @@ const CreateAgent = () => {
                   value={formData.surname}
                   onChange={handleInputChange}
                   placeholder="Enter surname"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -500,7 +500,7 @@ const CreateAgent = () => {
                   value={formData.address}
                   onChange={handleInputChange}
                   placeholder="Enter address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -516,7 +516,7 @@ const CreateAgent = () => {
                   value={formData.location}
                   onChange={handleInputChange}
                   placeholder="Enter location"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -532,7 +532,7 @@ const CreateAgent = () => {
                   value={formData.accountNumber}
                   onChange={handleInputChange}
                   placeholder="Enter account number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -550,7 +550,7 @@ const CreateAgent = () => {
                     onChange={(e) => setBankSearchTerm(e.target.value)}
                     onFocus={() => setIsBankDropdownOpen(true)}
                     placeholder="Search and select bank..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                     <ChevronDownIcon className="h-4 w-4 text-gray-400" />
@@ -592,7 +592,7 @@ const CreateAgent = () => {
                         ? 'bg-green-100 text-green-800 border border-green-300'
                         : isVerifyingAccount
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200'
+                        : 'bg-[#2389E3]/10 text-[#2389E3] border border-[#2389E3] hover:bg-[#2389E3]/20'
                     }`}
                   >
                     {isVerifyingAccount
@@ -624,7 +624,7 @@ const CreateAgent = () => {
                     }}
                     onFocus={() => setIsStateDropdownOpen(true)}
                     placeholder="Search and select state..."
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                   />
                   <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <button
@@ -671,7 +671,7 @@ const CreateAgent = () => {
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   placeholder="Enter phone number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -687,7 +687,7 @@ const CreateAgent = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Enter email address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                 />
               </div>
 
@@ -722,7 +722,7 @@ const CreateAgent = () => {
           <div className="flex justify-end pt-6 border-t border-gray-200">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors"
+              className="bg-[#2389E3] hover:bg-[#2389E3] text-white px-6 py-2 rounded-md font-medium transition-colors"
             >
               Create Agent
             </button>

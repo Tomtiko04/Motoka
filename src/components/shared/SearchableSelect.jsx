@@ -77,7 +77,7 @@ const SearchableSelect = ({
         />
         <div className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
           {isLoading ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
           ) : (
             <svg
               className={`h-4 w-4 text-[#05243F]/40 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}

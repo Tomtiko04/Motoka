@@ -153,7 +153,7 @@ export default function PushOptInPrompt() {
               type="button"
               onClick={enable}
               disabled={enabling}
-              className="inline-flex items-center rounded-md bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a7acf] disabled:opacity-60"
+              className="inline-flex items-center rounded-md bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2389E3] disabled:opacity-60"
             >
               {enabling ? "Enabling…" : "Enable alerts"}
             </button>

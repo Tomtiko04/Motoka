@@ -86,11 +86,11 @@ const UserSearch = ({ onSelect }) => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search by name, email or phone…"
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3]"
       />
       {searching && (
         <div className="absolute right-3 top-2.5">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
         </div>
       )}
       {open && results.length > 0 && (
@@ -98,7 +98,7 @@ const UserSearch = ({ onSelect }) => {
           {results.map((u) => (
             <li
               key={u.id}
-              className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+              className="px-3 py-2 hover:bg-[#2389E3]/5 cursor-pointer text-sm"
               onMouseDown={(e) => {
                 e.preventDefault();
                 onSelect(u);
@@ -276,7 +276,7 @@ const AdminDocuments = () => {
         </div>
         <button
           onClick={() => setUploadModal(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+          className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2389E3] text-white text-sm font-medium rounded-lg hover:bg-[#2389E3]"
         >
           <PlusIcon className="h-4 w-4" />
           Upload for User
@@ -293,7 +293,7 @@ const AdminDocuments = () => {
               placeholder="Filter by name or email…"
               value={nameSearch}
               onChange={(e) => setNameSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#2389E3]"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -301,7 +301,7 @@ const AdminDocuments = () => {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3]"
             >
               <option value="all">All statuses</option>
               <option value="pending">Pending</option>
@@ -311,7 +311,7 @@ const AdminDocuments = () => {
             <select
               value={typeFilter}
               onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3]"
             >
               <option value="all">All types</option>
               <option value="car">Car</option>
@@ -325,7 +325,7 @@ const AdminDocuments = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#2389E3]" />
           </div>
         ) : filteredDocs.length === 0 ? (
           <div className="py-16 text-center text-gray-400">
@@ -376,7 +376,7 @@ const AdminDocuments = () => {
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => setPreviewDoc(doc)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center gap-1"
+                          className="text-[#2389E3] hover:text-[#2389E3] text-sm font-medium inline-flex items-center gap-1"
                         >
                           <EyeIcon className="h-4 w-4" />
                           View
@@ -635,7 +635,7 @@ const AdminDocuments = () => {
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-[#2389E3] text-white rounded-lg text-sm hover:bg-[#2389E3] disabled:opacity-50"
                 >
                   {actionLoading ? 'Uploading…' : 'Upload'}
                 </button>

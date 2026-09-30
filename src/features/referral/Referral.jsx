@@ -114,7 +114,7 @@ export default function Referral() {
             <button
               type="button"
               onClick={share}
-              className="flex items-center gap-2 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1b6dbd]"
+              className="flex items-center gap-2 rounded-full bg-[#2389E3] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2389E3]"
             >
               <Share2 className="h-4 w-4" /> Share invite
             </button>

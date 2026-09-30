@@ -65,7 +65,7 @@ export default function DeleteAccount({ onNavigate }) {
 
         <div className="flex justify-center gap-4">
           <button
-            className="rounded-3xl bg-[#2389E3] hover:bg-sky-600 text-base font-semibold text-white py-2 px-10 transition-colors"
+            className="rounded-3xl bg-[#2389E3] hover:bg-[#2389E3] text-base font-semibold text-white py-2 px-10 transition-colors"
             onClick={handleOpenModal}
           >
             Yes

@@ -818,7 +818,7 @@ export default function PlateDetails() {
                         onChange={(e) => handleFileChange(e, "cac_document")}
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.cac_document
                           ? files.cac_document.name
@@ -838,7 +838,7 @@ export default function PlateDetails() {
                         onChange={(e) => handleFileChange(e, "letterhead")}
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.letterhead
                           ? files.letterhead.name
@@ -857,7 +857,7 @@ export default function PlateDetails() {
                         }
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.means_of_identification
                           ? files.means_of_identification.name
@@ -893,7 +893,7 @@ export default function PlateDetails() {
                         onChange={(e) => handleFileChange(e, "cac_document")}
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.cac_document
                           ? files.cac_document.name
@@ -913,7 +913,7 @@ export default function PlateDetails() {
                         onChange={(e) => handleFileChange(e, "letterhead")}
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.letterhead
                           ? files.letterhead.name
@@ -935,7 +935,7 @@ export default function PlateDetails() {
                         }
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.means_of_identification
                           ? files.means_of_identification.name
@@ -971,7 +971,7 @@ export default function PlateDetails() {
                         onChange={(e) => handleFileChange(e, "cac_document")}
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.cac_document
                           ? files.cac_document.name
@@ -1060,7 +1060,7 @@ export default function PlateDetails() {
                         onChange={(e) => handleFileChange(e, "cac_document")}
                         className="hidden"
                       />
-                      <LuUpload className="text-3xl font-semibold text-[#45A1F2]" />
+                      <LuUpload className="text-3xl font-semibold text-[#2389E3]" />
                       <p className="mt-2 text-center text-sm font-semibold text-[#05243F]">
                         {files.cac_document
                           ? files.cac_document.name

@@ -76,7 +76,7 @@ const StepOne = ({ nextStep, email, setEmail }) => {
                 type="email"
                 autoComplete="email"
                 required
-                // className="relative block  rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                // className="relative block  rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-[#2389E3] focus:outline-none focus:ring-[#2389E3] sm:text-sm"
                 className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="Email address"
               />
@@ -88,7 +88,7 @@ const StepOne = ({ nextStep, email, setEmail }) => {
               type="submit"
               disabled={isForgotPasswordLoading}
               onClick={handleSubmit}
-              className={`mx-auto mt-6 flex w-full justify-center rounded-3xl px-4 py-2 text-sm font-semibold text-white ${isForgotPasswordLoading ? "cursor-not-allowed bg-[#2389E3]/70" : "bg-[#2389E3] hover:bg-[#1c6fb8]"}`}
+              className={`mx-auto mt-6 flex w-full justify-center rounded-3xl px-4 py-2 text-sm font-semibold text-white ${isForgotPasswordLoading ? "cursor-not-allowed bg-[#2389E3]/70" : "bg-[#2389E3] hover:bg-[#2389E3]"}`}
             >
               {isForgotPasswordLoading
                 ? "Sending..."
@@ -157,7 +157,7 @@ const StepTwo = ({ nextStep, prevStep, email, setToken }) => {
                 onChange={(e) => setOtp(e.target.value)}
                 autoComplete="one-time-code"
                 required
-                // className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                // className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-[#2389E3] focus:outline-none focus:ring-[#2389E3] sm:text-sm"
                 className="relative block h-12 w-full appearance-none rounded-lg bg-[#FFF4DD] px-3 py-2 text-sm font-medium text-gray-900 placeholder-[#05243F]/40 transition-colors duration-300 focus:z-10 focus:outline-none sm:text-base"
                 placeholder="Verification Code"
               />
@@ -168,7 +168,7 @@ const StepTwo = ({ nextStep, prevStep, email, setToken }) => {
             <button
               type="submit"
               disabled={isVerifyingReset}
-              className={`mx-auto mt-6 flex w-full justify-center rounded-3xl px-4 py-2 text-sm font-semibold text-white ${isVerifyingReset ? "cursor-not-allowed bg-[#2389E3]/70" : "bg-[#2389E3] hover:bg-[#1c6fb8]"}`}
+              className={`mx-auto mt-6 flex w-full justify-center rounded-3xl px-4 py-2 text-sm font-semibold text-white ${isVerifyingReset ? "cursor-not-allowed bg-[#2389E3]/70" : "bg-[#2389E3] hover:bg-[#2389E3]"}`}
             >
               {isVerifyingReset ? "Verifying..." : "Verify Code"}
             </button>

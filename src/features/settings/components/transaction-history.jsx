@@ -57,7 +57,7 @@ export default function TransactionHistory({ onNavigate }) {
       <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1 md:space-y-4">
         {loading ? (
           <div className="flex items-center justify-center my-10">
-            <ClipLoader color="#2284DB" size={40} />
+            <ClipLoader color="#2389E3" size={40} />
           </div>
         ) : transactions.length > 0 ? (
           transactions.map((transaction) => (
@@ -67,7 +67,7 @@ export default function TransactionHistory({ onNavigate }) {
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sky-100 text-xs text-sky-600">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#2389E3]/10 text-xs text-[#2389E3]">
                     📄
                   </div>
                   <div className="flex-1">
@@ -112,7 +112,7 @@ export default function TransactionHistory({ onNavigate }) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-sky-600">
+                  <p className="text-sm font-semibold text-[#2389E3]">
                     {formatAmount(transaction.amount)}
                   </p>
                 </div>

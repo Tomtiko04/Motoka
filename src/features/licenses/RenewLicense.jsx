@@ -634,7 +634,7 @@ export default function RenewLicense() {
         <div className="relative mt-3 mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#E5F3FF]"
+            className="absolute top-1/2 left-0 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#E1E6F4] text-[#697C8C] transition-colors hover:bg-[#2389E3]/10"
           >
             <FaArrowLeft className="h-5 w-5" />
           </button>
@@ -706,7 +706,7 @@ export default function RenewLicense() {
                 {loadingPayments ? (
                   <div className="col-span-1 mx-auto my-10 flex items-center justify-center sm:col-span-2">
                     <div>
-                      <ClipLoader color="#2284DB" />
+                      <ClipLoader color="#2389E3" />
                     </div>
                   </div>
                 ) : (
@@ -1017,7 +1017,7 @@ export default function RenewLicense() {
                   duplicateCheckLoading ||
                   (monicreditPhoneError && !inlinePhone.trim())
                 }
-                className="mt-2 w-full rounded-full bg-[#2284DB] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50"
+                className="mt-2 w-full rounded-full bg-[#2389E3] py-[10px] text-base font-semibold text-white transition-colors hover:bg-[#2389E3] disabled:opacity-50"
               >
                 {phoneStep === "saving" ? (
                   "Saving phone number..."

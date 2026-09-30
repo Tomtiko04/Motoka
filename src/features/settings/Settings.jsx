@@ -95,7 +95,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-h-screen from-sky-50 to-sky-100 flex-1 flex flex-col">
+    <div className="max-h-screen from-[#2389E3]/5 to-[#2389E3]/10 flex-1 flex flex-col">
       <SettingsLayout
         activePage={activePage}
         expandedSection={expandedSection}

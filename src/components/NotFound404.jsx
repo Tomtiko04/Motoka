@@ -19,7 +19,7 @@ export default function NotFound404() {
             <Link
               type="button"
               to="/dashboard"
-              className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#1B6CB3]"
+              className="rounded-full bg-[#2389E3] px-6 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]"
             >
               Go to Dashboard
             </Link>

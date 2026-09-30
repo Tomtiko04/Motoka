@@ -110,7 +110,7 @@ const InstallPrompt = () => {
               <button
                 type="button"
                 onClick={install}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a7acf]"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#2389E3] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2389E3]"
               >
                 <ArrowDownTrayIcon className="h-3.5 w-3.5" />
                 Install

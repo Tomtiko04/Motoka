@@ -126,7 +126,7 @@ export default function GuestRenewalSignup() {
           <button
             type="submit"
             disabled={isSubmitting || !password || !confirmation}
-            className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1B6CB3] disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full rounded-full bg-[#2389E3] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#2389E3] disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isSubmitting ? <><RefreshCw className="h-4 w-4 animate-spin" /> Creating account…</> : "Create Account"}
           </button>

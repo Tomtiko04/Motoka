@@ -193,7 +193,7 @@ const AdminUserDetails = () => {
         <p className="mt-4 text-base text-gray-500">User not found</p>
         <button
           onClick={handleBack}
-          className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          className="mt-4 rounded-lg bg-[#2389E3] px-4 py-2 text-sm text-white hover:bg-[#2389E3]"
         >
           Go Back
         </button>
@@ -248,8 +248,8 @@ const AdminUserDetails = () => {
       {/* User Info Card */}
       <div className="rounded-lg bg-white p-5 shadow-sm border border-gray-100">
         <div className="flex items-start gap-4">
-          <div className="h-16 w-16 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="text-xl font-semibold text-blue-600">
+          <div className="h-16 w-16 flex-shrink-0 rounded-full bg-[#2389E3]/10 flex items-center justify-center">
+            <span className="text-xl font-semibold text-[#2389E3]">
               {user.name?.charAt(0).toUpperCase() || 'U'}
             </span>
           </div>
@@ -316,8 +316,8 @@ const AdminUserDetails = () => {
               <p className="text-xs text-gray-500 mb-1">Total Cars</p>
               <p className="text-2xl font-semibold text-gray-900">{user.cars_count || 0}</p>
             </div>
-            <div className="rounded-full bg-blue-100 p-2.5">
-              <Icon icon="mdi:car" className="h-6 w-6 text-blue-600" />
+            <div className="rounded-full bg-[#2389E3]/10 p-2.5">
+              <Icon icon="mdi:car" className="h-6 w-6 text-[#2389E3]" />
             </div>
           </div>
         </div>
@@ -367,7 +367,7 @@ const AdminUserDetails = () => {
             <h2 className="text-base font-semibold text-gray-900">Recent Cars</h2>
             <button
               onClick={() => setShowAddCarModal(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg bg-[#2389E3] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#2389E3] transition-colors"
             >
               <Icon icon="mdi:plus" className="h-3.5 w-3.5" />
               Add Car
@@ -379,7 +379,7 @@ const AdminUserDetails = () => {
                 <div
                   key={car.id}
                   onClick={() => window.location.href = `/admin/cars/${car.slug}`}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-[#2389E3]/5 hover:border-[#2389E3]/20 cursor-pointer transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 truncate">
@@ -391,7 +391,7 @@ const AdminUserDetails = () => {
                   </div>
                   <button
                     onClick={() => navigate(`/admin/cars/${car.slug}`)}
-                    className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
+                    className="ml-3 text-[#2389E3] hover:text-[#2389E3] transition-colors"
                   >
                     <Icon icon="mdi:arrow-right" className="h-5 w-5" />
                   </button>
@@ -426,7 +426,7 @@ const AdminUserDetails = () => {
                   </div>
                   <button
                     onClick={() => navigate(`/admin/orders/${order.slug}`)}
-                    className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
+                    className="ml-3 text-[#2389E3] hover:text-[#2389E3] transition-colors"
                   >
                     <Icon icon="mdi:arrow-right" className="h-5 w-5" />
                   </button>

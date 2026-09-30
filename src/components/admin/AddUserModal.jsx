@@ -28,7 +28,7 @@ function Field({ label, id, required, error, hint, children }) {
 }
 
 function inputCls(hasError) {
-  return `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
+  return `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none transition-colors ${
     hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'
   }`;
 }
@@ -53,7 +53,7 @@ function MiniMakeSelect({ value, onChange, error }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
+        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none ${
           error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
         }`}
       >
@@ -69,7 +69,7 @@ function MiniMakeSelect({ value, onChange, error }) {
               placeholder="Search make..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none"
             />
           </div>
           <ul className="max-h-48 overflow-y-auto">
@@ -81,8 +81,8 @@ function MiniMakeSelect({ value, onChange, error }) {
                   <button
                     type="button"
                     onClick={() => { onChange(make); setQuery(''); setOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                      value === make ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#2389E3]/5 hover:text-[#2389E3] transition-colors ${
+                      value === make ? 'bg-[#2389E3]/5 text-[#2389E3] font-medium' : 'text-gray-700'
                     }`}
                   >
                     {make}
@@ -120,7 +120,7 @@ function MiniModelSelect({ make, value, onChange, error }) {
   return (
     <div ref={ref} className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
+        className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm text-left transition-colors focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none ${
           error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
         }`}
       >
@@ -132,7 +132,7 @@ function MiniModelSelect({ make, value, onChange, error }) {
           <div className="p-2 border-b border-gray-100">
             <input autoFocus type="text" placeholder="Search model..." value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2389E3] focus:border-transparent outline-none"
             />
           </div>
           <ul className="max-h-48 overflow-y-auto">
@@ -142,8 +142,8 @@ function MiniModelSelect({ make, value, onChange, error }) {
               filtered.map((model) => (
                 <li key={model}>
                   <button type="button" onClick={() => { onChange(model); setQuery(''); setOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                      value === model ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#2389E3]/5 hover:text-[#2389E3] transition-colors ${
+                      value === model ? 'bg-[#2389E3]/5 text-[#2389E3] font-medium' : 'text-gray-700'
                     }`}
                   >{model}</button>
                 </li>
@@ -152,7 +152,7 @@ function MiniModelSelect({ make, value, onChange, error }) {
           </ul>
           {query && !filtered.includes(query) && (
             <button type="button" onClick={() => { onChange(query); setQuery(''); setOpen(false); }}
-              className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 border-t border-gray-100 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-[#2389E3] hover:bg-[#2389E3]/5 border-t border-gray-100 transition-colors"
             >Use "{query}"</button>
           )}
         </div>
@@ -318,15 +318,15 @@ export default function AddUserModal({ onClose, onSuccess }) {
             <div className="flex items-center gap-2">
               {[1, 2].map((s) => (
                 <React.Fragment key={s}>
-                  <div className={`flex items-center gap-1.5 text-xs font-medium ${s <= step ? 'text-blue-600' : 'text-gray-400'}`}>
+                  <div className={`flex items-center gap-1.5 text-xs font-medium ${s <= step ? 'text-[#2389E3]' : 'text-gray-400'}`}>
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold ${
-                      s < step ? 'bg-blue-600 text-white' : s === step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+                      s < step ? 'bg-[#2389E3] text-white' : s === step ? 'bg-[#2389E3] text-white' : 'bg-gray-200 text-gray-500'
                     }`}>
                       {s < step ? <CheckCircleIcon className="w-4 h-4" /> : s}
                     </div>
                     {s === 1 ? 'User Info' : 'Car (Optional)'}
                   </div>
-                  {s < 2 && <div className={`flex-1 h-0.5 rounded ${step > s ? 'bg-blue-600' : 'bg-gray-200'}`} />}
+                  {s < 2 && <div className={`flex-1 h-0.5 rounded ${step > s ? 'bg-[#2389E3]' : 'bg-gray-200'}`} />}
                 </React.Fragment>
               ))}
             </div>
@@ -365,9 +365,9 @@ export default function AddUserModal({ onClose, onSuccess }) {
           {/* STEP 2: Optional car */}
           {step === 2 && (
             <form id="add-user-form" onSubmit={handleSubmit} className="space-y-4">
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-blue-300 hover:bg-blue-50/50 transition-all">
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-[#2389E3] hover:bg-[#2389E3]/5 transition-all">
                 <input type="checkbox" checked={addCar} onChange={(e) => setAddCar(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                  className="h-4 w-4 rounded border-gray-300 text-[#2389E3] focus:ring-[#2389E3]" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Also add a car for this user</p>
                   <p className="text-xs text-gray-500">You can always add cars later from the user's profile</p>
@@ -449,9 +449,9 @@ export default function AddUserModal({ onClose, onSuccess }) {
               </div>
 
               {result.car && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-left">
-                  <p className="text-xs font-semibold text-blue-800 mb-1">Car Added</p>
-                  <p className="text-sm text-blue-900">
+                <div className="bg-[#2389E3]/5 border border-[#2389E3]/20 rounded-xl p-4 text-left">
+                  <p className="text-xs font-semibold text-[#2389E3] mb-1">Car Added</p>
+                  <p className="text-sm text-[#2389E3]">
                     {result.car.vehicle_make} {result.car.vehicle_model}
                     {result.car.plate_number && ` — ${result.car.plate_number}`}
                   </p>
@@ -470,7 +470,7 @@ export default function AddUserModal({ onClose, onSuccess }) {
                 Cancel
               </button>
               <button type="button" onClick={goToStep2}
-                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors">
                 Next
               </button>
             </>
@@ -482,7 +482,7 @@ export default function AddUserModal({ onClose, onSuccess }) {
                 Cancel
               </button>
               <button type="submit" form="add-user-form" disabled={submitting}
-                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
                 {submitting && <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />}
                 {submitting ? 'Creating...' : addCar ? 'Create User & Car' : 'Create User'}
               </button>
@@ -490,7 +490,7 @@ export default function AddUserModal({ onClose, onSuccess }) {
           )}
           {step === 3 && (
             <button type="button" onClick={onClose}
-              className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+              className="px-5 py-2 text-sm font-medium text-white bg-[#2389E3] rounded-lg hover:bg-[#2389E3] transition-colors">
               Done
             </button>
           )}

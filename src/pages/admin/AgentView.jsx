@@ -532,7 +532,7 @@ const AgentView = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]"></div>
       </div>
     );
   }
@@ -545,7 +545,7 @@ const AgentView = () => {
         <p className="text-gray-500">The agent you're looking for doesn't exist.</p>
         <button
           onClick={() => navigate('/admin/agents')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="mt-4 px-4 py-2 bg-[#2389E3] text-white rounded-md hover:bg-[#2389E3]"
         >
           Back to Agents
         </button>
@@ -578,7 +578,7 @@ const AgentView = () => {
           
           <button
             onClick={handleOpenEditModal}
-            className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+            className="flex items-center px-3 py-1.5 bg-[#2389E3] text-white rounded-md hover:bg-[#2389E3] text-sm"
           >
             <PencilIcon className="h-3 w-3 mr-1.5" />
             Edit
@@ -611,7 +611,7 @@ const AgentView = () => {
               onClick={() => setActiveTab(tab)}
               className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
                 activeTab === tab
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-[#2389E3] text-[#2389E3]'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -946,7 +946,7 @@ const AgentView = () => {
                         value={editForm.first_name}
                         onChange={(e) => setEditForm(prev => ({ ...prev, first_name: e.target.value }))}
                         placeholder="Enter first name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                         required
                       />
                     </div>
@@ -962,7 +962,7 @@ const AgentView = () => {
                         value={editForm.last_name}
                         onChange={(e) => setEditForm(prev => ({ ...prev, last_name: e.target.value }))}
                         placeholder="Enter last name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                         required
                       />
                     </div>
@@ -978,7 +978,7 @@ const AgentView = () => {
                         value={editForm.address}
                         onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
                         placeholder="Enter address"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                       />
                     </div>
 
@@ -993,7 +993,7 @@ const AgentView = () => {
                         value={editForm.lga}
                         onChange={(e) => setEditForm(prev => ({ ...prev, lga: e.target.value }))}
                         placeholder="Enter location"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                       />
                     </div>
 
@@ -1009,13 +1009,13 @@ const AgentView = () => {
                           value={editForm.account_number}
                           onChange={(e) => setEditForm(prev => ({ ...prev, account_number: e.target.value }))}
                           placeholder="Enter account number"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                         />
                         <button
                           type="button"
                           onClick={verifyAccount}
                           disabled={isVerifyingAccount || !editForm.account_number || !selectedBank}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                          className="px-4 py-2 bg-[#2389E3] text-white rounded-md hover:bg-[#2389E3] disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
                         >
                           {isVerifyingAccount ? 'Verifying...' : 'Verify'}
                         </button>
@@ -1044,7 +1044,7 @@ const AgentView = () => {
                           }}
                           onFocus={() => setIsStateDropdownOpen(true)}
                           placeholder="Search and select state..."
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                         />
                         <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <button
@@ -1090,7 +1090,7 @@ const AgentView = () => {
                         value={editForm.phone}
                         onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                         placeholder="Enter phone number"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                       />
                     </div>
 
@@ -1105,7 +1105,7 @@ const AgentView = () => {
                         value={editForm.email}
                         onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                         placeholder="Enter email address"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                         required
                       />
                     </div>
@@ -1125,7 +1125,7 @@ const AgentView = () => {
                           }}
                           onFocus={() => setIsBankDropdownOpen(true)}
                           placeholder="Search and select bank..."
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                         />
                         <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <button
@@ -1171,7 +1171,7 @@ const AgentView = () => {
                         value={editForm.account_name}
                         onChange={(e) => setEditForm(prev => ({ ...prev, account_name: e.target.value }))}
                         placeholder="Enter account name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                       />
                     </div>
 
@@ -1210,7 +1210,7 @@ const AgentView = () => {
                         onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
                         rows={3}
                         placeholder="Enter any additional notes..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2389E3] focus:border-transparent text-sm"
                       />
                     </div>
                   </div>
@@ -1228,7 +1228,7 @@ const AgentView = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded-md font-medium transition-colors text-sm"
+                    className="bg-[#2389E3] hover:bg-[#2389E3] disabled:bg-[#2389E3]/50 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded-md font-medium transition-colors text-sm"
                   >
                     {isSubmitting ? 'Updating...' : 'Update Agent'}
                   </button>

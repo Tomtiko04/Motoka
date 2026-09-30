@@ -33,7 +33,7 @@ function CheckboxRow({ label, count, checked, onChange }) {
           type="checkbox"
           checked={checked}
           onChange={onChange}
-          className="h-4 w-4 cursor-pointer rounded border-[#D3D9DE] text-[#1A7ACF] focus:ring-[#1A7ACF]"
+          className="h-4 w-4 cursor-pointer rounded border-[#D3D9DE] text-[#2389E3] focus:ring-[#2389E3]"
         />
         <span className={`${checked ? "font-semibold text-[#05243F]" : "text-[#465465]"}`}>
           {label}
@@ -99,7 +99,7 @@ export default function FilterSidebar({
           {hasActiveFilters && (
             <button
               onClick={onClear}
-              className="text-[12px] font-semibold text-[#2389E3] hover:text-[#1a7acf]"
+              className="text-[12px] font-semibold text-[#2389E3] hover:text-[#2389E3]"
             >
               Reset
             </button>
@@ -110,7 +110,7 @@ export default function FilterSidebar({
           <select
             value={filters.sort || "newest"}
             onChange={(e) => onFiltersChange({ sort: e.target.value })}
-            className="w-full rounded-lg border border-[#E1E6F4] bg-white px-3 py-2 text-[13px] text-[#05243F] focus:border-[#1A7ACF] focus:outline-none"
+            className="w-full rounded-lg border border-[#E1E6F4] bg-white px-3 py-2 text-[13px] text-[#05243F] focus:border-[#2389E3] focus:outline-none"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -131,7 +131,7 @@ export default function FilterSidebar({
               onChange={(e) => setLocalPrice((p) => ({ ...p, min: e.target.value }))}
               onBlur={applyPrice}
               onKeyDown={(e) => e.key === "Enter" && applyPrice()}
-              className="w-full rounded-lg border border-[#E1E6F4] bg-white px-2 py-1.5 text-[12px] text-[#05243F] focus:border-[#1A7ACF] focus:outline-none"
+              className="w-full rounded-lg border border-[#E1E6F4] bg-white px-2 py-1.5 text-[12px] text-[#05243F] focus:border-[#2389E3] focus:outline-none"
             />
             <span className="text-[12px] text-[#8B98A5]">–</span>
             <input
@@ -143,7 +143,7 @@ export default function FilterSidebar({
               onChange={(e) => setLocalPrice((p) => ({ ...p, max: e.target.value }))}
               onBlur={applyPrice}
               onKeyDown={(e) => e.key === "Enter" && applyPrice()}
-              className="w-full rounded-lg border border-[#E1E6F4] bg-white px-2 py-1.5 text-[12px] text-[#05243F] focus:border-[#1A7ACF] focus:outline-none"
+              className="w-full rounded-lg border border-[#E1E6F4] bg-white px-2 py-1.5 text-[12px] text-[#05243F] focus:border-[#2389E3] focus:outline-none"
             />
           </div>
           {priceBounds.max > 0 && (

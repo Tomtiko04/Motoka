@@ -190,9 +190,9 @@ const AdminOrderDetails = () => {
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Order ${fmt(order?.order_number)}</title>
     <style>
       body { font-family: Arial, sans-serif; font-size: 13px; color: #111; margin: 0; padding: 24px; }
-      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 24px; }
-      .logo { font-size: 22px; font-weight: 700; color: #2563eb; }
-      .badge { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #1d4ed8; font-weight: 600; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2389E3; padding-bottom: 16px; margin-bottom: 24px; }
+      .logo { font-size: 22px; font-weight: 700; color: #2389E3; }
+      .badge { background: #eff6ff; border: 1px solid #[2389E3]/20; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #2389E3; font-weight: 600; }
       h2 { font-size: 15px; font-weight: 700; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin: 20px 0 12px; }
       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
       .item label { display: block; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
@@ -278,7 +278,7 @@ const AdminOrderDetails = () => {
 
     const statusConfig = {
       pending:    { color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon,        label: 'NEW' },
-      processing: { color: 'bg-blue-100 text-blue-800',     icon: ClockIcon,        label: 'IN PROGRESS' },
+      processing: { color: 'bg-[#2389E3]/10 text-[#2389E3]',     icon: ClockIcon,        label: 'IN PROGRESS' },
       completed:  { color: 'bg-green-100 text-green-800',   icon: CheckCircleIcon,  label: 'COMPLETED' },
       cancelled:  { color: 'bg-red-100 text-red-800',       icon: XCircleIcon,      label: 'CANCELLED' },
     };
@@ -307,7 +307,7 @@ const AdminOrderDetails = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]"></div>
       </div>
     );
   }
@@ -387,7 +387,7 @@ const AdminOrderDetails = () => {
                     {order.selected_items.map((item) => (
                       <span
                         key={item}
-                        className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                        className="inline-flex items-center rounded-full bg-[#2389E3]/5 px-3 py-1 text-xs font-medium text-[#2389E3]"
                       >
                         {String(item).split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                       </span>
@@ -613,7 +613,7 @@ const AdminOrderDetails = () => {
                   <button
                     onClick={() => handleStatusUpdate('processing')}
                     disabled={statusUpdating}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                    className="w-full bg-[#2389E3] text-white py-2 px-4 rounded-lg hover:bg-[#2389E3] disabled:opacity-50 font-medium text-sm"
                   >
                     {statusUpdating ? 'Updating...' : 'Mark In Progress'}
                   </button>
@@ -642,7 +642,7 @@ const AdminOrderDetails = () => {
                       <select
                         value={uploadCategory}
                         onChange={(e) => setUploadCategory(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#2389E3] focus:outline-none focus:ring-1 focus:ring-[#2389E3]"
                       >
                         {DOC_CATEGORIES.map((c) => (
                           <option key={c.value} value={c.value}>{c.label}</option>
@@ -653,12 +653,12 @@ const AdminOrderDetails = () => {
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,.webp"
                         onChange={(e) => setUploadFile(e.target.files[0] || null)}
-                        className="w-full text-sm text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                        className="w-full text-sm text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-[#2389E3]/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#2389E3] hover:file:bg-[#2389E3]/10"
                       />
                       <button
                         onClick={handleDocumentUpload}
                         disabled={uploading || !uploadFile}
-                        className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        className="w-full bg-[#2389E3] text-white py-2 rounded-lg text-sm font-medium hover:bg-[#2389E3] disabled:opacity-50 transition-colors"
                       >
                         {uploading ? 'Uploading…' : 'Upload'}
                       </button>
@@ -666,13 +666,13 @@ const AdminOrderDetails = () => {
                     {/* Uploaded docs list */}
                     {docsLoading ? (
                       <div className="flex justify-center py-3 border-t border-gray-100">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2389E3]" />
                       </div>
                     ) : documents.length > 0 && (
                       <div className="border-t border-gray-100 divide-y divide-gray-50">
                         {documents.map((doc) => (
                           <div key={doc.id} className="flex items-center gap-2 px-3 py-2">
-                            <DocumentIcon className="h-4 w-4 text-blue-500 shrink-0" />
+                            <DocumentIcon className="h-4 w-4 text-[#2389E3] shrink-0" />
                             <span className="text-xs text-gray-700 flex-1 truncate">
                               {DOC_CATEGORIES.find((c) => c.value === doc.document_category)?.label || 'Document'}
                             </span>
@@ -728,7 +728,7 @@ const AdminOrderDetails = () => {
                   <button
                     onClick={handleReopenOrder}
                     disabled={statusUpdating}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                    className="w-full bg-[#2389E3] text-white py-2 px-4 rounded-lg hover:bg-[#2389E3] disabled:opacity-50 font-medium text-sm"
                   >
                     {statusUpdating ? 'Reopening…' : 'Reopen Order'}
                   </button>

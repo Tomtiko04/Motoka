@@ -30,7 +30,7 @@ function Header() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`mx-4 text-base font-normal hover:text-[#126cbb] ${item.name === "Home" ? "text-[#2388E1] bg-[#FFFFFF] rounded-lg px-8 py-2 font-bold" : "text-[#05243F99]"}`}
+                className={`mx-4 text-base font-normal hover:text-[#2389E3] ${item.name === "Home" ? "text-[#2389E3] bg-[#FFFFFF] rounded-lg px-8 py-2 font-bold" : "text-[#05243F99]"}`}
               >
                 {item.name}
               </Link>
@@ -39,7 +39,7 @@ function Header() {
           {/* Mobile Nav Toggle */}
           <div className="flex items-center gap-2">
             <button 
-             className="hidden md:block rounded-[10px] border-[1.7px] border-[#2287E0] text-[#05243F] hover:text-white hover:bg-[#2287E0] transition-colors duration-300 ease-in-out px-8 py-2 text-base font-semibold sm:mt-0 "
+             className="hidden md:block rounded-[10px] border-[1.7px] border-[#2389E3] text-[#05243F] hover:text-white hover:bg-[#2389E3] transition-colors duration-300 ease-in-out px-8 py-2 text-base font-semibold sm:mt-0 "
              onClick={() => navigate("/auth/login")}
              >
               Login
@@ -72,7 +72,7 @@ function Header() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`block py-2 text-base font-normal hover:text-[#126cbb] ${item.name === "Home" ? "text-[#2388E1]" : "text-[#05243F99]"}`}
+                className={`block py-2 text-base font-normal hover:text-[#2389E3] ${item.name === "Home" ? "text-[#2389E3]" : "text-[#05243F99]"}`}
                 onClick={() => setMenuOpen(false)}
               >
                 {item.name}
@@ -80,7 +80,7 @@ function Header() {
 
             ))}
             <button 
-             className="rounded-[10px] border-[1.7px] border-[#2287E0] text-white bg-[#2287E0] transition-colors duration-300 ease-in-out px-8 py-2 text-base font-semibold sm:mt-0 "
+             className="rounded-[10px] border-[1.7px] border-[#2389E3] text-white bg-[#2389E3] transition-colors duration-300 ease-in-out px-8 py-2 text-base font-semibold sm:mt-0 "
              onClick={() => navigate("/auth/login")}
              >
               Login

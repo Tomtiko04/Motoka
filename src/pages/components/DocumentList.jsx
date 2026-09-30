@@ -116,7 +116,7 @@ function DocumentList({
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-5">
@@ -169,9 +169,9 @@ function DocumentList({
             <div className="relative h-full w-full z-10 p-4 flex flex-col justify-between">
               <div className="w-[30px] h-[30px] flex items-center justify-center bg-[#D2E2F0] rounded-[10px]">
                 {isUploading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#2284DB] border-t-transparent" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#2389E3] border-t-transparent" />
                 ) : (
-                  <Icon icon="lets-icons:add-round" fontSize={24} color="#2284DB" />
+                  <Icon icon="lets-icons:add-round" fontSize={24} color="#2389E3" />
                 )}
               </div>
               <p className="text-[#05243F] text-[16px] font-semibold">
@@ -196,7 +196,7 @@ function DocumentList({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3]"
               >
                 <option value="">Select category (optional)</option>
                 {CAR_DOC_CATEGORIES.map((c) => (
@@ -212,7 +212,7 @@ function DocumentList({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g. Vehicle license renewed Jan 2026"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2389E3]"
               />
             </div>
 
@@ -226,7 +226,7 @@ function DocumentList({
               <button
                 onClick={handleUploadConfirm}
                 disabled={isUploading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#2389E3] text-white rounded-lg text-sm hover:bg-[#2389E3] disabled:opacity-50"
               >
                 {isUploading ? "Uploading…" : "Upload"}
               </button>

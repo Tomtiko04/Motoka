@@ -110,7 +110,7 @@ const AdminVehicleDocs = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]" />
         <p className="ml-4 text-sm text-gray-600">Loading prices…</p>
       </div>
     );
@@ -183,7 +183,7 @@ const AdminVehicleDocs = () => {
                     {/* Required badge */}
                     <td className="px-5 py-4 whitespace-nowrap">
                       {item.required ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#2389E3]/10 text-[#2389E3]">
                           Required
                         </span>
                       ) : (
@@ -219,7 +219,7 @@ const AdminVehicleDocs = () => {
                             onChange={(e) => setEditValue(e.target.value)}
                             onKeyDown={(e) => handleKeyDown(e, item)}
                             autoFocus
-                            className="w-32 border border-blue-400 rounded-md px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-32 border border-[#2389E3] rounded-md px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
                           />
                         </div>
                       ) : (
@@ -239,7 +239,7 @@ const AdminVehicleDocs = () => {
                             onClick={() => saveEdit(item)}
                             disabled={saving}
                             title="Save"
-                            className="flex items-center justify-center h-8 w-8 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="flex items-center justify-center h-8 w-8 rounded-md bg-[#2389E3] text-white hover:bg-[#2389E3] disabled:opacity-50 transition-colors"
                           >
                             {saving ? (
                               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -260,7 +260,7 @@ const AdminVehicleDocs = () => {
                         <button
                           onClick={() => startEdit(item)}
                           title="Edit price"
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2389E3] bg-[#2389E3]/5 rounded-md hover:bg-[#2389E3]/10 transition-colors"
                         >
                           <PencilSquareIcon className="h-3.5 w-3.5" />
                           Edit

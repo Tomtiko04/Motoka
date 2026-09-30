@@ -111,7 +111,7 @@ const AdminAgents = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2389E3]"></div>
       </div>
     );
   }
@@ -132,7 +132,7 @@ const AdminAgents = () => {
             onClick={() => setActiveFilter(filter)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               activeFilter === filter
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#2389E3] text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -164,7 +164,7 @@ const AdminAgents = () => {
                   />
                 ) : null}
                 <div 
-                  className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl"
+                  className="w-full h-full bg-gradient-to-br from-[#2389E3]/60 to-[#2389E3] rounded-full flex items-center justify-center text-white font-bold text-xl"
                   style={{ display: agent.profile_image ? 'none' : 'flex' }}
                 >
                   {agent.name.split(' ').map(n => n[0]).join('').toUpperCase()}
@@ -206,12 +206,12 @@ const AdminAgents = () => {
       <div className="flex justify-center mt-8">
         <div 
           onClick={() => navigate('/admin/agents/create')}
-          className="bg-gray-50 rounded-2xl border-2 border-dashed border-blue-400 p-8 max-w-sm w-full text-center hover:bg-blue-50 hover:border-blue-500 transition-all duration-300 cursor-pointer group"
+          className="bg-gray-50 rounded-2xl border-2 border-dashed border-[#2389E3] p-8 max-w-sm w-full text-center hover:bg-[#2389E3]/5 hover:border-[#2389E3] transition-all duration-300 cursor-pointer group"
         >
-          <div className="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+          <div className="w-20 h-20 bg-[#2389E3] rounded-full mx-auto mb-4 flex items-center justify-center group-hover:bg-[#2389E3] transition-colors">
             <PlusIcon className="h-10 w-10 text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Create New Agent</h3>
+          <h3 className="text-lg font-semibold text-gray-800 group-hover:text-[#2389E3] transition-colors">Create New Agent</h3>
         </div>
       </div>
     </div>

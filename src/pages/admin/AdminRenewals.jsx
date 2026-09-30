@@ -55,11 +55,11 @@ function UrgencyBadge({ daysLeft, message, state }) {
   const inProgress = state === 'in_progress';
 
   const style =
-    inProgress ? 'bg-blue-100 text-blue-800'
+    inProgress ? 'bg-[#2389E3]/10 text-[#2389E3]'
     : daysLeft < 0 ? 'bg-red-100 text-red-800'
     : daysLeft === 0 ? 'bg-orange-100 text-orange-800'
     : daysLeft <= 7 ? 'bg-yellow-100 text-yellow-800'
-    : 'bg-blue-100 text-blue-800';
+    : 'bg-[#2389E3]/10 text-[#2389E3]';
 
   return (
     <span className={`inline-block text-xs font-semibold px-2 py-1 rounded whitespace-nowrap ${style}`}>
@@ -72,7 +72,7 @@ function RenewalStateBadge({ state, openOrder, cancelledOrder }) {
   if (state === 'in_progress') {
     return (
       <span
-        className="inline-block rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800"
+        className="inline-block rounded bg-[#2389E3]/10 px-2 py-1 text-xs font-semibold text-[#2389E3]"
         title={openOrder ? `Order ${openOrder} is open` : undefined}
       >
         Renewal in progress — don&apos;t call
@@ -200,7 +200,7 @@ function MarkChannelModal({ pending, confirming, onCancel, onConfirm }) {
             type="button"
             onClick={onConfirm}
             disabled={confirming}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-[#2389E3] text-white hover:bg-[#2389E3] disabled:opacity-50"
           >
             {confirming ? 'Saving…' : `Confirm ${label}`}
           </button>
@@ -219,7 +219,7 @@ function RenewalChannelCell({ row, disabled, onMark }) {
           type="button"
           disabled={disabled}
           onClick={() => onMark(row, 'internal')}
-          className="px-2 py-1 text-[11px] font-semibold rounded-md border border-blue-200 text-blue-800 bg-blue-50 hover:bg-blue-100 disabled:opacity-40"
+          className="px-2 py-1 text-[11px] font-semibold rounded-md border border-[#2389E3]/20 text-[#2389E3] bg-[#2389E3]/5 hover:bg-[#2389E3]/10 disabled:opacity-40"
         >
           Internal
         </button>
@@ -251,14 +251,14 @@ function ContactLinks({ email, phone }) {
   return (
     <div className="flex flex-col gap-1 text-xs">
       {email && (
-        <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 text-blue-600 hover:underline break-all">
+        <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 text-[#2389E3] hover:underline break-all">
           <EnvelopeIcon className="h-3.5 w-3.5 shrink-0" />
           {email}
         </a>
       )}
       {phone && (
         <span className="inline-flex items-center gap-2">
-          <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 text-blue-600 hover:underline">
+          <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 text-[#2389E3] hover:underline">
             <PhoneIcon className="h-3.5 w-3.5 shrink-0" />
             {phone}
           </a>
@@ -448,7 +448,7 @@ const AdminRenewals = () => {
             <select
               value={month}
               onChange={(e) => selectMonth(e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
             >
               <option value="">All months</option>
               {byMonth.map((m) => (
@@ -508,7 +508,7 @@ const AdminRenewals = () => {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search plate, vehicle, owner name, email or phone…"
-              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
             />
           </form>
         )}

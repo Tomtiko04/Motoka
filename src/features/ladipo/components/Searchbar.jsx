@@ -68,7 +68,7 @@ export default function SearchBar({
       {/* Mobile: stacked vertically. sm+: side by side */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         {/* Search Input — always full width */}
-        <div className="relative flex flex-1 items-center bg-[#F0F4F8] rounded-full p-1 border border-transparent focus-within:bg-white focus-within:border-[#46A2EC] transition-all">
+        <div className="relative flex flex-1 items-center bg-[#F0F4F8] rounded-full p-1 border border-transparent focus-within:bg-white focus-within:border-[#2389E3] transition-all">
           <Search className="absolute left-5 text-[#8A9EB0] pointer-events-none" size={18} />
           <input
             type="text"
@@ -88,7 +88,7 @@ export default function SearchBar({
           )}
           <button
             onClick={() => handleSearch()}
-            className="absolute right-1 w-[84px] h-[calc(100%-8px)] rounded-full bg-[#46A2EC] hover:bg-[#2389E3] text-white text-[13px] font-bold transition-colors flex items-center justify-center cursor-pointer"
+            className="absolute right-1 w-[84px] h-[calc(100%-8px)] rounded-full bg-[#2389E3] hover:bg-[#2389E3] text-white text-[13px] font-bold transition-colors flex items-center justify-center cursor-pointer"
           >
             Search
           </button>

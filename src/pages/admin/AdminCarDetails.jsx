@@ -42,7 +42,7 @@ const StatusPill = ({ status }) => {
     approved:  { bg: 'bg-green-100 text-green-800',  label: 'Approved' },
     unpaid:    { bg: 'bg-yellow-100 text-yellow-800', label: 'Renewal Due' },
     expired:   { bg: 'bg-red-100 text-red-800',       label: 'Expired' },
-    pending:   { bg: 'bg-blue-100 text-blue-800',     label: 'Pending' },
+    pending:   { bg: 'bg-[#2389E3]/10 text-[#2389E3]',     label: 'Pending' },
     completed: { bg: 'bg-green-100 text-green-800',   label: 'Completed' },
     processing:{ bg: 'bg-orange-100 text-orange-800',label: 'In Progress' },
     cancelled: { bg: 'bg-gray-100 text-gray-600',     label: 'Cancelled' },
@@ -239,7 +239,7 @@ const AdminCarDetails = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#2389E3]" />
       </div>
     );
   }
@@ -378,8 +378,8 @@ const AdminCarDetails = () => {
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Owner Information</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                <UserIcon className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3]/5">
+                <UserIcon className="h-5 w-5 text-[#2389E3]" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">{car.name_of_owner || car.user?.name || 'N/A'}</p>
@@ -430,7 +430,7 @@ const AdminCarDetails = () => {
                   {order.selected_items?.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {order.selected_items.map(item => (
-                        <span key={item} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                        <span key={item} className="rounded-full bg-[#2389E3]/5 px-2 py-0.5 text-xs text-[#2389E3]">
                           {formatScheduleName(item)}
                         </span>
                       ))}
@@ -500,7 +500,7 @@ const AdminCarDetails = () => {
               <select
                 value={uploadCategory}
                 onChange={e => setUploadCategory(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#2389E3] focus:outline-none focus:ring-1 focus:ring-[#2389E3]"
               >
                 {DOC_CATEGORIES.map(c => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -514,13 +514,13 @@ const AdminCarDetails = () => {
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.webp"
                 onChange={e => setUploadFile(e.target.files[0] || null)}
-                className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#2389E3]/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#2389E3] hover:file:bg-[#2389E3]/10"
               />
             </div>
             <button
               type="submit"
               disabled={uploading || !uploadFile}
-              className="shrink-0 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="shrink-0 rounded-lg bg-[#2389E3] px-5 py-2 text-sm font-medium text-white hover:bg-[#2389E3] disabled:opacity-50 transition-colors"
             >
               {uploading ? 'Uploading…' : 'Upload'}
             </button>
@@ -530,15 +530,15 @@ const AdminCarDetails = () => {
         {/* Document List */}
         {docsLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#2389E3]" />
           </div>
         ) : documents.length > 0 ? (
           <div className="divide-y divide-gray-50">
             {documents.map((doc) => (
               <div key={doc.id} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                    <DocumentIcon className="h-5 w-5 text-blue-600" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2389E3]/5">
+                    <DocumentIcon className="h-5 w-5 text-[#2389E3]" />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-gray-900">

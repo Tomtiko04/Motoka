@@ -138,7 +138,7 @@ export default function FundWalletModal({ open, onClose }) {
         <button
           onClick={handleContinue}
           disabled={submitting || quoting || !quote}
-          className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#1b6dbd] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[#2389E3] px-4 py-3 text-base font-semibold text-white transition-all hover:bg-[#2389E3] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Redirecting…</> : <>Continue to pay {quote ? naira(quote.total_charge_naira) : ""}</>}
         </button>

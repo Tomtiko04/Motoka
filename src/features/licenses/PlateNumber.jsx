@@ -8,7 +8,7 @@ const plateType = [
     title: "New Plate Number",
     description:
       "Ideal for cars that are new or foreign used, or for cars that have been registered but has changed ownership",
-    icon: <BsArrowRight className="text-2xl text-[#2284DB]" />,
+    icon: <BsArrowRight className="text-2xl text-[#2389E3]" />,
     link: "new-plate-number",
   },
 ];

@@ -108,7 +108,7 @@ export default function AllCategoriesModal({ open, onClose }) {
                 <section key={parent.id}>
                   <button
                     onClick={() => handlePickMain(parent)}
-                    className="mb-3 text-left text-[15px] font-bold text-[#05243F] hover:text-[#1A7ACF]"
+                    className="mb-3 text-left text-[15px] font-bold text-[#05243F] hover:text-[#2389E3]"
                   >
                     {parent.name}
                   </button>
@@ -118,7 +118,7 @@ export default function AllCategoriesModal({ open, onClose }) {
                         <button
                           key={sub.id}
                           onClick={() => handlePickSub(parent, sub)}
-                          className="rounded-full border border-[#E1E6F4] px-3 py-1.5 text-[12px] font-semibold text-[#05243F] hover:border-[#1A7ACF] hover:bg-[#1A7ACF]/5 hover:text-[#1A7ACF]"
+                          className="rounded-full border border-[#E1E6F4] px-3 py-1.5 text-[12px] font-semibold text-[#05243F] hover:border-[#2389E3] hover:bg-[#2389E3]/5 hover:text-[#2389E3]"
                         >
                           {sub.name}
                         </button>

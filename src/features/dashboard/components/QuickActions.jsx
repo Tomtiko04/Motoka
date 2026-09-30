@@ -79,7 +79,7 @@ export default function QuickActions() {
           <Link
             key={index}
             to={action.link}
-            className="group relative flex h-[161px] flex-col justify-between rounded-3xl border-2 border-transparent bg-white px-2 py-6 will-change-transform hover:border-2 hover:border-[#45A1F2] hover:shadow-lg sm:px-4"
+            className="group relative flex h-[161px] flex-col justify-between rounded-3xl border-2 border-transparent bg-white px-2 py-6 will-change-transform hover:border-2 hover:border-[#2389E3] hover:shadow-lg sm:px-4"
             style={{ transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
             {/* Coming Soon Badge */}
@@ -106,7 +106,7 @@ export default function QuickActions() {
               </div>
               <div className="flex w-full items-center justify-between">
                 <h3
-                  className="text-base leading-tight font-normal whitespace-pre-line text-[#05243F] group-hover:text-[#45A1F2]"
+                  className="text-base leading-tight font-normal whitespace-pre-line text-[#05243F] group-hover:text-[#2389E3]"
                   style={{
                     transition: "color 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
@@ -114,7 +114,7 @@ export default function QuickActions() {
                   {action.title}
                 </h3>
                 <div
-                  className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#45A1F2]"
+                  className="text-[#697B8C] group-hover:translate-x-1 group-hover:text-[#2389E3]"
                   style={{
                     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
