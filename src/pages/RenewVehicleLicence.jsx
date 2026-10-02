@@ -3,7 +3,10 @@ import PlateRenewCta from "../components/PlateRenewCta";
 import Seo from "../components/Seo";
 import { absoluteUrl } from "../utils/site";
 
-const PATH = "/renew-vehicle-licence";
+// This route (/renew-vehicle-licence) targets the same query as
+// /renew/vehicle-license, so canonical + schema point there and it stays
+// out of the prerender/sitemap lists (see scripts/prerender.js).
+const CANONICAL_PATH = "/renew/vehicle-license";
 const TITLE = "How to renew a vehicle licence online in Nigeria";
 const DESCRIPTION =
   "Renew your vehicle licence and papers online in Nigeria. Enter your plate number, pay, and Motoka processes the documents. Works as a guest — no account required.";
@@ -66,7 +69,7 @@ const jsonLd = [
     "@type": "HowTo",
     name: TITLE,
     description: DESCRIPTION,
-    url: absoluteUrl(PATH),
+    url: absoluteUrl(CANONICAL_PATH),
     step: STEPS.map((step, index) => ({
       "@type": "HowToStep",
       position: index + 1,
@@ -94,14 +97,14 @@ const jsonLd = [
     },
     areaServed: "NG",
     serviceType: "Vehicle document renewal",
-    url: absoluteUrl(PATH),
+    url: absoluteUrl(CANONICAL_PATH),
   },
 ];
 
 export default function RenewVehicleLicence() {
   return (
     <article className="px-6 py-12 sm:px-10 sm:py-16">
-      <Seo title={TITLE} description={DESCRIPTION} path={PATH} jsonLd={jsonLd} />
+      <Seo title={TITLE} description={DESCRIPTION} path={CANONICAL_PATH} jsonLd={jsonLd} />
       <div className="mx-auto max-w-3xl">
         <p className="text-sm font-semibold uppercase tracking-wide text-[#2389E3]">
           Vehicle documents

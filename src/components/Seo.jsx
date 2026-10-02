@@ -25,7 +25,7 @@ function upsertMeta(selector, attrs) {
   Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
 }
 
-export default function Seo({ title, description, path = "/", jsonLd }) {
+export default function Seo({ title, description, path = "/", jsonLd, noindex = false }) {
   const url = absoluteUrl(path);
   const fullTitle = title
     ? title.includes("Motoka")
@@ -65,7 +65,20 @@ export default function Seo({ title, description, path = "/", jsonLd }) {
       property: "og:image",
       content: absoluteUrl("/icons/icon-512.png"),
     });
-  }, [fullTitle, description, url]);
+
+    // Soft-404 guard: unknown paths boot from the homepage snapshot, so
+    // without this they look like indexable homepage duplicates. noindex
+    // tells crawlers to drop the URL instead. Removed on real pages so it
+    // never leaks across client-side navigation.
+    if (noindex) {
+      upsertMeta('meta[name="robots"]', {
+        name: "robots",
+        content: "noindex",
+      });
+    } else {
+      document.head.querySelector('meta[name="robots"]')?.remove();
+    }
+  }, [fullTitle, description, url, noindex]);
 
   // Structured data is removed on unmount — unlike the tags above it is not
   // overwritten by the next route, so leaving it would attach one page's

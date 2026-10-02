@@ -212,6 +212,7 @@ export default function App() {
           {/* Auth Routes */}
           <Route element={<BlogLayout />} >
           <Route path="blogs" element={<BlogsPage />} />
+          <Route path="/blog" element={<Navigate to="/blogs" replace />} />
           <Route path="/blog/:slug" element={<BlogPage />} />
          </Route> 
 

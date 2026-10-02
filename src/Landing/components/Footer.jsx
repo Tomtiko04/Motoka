@@ -89,7 +89,7 @@ function Footer() {
           {
             title: "Services",
             links: [
-              { label: "License Auto Renewal", to: "/renew-vehicle-licence" },
+              { label: "License Auto Renewal", to: "/renew/vehicle-license" },
               { label: "License Auto Reminder", to: "/reminders" },
               // /ladipo is behind ProtectedRoute — a signed-out visitor is sent
               // to login, which is expected for a marketplace. /traffic-rules is

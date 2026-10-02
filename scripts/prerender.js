@@ -37,7 +37,9 @@ const STATIC_ROUTES = [
   '/how-it-works',
   '/guides',
   '/reminders',
-  '/renew-vehicle-licence',
+  // NOTE: /renew-vehicle-licence is deliberately absent — it canonicalizes
+  // to /renew/vehicle-license (see src/pages/RenewVehicleLicence.jsx), so
+  // prerendering it would also put it back in sitemap.xml.
   '/renew/vehicle-license',
   '/renew/road-worthiness',
   '/renew/drivers-license',

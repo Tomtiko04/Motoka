@@ -1,9 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Seo from "./Seo";
 
 export default function NotFound404() {
   return (
     <div className="flex h-screen justify-center">
+      <Seo
+        title="Page not found"
+        description="The page you're looking for doesn't exist or may have been moved."
+        path="/404"
+        noindex
+      />
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="w-full max-w-xl rounded-2xl bg-white p-8 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#E1E6F4] text-[#2389E3]">

@@ -26,7 +26,7 @@ export default function DriverGuides() {
         </h2>
         <ol className="list-decimal space-y-2 pl-5">
           <li>On Motoka, enter your plate on the{" "}
-            <Link to="/renew-vehicle-licence" className="font-semibold text-[#2389E3] hover:underline">
+            <Link to="/renew/vehicle-license" className="font-semibold text-[#2389E3] hover:underline">
               vehicle licence renewal
             </Link>{" "}
             page, or log in and open Licenses.</li>
