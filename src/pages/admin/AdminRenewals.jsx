@@ -225,7 +225,7 @@ function RenewalChannelCell({ row, disabled, onMark }) {
           type="button"
           disabled={disabled}
           onClick={() => onMark(row, 'internal')}
-          className="px-2 py-1 text-[11px] font-semibold rounded-lg border border-blue-200 text-blue-800 bg-blue-50 hover:bg-blue-100 disabled:opacity-40"
+          className="px-2 py-1 text-[11px] font-semibold rounded-lg border border-[#2389E3]/20 text-[#2389E3] bg-[#2389E3]/5 hover:bg-[#2389E3]/10 disabled:opacity-40"
         >
           Internal
         </button>
@@ -257,14 +257,14 @@ function ContactLinks({ email, phone }) {
   return (
     <div className="flex flex-col gap-1 text-xs">
       {email && (
-        <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 text-blue-600 hover:underline break-all">
+        <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 text-[#2389E3] hover:underline break-all">
           <EnvelopeIcon className="h-3.5 w-3.5 shrink-0" />
           {email}
         </a>
       )}
       {phone && (
         <span className="inline-flex items-center gap-2">
-          <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 text-blue-600 hover:underline">
+          <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 text-[#2389E3] hover:underline">
             <PhoneIcon className="h-3.5 w-3.5 shrink-0" />
             {phone}
           </a>
@@ -459,7 +459,7 @@ const AdminRenewals = () => {
             <select
               value={month}
               onChange={(e) => selectMonth(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               <option value="">All months</option>
               {byMonth.map((m) => (

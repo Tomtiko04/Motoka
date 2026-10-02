@@ -527,10 +527,10 @@ export default function AdminLadipo() {
     }).length;
 
     return [
-      { label: 'New today', value: newToday, tone: 'text-blue-700 bg-blue-50' },
+      { label: 'New today', value: newToday, tone: 'text-[#2389E3] bg-[#2389E3]/5' },
       { label: 'Needs action', value: needsAction, tone: 'text-amber-700 bg-amber-50' },
-      { label: 'Preparing', value: processing, tone: 'text-blue-700 bg-blue-50' },
-      { label: 'Out / Ready', value: outForDelivery, tone: 'text-blue-700 bg-blue-50' },
+      { label: 'Preparing', value: processing, tone: 'text-[#2389E3] bg-[#2389E3]/5' },
+      { label: 'Out / Ready', value: outForDelivery, tone: 'text-[#2389E3] bg-[#2389E3]/5' },
       { label: 'Delivered today', value: deliveredToday, tone: 'text-green-700 bg-green-50' },
       { label: 'Cancelled rate', value: `${cancellationRate}%`, tone: 'text-red-700 bg-red-50' },
     ];
@@ -1272,7 +1272,7 @@ export default function AdminLadipo() {
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
                   placeholder="Search order number…"
-                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                 />
               </div>
 
@@ -1280,7 +1280,7 @@ export default function AdminLadipo() {
               <select
                 value={orderStatus}
                 onChange={(e) => setOrderStatus(e.target.value)}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500"
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2389E3]"
               >
                 {ORDER_STATUSES.map((status) => (
                   <option key={status} value={status}>
@@ -1324,8 +1324,8 @@ export default function AdminLadipo() {
                   onClick={() => setQuickOrderView(view.key)}
                   className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
                     quickOrderView === view.key
-                      ? 'border-blue-600 bg-blue-600 text-white'
-                      : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-blue-600/40 hover:text-blue-600'
+                      ? 'border-[#2389E3] bg-[#2389E3] text-white'
+                      : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-[#2389E3]/40 hover:text-[#2389E3]'
                   }`}
                 >
                   {view.label}
@@ -1348,7 +1348,7 @@ export default function AdminLadipo() {
                 : 'Select all'}
             </button>
             {selectedOrderNumbers.length > 0 && (
-              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
+              <span className="rounded-full bg-[#2389E3]/5 px-2 py-0.5 text-xs font-semibold text-[#2389E3]">
                 {selectedOrderNumbers.length} selected
               </span>
             )}
@@ -1464,7 +1464,7 @@ export default function AdminLadipo() {
                       : `${Math.floor(diffMin / 1440)}d ago`;
 
                     return (
-                      <tr key={order.id} className="group hover:bg-blue-50/30 transition-colors">
+                      <tr key={order.id} className="group hover:bg-[#2389E3]/5 transition-colors">
                         <td className={`px-3 ${rowPaddingClass}`}>
                           <input
                             type="checkbox"
@@ -1548,7 +1548,7 @@ export default function AdminLadipo() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openOrderDetails(order.order_number)}
-                              className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-600 hover:border-blue-600 hover:text-blue-600"
+                              className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-600 hover:border-[#2389E3] hover:text-[#2389E3]"
                             >
                               View
                             </button>
@@ -1630,7 +1630,7 @@ export default function AdminLadipo() {
                   value={productQuery}
                   onChange={(e) => setProductQuery(e.target.value)}
                   placeholder="Search name, slug, product brand…"
-                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                   aria-label="Search products"
                 />
               </div>
@@ -1639,7 +1639,7 @@ export default function AdminLadipo() {
                 onChange={(e) => setProductBrand(e.target.value)}
                 disabled={productFiltersLoading}
                 aria-label="Filter products by brand"
-                className="min-w-[150px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                className="min-w-[150px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20 disabled:opacity-50"
               >
                 <option value="">All product brands</option>
                 {productFilters.brands.map((brand) => <option key={brand} value={brand}>{brand}</option>)}
@@ -1649,7 +1649,7 @@ export default function AdminLadipo() {
                 onChange={(e) => setProductMake(e.target.value)}
                 disabled={productFiltersLoading}
                 aria-label="Filter products by compatible vehicle make"
-                className="min-w-[170px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                className="min-w-[170px] rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20 disabled:opacity-50"
               >
                 <option value="">All compatible vehicle makes</option>
                 {productFilters.makes.map((make) => <option key={make} value={make}>{make}</option>)}
@@ -1729,7 +1729,7 @@ export default function AdminLadipo() {
                       key={product.id}
                       className={`flex items-center gap-2.5 rounded-xl border bg-white px-3 py-2 shadow-sm transition-colors ${
                         isEditing || isViewing
-                          ? 'border-blue-600 ring-1 ring-blue-600/20'
+                          ? 'border-[#2389E3] ring-1 ring-[#2389E3]/20'
                           : 'border-gray-100 hover:border-gray-200'
                       }`}
                     >
@@ -1751,7 +1751,7 @@ export default function AdminLadipo() {
                           {[catLabel, product.brand].filter(Boolean).join(' · ') || product.slug}
                         </p>
                         <div className="mt-0.5 flex items-center gap-2 text-[11px]">
-                          <span className="font-semibold text-blue-600">{formatPrice(product.inventory?.price_kobo)}</span>
+                          <span className="font-semibold text-[#2389E3]">{formatPrice(product.inventory?.price_kobo)}</span>
                           <span className="text-gray-400">Stock: <span className="font-medium text-gray-600">{product.inventory?.stock_qty ?? 0}</span></span>
                           <StatusBadge tone={product.is_active ? 'green' : 'gray'}>
                             {product.is_active ? 'Active' : 'Hidden'}
@@ -1770,8 +1770,8 @@ export default function AdminLadipo() {
                           }}
                           className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                             isViewing
-                              ? 'border-blue-600 bg-blue-600 text-white'
-                              : 'border-gray-200 text-gray-600 hover:border-blue-600 hover:text-blue-600'
+                              ? 'border-[#2389E3] bg-[#2389E3] text-white'
+                              : 'border-gray-200 text-gray-600 hover:border-[#2389E3] hover:text-[#2389E3]'
                           }`}
                         >
                           View
@@ -1785,8 +1785,8 @@ export default function AdminLadipo() {
                           }}
                           className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                             isEditing
-                              ? 'border-blue-600 bg-blue-600 text-white'
-                              : 'border-gray-200 text-gray-600 hover:border-blue-600 hover:text-blue-600'
+                              ? 'border-[#2389E3] bg-[#2389E3] text-white'
+                              : 'border-gray-200 text-gray-600 hover:border-[#2389E3] hover:text-[#2389E3]'
                           }`}
                         >
                           Edit
@@ -1833,7 +1833,7 @@ export default function AdminLadipo() {
                 type="button"
                 onClick={resetProductForm}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  productPanelMode === 'add' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'
+                  productPanelMode === 'add' ? 'bg-[#2389E3] text-white' : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
                 + Add product
@@ -1898,7 +1898,7 @@ export default function AdminLadipo() {
                   <div className="flex gap-4 rounded-xl bg-gray-50 px-4 py-3">
                     <div>
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">Price</p>
-                      <p className="text-base font-bold text-blue-600">{formatPrice(vp.inventory?.price_kobo)}</p>
+                      <p className="text-base font-bold text-[#2389E3]">{formatPrice(vp.inventory?.price_kobo)}</p>
                     </div>
                     <div className="ml-auto text-right">
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">Stock</p>
@@ -2008,7 +2008,7 @@ export default function AdminLadipo() {
                       });
                     }}
                     placeholder="e.g. Front brake pads"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                     required
                   />
                 </div>
@@ -2023,7 +2023,7 @@ export default function AdminLadipo() {
                           slugManuallyEdited.current = false;
                           setProductForm((prev) => ({ ...prev, slug: slugifyFromName(prev.name) }));
                         }}
-                        className="text-xs font-semibold text-blue-600 hover:underline"
+                        className="text-xs font-semibold text-[#2389E3] hover:underline"
                       >
                         Regenerate
                       </button>
@@ -2036,7 +2036,7 @@ export default function AdminLadipo() {
                       setProductForm((prev) => ({ ...prev, slug: e.target.value }));
                     }}
                     placeholder="unique-slug"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                     required
                   />
                 </div>
@@ -2046,7 +2046,7 @@ export default function AdminLadipo() {
                   <select
                     value={productForm.category_id}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, category_id: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                     required
                   >
                     <option value="">Select category</option>
@@ -2068,7 +2068,7 @@ export default function AdminLadipo() {
                     value={productForm.brand}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, brand: e.target.value }))}
                     placeholder="Optional"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                   />
                 </div>
 
@@ -2079,7 +2079,7 @@ export default function AdminLadipo() {
                     onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Shown on the product page"
                     rows={3}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                   />
                 </div>
 
@@ -2089,7 +2089,7 @@ export default function AdminLadipo() {
                     <select
                       value={productForm.condition}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, condition: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                     >
                       <option value="new">New</option>
                       <option value="tokunbo">Tokunbo</option>
@@ -2101,7 +2101,7 @@ export default function AdminLadipo() {
                     <select
                       value={productForm.part_type}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, part_type: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                     >
                       <option value="aftermarket">Aftermarket</option>
                       <option value="oem">OEM</option>
@@ -2120,7 +2120,7 @@ export default function AdminLadipo() {
                       value={productForm.price_naira}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, price_naira: e.target.value }))}
                       placeholder="e.g. 15000"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                       required
                     />
                     {priceKoboPreview && (
@@ -2137,7 +2137,7 @@ export default function AdminLadipo() {
                       step="1"
                       value={productForm.stock_qty}
                       onChange={(e) => setProductForm((prev) => ({ ...prev, stock_qty: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                       required
                     />
                   </div>
@@ -2149,7 +2149,7 @@ export default function AdminLadipo() {
                     value={productForm.seller_label}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, seller_label: e.target.value }))}
                     placeholder="Motoka"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#2389E3] focus:ring-2 focus:ring-[#2389E3]/20"
                   />
                 </div>
 
@@ -2158,7 +2158,7 @@ export default function AdminLadipo() {
                     type="checkbox"
                     checked={productForm.is_universal}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, is_universal: e.target.checked }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-[#2389E3] focus:ring-[#2389E3]"
                   />
                   Universal part (shows for all cars)
                 </label>
@@ -2178,7 +2178,7 @@ export default function AdminLadipo() {
                           type="checkbox"
                           checked={Boolean(productForm[key])}
                           onChange={(e) => setProductForm((prev) => ({ ...prev, [key]: e.target.checked }))}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-[#2389E3] focus:ring-[#2389E3]"
                         />
                         Feature in &quot;{label}&quot;
                       </label>
@@ -2222,32 +2222,32 @@ export default function AdminLadipo() {
                         value={compatibilityDraft.make}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, make: e.target.value }))}
                         placeholder="Make"
-                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
+                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2389E3]"
                       />
                       <input
                         value={compatibilityDraft.model}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, model: e.target.value }))}
                         placeholder="Model (optional)"
-                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
+                        className="col-span-3 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2389E3]"
                       />
                       <input
                         type="number"
                         value={compatibilityDraft.year_min}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, year_min: e.target.value }))}
                         placeholder="Year min"
-                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
+                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2389E3]"
                       />
                       <input
                         type="number"
                         value={compatibilityDraft.year_max}
                         onChange={(e) => setCompatibilityDraft((prev) => ({ ...prev, year_max: e.target.value }))}
                         placeholder="Year max"
-                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-blue-500"
+                        className="col-span-2 rounded-lg border border-gray-200 px-2 py-2 text-xs outline-none focus:border-[#2389E3]"
                       />
                       <button
                         type="button"
                         onClick={addCompatibilityEntry}
-                        className="col-span-2 rounded-lg bg-blue-600 px-2 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                        className="col-span-2 rounded-lg bg-[#2389E3] px-2 py-2 text-xs font-semibold text-white hover:bg-[#2389E3]"
                       >
                         Add
                       </button>
@@ -2279,7 +2279,7 @@ export default function AdminLadipo() {
                         type="file"
                         accept="image/jpeg,image/jpg,image/png,image/webp"
                         onChange={(e) => setProductImageFile(e.target.files?.[0] || null)}
-                        className="w-full text-xs text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-600 file:px-2.5 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-700"
+                        className="w-full text-xs text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-[#2389E3] file:px-2.5 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-[#2389E3]"
                       />
                       {productImageFile && (
                         <div className="flex items-center gap-2">
@@ -2302,7 +2302,7 @@ export default function AdminLadipo() {
                     type="checkbox"
                     checked={productForm.is_active}
                     onChange={(e) => setProductForm((prev) => ({ ...prev, is_active: e.target.checked }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-[#2389E3] focus:ring-[#2389E3]"
                   />
                   Visible in Ladipo (active)
                 </label>
@@ -2347,7 +2347,7 @@ export default function AdminLadipo() {
           </div>
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {[
-              { key: 'essential', title: 'Essential Products', items: curatedProducts.essential, tone: 'text-blue-600' },
+              { key: 'essential', title: 'Essential Products', items: curatedProducts.essential, tone: 'text-[#2389E3]' },
               { key: 'mustHave', title: 'Must Have', items: curatedProducts.mustHave, tone: 'text-gray-700' },
               { key: 'featured', title: 'Featured', items: curatedProducts.featured, tone: 'text-green-700' },
               { key: 'bestsellers', title: 'Bestsellers', items: curatedProducts.bestsellers, tone: 'text-amber-700' },
@@ -2371,7 +2371,7 @@ export default function AdminLadipo() {
                           <p className="truncate text-sm font-semibold text-gray-900">{product.name}</p>
                           <p className="text-xs text-gray-500">{formatPrice(product.inventory?.price_kobo)} · Stock {product.inventory?.stock_qty ?? 0}</p>
                         </div>
-                        <button type="button" onClick={() => { selectTab('products'); startEditProduct(product); setProductPanelMode('edit'); }} className="text-xs font-semibold text-blue-600 hover:underline">Edit</button>
+                        <button type="button" onClick={() => { selectTab('products'); startEditProduct(product); setProductPanelMode('edit'); }} className="text-xs font-semibold text-[#2389E3] hover:underline">Edit</button>
                       </div>
                     ))}
                   </div>
@@ -2435,12 +2435,12 @@ export default function AdminLadipo() {
                           value={categoryUrlDraft}
                           onChange={(e) => setCategoryUrlDraft(e.target.value)}
                           placeholder="https://..."
-                          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
+                          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#2389E3]"
                         />
                         <button
                           onClick={() => handleCategoryUrlSave(cat.id)}
                           disabled={isUploading || !categoryUrlDraft.trim()}
-                          className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                          className="rounded-lg bg-[#2389E3] px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-[#2389E3] disabled:opacity-50"
                         >
                           Save
                         </button>
@@ -2455,7 +2455,7 @@ export default function AdminLadipo() {
 
                     {!showUrlInput && (
                       <div className="flex gap-1.5">
-                        <label className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-blue-600 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-[#2389E3] px-3 py-1.5 text-xs font-semibold text-[#2389E3] hover:bg-[#2389E3]/5 cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           {isUploading ? (
                             <Spinner size="sm" />
                           ) : (
@@ -2675,7 +2675,7 @@ export default function AdminLadipo() {
                         className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                           nextStatus === 'cancelled'
                             ? 'border-red-300 text-red-800 hover:bg-red-50'
-                            : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
+                            : 'border-[#2389E3] text-[#2389E3] hover:bg-[#2389E3] hover:text-white'
                         }`}
                       >
                         {formatNextActionLabel(selectedOrder, nextStatus)}
@@ -2708,7 +2708,7 @@ export default function AdminLadipo() {
               onChange={(e) => setCancelReason(e.target.value)}
               placeholder="Reason for cancellation (at least 10 characters)..."
               rows={4}
-              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-[#2389E3] focus:outline-none focus:ring-2 focus:ring-[#2389E3]/20"
             />
             <p className="mt-2 text-xs text-gray-500">Minimum 10 characters. This text may be emailed to the customer.</p>
 
@@ -2764,7 +2764,7 @@ export default function AdminLadipo() {
               value={adminNameDraft}
               onChange={(e) => setAdminNameDraft(e.target.value)}
               placeholder="Enter your name"
-              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-[#2389E3] focus:outline-none focus:ring-2 focus:ring-[#2389E3]/20"
             />
 
             <div className="mt-4 flex justify-end gap-2">

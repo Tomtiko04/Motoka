@@ -49,7 +49,7 @@ function GatewayRow({ name, data, isPrimary, isFallback, hasLiveData }) {
         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[status] || STATUS_DOT.unknown}`} />
         <span className="text-sm font-medium capitalize text-gray-900">{name}</span>
         {isPrimary && (
-          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-800">
+          <span className="rounded bg-[#2389E3]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#2389E3]">
             Primary
           </span>
         )}

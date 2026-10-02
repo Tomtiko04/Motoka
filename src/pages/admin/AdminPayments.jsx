@@ -286,7 +286,7 @@ const AdminPayments = () => {
                     onClick={() => handleFilterChange(option.value)}
                     className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                       activeFilter === option.value
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        ? 'bg-[#2389E3]/10 text-[#2389E3] border border-[#2389E3]/20'
                         : 'text-gray-700 hover:bg-gray-100 border border-gray-200'
                     }`}
                   >
@@ -325,7 +325,7 @@ const AdminPayments = () => {
                 type="checkbox"
                 checked={includeDuplicates}
                 onChange={(e) => { setIncludeDuplicates(e.target.checked); setCurrentPage(1); }}
-                className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-3.5 w-3.5 rounded border-gray-300 text-[#2389E3] focus:ring-[#2389E3]"
               />
               Show duplicates
             </label>
@@ -414,7 +414,7 @@ const AdminPayments = () => {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleViewTransaction(transaction.transaction_id)}
-                          className="p-1 rounded text-blue-600 hover:bg-blue-50"
+                          className="p-1 rounded text-[#2389E3] hover:bg-[#2389E3]/5"
                           title="View transaction details"
                           aria-label="View"
                         >
@@ -429,7 +429,7 @@ const AdminPayments = () => {
                                   ? 'text-amber-600 hover:bg-amber-50'
                                   : transaction.status === 'pending'
                                   ? 'text-green-600 hover:bg-green-50'
-                                  : 'text-blue-600 hover:bg-blue-50'
+                                  : 'text-[#2389E3] hover:bg-[#2389E3]/5'
                               }`}
                               title={
                                 transaction.status === 'abandoned'
@@ -652,7 +652,7 @@ const AdminPayments = () => {
                     <div className="border-t pt-4">
                       <button
                         onClick={() => handleMarkPaid(selectedTransaction.reference)}
-                        className="w-full py-2 px-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                        className="w-full py-2 px-3 text-sm font-medium text-white bg-[#2389E3] hover:bg-[#2389E3] rounded-lg"
                       >
                         Create Missing Order
                       </button>

@@ -141,10 +141,10 @@ function WalletDrawer({ userId, onClose, onChanged }) {
               <div className="relative mb-3">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-700">₦</span>
                 <input type="number" min="1" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-7 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-7 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]" />
               </div>
               <textarea rows={2} placeholder="Reason (required — e.g. refund for duplicate charge #257)" value={reason} onChange={(e) => setReason(e.target.value)}
-                className="mb-3 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="mb-3 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]" />
               <button onClick={applyAdjust} disabled={busy} className={`w-full ${BTN_PRIMARY}`}>
                 {busy ? 'Applying…' : `Apply ${direction}`}
               </button>
@@ -276,7 +276,7 @@ export default function AdminWallets() {
         <div className="relative flex-1">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input type="text" placeholder="Search by name or email…" value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]" />
         </div>
         <button type="submit" className={BTN_PRIMARY}>Search</button>
         {search && <button type="button" onClick={() => { setSearch(''); setSearchInput(''); }} className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"><XMarkIcon className="h-4 w-4 text-gray-500" /></button>}
@@ -312,7 +312,7 @@ export default function AdminWallets() {
                       <StatusBadge tone={w.status === 'frozen' ? 'red' : 'green'} className="capitalize">{w.status}</StatusBadge>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => setSelectedUserId(w.user_id)} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline">
+                      <button onClick={() => setSelectedUserId(w.user_id)} className="flex items-center gap-1 text-xs font-medium text-[#2389E3] hover:underline">
                         <EyeIcon className="h-3.5 w-3.5" /> Manage
                       </button>
                     </td>

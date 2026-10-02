@@ -108,7 +108,7 @@ export default function AdminOrdersHub() {
               onClick={() => switchTab(key)}
               className={`relative -mb-px flex items-center gap-2 rounded-t-lg px-5 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'border border-b-0 border-gray-200 bg-white text-blue-600'
+                  ? 'border border-b-0 border-gray-200 bg-white text-[#2389E3]'
                   : 'text-gray-500 hover:text-gray-800'
               }`}
             >

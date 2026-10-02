@@ -167,7 +167,7 @@ const AdminCars = () => {
               placeholder="Search by make, model, reg number, or owner..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             />
           </div>
           <button type="submit" className={BTN_PRIMARY}>
@@ -187,7 +187,7 @@ const AdminCars = () => {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -199,7 +199,7 @@ const AdminCars = () => {
             <select
               value={carTypeFilter}
               onChange={(e) => { setCarTypeFilter(e.target.value); setCurrentPage(1); }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               {carTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -211,7 +211,7 @@ const AdminCars = () => {
             <select
               value={sortFilter}
               onChange={(e) => { setSortFilter(e.target.value); setCurrentPage(1); }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               <option value="recently_added">Recently Added</option>
               <option value="a_z">A - Z</option>
@@ -228,7 +228,7 @@ const AdminCars = () => {
                 setSearchTerm('');
                 setCurrentPage(1);
               }}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-[#2389E3] hover:text-[#2389E3] font-medium"
             >
               Reset all filters
             </button>
@@ -284,8 +284,8 @@ const AdminCars = () => {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                          <TruckIcon className="h-6 w-6 text-blue-600" />
+                        <div className="h-10 w-10 rounded-lg bg-[#2389E3]/10 flex items-center justify-center">
+                          <TruckIcon className="h-6 w-6 text-[#2389E3]" />
                         </div>
                       </div>
                       <div className="ml-4">
@@ -337,7 +337,7 @@ const AdminCars = () => {
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                     <a
                       href={`/admin/cars/${car.slug}`}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-[#2389E3] hover:text-[#2389E3]"
                     >
                       <EyeIcon className="h-4 w-4" />
                     </a>

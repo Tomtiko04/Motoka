@@ -205,7 +205,7 @@ function DetailPanel({ applicationId, onClose, onStatusUpdated }) {
                 <select
                   value={selectedStatus}
                   onChange={e => setSelectedStatus(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
                 >
                   <option value="">— Select new status —</option>
                   {app.status !== 'approved' && <option value="approved">Approved</option>}
@@ -217,7 +217,7 @@ function DetailPanel({ applicationId, onClose, onStatusUpdated }) {
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2389E3] resize-none"
                 />
                 <div className="flex gap-3">
                   <button
@@ -302,7 +302,7 @@ export default function AdminDriverLicenseApplications() {
               placeholder="Search by name..."
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
             />
           </div>
           <button type="submit" className={BTN_PRIMARY}>
@@ -320,7 +320,7 @@ export default function AdminDriverLicenseApplications() {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
           >
             <option value="">All statuses</option>
             <option value="draft">Draft</option>
@@ -332,7 +332,7 @@ export default function AdminDriverLicenseApplications() {
           <select
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
-            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
           >
             <option value="">All types</option>
             <option value="new">New License</option>
@@ -395,7 +395,7 @@ export default function AdminDriverLicenseApplications() {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => setSelectedId(app.id)}
-                        className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                        className="flex items-center gap-1 text-xs font-medium text-[#2389E3] hover:underline"
                       >
                         <EyeIcon className="h-3.5 w-3.5" />
                         View

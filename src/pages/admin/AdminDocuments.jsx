@@ -110,7 +110,7 @@ const UserSearch = ({ onSelect }) => {
           {results.map((u) => (
             <li
               key={u.id}
-              className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+              className="px-3 py-2 hover:bg-[#2389E3]/5 cursor-pointer text-sm"
               onMouseDown={(e) => {
                 e.preventDefault();
                 onSelect(u);
@@ -302,7 +302,7 @@ const AdminDocuments = () => {
               placeholder="Filter by name or email…"
               value={nameSearch}
               onChange={(e) => setNameSearch(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ const AdminDocuments = () => {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               <option value="all">All statuses</option>
               <option value="pending">Pending</option>
@@ -320,7 +320,7 @@ const AdminDocuments = () => {
             <select
               value={typeFilter}
               onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               <option value="all">All types</option>
               <option value="car">Car</option>
@@ -388,7 +388,7 @@ const AdminDocuments = () => {
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => setPreviewDoc(doc)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center gap-1"
+                          className="text-[#2389E3] hover:text-[#2389E3] text-sm font-medium inline-flex items-center gap-1"
                         >
                           <EyeIcon className="h-4 w-4" />
                           View

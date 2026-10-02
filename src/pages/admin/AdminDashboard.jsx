@@ -215,7 +215,7 @@ const AdminDashboard = () => {
               ? `/admin/renewals?bucket=expired&month=${stats.expired_month}`
               : '/admin/renewals?bucket=expired'
           }
-          className="block rounded-xl transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="block rounded-xl transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2389E3]"
         >
           <StatCard
             icon={CalendarDaysIcon}
@@ -251,7 +251,7 @@ const AdminDashboard = () => {
                   key={opt.value}
                   onClick={() => setChartPeriod(opt.value)}
                   className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    chartPeriod === opt.value ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    chartPeriod === opt.value ? 'bg-[#2389E3] text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   {opt.label}
@@ -291,8 +291,8 @@ const AdminDashboard = () => {
                   }
                   contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }}
                 />
-                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="orders" dataKey="orders" name="Orders" fill="#93c5fd" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="amount" dataKey="amount" name="Revenue" fill="#2389E3" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="orders" dataKey="orders" name="Orders" fill="#2389E3" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -306,7 +306,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-            <Link to="/admin/orders" className="text-blue-600 text-sm font-medium hover:text-blue-700">See More</Link>
+            <Link to="/admin/orders" className="text-[#2389E3] text-sm font-medium hover:text-[#2389E3]">See More</Link>
           </div>
           <div className="space-y-1">
             {recentOrders.length > 0 ? (
@@ -340,7 +340,7 @@ const AdminDashboard = () => {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-          <Link to="/admin/payments" className="text-blue-600 text-sm font-medium hover:text-blue-700">See More</Link>
+          <Link to="/admin/payments" className="text-[#2389E3] text-sm font-medium hover:text-[#2389E3]">See More</Link>
         </div>
         <div className="space-y-1">
           {recentTransactions.length > 0 ? (
@@ -350,8 +350,8 @@ const AdminDashboard = () => {
                 to="/admin/payments"
                 className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                  <DocumentTextIcon className="h-4 w-4 text-blue-600" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#2389E3]/5">
+                  <DocumentTextIcon className="h-4 w-4 text-[#2389E3]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-gray-900">

@@ -15,7 +15,7 @@ import React from 'react';
 // ── Class recipes (for elements that stay inline, e.g. <button>, <input>) ────
 
 export const BTN_PRIMARY =
-  'inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
+  'inline-flex items-center justify-center gap-2 rounded-lg bg-[#2389E3] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#2389E3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
 
 export const BTN_SECONDARY =
   'inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
@@ -24,7 +24,7 @@ export const BTN_DANGER =
   'inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
 
 export const INPUT =
-  'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none';
+  'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none';
 
 export const TH =
   'px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider';
@@ -41,8 +41,8 @@ export function PageHeader({ icon: Icon, title, subtitle, actions, children }) {
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         {Icon && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-            <Icon className="h-5 w-5 text-blue-600" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2389E3]/5">
+            <Icon className="h-5 w-5 text-[#2389E3]" />
           </div>
         )}
         <div>
@@ -66,7 +66,7 @@ export function Card({ className = '', children, ...rest }) {
 }
 
 const STAT_TILE = {
-  blue: 'bg-blue-50 text-blue-600',
+  blue: 'bg-[#2389E3]/5 text-[#2389E3]',
   green: 'bg-green-50 text-green-600',
   amber: 'bg-amber-50 text-amber-600',
   red: 'bg-red-50 text-red-600',
@@ -104,7 +104,7 @@ const BADGE_TONES = {
   green: 'bg-green-100 text-green-800',
   amber: 'bg-amber-100 text-amber-800',
   red: 'bg-red-100 text-red-800',
-  blue: 'bg-blue-100 text-blue-800',
+  blue: 'bg-[#2389E3]/10 text-[#2389E3]',
   gray: 'bg-gray-100 text-gray-600',
 };
 

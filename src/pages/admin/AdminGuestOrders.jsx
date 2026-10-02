@@ -125,7 +125,7 @@ export default function AdminGuestOrders() {
                 setActiveFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>

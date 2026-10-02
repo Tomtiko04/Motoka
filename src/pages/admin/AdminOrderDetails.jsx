@@ -202,9 +202,9 @@ const AdminOrderDetails = () => {
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Order ${fmt(order?.order_number)}</title>
     <style>
       body { font-family: Arial, sans-serif; font-size: 13px; color: #111; margin: 0; padding: 24px; }
-      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 24px; }
-      .logo { font-size: 22px; font-weight: 700; color: #2563eb; }
-      .badge { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #1d4ed8; font-weight: 600; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2389E3; padding-bottom: 16px; margin-bottom: 24px; }
+      .logo { font-size: 22px; font-weight: 700; color: #2389E3; }
+      .badge { background: #eff6ff; border: 1px solid #2389E3; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #2389E3; font-weight: 600; }
       h2 { font-size: 15px; font-weight: 700; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin: 20px 0 12px; }
       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
       .item label { display: block; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
@@ -390,7 +390,7 @@ const AdminOrderDetails = () => {
                     {order.selected_items.map((item) => (
                       <span
                         key={item}
-                        className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                        className="inline-flex items-center rounded-full bg-[#2389E3]/5 px-3 py-1 text-xs font-medium text-[#2389E3]"
                       >
                         {String(item).split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                       </span>
@@ -656,7 +656,7 @@ const AdminOrderDetails = () => {
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,.webp"
                         onChange={(e) => setUploadFile(e.target.files[0] || null)}
-                        className="w-full text-sm text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                        className="w-full text-sm text-gray-600 file:mr-2 file:rounded-lg file:border-0 file:bg-[#2389E3]/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#2389E3] hover:file:bg-[#2389E3]/10"
                       />
                       <button
                         onClick={handleDocumentUpload}
@@ -675,7 +675,7 @@ const AdminOrderDetails = () => {
                       <div className="border-t border-gray-100 divide-y divide-gray-50">
                         {documents.map((doc) => (
                           <div key={doc.id} className="flex items-center gap-2 px-3 py-2">
-                            <DocumentIcon className="h-4 w-4 text-blue-500 shrink-0" />
+                            <DocumentIcon className="h-4 w-4 text-[#2389E3] shrink-0" />
                             <span className="text-xs text-gray-700 flex-1 truncate">
                               {DOC_CATEGORIES.find((c) => c.value === doc.document_category)?.label || 'Document'}
                             </span>

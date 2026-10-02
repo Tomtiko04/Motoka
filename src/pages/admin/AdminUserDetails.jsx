@@ -265,8 +265,8 @@ const AdminUserDetails = () => {
       {/* User Info Card */}
       <Card className="p-5">
         <div className="flex items-start gap-4">
-          <div className="h-16 w-16 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="text-xl font-semibold text-blue-600">
+          <div className="h-16 w-16 flex-shrink-0 rounded-full bg-[#2389E3]/10 flex items-center justify-center">
+            <span className="text-xl font-semibold text-[#2389E3]">
               {user.name?.charAt(0).toUpperCase() || 'U'}
             </span>
           </div>
@@ -373,7 +373,7 @@ const AdminUserDetails = () => {
                 <div
                   key={car.id}
                   onClick={() => window.location.href = `/admin/cars/${car.slug}`}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-[#2389E3]/5 hover:border-[#2389E3]/20 cursor-pointer transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 truncate">
@@ -385,7 +385,7 @@ const AdminUserDetails = () => {
                   </div>
                   <button
                     onClick={() => navigate(`/admin/cars/${car.slug}`)}
-                    className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
+                    className="ml-3 text-[#2389E3] hover:text-[#2389E3] transition-colors"
                     aria-label="View car"
                   >
                     <ArrowRightIcon className="h-5 w-5" />
@@ -422,7 +422,7 @@ const AdminUserDetails = () => {
                   </div>
                   <button
                     onClick={() => navigate(`/admin/orders/${order.slug}`)}
-                    className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
+                    className="ml-3 text-[#2389E3] hover:text-[#2389E3] transition-colors"
                     aria-label="View order"
                   >
                     <ArrowRightIcon className="h-5 w-5" />

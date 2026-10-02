@@ -209,7 +209,7 @@ const AdminVehicleDocs = () => {
                             onChange={(e) => setEditValue(e.target.value)}
                             onKeyDown={(e) => handleKeyDown(e, item)}
                             autoFocus
-                            className="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-[#2389E3] focus:outline-none"
                           />
                         </div>
                       ) : (
@@ -229,7 +229,7 @@ const AdminVehicleDocs = () => {
                             onClick={() => saveEdit(item)}
                             disabled={saving}
                             title="Save"
-                            className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-600 text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="flex items-center justify-center h-8 w-8 rounded-lg bg-[#2389E3] text-white shadow-sm hover:bg-[#2389E3] disabled:opacity-50 transition-colors"
                           >
                             {saving ? (
                               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -250,7 +250,7 @@ const AdminVehicleDocs = () => {
                         <button
                           onClick={() => startEdit(item)}
                           title="Edit price"
-                          className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"
+                          className="flex items-center gap-1.5 rounded-lg bg-[#2389E3]/5 px-3 py-1.5 text-xs font-medium text-[#2389E3] hover:bg-[#2389E3]/10 transition-colors"
                         >
                           <PencilSquareIcon className="h-3.5 w-3.5" />
                           Edit

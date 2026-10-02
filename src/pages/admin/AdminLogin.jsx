@@ -262,7 +262,7 @@ const AdminLogin = () => {
                   setPassword('');
                   setError('');
                 }}
-                className="w-full text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                className="w-full text-sm text-[#2389E3] hover:text-[#2389E3] hover:underline"
               >
                 {method === 'password'
                   ? 'Sign in with a one-time code instead'

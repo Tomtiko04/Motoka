@@ -295,7 +295,7 @@ const AdminCarDetails = () => {
 
       {/* Hero Card */}
       <div className={`${CARD} overflow-hidden`}>
-        <div className="bg-blue-600 px-6 py-6">
+        <div className="bg-[#2389E3] px-6 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/20 text-white">
@@ -370,8 +370,8 @@ const AdminCarDetails = () => {
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Owner Information</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                <UserIcon className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2389E3]/5">
+                <UserIcon className="h-5 w-5 text-[#2389E3]" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">{car.name_of_owner || car.user?.name || 'N/A'}</p>
@@ -422,7 +422,7 @@ const AdminCarDetails = () => {
                   {order.selected_items?.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {order.selected_items.map(item => (
-                        <span key={item} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+                        <span key={item} className="rounded-full bg-[#2389E3]/5 px-2 py-0.5 text-xs text-[#2389E3]">
                           {formatScheduleName(item)}
                         </span>
                       ))}
@@ -500,7 +500,7 @@ const AdminCarDetails = () => {
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.webp"
                 onChange={e => setUploadFile(e.target.files[0] || null)}
-                className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#2389E3]/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#2389E3] hover:file:bg-[#2389E3]/10"
               />
             </div>
             <button
@@ -523,8 +523,8 @@ const AdminCarDetails = () => {
             {documents.map((doc) => (
               <div key={doc.id} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                    <DocumentIcon className="h-5 w-5 text-blue-600" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2389E3]/5">
+                    <DocumentIcon className="h-5 w-5 text-[#2389E3]" />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-gray-900">

@@ -185,7 +185,7 @@ export default function AdminReferral() {
                   type="checkbox"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                  className="h-4 w-4 rounded border-gray-300 text-[#2389E3]"
                 />
                 Program active
               </label>
