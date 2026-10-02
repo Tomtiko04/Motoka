@@ -49,7 +49,7 @@ function ProductCard({ part }) {
 
   return (
     <div
-      className="group relative flex h-full w-full cursor-pointer flex-col rounded-[16px] border border-[#E1E6F4] bg-white p-3 sm:p-4 transition-all duration-300 hover:border-[#2389E3]"
+      className="group relative flex h-full max-h-[300px] sm:max-h-[380px] w-full cursor-pointer flex-col overflow-hidden rounded-[16px] border border-[#E1E6F4] bg-white p-3 sm:p-4 transition-all duration-300 hover:border-[#2389E3]"
       onClick={handleCardOpen}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -87,11 +87,11 @@ function ProductCard({ part }) {
       </div>
 
       <div className="flex flex-1 flex-col">
-        <p className="mb-1 min-h-[2.25rem] sm:min-h-[3.5rem] text-[12px] sm:text-[14px] font-bold leading-snug text-[#05243F] line-clamp-2">
+        <p className="mb-1 h-[2.25rem] sm:h-[3.5rem] overflow-hidden text-[12px] sm:text-[14px] font-bold leading-snug text-[#05243F] line-clamp-2">
           {part.name}
         </p>
 
-        <p className="mb-1 sm:mb-2 min-h-[1rem] sm:min-h-[1.25rem] text-[11px] sm:text-[12px] font-medium text-[#8A9EB0] line-clamp-1">
+        <p className="mb-1 sm:mb-2 h-[1rem] sm:h-[1.25rem] overflow-hidden text-[11px] sm:text-[12px] font-medium text-[#8A9EB0] line-clamp-1">
           {part.brand || "\u00A0"}
         </p>
 

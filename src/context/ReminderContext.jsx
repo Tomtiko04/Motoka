@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { api } from "../services/apiClient";
 
 const ReminderContext = createContext();
@@ -28,7 +28,3 @@ export function ReminderProvider({ children }) {
     </ReminderContext.Provider>
   );
 }
-
-export function useReminders() {
-  return useContext(ReminderContext);
-} 

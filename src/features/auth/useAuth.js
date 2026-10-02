@@ -20,15 +20,14 @@ export function useLogin() {
   const navigate = useNavigate();
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState("");
+  const [twoFactorUserId, setTwoFactorUserId] = useState("");
 
   const { mutate: verifyTwoFactor, isPending: isVerifyingTwoFactor } =
     useMutation({
-      mutationFn: (code) => verifyLoginTwoFactor(twoFactorToken, code),
+      mutationFn: (code) =>
+        verifyLoginTwoFactor({ userId: twoFactorUserId, tempToken: twoFactorToken, code }),
       onSuccess: (data) => {
         toast.dismiss();
-
-        if (data.authorization?.token) {
-        }
 
         queryClient.setQueryData(["user"], data.user);
         toast.success(data.message || "Login successful!");
@@ -57,7 +56,8 @@ export function useLogin() {
     mutationFn: (formData) => loginApi(formData),
     onSuccess: (data) => {
       if (data.status === "2fa_required") {
-        setTwoFactorToken(data["2fa_token"]);
+        setTwoFactorToken(data.temp_token);
+        setTwoFactorUserId(data.user_id);
         setTwoFactorRequired(true);
         toast.success(data.message || "Please enter 2FA verification code");
       } else {

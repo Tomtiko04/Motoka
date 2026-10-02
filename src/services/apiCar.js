@@ -11,17 +11,17 @@ export async function getCars() {
 }
 
 export async function updateCarDocuments(carSlug, carData) {
-  const { data } = await api.put(`/car/${carSlug}`, carData);
+  const { data } = await api.put(`/cars/${carSlug}`, carData);
   return data;
 }
 
 export async function updateCarDetails(carSlug, carData) {
-  const { data } = await api.put(`/car/${carSlug}`, carData);
+  const { data } = await api.put(`/cars/${carSlug}`, carData);
   return data;
 }
 
 export async function deleteCar(carId) {
-  const { data } = await api.delete(`/car/${carId}`);
+  const { data } = await api.delete(`/cars/${carId}`);
   return data;
 }
 

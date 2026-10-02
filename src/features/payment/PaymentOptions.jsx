@@ -325,6 +325,8 @@ export default function PaymentOptions() {
     return {
       car_slug,
       payment_schedule_id,
+      ...(paymentSession?.renewal_state ? { renewal_state: paymentSession.renewal_state } : {}),
+      ...(paymentSession?.renewal_months ? { renewal_months: paymentSession.renewal_months } : {}),
       ...deliveryMeta(),
     };
   };

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
+import { api } from "../../../../services/apiClient";
 
 export default function VerifyTwoFactor({ onVerify, email, onClose, isVerifying }) {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -52,22 +53,14 @@ export default function VerifyTwoFactor({ onVerify, email, onClose, isVerifying 
     setTimeLeft(600);
     
     try {
-     
-      const response = await fetch("/api/2fa/resend-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      
-      const data = await response.json();
+      const { data } = await api.post("/2fa/send-code");
       if (data.success) {
         toast.success("Verification code resent!");
       } else {
         toast.error(data.message || "Failed to resend code");
       }
     } catch (error) {
-      toast.error("Failed to resend code");
+      toast.error(error.response?.data?.message || "Failed to resend code");
     }
   };
 
@@ -142,7 +135,7 @@ export default function VerifyTwoFactor({ onVerify, email, onClose, isVerifying 
         <button
           onClick={handleVerify}
           disabled={code.join("").length !== 6 || isVerifying}
-          className="w-full sm:w-36 justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#2389E3] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-36 justify-center rounded-3xl bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#1a7acf] focus:ring-2 focus:ring-[#2389E3] focus:ring-offset-2 focus:outline-none active:scale-95 sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isVerifying ? "Verifying..." : "Verify"}
         </button>

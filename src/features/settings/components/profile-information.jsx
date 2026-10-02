@@ -37,7 +37,7 @@ export default function ProfileInformation({ onNavigate }) {
   if (loading && !profileData) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2389E3]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
       </div>
     )
   }
@@ -49,14 +49,14 @@ export default function ProfileInformation({ onNavigate }) {
   return (
     <div>
       <div className="flex justify-end mb-6">
-        <button className="flex items-center gap-1 text-[#2389E3] hover:text-[#2389E3] transition-colors cursor-pointer" onClick={handleEditClick}>
+        <button className="flex items-center gap-1 text-sky-500 hover:text-sky-600 transition-colors cursor-pointer" onClick={handleEditClick}>
           <Pencil className="h-5 w-5" />
         </button>
       </div>
 
       <div className="flex flex-col md:flex-row  md:items-start gap-6 items-center justify-end mb-8">
         {/* <div className="relative">
-          <Avatar src={profileData?.image} alt={profileData?.name} />
+          <Avatar src={profileData?.image} name={profileData?.name} alt={profileData?.name} />
         </div> */}
         <div className="text-right">
           <h2 className="text-2xl font-medium text-[#05243F] sm:text-2xl">{profileData?.name || "User"}</h2>

@@ -48,6 +48,7 @@ export default function BlogPage() {
           title={blog.title}
           description={blog.content.slice(0, 160)}
           path={canonicalPath}
+          image={blog.image}
           jsonLd={jsonLd}
         />
         {/* Image */}
