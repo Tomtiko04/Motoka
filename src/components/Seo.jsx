@@ -90,6 +90,12 @@ export default function Seo({ title, description, path = "/", image, jsonLd, noi
     } else {
       document.head.querySelector('meta[name="robots"]')?.remove();
     }
+
+    // SPA PageView: the pixel in index.html only fires on hard loads —
+    // this covers every client-side route change.
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "PageView");
+    }
   }, [fullTitle, description, url, image, noindex]);
 
   // Structured data is removed on unmount — unlike the tags above it is not
