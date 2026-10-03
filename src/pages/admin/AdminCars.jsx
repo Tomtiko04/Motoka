@@ -44,7 +44,7 @@ const AdminCars = () => {
   const statusOptions = [
     { value: 'all', label: 'All Status' },
     { value: 'active', label: 'Registered' },
-    { value: 'unpaid', label: 'Renewal Due' },
+    { value: 'unpaid', label: 'Unpaid' },
     { value: 'expired', label: 'Expired' },
   ];
 
@@ -103,7 +103,7 @@ const AdminCars = () => {
   const STATUS_MAP = {
     active:   { tone: 'green', label: 'Registered' },
     approved: { tone: 'green', label: 'Approved' },
-    unpaid:   { tone: 'amber', label: 'Renewal Due' },
+    unpaid:   { tone: 'amber', label: 'Unpaid' },
     expired:  { tone: 'red',   label: 'Expired' },
   };
 

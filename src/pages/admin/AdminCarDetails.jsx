@@ -53,7 +53,7 @@ const StatusPill = ({ status }) => {
   const map = {
     active:    { tone: 'green', label: 'Registered' },
     approved:  { tone: 'green', label: 'Approved' },
-    unpaid:    { tone: 'amber', label: 'Renewal Due' },
+    unpaid:    { tone: 'amber', label: 'Unpaid' },
     expired:   { tone: 'red',   label: 'Expired' },
     pending:   { tone: 'blue',  label: 'Pending' },
     completed: { tone: 'green', label: 'Completed' },
