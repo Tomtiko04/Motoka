@@ -201,12 +201,22 @@ const AdminDashboard = () => {
           icon={UsersIcon}
           label="Total Users"
           value={stats ? Number(stats.total_users).toLocaleString() : '0'}
+          hint={
+            Number(stats?.users_last_7_days) > 0
+              ? `+${Number(stats.users_last_7_days).toLocaleString()} in the last 7 days`
+              : null
+          }
           loading={!statsReady}
         />
         <StatCard
           icon={TruckIcon}
           label="Total Cars"
           value={stats ? Number(stats.total_cars).toLocaleString() : '0'}
+          hint={
+            Number(stats?.cars_last_7_days) > 0
+              ? `+${Number(stats.cars_last_7_days).toLocaleString()} in the last 7 days`
+              : null
+          }
           loading={!statsReady}
         />
         <Link
