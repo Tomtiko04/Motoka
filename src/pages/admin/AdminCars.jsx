@@ -107,8 +107,31 @@ const AdminCars = () => {
     expired:  { tone: 'red',   label: 'Expired' },
   };
 
-  const getStatusBadge = (status) => {
-    const cfg = STATUS_MAP[status] || { tone: 'gray', label: status };
+  // Badge is derived from expiry_date, not the raw backend status: a car
+  // with a far-out expiry is never "due", whatever it paid through Motoka.
+  const RENEWAL_WINDOW_DAYS = 60;
+
+  const getStatusBadge = (car) => {
+    const expiry = car.expiry_date ? new Date(car.expiry_date) : null;
+    const daysToExpiry =
+      expiry && !isNaN(expiry.getTime())
+        ? Math.ceil((expiry.getTime() - Date.now()) / 86400000)
+        : null;
+
+    if (daysToExpiry !== null && daysToExpiry < 0) {
+      return <StatusBadge tone="red">Expired</StatusBadge>;
+    }
+    if (
+      car.status === 'unpaid' &&
+      daysToExpiry !== null &&
+      daysToExpiry <= RENEWAL_WINDOW_DAYS
+    ) {
+      return <StatusBadge tone="amber">Renewal Due</StatusBadge>;
+    }
+    if (car.status === 'unpaid') {
+      return <StatusBadge tone="gray">Unpaid</StatusBadge>;
+    }
+    const cfg = STATUS_MAP[car.status] || { tone: 'gray', label: car.status };
     return <StatusBadge tone={cfg.tone}>{cfg.label}</StatusBadge>;
   };
 
@@ -320,7 +343,7 @@ const AdminCars = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    {getStatusBadge(car.status)}
+                    {getStatusBadge(car)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
