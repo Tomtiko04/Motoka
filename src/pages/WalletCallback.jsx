@@ -4,8 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { verifyPaystackPayment } from "../services/apiPaystack";
 
-// Paystack redirects here after a wallet top-up. Verifying the reference is what
-// credits the wallet on the backend (the verify path handles wallet_funding).
+// Monipay or Paystack redirects here after a wallet top-up. Verifying the
+// reference is what credits the wallet on the backend (the verify path looks up
+// the gateway from the transaction and handles wallet_funding).
 export default function WalletCallback() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
