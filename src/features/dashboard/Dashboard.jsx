@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
@@ -25,10 +25,6 @@ export default function Dashboard() {
 
   function handleViewDocuments(carDetail) {
     navigate("/documents", { state: { carId: carDetail?.id } });
-  }
-
-  function handleGarage() {
-    navigate("/garage");
   }
 
   function handleAddCar() {
@@ -73,7 +69,7 @@ export default function Dashboard() {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <WelcomeSection userName={userName} />
-      <NavigationTabs onGarageClick={handleGarage} activeTab="license" />
+      <NavigationTabs activeTab="cars" />
 
       <div className="mb-8">
         {isLoading ? (
