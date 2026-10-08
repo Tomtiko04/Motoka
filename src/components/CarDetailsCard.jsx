@@ -217,7 +217,7 @@ export default function CarDetailsCard({
 
       <div className={` ${!isRenew ? 'w-full' : 'flex items-center justify-between'}`}>
         <div
-          className="flex w-fit items-center gap-2 rounded-full p-4"
+          className="flex h-9 w-fit items-center gap-2 rounded-full px-4"
           style={{ backgroundColor: statusStyle.bgColor }}
         >
           <span
@@ -230,7 +230,7 @@ export default function CarDetailsCard({
         </div>
         {isRenew && (
           <button
-            className="w-full cursor-pointer whitespace-nowrap rounded-full bg-[#2389E3] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
+            className="flex h-9 w-full cursor-pointer items-center justify-center whitespace-nowrap rounded-full bg-[#2389E3] px-4 text-sm font-semibold text-white hover:bg-[#2389E3]/90 md:w-auto"
             onClick={(e) => {
               e.stopPropagation();
               if (isUpToDate) handleViewDocumentsClick();
