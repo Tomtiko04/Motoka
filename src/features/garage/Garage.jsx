@@ -40,7 +40,7 @@ export default function Garage() {
       <WelcomeSection userName={userName} />
 
       {/* Navigation Tabs */}
-      <NavigationTabs onLicenseClick={handleLicence} activeTab="garage" />
+      <NavigationTabs onCarsClick={handleLicence} activeTab="garage" />
 
       {/* Car Details Card */}
       {isLoading ? (
