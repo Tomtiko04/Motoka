@@ -19,8 +19,8 @@ export async function getFundingQuote(amountKobo) {
 }
 
 // Start a top-up. Returns { authorization_url, reference, credit_kobo, fee_kobo, total_charge_kobo }.
-export async function initFunding(amountKobo) {
-  const { data } = await api.post("/wallet/fund", { amount_kobo: amountKobo });
+export async function initFunding(amountKobo, gateway = "monipay") {
+  const { data } = await api.post("/wallet/fund", { amount_kobo: amountKobo, payment_gateway: gateway });
   return data?.data ?? data;
 }
 
