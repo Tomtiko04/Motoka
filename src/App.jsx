@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import {
   QueryCache,
@@ -11,6 +11,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import InstallPrompt from "./components/pwa/InstallPrompt.jsx";
 import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt.jsx";
 import PushOptInPrompt from "./components/pwa/PushOptInPrompt.jsx";
+import CookieConsent from "./components/CookieConsent.jsx";
+import { getConsent, loadAnalytics } from "./utils/consent.js";
 
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
@@ -164,6 +166,12 @@ captureReferralCodeFromUrl();
 
 export default function App() {
   const { isOpen } = useModalStore();
+
+  // Returning visitor who already accepted: load tracking immediately so
+  // the first page_view isn't lost. Declined/unknown: banner handles it.
+  useEffect(() => {
+    if (getConsent() === "accepted") void loadAnalytics();
+  }, []);
 
   // Show nothing while the redirect is in-flight — avoids the landing page flash
   if (isProcessingOAuth) {
@@ -354,6 +362,7 @@ export default function App() {
       {/* PWA: install nudge, soft push opt-in, and update toast. Each self-hides
           when irrelevant so we never spam the user. */}
       <InstallPrompt />
+      <CookieConsent />
       <PushOptInPrompt />
       <PWAUpdatePrompt />
       <Toaster

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { absoluteUrl } from "../utils/site";
+import { trackPageView } from "../utils/consent.js";
 
 /**
  * Per-route document head.
@@ -91,11 +92,9 @@ export default function Seo({ title, description, path = "/", image, jsonLd, noi
       document.head.querySelector('meta[name="robots"]')?.remove();
     }
 
-    // SPA PageView: the pixel in index.html only fires on hard loads —
-    // this covers every client-side route change.
-    if (typeof window !== "undefined" && typeof window.fbq === "function") {
-      window.fbq("track", "PageView");
-    }
+    // SPA page views, consent-gated: GA4 + Meta Pixel fire only after the
+    // visitor accepts the cookie banner. No-ops otherwise.
+    trackPageView({ path: url, title: fullTitle });
   }, [fullTitle, description, url, image, noindex]);
 
   // Structured data is removed on unmount — unlike the tags above it is not
