@@ -5,6 +5,7 @@ import { getPaymentReceipt } from "../services/apiPayment";
 import { formatCurrency } from "../utils/formatCurrency";
 import ShipmentTracker from "../components/delivery/ShipmentTracker";
 import { useOrderTracking } from "../hooks/useOrderTracking";
+import { buildWhatsAppUrl } from "../constants/support";
 
 function unwrapReceipt(data) {
   const payload = data?.data || data || {};
@@ -37,6 +38,11 @@ export default function PaymentReceipt() {
 
   const { payment, order } = unwrapReceipt(data);
   const orderNumber = order?.order_number;
+  const whatsappUrl = buildWhatsAppUrl([
+    "Hello Motoka, I've just made a payment.",
+    orderNumber ? `Order: ${orderNumber}` : null,
+    payment?.reference ? `Reference: ${payment.reference}` : null,
+  ]);
   const { data: tracking, isPending: trackingPending } = useOrderTracking(orderNumber);
 
   if (isPending) {
@@ -343,6 +349,14 @@ export default function PaymentReceipt() {
           >
             Go to Dashboard
           </button>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="block w-full rounded-lg bg-[#25D366] px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#1fb85a]"
+          >
+            Text us on WhatsApp that you've paid
+          </a>
           <button
             onClick={() => window.print()}
             className="w-full rounded-lg border border-[#2389E3] px-4 py-2 text-sm font-medium text-[#2389E3] transition-colors hover:bg-[#2389E3] hover:text-white"

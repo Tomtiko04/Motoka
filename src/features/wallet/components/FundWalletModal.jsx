@@ -4,10 +4,15 @@ import { toast } from "react-hot-toast";
 import { getFundingQuote, initFunding } from "../../../services/apiWallet";
 
 const PRESETS = [30000, 50000, 75000, 100000]; // naira — sized to Motoka's services (nothing is under ₦30k)
+const GATEWAYS = [
+  { id: "monipay", label: "Monipay", hint: "Bank transfer or card" },
+  { id: "paystack", label: "Paystack", hint: "Card, transfer or USSD" },
+];
 const naira = (n) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
 
 export default function FundWalletModal({ open, onClose }) {
   const [amount, setAmount] = useState(50000); // naira
+  const [gateway, setGateway] = useState("monipay");
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -52,9 +57,9 @@ export default function FundWalletModal({ open, onClose }) {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await initFunding(kobo);
+      const res = await initFunding(kobo, gateway);
       if (res?.authorization_url) {
-        // Full-tab redirect to Paystack; it returns to /wallet/callback.
+        // Full-tab redirect to the gateway; it returns to /wallet/callback.
         window.location.href = res.authorization_url;
       } else {
         throw new Error("Could not start payment. Please try again.");
@@ -133,6 +138,27 @@ export default function FundWalletModal({ open, onClose }) {
           <Row label={<span className="font-semibold text-[#05243F]">You pay</span>} value={<span className="font-semibold text-[#05243F]">{quote ? naira(quote.total_charge_naira) : "—"}</span>} big />
         </div>
 
+        {/* Gateway */}
+        <label className="mb-1.5 block text-xs font-medium text-[#697C8C]">Pay with</label>
+        <div className="mb-4 grid grid-cols-2 gap-2">
+          {GATEWAYS.map((g) => (
+            <button
+              key={g.id}
+              type="button"
+              onClick={() => setGateway(g.id)}
+              disabled={submitting}
+              className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
+                gateway === g.id
+                  ? "border-[#2389E3] bg-[#EAF4FD]"
+                  : "border-[#EEF1F6] bg-white hover:bg-[#F9FAFC]"
+              }`}
+            >
+              <p className="text-sm font-semibold text-[#05243F]">{g.label}</p>
+              <p className="text-[11px] text-[#697C8C]">{g.hint}</p>
+            </button>
+          ))}
+        </div>
+
         {error && <p className="mb-3 text-xs text-red-600">{error}</p>}
 
         <button
@@ -142,7 +168,9 @@ export default function FundWalletModal({ open, onClose }) {
         >
           {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Redirecting…</> : <>Continue to pay {quote ? naira(quote.total_charge_naira) : ""}</>}
         </button>
-        <p className="mt-3 text-center text-[11px] text-[#697C8C]">Secured by Paystack · Card, bank transfer or USSD</p>
+        <p className="mt-3 text-center text-[11px] text-[#697C8C]">
+          Secured by {gateway === "monipay" ? "Monipay" : "Paystack"}
+        </p>
       </div>
     </div>
   );

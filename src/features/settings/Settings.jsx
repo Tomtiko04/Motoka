@@ -45,6 +45,10 @@ export default function SettingsPage() {
       setActivePage("ladipo-orders")
       setExpandedSection("payment")
       navigate(location.pathname, { replace: true, state: {} })
+    } else if (target === "transaction") {
+      setActivePage("transaction")
+      setExpandedSection("payment")
+      navigate(location.pathname, { replace: true, state: {} })
     } else if (target === "faqs") {
       setActivePage("faqs")
       setExpandedSection("faqs")

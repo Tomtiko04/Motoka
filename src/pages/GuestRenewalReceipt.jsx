@@ -5,6 +5,7 @@ import { authStorage } from "../utils/authStorage";
 import { Icon } from "@iconify/react";
 import { formatCurrency } from "../utils/formatCurrency";
 import toast from "react-hot-toast";
+import { buildWhatsAppUrl } from "../constants/support";
 import ShipmentTracker from "../components/delivery/ShipmentTracker";
 import { useGuestOrderTracking } from "../hooks/useOrderTracking";
 
@@ -322,6 +323,19 @@ export default function GuestRenewalReceipt() {
                   Create Account to Track Documents
                 </button>
               )}
+              <a
+                href={buildWhatsAppUrl([
+                  "Hello Motoka, I've just made a payment.",
+                  receipt.plateNumber ? `Plate: ${receipt.plateNumber}` : null,
+                  receipt.reference ? `Reference: ${receipt.reference}` : null,
+                ])}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full rounded-full bg-[#25D366] py-3 text-sm font-semibold text-white hover:bg-[#1fb85a] transition-colors flex items-center justify-center gap-2"
+              >
+                <Icon icon="ic:baseline-whatsapp" fontSize={18} />
+                Text us on WhatsApp that you've paid
+              </a>
               <button
                 onClick={handleDownload}
                 className="w-full rounded-full border border-[#E1E5EE] py-3 text-sm font-medium text-[#05243F] hover:bg-[#F4F5FC] transition-colors flex items-center justify-center gap-2"
