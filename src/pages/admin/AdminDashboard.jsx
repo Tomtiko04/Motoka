@@ -21,6 +21,7 @@ import {
 } from 'recharts';
 import config from '../../config/config';
 import GatewayHealthPanel from '../../components/admin/GatewayHealthPanel';
+import TrafficPanel from '../../components/admin/TrafficPanel';
 import RenewalsSummary from '../../components/admin/RenewalsSummary';
 import { PageHeader, StatCard, StatusBadge } from '../../components/admin/ui';
 
@@ -244,6 +245,9 @@ const AdminDashboard = () => {
 
       {/* Payment gateway health — live ops signal during payment incidents */}
       <GatewayHealthPanel />
+
+      {/* Website traffic — GA4 sessions/users by channel + top pages */}
+      <TrafficPanel />
 
       {/* Chart and Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
